@@ -1,0 +1,127 @@
+{
+  "portfolio_output_templates": {
+    "portfolio_bounded_allocation_primary_output": {
+      "portfolio_output_template_id": "portfolio_bounded_allocation_primary_output",
+      "semantic_scope": "shared_control_plane",
+      "resolution_class_id": "resolved_with_action",
+      "disposition_class_id": "closed_pending_downstream_execution",
+      "recommendation_class_id": "recommend_act_now",
+      "policy_output_class_id": "policy_shaped_allowance",
+      "portfolio_output_class_id": "portfolio_bounded_allocation",
+      "route_name": "primary_case_path",
+      "required_context_fields": [
+        "portfolio_summary",
+        "portfolio_output_reference",
+        "scope_reference",
+        "action_path_reference",
+        "portfolio_rationale",
+        "action_boundary_summary",
+        "allocation_reference",
+        "allocation_weight_reference"
+      ],
+      "optional_context_fields": [
+        "recommendation_summary",
+        "policy_summary",
+        "confidence_summary",
+        "constraint_summary",
+        "uncertainty_summary",
+        "failure_state_context",
+        "review_summary",
+        "resolution_rationale",
+        "policy_rationale",
+        "allowance_reference"
+      ],
+      "required_audit_fields": [
+        "portfolio_author_id",
+        "portfolio_author_role"
+      ],
+      "portfolio_output_status": "ready_for_downstream_use",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "portfolio_output_template_seed"
+      }
+    },
+    "portfolio_ranked_preference_primary_output": {
+      "portfolio_output_template_id": "portfolio_ranked_preference_primary_output",
+      "semantic_scope": "shared_control_plane",
+      "resolution_class_id": "returned_for_clarification",
+      "disposition_class_id": "returned_for_clarification_open",
+      "recommendation_class_id": "recommend_gather_more_information",
+      "policy_output_class_id": "policy_shaped_information_requirement",
+      "portfolio_output_class_id": "portfolio_ranked_preference",
+      "route_name": "primary_case_path",
+      "required_context_fields": [
+        "portfolio_summary",
+        "portfolio_output_reference",
+        "scope_reference",
+        "action_path_reference",
+        "portfolio_rationale",
+        "action_boundary_summary",
+        "preference_rank_reference",
+        "clarification_reference"
+      ],
+      "optional_context_fields": [
+        "recommendation_summary",
+        "policy_summary",
+        "confidence_summary",
+        "constraint_summary",
+        "uncertainty_summary",
+        "failure_state_context",
+        "review_summary",
+        "resolution_rationale",
+        "policy_rationale"
+      ],
+      "required_audit_fields": [
+        "portfolio_author_id",
+        "portfolio_author_role"
+      ],
+      "portfolio_output_status": "ready_for_downstream_use",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "portfolio_output_template_seed"
+      }
+    },
+    "portfolio_fallback_generic_output": {
+      "portfolio_output_template_id": "portfolio_fallback_generic_output",
+      "semantic_scope": "shared_control_plane",
+      "resolution_class_id": "manual_fallback_resolution",
+      "disposition_class_id": "manual_fallback_hold",
+      "recommendation_class_id": "abstain_from_strong_recommendation",
+      "policy_output_class_id": "policy_shaped_suppression",
+      "portfolio_output_class_id": "portfolio_suppression_hold",
+      "required_context_fields": [
+        "portfolio_summary",
+        "portfolio_output_reference",
+        "scope_reference",
+        "action_path_reference",
+        "portfolio_rationale",
+        "action_boundary_summary",
+        "suppression_reference",
+        "fallback_reference"
+      ],
+      "optional_context_fields": [
+        "recommendation_summary",
+        "policy_summary",
+        "confidence_summary",
+        "constraint_summary",
+        "uncertainty_summary",
+        "failure_state_context",
+        "review_summary",
+        "resolution_rationale",
+        "policy_rationale"
+      ],
+      "required_audit_fields": [
+        "portfolio_author_id",
+        "portfolio_author_role"
+      ],
+      "portfolio_output_status": "fallback_template_applied",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "portfolio_output_template_seed"
+      }
+    }
+  }
+}

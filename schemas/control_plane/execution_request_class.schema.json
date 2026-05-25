@@ -1,0 +1,57 @@
+{
+  "type": "object",
+  "required": [
+    "execution_request_class_id",
+    "description",
+    "action_boundary_posture",
+    "allowed_action_instruction_class_ids",
+    "prohibited_execution_fields",
+    "status",
+    "lineage"
+  ],
+  "properties": {
+    "execution_request_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "description": {
+      "type": "string",
+      "min_length": 1
+    },
+    "action_boundary_posture": {
+      "type": "string",
+      "enum": [
+        "request_ready_non_executing",
+        "request_conditioned_non_executing",
+        "request_hold_non_executing"
+      ]
+    },
+    "allowed_action_instruction_class_ids": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "prohibited_execution_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object"
+    }
+  },
+  "additional_properties": false
+}

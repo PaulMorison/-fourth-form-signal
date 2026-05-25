@@ -1,0 +1,57 @@
+{
+  "type": "object",
+  "required": [
+    "execution_dispatch_class_id",
+    "description",
+    "dispatch_boundary_posture",
+    "allowed_execution_request_class_ids",
+    "prohibited_dispatch_fields",
+    "status",
+    "lineage"
+  ],
+  "properties": {
+    "execution_dispatch_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "description": {
+      "type": "string",
+      "min_length": 1
+    },
+    "dispatch_boundary_posture": {
+      "type": "string",
+      "enum": [
+        "dispatch_boundary_ready_non_executing",
+        "dispatch_boundary_conditioned_non_executing",
+        "dispatch_boundary_hold_non_executing"
+      ]
+    },
+    "allowed_execution_request_class_ids": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "prohibited_dispatch_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object"
+    }
+  },
+  "additional_properties": false
+}

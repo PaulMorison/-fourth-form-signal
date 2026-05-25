@@ -1,0 +1,94 @@
+{
+  "review_thresholds": [
+    {
+      "threshold_id": "assessment_review_required",
+      "semantic_scope": "shared_control_plane",
+      "router_rule_id": "default_case_route",
+      "transition_name": "promote_to_case_assessment",
+      "route_name": "primary_case_path",
+      "trigger_class": "review_entry_threshold",
+      "review_mode": "required",
+      "threshold_type": "numeric_comparison",
+      "operator": "gte",
+      "value_source": "impact_score",
+      "comparison_value": "0.80",
+      "calibration_profile_id": "high_sensitivity_review",
+      "required_context_fields": [
+        "impact_score"
+      ],
+      "playbook_reference": "playbook.review.assessment_required",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "review_threshold_seed"
+      }
+    },
+    {
+      "threshold_id": "assessment_review_optional",
+      "semantic_scope": "shared_control_plane",
+      "router_rule_id": "default_case_route",
+      "transition_name": "promote_to_case_assessment",
+      "route_name": "primary_case_path",
+      "trigger_class": "review_entry_threshold",
+      "review_mode": "optional",
+      "threshold_type": "numeric_comparison",
+      "operator": "gte",
+      "value_source": "impact_score",
+      "comparison_value": "0.40",
+      "required_context_fields": [
+        "impact_score"
+      ],
+      "playbook_reference": "playbook.review.assessment_optional",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "review_threshold_seed"
+      }
+    },
+    {
+      "threshold_id": "review_gate_fallback_optional",
+      "semantic_scope": "shared_control_plane",
+      "router_rule_id": "default_case_route",
+      "transition_name": "promote_to_case_assessment",
+      "route_name": "review_gate_path",
+      "trigger_class": "review_entry_threshold",
+      "review_mode": "required",
+      "threshold_type": "numeric_comparison",
+      "operator": "gte",
+      "value_source": "impact_score",
+      "comparison_value": "0.90",
+      "required_context_fields": [
+        "impact_score"
+      ],
+      "fallback_review_mode": "optional",
+      "playbook_reference": "playbook.review.review_gate_triage",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "review_threshold_seed"
+      }
+    },
+    {
+      "threshold_id": "fallback_route_optional_review",
+      "semantic_scope": "shared_control_plane",
+      "router_rule_id": "fallback_resolution_case_route",
+      "transition_name": "promote_to_case_assessment",
+      "route_name": "contained_manual_fallback_path",
+      "trigger_class": "fallback_review_threshold",
+      "review_mode": "optional",
+      "threshold_type": "boolean_signal",
+      "operator": "eq",
+      "value_source": "routing_review_required",
+      "comparison_value": "true",
+      "required_context_fields": [
+        "routing_review_required"
+      ],
+      "playbook_reference": "playbook.review.manual_fallback",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "review_threshold_seed"
+      }
+    }
+  ]
+}

@@ -1,0 +1,97 @@
+{
+  "review_packet_templates": {
+    "assessment_required_packet": {
+      "packet_template_id": "assessment_required_packet",
+      "semantic_scope": "shared_control_plane",
+      "router_rule_id": "default_case_route",
+      "transition_name": "promote_to_case_assessment",
+      "route_name": "primary_case_path",
+      "threshold_id": "assessment_review_required",
+      "review_mode": "required",
+      "reason_class": "impact_assessment_required",
+      "packet_scope": "case_review",
+      "required_context_fields": [
+        "review_focus"
+      ],
+      "optional_context_fields": [
+        "impact_score",
+        "route_name",
+        "playbook_reference"
+      ],
+      "required_audit_fields": [
+        "case_key",
+        "authority_resolution_kind",
+        "threshold_id"
+      ],
+      "handoff_channel": "human_review_queue_placeholder",
+      "packet_status": "ready_for_handoff",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "review_packet_template_seed"
+      }
+    },
+    "assessment_optional_packet": {
+      "packet_template_id": "assessment_optional_packet",
+      "semantic_scope": "shared_control_plane",
+      "router_rule_id": "default_case_route",
+      "transition_name": "promote_to_case_assessment",
+      "route_name": "primary_case_path",
+      "threshold_id": "assessment_review_optional",
+      "review_mode": "optional",
+      "reason_class": "impact_assessment_optional",
+      "packet_scope": "case_review",
+      "required_context_fields": [
+        "review_focus"
+      ],
+      "optional_context_fields": [
+        "impact_score",
+        "route_name",
+        "playbook_reference"
+      ],
+      "required_audit_fields": [
+        "case_key",
+        "authority_resolution_kind",
+        "threshold_id"
+      ],
+      "handoff_channel": "human_review_queue_placeholder",
+      "packet_status": "ready_for_handoff",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "review_packet_template_seed"
+      }
+    },
+    "review_gate_optional_fallback_packet": {
+      "packet_template_id": "review_gate_optional_fallback_packet",
+      "semantic_scope": "shared_control_plane",
+      "router_rule_id": "default_case_route",
+      "transition_name": "promote_to_case_assessment",
+      "route_name": "review_gate_path",
+      "review_mode": "optional",
+      "reason_class": "manual_fallback_review",
+      "packet_scope": "fallback_review",
+      "required_context_fields": [
+        "review_focus"
+      ],
+      "optional_context_fields": [
+        "impact_score",
+        "route_name",
+        "playbook_reference",
+        "routing_review_required"
+      ],
+      "required_audit_fields": [
+        "case_key",
+        "authority_resolution_kind",
+        "router_rule_id"
+      ],
+      "handoff_channel": "manual_triage_placeholder",
+      "packet_status": "fallback_template_applied",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "review_packet_template_seed"
+      }
+    }
+  }
+}

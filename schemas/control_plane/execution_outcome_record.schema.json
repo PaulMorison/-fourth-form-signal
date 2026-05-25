@@ -1,0 +1,369 @@
+{
+  "type": "object",
+  "required": [
+    "execution_outcome_id",
+    "execution_outcome_status",
+    "reason",
+    "execution_outcome_class_id",
+    "execution_outcome_template_id",
+    "realized_result_class",
+    "feedback_capture_readiness",
+    "expected_relation",
+    "comparison_posture",
+    "execution_dispatch_id",
+    "execution_dispatch_status",
+    "execution_dispatch_class_id",
+    "execution_dispatch_template_id",
+    "dispatch_boundary_posture",
+    "execution_request_id",
+    "execution_request_status",
+    "execution_request_class_id",
+    "semantic_scope",
+    "case_type",
+    "case_key",
+    "state_model_name",
+    "episode_id",
+    "transition_name",
+    "transition_class",
+    "source_stage",
+    "target_stage",
+    "execution_dispatch_author_role",
+    "execution_dispatch_author_id",
+    "execution_outcome_author_role",
+    "execution_outcome_author_id",
+    "authority_resolution_kind",
+    "authority_review_required",
+    "router_rule_id",
+    "routing_resolution_status",
+    "routing_review_required",
+    "review_mode",
+    "required_execution_outcome_fields",
+    "optional_execution_outcome_fields",
+    "required_audit_fields",
+    "prohibited_observation_fields",
+    "required_execution_outcome_snapshot",
+    "optional_execution_outcome_snapshot",
+    "required_audit_snapshot",
+    "lineage",
+    "generated_at"
+  ],
+  "properties": {
+    "execution_outcome_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "execution_outcome_status": {
+      "type": "string",
+      "enum": [
+        "blocked",
+        "ready_for_downstream_use",
+        "fallback_template_applied"
+      ]
+    },
+    "reason": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_outcome_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_outcome_template_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "realized_result_class": {
+      "type": "string",
+      "enum": [
+        "favorable",
+        "negative",
+        "mixed",
+        "incomplete",
+        "deferred",
+        "exception_bearing"
+      ]
+    },
+    "feedback_capture_readiness": {
+      "type": "string",
+      "enum": [
+        "feedback_capture_ready_for_post_mortem",
+        "feedback_capture_deferred",
+        "feedback_capture_incomplete"
+      ]
+    },
+    "expected_relation": {
+      "type": "string",
+      "enum": [
+        "realized_matches_expected_path",
+        "realized_deviates_from_expected_path",
+        "expected_relation_pending_observation"
+      ]
+    },
+    "comparison_posture": {
+      "type": "string",
+      "enum": [
+        "comparison_ready_expected_matches_realized",
+        "comparison_ready_expected_differs_from_realized",
+        "comparison_pending_observation"
+      ]
+    },
+    "execution_dispatch_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "execution_dispatch_status": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_dispatch_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_dispatch_template_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "dispatch_boundary_posture": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_request_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "execution_request_status": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_request_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "semantic_scope": {
+      "type": "string",
+      "min_length": 1
+    },
+    "case_type": {
+      "type": "string",
+      "min_length": 1
+    },
+    "case_key": {
+      "type": "string",
+      "min_length": 1
+    },
+    "state_model_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "episode_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "transition_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "transition_class": {
+      "type": "string",
+      "min_length": 1
+    },
+    "source_stage": {
+      "type": "string",
+      "min_length": 1
+    },
+    "target_stage": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_dispatch_author_role": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_dispatch_author_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_outcome_author_role": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_outcome_author_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "authority_resolution_kind": {
+      "type": "string",
+      "min_length": 1
+    },
+    "authority_review_required": {
+      "type": "boolean"
+    },
+    "router_rule_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "routing_resolution_status": {
+      "type": "string",
+      "min_length": 1
+    },
+    "routing_review_required": {
+      "type": "boolean"
+    },
+    "review_mode": {
+      "type": "string",
+      "min_length": 1
+    },
+    "observation_basis": {
+      "type": "string",
+      "min_length": 1
+    },
+    "observation_horizon_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "comparison_basis": {
+      "type": "string",
+      "min_length": 1
+    },
+    "feedback_maturity_posture": {
+      "type": "string",
+      "min_length": 1
+    },
+    "feedback_reuse_boundary": {
+      "type": "string",
+      "min_length": 1
+    },
+    "domain_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "decision_scope_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "reporting_scope_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "tenant_scope_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "expected_state_basis": {
+      "type": "string",
+      "min_length": 1
+    },
+    "realized_state_basis": {
+      "type": "string",
+      "min_length": 1
+    },
+    "recommendation_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "action_instruction_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "executed_action_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "non_execution_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "realized_outcome_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "route_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "threshold_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "trigger_class": {
+      "type": "string",
+      "min_length": 1
+    },
+    "executable_scope_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_condition_references": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "required_execution_outcome_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "optional_execution_outcome_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "required_audit_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "prohibited_observation_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "required_execution_outcome_snapshot": {
+      "type": "object"
+    },
+    "optional_execution_outcome_snapshot": {
+      "type": "object"
+    },
+    "required_audit_snapshot": {
+      "type": "object"
+    },
+    "lineage": {
+      "type": "object"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "missing_execution_outcome_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "prohibited_observation_fields_present": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    }
+  },
+  "additional_properties": false
+}

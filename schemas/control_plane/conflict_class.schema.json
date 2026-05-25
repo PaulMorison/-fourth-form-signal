@@ -1,0 +1,64 @@
+{
+  "type": "object",
+  "required": [
+    "conflict_class",
+    "description",
+    "resolution_basis",
+    "allows_tie_break",
+    "allows_fallback",
+    "status",
+    "lineage"
+  ],
+  "additional_properties": false,
+  "properties": {
+    "conflict_class": {
+      "type": "string",
+      "min_length": 1
+    },
+    "description": {
+      "type": "string",
+      "min_length": 1
+    },
+    "resolution_basis": {
+      "type": "string",
+      "enum": [
+        "single_candidate",
+        "precedence",
+        "tie_break",
+        "unresolved",
+        "blocked"
+      ]
+    },
+    "allows_tie_break": {
+      "type": "boolean"
+    },
+    "allows_fallback": {
+      "type": "boolean"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object",
+      "required": [
+        "version",
+        "source"
+      ],
+      "additional_properties": false,
+      "properties": {
+        "version": {
+          "type": "string",
+          "min_length": 1
+        },
+        "source": {
+          "type": "string",
+          "min_length": 1
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "contained_rollback_classes": {
+    "full_scope_production_promotion_candidate": {
+      "contained_rollback_class_id": "full_scope_production_promotion_candidate",
+      "description": "A governed contained-rollback class for releases whose entitlement record supports rollback containment with bounded exposure, bounded downstream effects, and reconstructible release lineage without widening into rollback execution ownership, release closure, monitoring admission, runtime verification, reopen handling, or orchestration ownership.",
+      "allowed_production_entitlement_check_statuses": [
+        "production_entitlement_checked"
+      ],
+      "allowed_production_entitlement_check_outcomes": [
+        "approved_for_broader_trusted_production_entitlement"
+      ],
+      "allow_contained_rollback_restrictions": false,
+      "allow_contained_rollback_prerequisite_deferral": false,
+      "prohibited_contained_rollback_fields": [
+        "release_closure_reference",
+        "promotion_completion_reference",
+        "runtime_verification_reference",
+        "monitoring_admission_reference",
+        "monitor_alert_reference",
+        "drift_monitor_reference",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "orchestration_owner_reference",
+        "lifecycle_state_override"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-24",
+        "source": "contained_rollback_class_seed"
+      }
+    },
+    "conditional_production_release": {
+      "contained_rollback_class_id": "conditional_production_release",
+      "description": "A governed contained-rollback class for bounded conditional production exposure whose partial reversal remains explicitly narrowed while exposure, downstream effects, and release lineage stay reconstructible.",
+      "allowed_production_entitlement_check_statuses": [
+        "production_entitlement_checked",
+        "fallback_template_applied"
+      ],
+      "allowed_production_entitlement_check_outcomes": [
+        "approved_for_broader_trusted_production_entitlement",
+        "conditionally_approved_for_bounded_production_entitlement"
+      ],
+      "allow_contained_rollback_restrictions": true,
+      "allow_contained_rollback_prerequisite_deferral": false,
+      "prohibited_contained_rollback_fields": [
+        "release_closure_reference",
+        "promotion_completion_reference",
+        "runtime_verification_reference",
+        "monitoring_admission_reference",
+        "monitor_alert_reference",
+        "drift_monitor_reference",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "orchestration_owner_reference",
+        "lifecycle_state_override"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-24",
+        "source": "contained_rollback_class_seed"
+      }
+    },
+    "deferred_release_state": {
+      "contained_rollback_class_id": "deferred_release_state",
+      "description": "A governed contained-rollback class for releases whose rollback containment evidence or containment prerequisites remain too incomplete for present bounded rollback state even though rollback execution ownership is not taken here.",
+      "allowed_production_entitlement_check_statuses": [
+        "production_entitlement_checked",
+        "fallback_template_applied"
+      ],
+      "allowed_production_entitlement_check_outcomes": [
+        "approved_for_broader_trusted_production_entitlement",
+        "conditionally_approved_for_bounded_production_entitlement"
+      ],
+      "allow_contained_rollback_restrictions": true,
+      "allow_contained_rollback_prerequisite_deferral": true,
+      "prohibited_contained_rollback_fields": [
+        "release_closure_reference",
+        "promotion_completion_reference",
+        "runtime_verification_reference",
+        "monitoring_admission_reference",
+        "monitor_alert_reference",
+        "drift_monitor_reference",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "orchestration_owner_reference",
+        "lifecycle_state_override"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-24",
+        "source": "contained_rollback_class_seed"
+      }
+    }
+  }
+}

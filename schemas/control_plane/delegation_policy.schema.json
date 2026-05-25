@@ -1,0 +1,74 @@
+{
+  "type": "object",
+  "required": [
+    "delegation_policy_id",
+    "authority_rule_id",
+    "delegating_role",
+    "delegated_role",
+    "authority_scope",
+    "authority_ceiling",
+    "authority_floor",
+    "review_required",
+    "status",
+    "lineage"
+  ],
+  "additional_properties": false,
+  "properties": {
+    "delegation_policy_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "authority_rule_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "delegating_role": {
+      "type": "string",
+      "min_length": 1
+    },
+    "delegated_role": {
+      "type": "string",
+      "min_length": 1
+    },
+    "authority_scope": {
+      "type": "string",
+      "min_length": 1
+    },
+    "authority_ceiling": {
+      "type": "string",
+      "min_length": 1
+    },
+    "authority_floor": {
+      "type": "string",
+      "min_length": 1
+    },
+    "review_required": {
+      "type": "boolean"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object",
+      "required": [
+        "version",
+        "source"
+      ],
+      "additional_properties": false,
+      "properties": {
+        "version": {
+          "type": "string",
+          "min_length": 1
+        },
+        "source": {
+          "type": "string",
+          "min_length": 1
+        }
+      }
+    }
+  }
+}

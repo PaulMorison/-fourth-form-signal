@@ -1,0 +1,146 @@
+{
+  "execution_outcome_templates": {
+    "favorable_execution_outcome_primary": {
+      "execution_outcome_template_id": "favorable_execution_outcome_primary",
+      "semantic_scope": "shared_control_plane",
+      "execution_dispatch_class_id": "direct_dispatch_boundary",
+      "execution_outcome_class_id": "favorable_realized_outcome",
+      "route_name": "primary_case_path",
+      "required_execution_outcome_fields": [
+        "domain_reference",
+        "decision_scope_reference",
+        "tenant_scope_reference",
+        "expected_state_basis",
+        "observation_basis",
+        "observation_horizon_reference",
+        "comparison_basis",
+        "feedback_maturity_posture",
+        "feedback_reuse_boundary",
+        "executed_action_reference",
+        "realized_outcome_reference",
+        "outcome_summary"
+      ],
+      "optional_execution_outcome_fields": [
+        "reporting_scope_reference",
+        "execution_condition_references"
+      ],
+      "required_audit_fields": [
+        "execution_outcome_author_id",
+        "execution_outcome_author_role"
+      ],
+      "execution_outcome_status": "ready_for_downstream_use",
+      "feedback_capture_readiness": "feedback_capture_ready_for_post_mortem",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "execution_outcome_template_seed"
+      }
+    },
+    "negative_execution_outcome_primary": {
+      "execution_outcome_template_id": "negative_execution_outcome_primary",
+      "semantic_scope": "shared_control_plane",
+      "execution_dispatch_class_id": "direct_dispatch_boundary",
+      "execution_outcome_class_id": "negative_realized_outcome",
+      "route_name": "primary_case_path",
+      "required_execution_outcome_fields": [
+        "domain_reference",
+        "decision_scope_reference",
+        "tenant_scope_reference",
+        "expected_state_basis",
+        "observation_basis",
+        "observation_horizon_reference",
+        "comparison_basis",
+        "feedback_maturity_posture",
+        "feedback_reuse_boundary",
+        "executed_action_reference",
+        "realized_outcome_reference",
+        "outcome_summary"
+      ],
+      "optional_execution_outcome_fields": [
+        "reporting_scope_reference",
+        "execution_condition_references"
+      ],
+      "required_audit_fields": [
+        "execution_outcome_author_id",
+        "execution_outcome_author_role"
+      ],
+      "execution_outcome_status": "ready_for_downstream_use",
+      "feedback_capture_readiness": "feedback_capture_ready_for_post_mortem",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "execution_outcome_template_seed"
+      }
+    },
+    "negative_execution_outcome_conditioned": {
+      "execution_outcome_template_id": "negative_execution_outcome_conditioned",
+      "semantic_scope": "shared_control_plane",
+      "execution_dispatch_class_id": "conditioned_dispatch_boundary",
+      "execution_outcome_class_id": "negative_realized_outcome",
+      "required_execution_outcome_fields": [
+        "domain_reference",
+        "decision_scope_reference",
+        "tenant_scope_reference",
+        "expected_state_basis",
+        "observation_basis",
+        "observation_horizon_reference",
+        "comparison_basis",
+        "feedback_maturity_posture",
+        "feedback_reuse_boundary",
+        "executed_action_reference",
+        "realized_outcome_reference",
+        "outcome_summary"
+      ],
+      "optional_execution_outcome_fields": [
+        "reporting_scope_reference",
+        "execution_condition_references"
+      ],
+      "required_audit_fields": [
+        "execution_outcome_author_id",
+        "execution_outcome_author_role"
+      ],
+      "execution_outcome_status": "ready_for_downstream_use",
+      "feedback_capture_readiness": "feedback_capture_ready_for_post_mortem",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "execution_outcome_template_seed"
+      }
+    },
+    "deferred_execution_outcome_fallback": {
+      "execution_outcome_template_id": "deferred_execution_outcome_fallback",
+      "semantic_scope": "shared_control_plane",
+      "execution_dispatch_class_id": "hold_dispatch_boundary",
+      "execution_outcome_class_id": "deferred_realized_outcome",
+      "required_execution_outcome_fields": [
+        "domain_reference",
+        "decision_scope_reference",
+        "tenant_scope_reference",
+        "expected_state_basis",
+        "observation_basis",
+        "observation_horizon_reference",
+        "comparison_basis",
+        "feedback_maturity_posture",
+        "feedback_reuse_boundary",
+        "non_execution_reference",
+        "realized_outcome_reference",
+        "outcome_summary"
+      ],
+      "optional_execution_outcome_fields": [
+        "reporting_scope_reference",
+        "execution_condition_references"
+      ],
+      "required_audit_fields": [
+        "execution_outcome_author_id",
+        "execution_outcome_author_role"
+      ],
+      "execution_outcome_status": "fallback_template_applied",
+      "feedback_capture_readiness": "feedback_capture_deferred",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "execution_outcome_template_seed"
+      }
+    }
+  }
+}

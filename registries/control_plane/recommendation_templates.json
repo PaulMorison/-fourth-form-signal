@@ -1,0 +1,226 @@
+{
+  "recommendation_templates": {
+    "resolved_action_primary_recommendation": {
+      "recommendation_template_id": "resolved_action_primary_recommendation",
+      "semantic_scope": "shared_control_plane",
+      "resolution_class_id": "resolved_with_action",
+      "disposition_class_id": "closed_pending_downstream_execution",
+      "recommendation_class_id": "recommend_act_now",
+      "route_name": "primary_case_path",
+      "required_context_fields": [
+        "recommendation_summary",
+        "action_path_reference",
+        "scope_reference",
+        "confidence_summary",
+        "constraint_summary",
+        "uncertainty_summary",
+        "failure_state_context"
+      ],
+      "optional_context_fields": [
+        "review_summary",
+        "resolution_rationale",
+        "simulation_reference"
+      ],
+      "required_audit_fields": [
+        "recommender_id",
+        "recommender_role"
+      ],
+      "recommendation_status": "ready_for_downstream_use",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "recommendation_template_seed"
+      }
+    },
+    "deferred_wait_recommendation": {
+      "recommendation_template_id": "deferred_wait_recommendation",
+      "semantic_scope": "shared_control_plane",
+      "resolution_class_id": "deferred_continuation",
+      "disposition_class_id": "deferred_continuation_pending_review",
+      "recommendation_class_id": "recommend_wait",
+      "required_context_fields": [
+        "recommendation_summary",
+        "action_path_reference",
+        "scope_reference",
+        "confidence_summary",
+        "constraint_summary",
+        "uncertainty_summary",
+        "failure_state_context",
+        "revisit_reference"
+      ],
+      "optional_context_fields": [
+        "review_summary",
+        "resolution_rationale"
+      ],
+      "required_audit_fields": [
+        "recommender_id",
+        "recommender_role"
+      ],
+      "recommendation_status": "ready_for_downstream_use",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "recommendation_template_seed"
+      }
+    },
+    "rework_simulation_recommendation": {
+      "recommendation_template_id": "rework_simulation_recommendation",
+      "semantic_scope": "shared_control_plane",
+      "resolution_class_id": "returned_for_rework",
+      "disposition_class_id": "returned_for_rework_open",
+      "recommendation_class_id": "recommend_simulate_first",
+      "required_context_fields": [
+        "recommendation_summary",
+        "action_path_reference",
+        "scope_reference",
+        "confidence_summary",
+        "constraint_summary",
+        "uncertainty_summary",
+        "failure_state_context",
+        "simulation_reference"
+      ],
+      "optional_context_fields": [
+        "review_summary",
+        "resolution_rationale",
+        "rework_reference"
+      ],
+      "required_audit_fields": [
+        "recommender_id",
+        "recommender_role"
+      ],
+      "recommendation_status": "ready_for_downstream_use",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "recommendation_template_seed"
+      }
+    },
+    "clarification_primary_recommendation": {
+      "recommendation_template_id": "clarification_primary_recommendation",
+      "semantic_scope": "shared_control_plane",
+      "resolution_class_id": "returned_for_clarification",
+      "disposition_class_id": "returned_for_clarification_open",
+      "recommendation_class_id": "recommend_gather_more_information",
+      "route_name": "primary_case_path",
+      "required_context_fields": [
+        "recommendation_summary",
+        "action_path_reference",
+        "scope_reference",
+        "confidence_summary",
+        "constraint_summary",
+        "uncertainty_summary",
+        "failure_state_context",
+        "clarification_reference"
+      ],
+      "optional_context_fields": [
+        "review_summary",
+        "resolution_rationale"
+      ],
+      "required_audit_fields": [
+        "recommender_id",
+        "recommender_role"
+      ],
+      "recommendation_status": "ready_for_downstream_use",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "recommendation_template_seed"
+      }
+    },
+    "escalation_primary_recommendation": {
+      "recommendation_template_id": "escalation_primary_recommendation",
+      "semantic_scope": "shared_control_plane",
+      "resolution_class_id": "resolved_with_escalation",
+      "disposition_class_id": "escalated_pending_later_review",
+      "recommendation_class_id": "escalate_for_review",
+      "route_name": "primary_case_path",
+      "required_context_fields": [
+        "recommendation_summary",
+        "action_path_reference",
+        "scope_reference",
+        "confidence_summary",
+        "constraint_summary",
+        "uncertainty_summary",
+        "failure_state_context",
+        "escalation_reference"
+      ],
+      "optional_context_fields": [
+        "review_summary",
+        "resolution_rationale"
+      ],
+      "required_audit_fields": [
+        "recommender_id",
+        "recommender_role"
+      ],
+      "recommendation_status": "ready_for_downstream_use",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "recommendation_template_seed"
+      }
+    },
+    "non_action_primary_recommendation": {
+      "recommendation_template_id": "non_action_primary_recommendation",
+      "semantic_scope": "shared_control_plane",
+      "resolution_class_id": "resolved_with_non_action",
+      "disposition_class_id": "closed_non_action",
+      "recommendation_class_id": "abstain_from_strong_recommendation",
+      "route_name": "primary_case_path",
+      "required_context_fields": [
+        "recommendation_summary",
+        "action_path_reference",
+        "scope_reference",
+        "confidence_summary",
+        "constraint_summary",
+        "uncertainty_summary",
+        "failure_state_context",
+        "non_action_reference"
+      ],
+      "optional_context_fields": [
+        "review_summary",
+        "resolution_rationale"
+      ],
+      "required_audit_fields": [
+        "recommender_id",
+        "recommender_role"
+      ],
+      "recommendation_status": "ready_for_downstream_use",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "recommendation_template_seed"
+      }
+    },
+    "manual_fallback_generic_recommendation": {
+      "recommendation_template_id": "manual_fallback_generic_recommendation",
+      "semantic_scope": "shared_control_plane",
+      "resolution_class_id": "manual_fallback_resolution",
+      "disposition_class_id": "manual_fallback_hold",
+      "recommendation_class_id": "abstain_from_strong_recommendation",
+      "required_context_fields": [
+        "recommendation_summary",
+        "action_path_reference",
+        "scope_reference",
+        "confidence_summary",
+        "constraint_summary",
+        "uncertainty_summary",
+        "failure_state_context",
+        "fallback_reference"
+      ],
+      "optional_context_fields": [
+        "review_summary",
+        "resolution_rationale"
+      ],
+      "required_audit_fields": [
+        "recommender_id",
+        "recommender_role"
+      ],
+      "recommendation_status": "fallback_template_applied",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "recommendation_template_seed"
+      }
+    }
+  }
+}

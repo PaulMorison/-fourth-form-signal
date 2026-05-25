@@ -1,0 +1,53 @@
+{
+  "type": "object",
+  "required": [
+    "reason_class",
+    "description",
+    "handoff_purpose",
+    "status",
+    "lineage"
+  ],
+  "properties": {
+    "reason_class": {
+      "type": "string",
+      "min_length": 1
+    },
+    "description": {
+      "type": "string",
+      "min_length": 1
+    },
+    "handoff_purpose": {
+      "type": "string",
+      "enum": [
+        "review_only",
+        "manual_triage"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object",
+      "required": [
+        "version",
+        "source"
+      ],
+      "properties": {
+        "version": {
+          "type": "string",
+          "min_length": 1
+        },
+        "source": {
+          "type": "string",
+          "min_length": 1
+        }
+      },
+      "additional_properties": false
+    }
+  },
+  "additional_properties": false
+}

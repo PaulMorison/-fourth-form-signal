@@ -1,0 +1,106 @@
+{
+  "action_instruction_classes": {
+    "direct_action_instruction": {
+      "action_instruction_class_id": "direct_action_instruction",
+      "description": "A governed action instruction that preserves direct action intent for downstream execution preparation without collapsing instruction meaning into execution.",
+      "bounded_action_posture": "direct_action_instruction",
+      "execution_boundary_posture": "instruction_not_executed",
+      "promotion_safe_use": "promotion_safe_instruction",
+      "allowed_portfolio_output_class_ids": [
+        "portfolio_bounded_allocation"
+      ],
+      "allowed_policy_output_class_ids": [
+        "policy_shaped_allowance"
+      ],
+      "allowed_recommendation_class_ids": [
+        "recommend_act_now"
+      ],
+      "allowed_resolution_class_ids": [
+        "resolved_with_action"
+      ],
+      "allowed_disposition_class_ids": [
+        "closed_pending_downstream_execution"
+      ],
+      "prohibited_execution_fields": [
+        "execution_request_id",
+        "execution_reference",
+        "execution_status",
+        "executed_at",
+        "execution_result"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "action_instruction_class_seed"
+      }
+    },
+    "prerequisite_bounded_instruction": {
+      "action_instruction_class_id": "prerequisite_bounded_instruction",
+      "description": "A governed action instruction that preserves explicit prerequisite-bounded instruction posture for downstream preparation without silently becoming executable action.",
+      "bounded_action_posture": "prerequisite_bounded_instruction",
+      "execution_boundary_posture": "instruction_not_executed",
+      "promotion_safe_use": "promotion_safe_instruction",
+      "allowed_portfolio_output_class_ids": [
+        "portfolio_ranked_preference"
+      ],
+      "allowed_policy_output_class_ids": [
+        "policy_shaped_information_requirement"
+      ],
+      "allowed_recommendation_class_ids": [
+        "recommend_gather_more_information"
+      ],
+      "allowed_resolution_class_ids": [
+        "returned_for_clarification"
+      ],
+      "allowed_disposition_class_ids": [
+        "returned_for_clarification_open"
+      ],
+      "prohibited_execution_fields": [
+        "execution_request_id",
+        "execution_reference",
+        "execution_status",
+        "executed_at",
+        "execution_result"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "action_instruction_class_seed"
+      }
+    },
+    "suppression_hold_instruction": {
+      "action_instruction_class_id": "suppression_hold_instruction",
+      "description": "A governed action instruction that preserves explicit suppression hold posture for downstream preparation without becoming execution or reopening logic.",
+      "bounded_action_posture": "suppression_hold_instruction",
+      "execution_boundary_posture": "instruction_not_executed",
+      "promotion_safe_use": "promotion_safe_instruction",
+      "allowed_portfolio_output_class_ids": [
+        "portfolio_suppression_hold"
+      ],
+      "allowed_policy_output_class_ids": [
+        "policy_shaped_suppression"
+      ],
+      "allowed_recommendation_class_ids": [
+        "abstain_from_strong_recommendation"
+      ],
+      "allowed_resolution_class_ids": [
+        "manual_fallback_resolution"
+      ],
+      "allowed_disposition_class_ids": [
+        "manual_fallback_hold"
+      ],
+      "prohibited_execution_fields": [
+        "execution_request_id",
+        "execution_reference",
+        "execution_status",
+        "executed_at",
+        "execution_result"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "action_instruction_class_seed"
+      }
+    }
+  }
+}

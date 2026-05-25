@@ -1,0 +1,245 @@
+{
+  "router_rules": {
+    "default_case_route": [
+      {
+        "router_rule_id": "default_case_route",
+        "route_name": "primary_case_path",
+        "semantic_scope": "shared_control_plane",
+        "allowed_transition_classes": [
+          "entry",
+          "forward_progression",
+          "interruption",
+          "resumption"
+        ],
+        "allowed_sources": [
+          "__entry__",
+          "raw_ingestion",
+          "feature_registry",
+          "case_orchestration"
+        ],
+        "allowed_targets": [
+          "raw_ingestion",
+          "feature_registry",
+          "case_orchestration"
+        ],
+        "conflict_class": "precedence_required_conflict",
+        "tie_break_policy": "lexicographic_route_name",
+        "review_required": false,
+        "status": "active",
+        "lineage": {
+          "version": "2026-04-22",
+          "source": "router_rule_seed"
+        }
+      },
+      {
+        "router_rule_id": "default_case_route",
+        "route_name": "review_gate_path",
+        "semantic_scope": "shared_control_plane",
+        "allowed_transition_classes": [
+          "forward_progression"
+        ],
+        "allowed_sources": [
+          "feature_registry"
+        ],
+        "allowed_targets": [
+          "case_orchestration"
+        ],
+        "conflict_class": "precedence_required_conflict",
+        "tie_break_policy": "lexicographic_route_name",
+        "review_required": true,
+        "status": "active",
+        "lineage": {
+          "version": "2026-04-22",
+          "source": "router_rule_seed"
+        }
+      }
+    ],
+    "fallback_case_route": [
+      {
+        "router_rule_id": "fallback_case_route",
+        "route_name": "contained_fallback_path",
+        "semantic_scope": "shared_control_plane",
+        "allowed_transition_classes": [
+          "fallback"
+        ],
+        "allowed_sources": [
+          "case_orchestration"
+        ],
+        "allowed_targets": [
+          "feature_registry"
+        ],
+        "conflict_class": "single_route_conflict",
+        "tie_break_policy": "none",
+        "review_required": false,
+        "status": "active",
+        "lineage": {
+          "version": "2026-04-22",
+          "source": "router_rule_seed"
+        }
+      }
+    ],
+    "tie_break_case_route": [
+      {
+        "router_rule_id": "tie_break_case_route",
+        "route_name": "alpha_tie_path",
+        "semantic_scope": "shared_control_plane",
+        "allowed_transition_classes": [
+          "forward_progression"
+        ],
+        "allowed_sources": [
+          "feature_registry"
+        ],
+        "allowed_targets": [
+          "case_orchestration"
+        ],
+        "conflict_class": "tie_break_required_conflict",
+        "tie_break_policy": "lexicographic_route_name",
+        "review_required": false,
+        "status": "active",
+        "lineage": {
+          "version": "2026-04-22",
+          "source": "router_rule_seed"
+        }
+      },
+      {
+        "router_rule_id": "tie_break_case_route",
+        "route_name": "zeta_tie_path",
+        "semantic_scope": "shared_control_plane",
+        "allowed_transition_classes": [
+          "forward_progression"
+        ],
+        "allowed_sources": [
+          "feature_registry"
+        ],
+        "allowed_targets": [
+          "case_orchestration"
+        ],
+        "conflict_class": "tie_break_required_conflict",
+        "tie_break_policy": "lexicographic_route_name",
+        "review_required": false,
+        "status": "active",
+        "lineage": {
+          "version": "2026-04-22",
+          "source": "router_rule_seed"
+        }
+      }
+    ],
+    "unresolved_case_route": [
+      {
+        "router_rule_id": "unresolved_case_route",
+        "route_name": "review_conflict_path",
+        "semantic_scope": "shared_control_plane",
+        "allowed_transition_classes": [
+          "forward_progression"
+        ],
+        "allowed_sources": [
+          "feature_registry"
+        ],
+        "allowed_targets": [
+          "case_orchestration"
+        ],
+        "conflict_class": "unresolved_route_conflict",
+        "tie_break_policy": "manual_resolution_required",
+        "review_required": true,
+        "status": "active",
+        "lineage": {
+          "version": "2026-04-22",
+          "source": "router_rule_seed"
+        }
+      },
+      {
+        "router_rule_id": "unresolved_case_route",
+        "route_name": "operations_conflict_path",
+        "semantic_scope": "shared_control_plane",
+        "allowed_transition_classes": [
+          "forward_progression"
+        ],
+        "allowed_sources": [
+          "feature_registry"
+        ],
+        "allowed_targets": [
+          "case_orchestration"
+        ],
+        "conflict_class": "unresolved_route_conflict",
+        "tie_break_policy": "manual_resolution_required",
+        "review_required": true,
+        "status": "active",
+        "lineage": {
+          "version": "2026-04-22",
+          "source": "router_rule_seed"
+        }
+      }
+    ],
+    "fallback_resolution_case_route": [
+      {
+        "router_rule_id": "fallback_resolution_case_route",
+        "route_name": "review_triage_path",
+        "semantic_scope": "shared_control_plane",
+        "allowed_transition_classes": [
+          "forward_progression"
+        ],
+        "allowed_sources": [
+          "feature_registry"
+        ],
+        "allowed_targets": [
+          "case_orchestration"
+        ],
+        "conflict_class": "unresolved_route_conflict",
+        "tie_break_policy": "manual_resolution_required",
+        "fallback_route_name": "contained_manual_fallback_path",
+        "review_required": true,
+        "status": "active",
+        "lineage": {
+          "version": "2026-04-22",
+          "source": "router_rule_seed"
+        }
+      },
+      {
+        "router_rule_id": "fallback_resolution_case_route",
+        "route_name": "operations_triage_path",
+        "semantic_scope": "shared_control_plane",
+        "allowed_transition_classes": [
+          "forward_progression"
+        ],
+        "allowed_sources": [
+          "feature_registry"
+        ],
+        "allowed_targets": [
+          "case_orchestration"
+        ],
+        "conflict_class": "unresolved_route_conflict",
+        "tie_break_policy": "manual_resolution_required",
+        "fallback_route_name": "contained_manual_fallback_path",
+        "review_required": true,
+        "status": "active",
+        "lineage": {
+          "version": "2026-04-22",
+          "source": "router_rule_seed"
+        }
+      },
+      {
+        "router_rule_id": "fallback_resolution_case_route",
+        "route_name": "contained_manual_fallback_path",
+        "semantic_scope": "shared_control_plane",
+        "allowed_transition_classes": [
+          "forward_progression"
+        ],
+        "allowed_sources": [
+          "feature_registry"
+        ],
+        "allowed_targets": [
+          "case_orchestration"
+        ],
+        "conflict_class": "single_route_conflict",
+        "tie_break_policy": "none",
+        "review_required": true,
+        "status": "active",
+        "lineage": {
+          "version": "2026-04-22",
+          "source": "router_rule_seed"
+        }
+      }
+    ]
+  }
+}
+

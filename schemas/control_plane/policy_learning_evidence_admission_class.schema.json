@@ -1,0 +1,78 @@
+{
+  "type": "object",
+  "required": [
+    "policy_learning_evidence_class_id",
+    "description",
+    "allowed_post_mortem_judgment_class_ids",
+    "allowed_post_mortem_statuses",
+    "minimum_evidence_quality",
+    "minimum_confidence_posture",
+    "prohibited_evidence_fields",
+    "status",
+    "lineage"
+  ],
+  "properties": {
+    "policy_learning_evidence_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "description": {
+      "type": "string",
+      "min_length": 1
+    },
+    "allowed_post_mortem_judgment_class_ids": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "allowed_post_mortem_statuses": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "ready_for_downstream_use",
+          "fallback_template_applied"
+        ]
+      }
+    },
+    "minimum_evidence_quality": {
+      "type": "string",
+      "enum": [
+        "strong_reconstructible_evidence",
+        "mixed_evidence_requires_caution",
+        "immature_observation_horizon",
+        "insufficient_reconstructible_evidence"
+      ]
+    },
+    "minimum_confidence_posture": {
+      "type": "string",
+      "enum": [
+        "confident_for_attribution",
+        "cautious_for_review_only",
+        "insufficient_for_confident_judgment"
+      ]
+    },
+    "prohibited_evidence_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object"
+    }
+  },
+  "additional_properties": false
+}

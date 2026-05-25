@@ -1,0 +1,143 @@
+{
+  "policy_learning_update_mutation_planning_templates": {
+    "policy_mutation_plan_candidate_primary": {
+      "policy_learning_update_mutation_planning_template_id": "policy_mutation_plan_candidate_primary",
+      "semantic_scope": "shared_control_plane",
+      "policy_learning_update_preparation_class_id": "policy_mutation_planning_candidate",
+      "policy_learning_update_mutation_planning_class_id": "policy_mutation_plan_candidate",
+      "route_name": "primary_case_path",
+      "required_update_mutation_planning_fields": [
+        "domain_reference",
+        "decision_scope_reference",
+        "tenant_scope_reference",
+        "learning_scope_reference",
+        "candidate_update_reference",
+        "preparation_package_reference",
+        "preparation_summary",
+        "mutation_planning_scope_reference",
+        "preparation_artifact_boundary_summary",
+        "mutation_plan_reference",
+        "mutation_planning_summary",
+        "mutation_plan_scope_reference",
+        "mutation_planning_boundary_summary",
+        "artifact_readiness",
+        "planning_readiness",
+        "prerequisite_readiness",
+        "mutation_readiness",
+        "safeguard_readiness",
+        "rollback_readiness"
+      ],
+      "optional_update_mutation_planning_fields": [
+        "reporting_scope_reference",
+        "restriction_summary",
+        "mutation_scope_restriction_reference",
+        "follow_up_review_reference",
+        "mutation_planning_prerequisite_reference",
+        "outstanding_mutation_planning_prerequisites"
+      ],
+      "required_audit_fields": [
+        "policy_learning_update_mutation_planning_author_id",
+        "policy_learning_update_mutation_planning_author_role"
+      ],
+      "policy_learning_update_mutation_planning_status": "mutation_planning_ready",
+      "policy_learning_update_mutation_planning_outcome": "ready_for_policy_mutation_planning",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-24",
+        "source": "policy_learning_update_mutation_planning_template_seed"
+      }
+    },
+    "restricted_policy_mutation_plan_candidate_primary": {
+      "policy_learning_update_mutation_planning_template_id": "restricted_policy_mutation_plan_candidate_primary",
+      "semantic_scope": "shared_control_plane",
+      "policy_learning_update_preparation_class_id": "restricted_policy_mutation_planning_candidate",
+      "policy_learning_update_mutation_planning_class_id": "restricted_policy_mutation_plan_candidate",
+      "required_update_mutation_planning_fields": [
+        "domain_reference",
+        "decision_scope_reference",
+        "tenant_scope_reference",
+        "learning_scope_reference",
+        "candidate_update_reference",
+        "preparation_package_reference",
+        "preparation_summary",
+        "mutation_planning_scope_reference",
+        "preparation_artifact_boundary_summary",
+        "mutation_plan_reference",
+        "mutation_planning_summary",
+        "mutation_plan_scope_reference",
+        "mutation_planning_boundary_summary",
+        "artifact_readiness",
+        "planning_readiness",
+        "prerequisite_readiness",
+        "mutation_readiness",
+        "safeguard_readiness",
+        "rollback_readiness",
+        "restriction_summary",
+        "mutation_scope_restriction_reference"
+      ],
+      "optional_update_mutation_planning_fields": [
+        "reporting_scope_reference",
+        "follow_up_review_reference",
+        "mutation_planning_prerequisite_reference",
+        "outstanding_mutation_planning_prerequisites"
+      ],
+      "required_audit_fields": [
+        "policy_learning_update_mutation_planning_author_id",
+        "policy_learning_update_mutation_planning_author_role"
+      ],
+      "policy_learning_update_mutation_planning_status": "fallback_template_applied",
+      "policy_learning_update_mutation_planning_outcome": "ready_for_policy_mutation_planning_with_restrictions",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-24",
+        "source": "policy_learning_update_mutation_planning_template_seed"
+      }
+    },
+    "deferred_policy_mutation_plan_candidate_fallback": {
+      "policy_learning_update_mutation_planning_template_id": "deferred_policy_mutation_plan_candidate_fallback",
+      "semantic_scope": "shared_control_plane",
+      "policy_learning_update_preparation_class_id": "policy_mutation_planning_candidate",
+      "policy_learning_update_mutation_planning_class_id": "deferred_policy_mutation_plan_candidate",
+      "required_update_mutation_planning_fields": [
+        "domain_reference",
+        "decision_scope_reference",
+        "tenant_scope_reference",
+        "learning_scope_reference",
+        "candidate_update_reference",
+        "preparation_package_reference",
+        "preparation_summary",
+        "mutation_planning_scope_reference",
+        "preparation_artifact_boundary_summary",
+        "mutation_plan_reference",
+        "mutation_planning_summary",
+        "mutation_plan_scope_reference",
+        "mutation_planning_boundary_summary",
+        "artifact_readiness",
+        "planning_readiness",
+        "prerequisite_readiness",
+        "mutation_readiness",
+        "safeguard_readiness",
+        "rollback_readiness",
+        "mutation_planning_prerequisite_reference",
+        "outstanding_mutation_planning_prerequisites"
+      ],
+      "optional_update_mutation_planning_fields": [
+        "reporting_scope_reference",
+        "restriction_summary",
+        "mutation_scope_restriction_reference",
+        "follow_up_review_reference"
+      ],
+      "required_audit_fields": [
+        "policy_learning_update_mutation_planning_author_id",
+        "policy_learning_update_mutation_planning_author_role"
+      ],
+      "policy_learning_update_mutation_planning_status": "fallback_template_applied",
+      "policy_learning_update_mutation_planning_outcome": "deferred_pending_mutation_planning_prerequisites",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-24",
+        "source": "policy_learning_update_mutation_planning_template_seed"
+      }
+    }
+  }
+}

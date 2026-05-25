@@ -1,0 +1,90 @@
+{
+  "type": "object",
+  "required": [
+    "execution_dispatch_template_id",
+    "semantic_scope",
+    "execution_request_class_id",
+    "execution_dispatch_class_id",
+    "required_execution_dispatch_fields",
+    "optional_execution_dispatch_fields",
+    "required_audit_fields",
+    "execution_dispatch_status",
+    "execution_dispatch_readiness",
+    "status",
+    "lineage"
+  ],
+  "properties": {
+    "execution_dispatch_template_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "semantic_scope": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_request_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_dispatch_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "route_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "required_execution_dispatch_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "optional_execution_dispatch_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "required_audit_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "execution_dispatch_status": {
+      "type": "string",
+      "enum": [
+        "ready_for_downstream_use",
+        "fallback_template_applied"
+      ]
+    },
+    "execution_dispatch_readiness": {
+      "type": "string",
+      "enum": [
+        "dispatch_boundary_ready",
+        "dispatch_boundary_blocked_pending_authority",
+        "dispatch_boundary_blocked_pending_prerequisite",
+        "dispatch_boundary_blocked_pending_timing",
+        "dispatch_boundary_prohibited",
+        "dispatch_boundary_incomplete"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object"
+    }
+  },
+  "additional_properties": false
+}

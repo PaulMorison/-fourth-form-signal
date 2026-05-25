@@ -1,0 +1,60 @@
+{
+  "type": "object",
+  "required": [
+    "execution_outcome_class_id",
+    "description",
+    "realized_result_class",
+    "allowed_execution_dispatch_class_ids",
+    "prohibited_observation_fields",
+    "status",
+    "lineage"
+  ],
+  "properties": {
+    "execution_outcome_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "description": {
+      "type": "string",
+      "min_length": 1
+    },
+    "realized_result_class": {
+      "type": "string",
+      "enum": [
+        "favorable",
+        "negative",
+        "mixed",
+        "incomplete",
+        "deferred",
+        "exception_bearing"
+      ]
+    },
+    "allowed_execution_dispatch_class_ids": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "prohibited_observation_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object"
+    }
+  },
+  "additional_properties": false
+}

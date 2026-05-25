@@ -1,0 +1,414 @@
+{
+  "type": "object",
+  "required": [
+    "post_mortem_judgment_id",
+    "post_mortem_status",
+    "reason",
+    "post_mortem_judgment_class_id",
+    "post_mortem_judgment_template_id",
+    "primary_attribution_category",
+    "evidence_quality",
+    "confidence_posture",
+    "learning_direction",
+    "comparison_posture",
+    "execution_outcome_id",
+    "execution_outcome_status",
+    "execution_outcome_class_id",
+    "execution_outcome_template_id",
+    "realized_result_class",
+    "feedback_capture_readiness",
+    "expected_relation",
+    "execution_dispatch_id",
+    "execution_dispatch_class_id",
+    "execution_request_id",
+    "semantic_scope",
+    "case_type",
+    "case_key",
+    "state_model_name",
+    "episode_id",
+    "transition_name",
+    "transition_class",
+    "source_stage",
+    "target_stage",
+    "execution_outcome_author_role",
+    "execution_outcome_author_id",
+    "post_mortem_author_role",
+    "post_mortem_author_id",
+    "authority_resolution_kind",
+    "authority_review_required",
+    "router_rule_id",
+    "routing_resolution_status",
+    "routing_review_required",
+    "review_mode",
+    "required_post_mortem_fields",
+    "optional_post_mortem_fields",
+    "required_audit_fields",
+    "prohibited_judgment_fields",
+    "required_post_mortem_snapshot",
+    "optional_post_mortem_snapshot",
+    "required_audit_snapshot",
+    "lineage",
+    "generated_at"
+  ],
+  "properties": {
+    "post_mortem_judgment_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "post_mortem_status": {
+      "type": "string",
+      "enum": [
+        "blocked",
+        "ready_for_downstream_use",
+        "fallback_template_applied"
+      ]
+    },
+    "reason": {
+      "type": "string",
+      "min_length": 1
+    },
+    "post_mortem_judgment_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "post_mortem_judgment_template_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "primary_attribution_category": {
+      "type": "string",
+      "enum": [
+        "correct_recommendation_correct_execution",
+        "correct_recommendation_weak_execution",
+        "correct_recommendation_environment_changed",
+        "weak_recommendation_good_execution",
+        "weak_recommendation_weak_causal_logic",
+        "weak_recommendation_poor_local_state_capture",
+        "weak_recommendation_simulation_miss",
+        "weak_recommendation_constraint_miss",
+        "override_improved_outcome",
+        "override_worsened_outcome",
+        "insufficient_evidence_for_confident_judgment"
+      ]
+    },
+    "evidence_quality": {
+      "type": "string",
+      "enum": [
+        "strong_reconstructible_evidence",
+        "mixed_evidence_requires_caution",
+        "immature_observation_horizon",
+        "insufficient_reconstructible_evidence"
+      ]
+    },
+    "confidence_posture": {
+      "type": "string",
+      "enum": [
+        "confident_for_attribution",
+        "cautious_for_review_only",
+        "insufficient_for_confident_judgment"
+      ]
+    },
+    "learning_direction": {
+      "type": "string",
+      "enum": [
+        "preserve_current_path",
+        "investigate_execution_discipline",
+        "review_environment_shift_hypothesis",
+        "review_recommendation_logic",
+        "review_local_state_capture",
+        "review_simulation_assumptions",
+        "review_constraint_feasibility",
+        "review_override_handling",
+        "defer_learning_until_evidence_matures",
+        "withhold_learning_update"
+      ]
+    },
+    "comparison_posture": {
+      "type": "string",
+      "enum": [
+        "post_mortem_ready_expected_vs_realized",
+        "post_mortem_requires_execution_clarification",
+        "post_mortem_pending_mature_observation"
+      ]
+    },
+    "execution_outcome_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "execution_outcome_status": {
+      "type": "string",
+      "enum": [
+        "blocked",
+        "ready_for_downstream_use",
+        "fallback_template_applied"
+      ]
+    },
+    "execution_outcome_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_outcome_template_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "realized_result_class": {
+      "type": "string",
+      "enum": [
+        "favorable",
+        "negative",
+        "mixed",
+        "incomplete",
+        "deferred",
+        "exception_bearing"
+      ]
+    },
+    "feedback_capture_readiness": {
+      "type": "string",
+      "enum": [
+        "feedback_capture_ready_for_post_mortem",
+        "feedback_capture_deferred",
+        "feedback_capture_incomplete"
+      ]
+    },
+    "expected_relation": {
+      "type": "string",
+      "enum": [
+        "realized_matches_expected_path",
+        "realized_deviates_from_expected_path",
+        "expected_relation_pending_observation"
+      ]
+    },
+    "execution_dispatch_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "execution_dispatch_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_request_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "semantic_scope": {
+      "type": "string",
+      "min_length": 1
+    },
+    "case_type": {
+      "type": "string",
+      "min_length": 1
+    },
+    "case_key": {
+      "type": "string",
+      "min_length": 1
+    },
+    "state_model_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "episode_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "transition_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "transition_class": {
+      "type": "string",
+      "min_length": 1
+    },
+    "source_stage": {
+      "type": "string",
+      "min_length": 1
+    },
+    "target_stage": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_outcome_author_role": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_outcome_author_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "post_mortem_author_role": {
+      "type": "string",
+      "min_length": 1
+    },
+    "post_mortem_author_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "authority_resolution_kind": {
+      "type": "string",
+      "min_length": 1
+    },
+    "authority_review_required": {
+      "type": "boolean"
+    },
+    "router_rule_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "routing_resolution_status": {
+      "type": "string",
+      "min_length": 1
+    },
+    "routing_review_required": {
+      "type": "boolean"
+    },
+    "review_mode": {
+      "type": "string",
+      "min_length": 1
+    },
+    "observation_horizon_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "domain_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "decision_scope_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "reporting_scope_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "tenant_scope_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "rationale_snapshot": {
+      "type": "string",
+      "min_length": 1
+    },
+    "evidence_basis_summary": {
+      "type": "string",
+      "min_length": 1
+    },
+    "recommendation_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "action_instruction_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "executed_action_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "non_execution_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "realized_outcome_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_deviation_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "override_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "secondary_contributing_factors": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "competing_explanations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "evidence_gaps": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "execution_condition_references": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "required_post_mortem_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "optional_post_mortem_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "required_audit_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "prohibited_judgment_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "required_post_mortem_snapshot": {
+      "type": "object"
+    },
+    "optional_post_mortem_snapshot": {
+      "type": "object"
+    },
+    "required_audit_snapshot": {
+      "type": "object"
+    },
+    "lineage": {
+      "type": "object"
+    },
+    "generated_at": {
+      "type": "string",
+      "min_length": 1
+    },
+    "missing_post_mortem_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "prohibited_judgment_fields_present": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    }
+  },
+  "additional_properties": false
+}

@@ -1,0 +1,117 @@
+{
+  "post_mortem_judgment_templates": {
+    "correct_recommendation_correct_execution_primary": {
+      "post_mortem_judgment_template_id": "correct_recommendation_correct_execution_primary",
+      "semantic_scope": "shared_control_plane",
+      "execution_outcome_class_id": "favorable_realized_outcome",
+      "post_mortem_judgment_class_id": "correct_recommendation_correct_execution",
+      "route_name": "primary_case_path",
+      "required_post_mortem_fields": [
+        "domain_reference",
+        "decision_scope_reference",
+        "tenant_scope_reference",
+        "observation_horizon_reference",
+        "executed_action_reference",
+        "realized_outcome_reference",
+        "outcome_summary",
+        "evidence_quality",
+        "confidence_posture",
+        "rationale_snapshot",
+        "evidence_basis_summary",
+        "learning_direction"
+      ],
+      "optional_post_mortem_fields": [
+        "reporting_scope_reference",
+        "secondary_contributing_factors",
+        "competing_explanations",
+        "evidence_gaps",
+        "execution_condition_references"
+      ],
+      "required_audit_fields": [
+        "post_mortem_author_id",
+        "post_mortem_author_role"
+      ],
+      "post_mortem_status": "ready_for_downstream_use",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "post_mortem_judgment_template_seed"
+      }
+    },
+    "correct_recommendation_weak_execution_primary": {
+      "post_mortem_judgment_template_id": "correct_recommendation_weak_execution_primary",
+      "semantic_scope": "shared_control_plane",
+      "execution_outcome_class_id": "negative_realized_outcome",
+      "post_mortem_judgment_class_id": "correct_recommendation_weak_execution",
+      "required_post_mortem_fields": [
+        "domain_reference",
+        "decision_scope_reference",
+        "tenant_scope_reference",
+        "observation_horizon_reference",
+        "executed_action_reference",
+        "realized_outcome_reference",
+        "outcome_summary",
+        "evidence_quality",
+        "confidence_posture",
+        "rationale_snapshot",
+        "evidence_basis_summary",
+        "learning_direction"
+      ],
+      "optional_post_mortem_fields": [
+        "reporting_scope_reference",
+        "secondary_contributing_factors",
+        "competing_explanations",
+        "evidence_gaps",
+        "execution_condition_references",
+        "execution_deviation_reference"
+      ],
+      "required_audit_fields": [
+        "post_mortem_author_id",
+        "post_mortem_author_role"
+      ],
+      "post_mortem_status": "ready_for_downstream_use",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "post_mortem_judgment_template_seed"
+      }
+    },
+    "insufficient_evidence_for_confident_judgment_fallback": {
+      "post_mortem_judgment_template_id": "insufficient_evidence_for_confident_judgment_fallback",
+      "semantic_scope": "shared_control_plane",
+      "execution_outcome_class_id": "deferred_realized_outcome",
+      "post_mortem_judgment_class_id": "insufficient_evidence_for_confident_judgment",
+      "required_post_mortem_fields": [
+        "domain_reference",
+        "decision_scope_reference",
+        "tenant_scope_reference",
+        "observation_horizon_reference",
+        "non_execution_reference",
+        "realized_outcome_reference",
+        "outcome_summary",
+        "evidence_quality",
+        "confidence_posture",
+        "rationale_snapshot",
+        "evidence_basis_summary",
+        "learning_direction"
+      ],
+      "optional_post_mortem_fields": [
+        "reporting_scope_reference",
+        "secondary_contributing_factors",
+        "competing_explanations",
+        "evidence_gaps",
+        "execution_condition_references"
+      ],
+      "required_audit_fields": [
+        "post_mortem_author_id",
+        "post_mortem_author_role"
+      ],
+      "post_mortem_status": "fallback_template_applied",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "post_mortem_judgment_template_seed"
+      }
+    }
+  }
+}

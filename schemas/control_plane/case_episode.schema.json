@@ -1,0 +1,80 @@
+{
+  "type": "object",
+  "required": [
+    "episode_id",
+    "case_type",
+    "case_key",
+    "state_model_name",
+    "current_state",
+    "status",
+    "current_stage",
+    "opened_at",
+    "last_updated_at",
+    "raw_record_ids",
+    "feature_names",
+    "handoff_count"
+  ],
+  "additional_properties": false,
+  "properties": {
+    "episode_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "case_type": {
+      "type": "string",
+      "min_length": 1
+    },
+    "case_key": {
+      "type": "string",
+      "min_length": 1
+    },
+    "state_model_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "current_state": {
+      "type": "string",
+      "min_length": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "interrupted"
+      ]
+    },
+    "current_stage": {
+      "type": "string",
+      "min_length": 1
+    },
+    "opened_at": {
+      "type": "string",
+      "format": "iso-datetime"
+    },
+    "last_updated_at": {
+      "type": "string",
+      "format": "iso-datetime"
+    },
+    "raw_record_ids": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "format": "uuid"
+      }
+    },
+    "feature_names": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "interruption_reason": {
+      "type": "string"
+    },
+    "handoff_count": {
+      "type": "integer"
+    }
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "type": "object",
+  "required": [
+    "release_confirmation_class_id",
+    "description",
+    "allowed_release_watch_discipline_statuses",
+    "allowed_release_watch_discipline_outcomes",
+    "allow_release_confirmation_restrictions",
+    "allow_release_confirmation_prerequisite_deferral",
+    "prohibited_release_confirmation_fields",
+    "status",
+    "lineage"
+  ],
+  "properties": {
+    "release_confirmation_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "description": {
+      "type": "string",
+      "min_length": 1
+    },
+    "allowed_release_watch_discipline_statuses": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "release_watch_discipline_defined",
+          "fallback_template_applied",
+          "blocked_missing_context",
+          "rejected_for_release_watch_discipline_use",
+          "prohibited_overlap_blocked"
+        ]
+      }
+    },
+    "allowed_release_watch_discipline_outcomes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "ready_for_release_confirmation",
+          "conditionally_ready_for_release_confirmation",
+          "deferred_pending_release_watch_discipline_evidence",
+          "blocked_missing_context",
+          "rejected_for_release_watch_discipline_use",
+          "prohibited_overlap_blocked"
+        ]
+      }
+    },
+    "allow_release_confirmation_restrictions": {
+      "type": "boolean"
+    },
+    "allow_release_confirmation_prerequisite_deferral": {
+      "type": "boolean"
+    },
+    "prohibited_release_confirmation_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object"
+    }
+  }
+}

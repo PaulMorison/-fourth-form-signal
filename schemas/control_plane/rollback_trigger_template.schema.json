@@ -1,0 +1,86 @@
+{
+  "type": "object",
+  "required": [
+    "rollback_trigger_template_id",
+    "semantic_scope",
+    "rollout_scope_class_id",
+    "rollback_trigger_class_id",
+    "required_rollback_trigger_fields",
+    "optional_rollback_trigger_fields",
+    "required_audit_fields",
+    "rollback_trigger_status",
+    "rollback_trigger_outcome",
+    "status",
+    "lineage"
+  ],
+  "properties": {
+    "rollback_trigger_template_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "semantic_scope": {
+      "type": "string",
+      "min_length": 1
+    },
+    "rollout_scope_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "rollback_trigger_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "required_rollback_trigger_fields": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "optional_rollback_trigger_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "required_audit_fields": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "rollback_trigger_status": {
+      "type": "string",
+      "enum": [
+        "rollback_trigger_named",
+        "fallback_template_applied"
+      ]
+    },
+    "rollback_trigger_outcome": {
+      "type": "string",
+      "enum": [
+        "ready_for_release_watch_discipline",
+        "conditionally_ready_for_release_watch_discipline",
+        "deferred_pending_rollback_trigger_evidence"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object"
+    },
+    "route_name": {
+      "type": "string",
+      "min_length": 1
+    }
+  }
+}

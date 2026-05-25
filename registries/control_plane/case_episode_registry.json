@@ -1,0 +1,28 @@
+{
+  "case_types": {
+    "shared_control_plane_case": {
+      "state_model_name": "shared_control_plane_lifecycle",
+      "initial_stage": "raw_ingestion",
+      "allowed_stages": [
+        "raw_ingestion",
+        "feature_registry",
+        "case_orchestration"
+      ],
+      "allowed_stage_transitions": {
+        "raw_ingestion": [
+          "feature_registry",
+          "case_orchestration"
+        ],
+        "feature_registry": [
+          "case_orchestration"
+        ],
+        "case_orchestration": [
+          "feature_registry"
+        ]
+      },
+      "allowed_feature_namespaces": [
+        "shared.control"
+      ]
+    }
+  }
+}

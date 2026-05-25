@@ -1,0 +1,103 @@
+{
+  "type": "object",
+  "required": [
+    "event_name",
+    "router_rule_id",
+    "semantic_scope",
+    "state_model_name",
+    "transition_name",
+    "transition_class",
+    "source_stage",
+    "target_stage",
+    "conflict_class",
+    "classification_kind",
+    "candidate_count",
+    "resolution_status",
+    "review_required",
+    "reason"
+  ],
+  "additional_properties": false,
+  "properties": {
+    "event_name": {
+      "type": "string",
+      "enum": [
+        "decision.router.router_resolution_succeeded",
+        "decision.router.router_resolution_blocked",
+        "decision.router.conflict_classified",
+        "decision.router.tie_break_applied",
+        "decision.router.fallback_route_applied",
+        "decision.router.unresolved_conflict_detected"
+      ]
+    },
+    "router_rule_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "semantic_scope": {
+      "type": "string",
+      "min_length": 1
+    },
+    "state_model_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "transition_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "transition_class": {
+      "type": "string",
+      "min_length": 1
+    },
+    "source_stage": {
+      "type": "string",
+      "min_length": 1
+    },
+    "target_stage": {
+      "type": "string",
+      "min_length": 1
+    },
+    "conflict_class": {
+      "type": "string",
+      "min_length": 1
+    },
+    "classification_kind": {
+      "type": "string",
+      "min_length": 1
+    },
+    "candidate_count": {
+      "type": "integer"
+    },
+    "route_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "precedence_rank": {
+      "type": "integer"
+    },
+    "tie_break_policy": {
+      "type": "string",
+      "min_length": 1
+    },
+    "fallback_route_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "resolution_status": {
+      "type": "string",
+      "enum": [
+        "resolved",
+        "blocked",
+        "unresolved",
+        "fallback_applied"
+      ]
+    },
+    "review_required": {
+      "type": "boolean"
+    },
+    "reason": {
+      "type": "string",
+      "min_length": 1
+    }
+  }
+}

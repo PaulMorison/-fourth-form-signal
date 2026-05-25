@@ -1,0 +1,97 @@
+{
+  "type": "object",
+  "required": [
+    "resolution_class_id",
+    "description",
+    "resolution_state",
+    "review_outcome",
+    "disposition_class_id",
+    "allowed_packet_statuses",
+    "required_resolution_fields",
+    "optional_resolution_fields",
+    "required_audit_fields",
+    "status",
+    "lineage"
+  ],
+  "properties": {
+    "resolution_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "description": {
+      "type": "string",
+      "min_length": 1
+    },
+    "resolution_state": {
+      "type": "string",
+      "enum": [
+        "settled",
+        "returned",
+        "deferred",
+        "unresolved"
+      ]
+    },
+    "review_outcome": {
+      "type": "string",
+      "enum": [
+        "resolved_with_action",
+        "resolved_with_non_action",
+        "resolved_with_escalation",
+        "returned_for_rework",
+        "returned_for_clarification",
+        "deferred_continuation",
+        "unresolved_state",
+        "rejected_resolution"
+      ]
+    },
+    "disposition_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "allowed_packet_statuses": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "ready_for_handoff",
+          "fallback_template_applied"
+        ]
+      }
+    },
+    "required_resolution_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "optional_resolution_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "required_audit_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object"
+    }
+  },
+  "additional_properties": false
+}

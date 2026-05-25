@@ -1,0 +1,125 @@
+{
+  "policy_learning_update_approval_templates": {
+    "policy_update_preparation_candidate_primary": {
+      "policy_learning_update_approval_template_id": "policy_update_preparation_candidate_primary",
+      "semantic_scope": "shared_control_plane",
+      "policy_learning_update_threshold_class_id": "policy_update_candidate",
+      "policy_learning_update_approval_class_id": "policy_update_preparation_candidate",
+      "route_name": "primary_case_path",
+      "required_update_approval_fields": [
+        "domain_reference",
+        "decision_scope_reference",
+        "tenant_scope_reference",
+        "learning_scope_reference",
+        "candidate_update_reference",
+        "approval_summary",
+        "change_control_reference",
+        "preparation_scope_reference",
+        "preparation_boundary_summary",
+        "governance_readiness",
+        "change_control_readiness",
+        "boundary_control_strength",
+        "preparation_readiness"
+      ],
+      "optional_update_approval_fields": [
+        "reporting_scope_reference",
+        "restriction_summary",
+        "preparation_scope_restriction_reference",
+        "follow_up_review_reference",
+        "additional_governance_requirements",
+        "unresolved_governance_gaps"
+      ],
+      "required_audit_fields": [
+        "policy_learning_update_approval_author_id",
+        "policy_learning_update_approval_author_role"
+      ],
+      "policy_learning_update_approval_status": "approval_ready",
+      "policy_learning_update_approval_outcome": "approved_for_policy_update_preparation",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "policy_learning_update_approval_template_seed"
+      }
+    },
+    "restricted_policy_update_preparation_candidate_primary": {
+      "policy_learning_update_approval_template_id": "restricted_policy_update_preparation_candidate_primary",
+      "semantic_scope": "shared_control_plane",
+      "policy_learning_update_threshold_class_id": "narrowed_policy_update_candidate",
+      "policy_learning_update_approval_class_id": "restricted_policy_update_preparation_candidate",
+      "required_update_approval_fields": [
+        "domain_reference",
+        "decision_scope_reference",
+        "tenant_scope_reference",
+        "learning_scope_reference",
+        "candidate_update_reference",
+        "approval_summary",
+        "change_control_reference",
+        "preparation_scope_reference",
+        "preparation_boundary_summary",
+        "governance_readiness",
+        "change_control_readiness",
+        "boundary_control_strength",
+        "preparation_readiness",
+        "restriction_summary",
+        "preparation_scope_restriction_reference"
+      ],
+      "optional_update_approval_fields": [
+        "reporting_scope_reference",
+        "follow_up_review_reference",
+        "additional_governance_requirements",
+        "unresolved_governance_gaps"
+      ],
+      "required_audit_fields": [
+        "policy_learning_update_approval_author_id",
+        "policy_learning_update_approval_author_role"
+      ],
+      "policy_learning_update_approval_status": "fallback_template_applied",
+      "policy_learning_update_approval_outcome": "approved_with_restrictions",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "policy_learning_update_approval_template_seed"
+      }
+    },
+    "deferred_policy_update_preparation_candidate_fallback": {
+      "policy_learning_update_approval_template_id": "deferred_policy_update_preparation_candidate_fallback",
+      "semantic_scope": "shared_control_plane",
+      "policy_learning_update_threshold_class_id": "deferred_policy_update_candidate",
+      "policy_learning_update_approval_class_id": "deferred_policy_update_preparation_candidate",
+      "required_update_approval_fields": [
+        "domain_reference",
+        "decision_scope_reference",
+        "tenant_scope_reference",
+        "learning_scope_reference",
+        "candidate_update_reference",
+        "approval_summary",
+        "change_control_reference",
+        "preparation_scope_reference",
+        "preparation_boundary_summary",
+        "governance_readiness",
+        "change_control_readiness",
+        "boundary_control_strength",
+        "preparation_readiness"
+      ],
+      "optional_update_approval_fields": [
+        "reporting_scope_reference",
+        "restriction_summary",
+        "preparation_scope_restriction_reference",
+        "follow_up_review_reference",
+        "additional_governance_requirements",
+        "unresolved_governance_gaps"
+      ],
+      "required_audit_fields": [
+        "policy_learning_update_approval_author_id",
+        "policy_learning_update_approval_author_role"
+      ],
+      "policy_learning_update_approval_status": "fallback_template_applied",
+      "policy_learning_update_approval_outcome": "deferred_pending_additional_governance",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "policy_learning_update_approval_template_seed"
+      }
+    }
+  }
+}

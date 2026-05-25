@@ -1,0 +1,87 @@
+{
+  "type": "object",
+  "required": [
+    "policy_learning_evidence_template_id",
+    "semantic_scope",
+    "post_mortem_judgment_class_id",
+    "policy_learning_evidence_class_id",
+    "required_evidence_fields",
+    "optional_evidence_fields",
+    "required_audit_fields",
+    "policy_learning_evidence_admission_status",
+    "policy_learning_evidence_admission_outcome",
+    "status",
+    "lineage"
+  ],
+  "properties": {
+    "policy_learning_evidence_template_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "semantic_scope": {
+      "type": "string",
+      "min_length": 1
+    },
+    "post_mortem_judgment_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "policy_learning_evidence_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "route_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "required_evidence_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "optional_evidence_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "required_audit_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "policy_learning_evidence_admission_status": {
+      "type": "string",
+      "enum": [
+        "admitted_ready",
+        "fallback_template_applied"
+      ]
+    },
+    "policy_learning_evidence_admission_outcome": {
+      "type": "string",
+      "enum": [
+        "admitted_for_update_consideration",
+        "admitted_with_restrictions",
+        "deferred_pending_more_evidence"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object"
+    }
+  },
+  "additional_properties": false
+}

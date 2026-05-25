@@ -1,0 +1,152 @@
+{
+  "action_instruction_templates": {
+    "direct_action_instruction_primary": {
+      "action_instruction_template_id": "direct_action_instruction_primary",
+      "semantic_scope": "shared_control_plane",
+      "resolution_class_id": "resolved_with_action",
+      "disposition_class_id": "closed_pending_downstream_execution",
+      "recommendation_class_id": "recommend_act_now",
+      "policy_output_class_id": "policy_shaped_allowance",
+      "portfolio_output_class_id": "portfolio_bounded_allocation",
+      "action_instruction_class_id": "direct_action_instruction",
+      "route_name": "primary_case_path",
+      "required_instruction_fields": [
+        "instruction_summary",
+        "action_instruction_reference",
+        "upstream_commitment_reference",
+        "instruction_authority_reference",
+        "executable_scope_reference",
+        "intended_action_reference",
+        "action_delivery_channel"
+      ],
+      "optional_instruction_fields": [
+        "portfolio_summary",
+        "policy_summary",
+        "recommendation_summary",
+        "confidence_summary",
+        "constraint_summary",
+        "uncertainty_summary",
+        "failure_state_context",
+        "review_summary",
+        "resolution_rationale",
+        "policy_rationale",
+        "portfolio_rationale",
+        "allocation_reference",
+        "allocation_weight_reference",
+        "invalidation_reference",
+        "unauthorized_instruction_reference",
+        "reopen_reference"
+      ],
+      "required_audit_fields": [
+        "instruction_author_id",
+        "instruction_author_role"
+      ],
+      "action_instruction_status": "ready_for_downstream_use",
+      "instruction_status": "executable_instruction_ready",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "action_instruction_template_seed"
+      }
+    },
+    "prerequisite_bounded_instruction_primary": {
+      "action_instruction_template_id": "prerequisite_bounded_instruction_primary",
+      "semantic_scope": "shared_control_plane",
+      "resolution_class_id": "returned_for_clarification",
+      "disposition_class_id": "returned_for_clarification_open",
+      "recommendation_class_id": "recommend_gather_more_information",
+      "policy_output_class_id": "policy_shaped_information_requirement",
+      "portfolio_output_class_id": "portfolio_ranked_preference",
+      "action_instruction_class_id": "prerequisite_bounded_instruction",
+      "route_name": "primary_case_path",
+      "required_instruction_fields": [
+        "instruction_summary",
+        "action_instruction_reference",
+        "upstream_commitment_reference",
+        "instruction_authority_reference",
+        "executable_scope_reference",
+        "intended_action_reference",
+        "action_delivery_channel",
+        "blocking_condition_reference",
+        "clarification_reference"
+      ],
+      "optional_instruction_fields": [
+        "portfolio_summary",
+        "policy_summary",
+        "recommendation_summary",
+        "confidence_summary",
+        "constraint_summary",
+        "uncertainty_summary",
+        "failure_state_context",
+        "review_summary",
+        "resolution_rationale",
+        "policy_rationale",
+        "portfolio_rationale",
+        "preference_rank_reference",
+        "blocking_condition_kind",
+        "invalidation_reference",
+        "unauthorized_instruction_reference",
+        "reopen_reference"
+      ],
+      "required_audit_fields": [
+        "instruction_author_id",
+        "instruction_author_role"
+      ],
+      "action_instruction_status": "ready_for_downstream_use",
+      "instruction_status": "instruction_blocked_pending_prerequisite",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "action_instruction_template_seed"
+      }
+    },
+    "suppression_hold_instruction_fallback": {
+      "action_instruction_template_id": "suppression_hold_instruction_fallback",
+      "semantic_scope": "shared_control_plane",
+      "resolution_class_id": "manual_fallback_resolution",
+      "disposition_class_id": "manual_fallback_hold",
+      "recommendation_class_id": "abstain_from_strong_recommendation",
+      "policy_output_class_id": "policy_shaped_suppression",
+      "portfolio_output_class_id": "portfolio_suppression_hold",
+      "action_instruction_class_id": "suppression_hold_instruction",
+      "required_instruction_fields": [
+        "instruction_summary",
+        "action_instruction_reference",
+        "upstream_commitment_reference",
+        "instruction_authority_reference",
+        "executable_scope_reference",
+        "intended_action_reference",
+        "action_delivery_channel",
+        "fallback_reference"
+      ],
+      "optional_instruction_fields": [
+        "portfolio_summary",
+        "policy_summary",
+        "recommendation_summary",
+        "confidence_summary",
+        "constraint_summary",
+        "uncertainty_summary",
+        "failure_state_context",
+        "review_summary",
+        "resolution_rationale",
+        "policy_rationale",
+        "portfolio_rationale",
+        "suppression_reference",
+        "invalidation_reference",
+        "unauthorized_instruction_reference",
+        "reopen_reference"
+      ],
+      "required_audit_fields": [
+        "instruction_author_id",
+        "instruction_author_role"
+      ],
+      "action_instruction_status": "fallback_template_applied",
+      "instruction_status": "instruction_prohibited",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "action_instruction_template_seed"
+      }
+    }
+  }
+}

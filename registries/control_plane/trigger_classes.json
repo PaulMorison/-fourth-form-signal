@@ -1,0 +1,31 @@
+{
+  "trigger_classes": {
+    "review_entry_threshold": {
+      "trigger_class": "review_entry_threshold",
+      "description": "Thresholds that decide whether accountable review entry is required or optional.",
+      "allowed_review_modes": [
+        "required",
+        "optional"
+      ],
+      "allows_fallback_review_mode": true,
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "trigger_class_seed"
+      }
+    },
+    "fallback_review_threshold": {
+      "trigger_class": "fallback_review_threshold",
+      "description": "Thresholds that convert routed fallback context into explicit optional review entry.",
+      "allowed_review_modes": [
+        "optional"
+      ],
+      "allows_fallback_review_mode": false,
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "trigger_class_seed"
+      }
+    }
+  }
+}

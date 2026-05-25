@@ -1,0 +1,158 @@
+{
+  "type": "object",
+  "required": [
+    "event_name",
+    "semantic_scope",
+    "state_model_name",
+    "transition_name",
+    "transition_class",
+    "router_rule_id",
+    "source_stage",
+    "target_stage",
+    "routing_resolution_status",
+    "actor_role",
+    "authority_resolution_kind",
+    "authority_review_required",
+    "routing_review_required",
+    "review_outcome",
+    "reason"
+  ],
+  "additional_properties": false,
+  "properties": {
+    "event_name": {
+      "type": "string",
+      "enum": [
+        "decision.review.threshold_evaluation_succeeded",
+        "decision.review.threshold_triggered",
+        "decision.review.threshold_not_triggered",
+        "decision.review.threshold_evaluation_blocked",
+        "decision.review.calibration_profile_applied",
+        "decision.review.fallback_review_mode_applied",
+        "decision.review.review_trigger_required",
+        "decision.review.review_trigger_optional"
+      ]
+    },
+    "semantic_scope": {
+      "type": "string",
+      "min_length": 1
+    },
+    "state_model_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "transition_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "transition_class": {
+      "type": "string",
+      "min_length": 1
+    },
+    "router_rule_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "route_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "source_stage": {
+      "type": "string",
+      "min_length": 1
+    },
+    "target_stage": {
+      "type": "string",
+      "min_length": 1
+    },
+    "routing_resolution_status": {
+      "type": "string",
+      "enum": [
+        "resolved",
+        "blocked",
+        "unresolved",
+        "fallback_applied"
+      ]
+    },
+    "actor_role": {
+      "type": "string",
+      "min_length": 1
+    },
+    "authority_resolution_kind": {
+      "type": "string",
+      "min_length": 1
+    },
+    "authority_review_required": {
+      "type": "boolean"
+    },
+    "routing_review_required": {
+      "type": "boolean"
+    },
+    "threshold_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "trigger_class": {
+      "type": "string",
+      "min_length": 1
+    },
+    "review_mode": {
+      "type": "string",
+      "enum": [
+        "required",
+        "optional"
+      ]
+    },
+    "fallback_review_mode": {
+      "type": "string",
+      "enum": [
+        "required",
+        "optional"
+      ]
+    },
+    "value_source": {
+      "type": "string",
+      "min_length": 1
+    },
+    "comparison_value_text": {
+      "type": "string",
+      "min_length": 1
+    },
+    "actual_value_text": {
+      "type": "string",
+      "min_length": 1
+    },
+    "calibrated_comparison_value_text": {
+      "type": "string",
+      "min_length": 1
+    },
+    "calibration_profile_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "playbook_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "required_context_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "review_outcome": {
+      "type": "string",
+      "enum": [
+        "required",
+        "optional",
+        "not_triggered",
+        "blocked"
+      ]
+    },
+    "reason": {
+      "type": "string",
+      "min_length": 1
+    }
+  }
+}

@@ -1,0 +1,114 @@
+{
+  "type": "object",
+  "required": [
+    "action_instruction_template_id",
+    "semantic_scope",
+    "resolution_class_id",
+    "disposition_class_id",
+    "recommendation_class_id",
+    "policy_output_class_id",
+    "portfolio_output_class_id",
+    "action_instruction_class_id",
+    "required_instruction_fields",
+    "optional_instruction_fields",
+    "required_audit_fields",
+    "action_instruction_status",
+    "instruction_status",
+    "status",
+    "lineage"
+  ],
+  "properties": {
+    "action_instruction_template_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "semantic_scope": {
+      "type": "string",
+      "min_length": 1
+    },
+    "resolution_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "disposition_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "recommendation_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "policy_output_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "portfolio_output_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "action_instruction_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "route_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "required_instruction_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "optional_instruction_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "required_audit_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "action_instruction_status": {
+      "type": "string",
+      "enum": [
+        "ready_for_downstream_use",
+        "fallback_template_applied"
+      ]
+    },
+    "instruction_status": {
+      "type": "string",
+      "enum": [
+        "instruction_permitted",
+        "instruction_prohibited",
+        "instruction_conditionally_permitted",
+        "instruction_issued",
+        "instruction_invalidated",
+        "instruction_blocked_pending_authority",
+        "instruction_blocked_pending_prerequisite",
+        "instruction_blocked_pending_timing",
+        "executable_instruction_ready",
+        "unauthorized_instruction_state"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object"
+    }
+  },
+  "additional_properties": false
+}

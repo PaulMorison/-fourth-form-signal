@@ -1,0 +1,86 @@
+{
+  "type": "object",
+  "required": [
+    "promotion_readiness_template_id",
+    "semantic_scope",
+    "policy_learning_update_mutation_execution_class_id",
+    "promotion_readiness_class_id",
+    "required_promotion_readiness_fields",
+    "optional_promotion_readiness_fields",
+    "required_audit_fields",
+    "promotion_readiness_status",
+    "promotion_readiness_outcome",
+    "status",
+    "lineage"
+  ],
+  "properties": {
+    "promotion_readiness_template_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "semantic_scope": {
+      "type": "string",
+      "min_length": 1
+    },
+    "policy_learning_update_mutation_execution_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "promotion_readiness_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "required_promotion_readiness_fields": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "optional_promotion_readiness_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "required_audit_fields": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "promotion_readiness_status": {
+      "type": "string",
+      "enum": [
+        "promotion_ready",
+        "fallback_template_applied"
+      ]
+    },
+    "promotion_readiness_outcome": {
+      "type": "string",
+      "enum": [
+        "ready_for_rollout_scope_control",
+        "conditionally_ready_for_rollout_scope_control",
+        "deferred_pending_promotion_readiness_evidence"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object"
+    },
+    "route_name": {
+      "type": "string",
+      "min_length": 1
+    }
+  }
+}

@@ -1,0 +1,114 @@
+{
+  "policy_learning_evidence_classes": {
+    "policy_learning_review_candidate": {
+      "policy_learning_evidence_class_id": "policy_learning_review_candidate",
+      "description": "A governed policy-learning evidence class for evidence complete enough to enter update-threshold review without collapsing admission into policy mutation, model change, reopen handling, or monitoring semantics.",
+      "allowed_post_mortem_judgment_class_ids": [
+        "correct_recommendation_correct_execution",
+        "correct_recommendation_weak_execution",
+        "correct_recommendation_environment_changed",
+        "weak_recommendation_good_execution",
+        "weak_recommendation_weak_causal_logic",
+        "weak_recommendation_poor_local_state_capture",
+        "weak_recommendation_simulation_miss",
+        "weak_recommendation_constraint_miss",
+        "override_improved_outcome",
+        "override_worsened_outcome",
+        "insufficient_evidence_for_confident_judgment"
+      ],
+      "allowed_post_mortem_statuses": [
+        "ready_for_downstream_use"
+      ],
+      "minimum_evidence_quality": "strong_reconstructible_evidence",
+      "minimum_confidence_posture": "confident_for_attribution",
+      "prohibited_evidence_fields": [
+        "policy_update_authority",
+        "policy_mutation_payload",
+        "policy_execution_reference",
+        "model_update_reference",
+        "model_version_target",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "drift_monitor_reference",
+        "monitor_alert_reference",
+        "deployment_environment_reference",
+        "orchestration_override_reference"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "policy_learning_evidence_class_seed"
+      }
+    },
+    "restricted_policy_learning_review_candidate": {
+      "policy_learning_evidence_class_id": "restricted_policy_learning_review_candidate",
+      "description": "A governed policy-learning evidence class for evidence that may enter learning review only within a narrowed scope or interpretation while remaining separate from policy mutation and monitoring semantics.",
+      "allowed_post_mortem_judgment_class_ids": [
+        "correct_recommendation_weak_execution",
+        "weak_recommendation_good_execution",
+        "weak_recommendation_weak_causal_logic",
+        "weak_recommendation_poor_local_state_capture",
+        "weak_recommendation_simulation_miss",
+        "weak_recommendation_constraint_miss",
+        "override_improved_outcome",
+        "override_worsened_outcome"
+      ],
+      "allowed_post_mortem_statuses": [
+        "ready_for_downstream_use"
+      ],
+      "minimum_evidence_quality": "mixed_evidence_requires_caution",
+      "minimum_confidence_posture": "cautious_for_review_only",
+      "prohibited_evidence_fields": [
+        "policy_update_authority",
+        "policy_mutation_payload",
+        "policy_execution_reference",
+        "model_update_reference",
+        "model_version_target",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "drift_monitor_reference",
+        "monitor_alert_reference",
+        "deployment_environment_reference",
+        "orchestration_override_reference"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "policy_learning_evidence_class_seed"
+      }
+    },
+    "deferred_policy_learning_review_candidate": {
+      "policy_learning_evidence_class_id": "deferred_policy_learning_review_candidate",
+      "description": "A governed policy-learning evidence class for structurally interpretable but still immature evidence that must remain deferred pending more evidence.",
+      "allowed_post_mortem_judgment_class_ids": [
+        "insufficient_evidence_for_confident_judgment"
+      ],
+      "allowed_post_mortem_statuses": [
+        "fallback_template_applied"
+      ],
+      "minimum_evidence_quality": "immature_observation_horizon",
+      "minimum_confidence_posture": "insufficient_for_confident_judgment",
+      "prohibited_evidence_fields": [
+        "policy_update_authority",
+        "policy_mutation_payload",
+        "policy_execution_reference",
+        "model_update_reference",
+        "model_version_target",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "drift_monitor_reference",
+        "monitor_alert_reference",
+        "deployment_environment_reference",
+        "orchestration_override_reference"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "policy_learning_evidence_class_seed"
+      }
+    }
+  }
+}

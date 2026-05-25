@@ -1,0 +1,60 @@
+{
+  "type": "object",
+  "required": [
+    "raw_record_id",
+    "source_name",
+    "source_record_id",
+    "entity_type",
+    "scope_key",
+    "scope_type",
+    "observed_at",
+    "acquired_at",
+    "lineage_hash",
+    "payload"
+  ],
+  "additional_properties": false,
+  "properties": {
+    "raw_record_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "source_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "source_record_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "entity_type": {
+      "type": "string",
+      "min_length": 1
+    },
+    "scope_key": {
+      "type": "string",
+      "min_length": 1
+    },
+    "scope_type": {
+      "type": "string",
+      "enum": [
+        "store",
+        "network"
+      ]
+    },
+    "observed_at": {
+      "type": "string",
+      "format": "iso-datetime"
+    },
+    "acquired_at": {
+      "type": "string",
+      "format": "iso-datetime"
+    },
+    "lineage_hash": {
+      "type": "string",
+      "min_length": 64
+    },
+    "payload": {
+      "type": "object"
+    }
+  }
+}

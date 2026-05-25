@@ -1,0 +1,348 @@
+{
+  "contracts": {
+    "audit_event": {
+      "schema_path": "schemas/control_plane/audit_event.schema.json",
+      "owner": "platform.audit.audit_event_store"
+    },
+    "raw_ingestion_record": {
+      "schema_path": "schemas/control_plane/raw_ingestion_record.schema.json",
+      "owner": "data.ingestion.raw_ingestion_pipeline"
+    },
+    "feature_definition": {
+      "schema_path": "schemas/control_plane/feature_definition.schema.json",
+      "owner": "state.features.feature_registry"
+    },
+    "authority_rule": {
+      "schema_path": "schemas/control_plane/authority_rule.schema.json",
+      "owner": "decision.authority.authority_registry"
+    },
+    "delegation_policy": {
+      "schema_path": "schemas/control_plane/delegation_policy.schema.json",
+      "owner": "decision.authority.delegation_policy"
+    },
+    "authority_resolution_event": {
+      "schema_path": "schemas/control_plane/authority_resolution_event.schema.json",
+      "owner": "decision.authority.authority_audit_adapter"
+    },
+    "router_rule": {
+      "schema_path": "schemas/control_plane/router_rule.schema.json",
+      "owner": "decision.router.router_registry"
+    },
+    "conflict_class": {
+      "schema_path": "schemas/control_plane/conflict_class.schema.json",
+      "owner": "decision.router.router_registry"
+    },
+    "router_resolution_event": {
+      "schema_path": "schemas/control_plane/router_resolution_event.schema.json",
+      "owner": "decision.router.router_audit_adapter"
+    },
+    "review_threshold": {
+      "schema_path": "schemas/control_plane/review_threshold.schema.json",
+      "owner": "decision.review.threshold_registry"
+    },
+    "trigger_class": {
+      "schema_path": "schemas/control_plane/trigger_class.schema.json",
+      "owner": "decision.review.threshold_registry"
+    },
+    "calibration_profile": {
+      "schema_path": "schemas/control_plane/calibration_profile.schema.json",
+      "owner": "decision.review.threshold_registry"
+    },
+    "review_trigger_event": {
+      "schema_path": "schemas/control_plane/review_trigger_event.schema.json",
+      "owner": "decision.review.review_audit_adapter"
+    },
+    "review_packet_template": {
+      "schema_path": "schemas/control_plane/review_packet_template.schema.json",
+      "owner": "decision.review.review_packet_registry"
+    },
+    "review_reason_class": {
+      "schema_path": "schemas/control_plane/review_reason_class.schema.json",
+      "owner": "decision.review.review_packet_registry"
+    },
+    "human_review_packet": {
+      "schema_path": "schemas/control_plane/human_review_packet.schema.json",
+      "owner": "decision.review.review_packet_audit_adapter"
+    },
+    "review_resolution_class": {
+      "schema_path": "schemas/control_plane/review_resolution_class.schema.json",
+      "owner": "decision.review.review_resolution_registry"
+    },
+    "case_disposition_class": {
+      "schema_path": "schemas/control_plane/case_disposition_class.schema.json",
+      "owner": "decision.review.review_resolution_registry"
+    },
+    "review_resolution_event": {
+      "schema_path": "schemas/control_plane/review_resolution_event.schema.json",
+      "owner": "decision.review.review_resolution_audit_adapter"
+    },
+    "recommendation_class": {
+      "schema_path": "schemas/control_plane/recommendation_class.schema.json",
+      "owner": "decision.output.recommendation_registry"
+    },
+    "recommendation_template": {
+      "schema_path": "schemas/control_plane/recommendation_template.schema.json",
+      "owner": "decision.output.recommendation_registry"
+    },
+    "recommendation_record": {
+      "schema_path": "schemas/control_plane/recommendation_record.schema.json",
+      "owner": "decision.output.recommendation_audit_adapter"
+    },
+    "policy_output_class": {
+      "schema_path": "schemas/control_plane/policy_output_class.schema.json",
+      "owner": "decision.output.policy_output_registry"
+    },
+    "policy_output_template": {
+      "schema_path": "schemas/control_plane/policy_output_template.schema.json",
+      "owner": "decision.output.policy_output_registry"
+    },
+    "policy_output_record": {
+      "schema_path": "schemas/control_plane/policy_output_record.schema.json",
+      "owner": "decision.output.policy_output_audit_adapter"
+    },
+    "portfolio_output_class": {
+      "schema_path": "schemas/control_plane/portfolio_output_class.schema.json",
+      "owner": "decision.output.portfolio_output_registry"
+    },
+    "portfolio_output_template": {
+      "schema_path": "schemas/control_plane/portfolio_output_template.schema.json",
+      "owner": "decision.output.portfolio_output_registry"
+    },
+    "portfolio_output_record": {
+      "schema_path": "schemas/control_plane/portfolio_output_record.schema.json",
+      "owner": "decision.output.portfolio_output_audit_adapter"
+    },
+    "action_instruction_class": {
+      "schema_path": "schemas/control_plane/action_instruction_class.schema.json",
+      "owner": "decision.output.action_instruction_registry"
+    },
+    "action_instruction_template": {
+      "schema_path": "schemas/control_plane/action_instruction_template.schema.json",
+      "owner": "decision.output.action_instruction_registry"
+    },
+    "action_instruction_record": {
+      "schema_path": "schemas/control_plane/action_instruction_record.schema.json",
+      "owner": "decision.output.action_instruction_audit_adapter"
+    },
+    "execution_request_class": {
+      "schema_path": "schemas/control_plane/execution_request_class.schema.json",
+      "owner": "execution.execution_request_registry"
+    },
+    "execution_request_template": {
+      "schema_path": "schemas/control_plane/execution_request_template.schema.json",
+      "owner": "execution.execution_request_registry"
+    },
+    "execution_request_record": {
+      "schema_path": "schemas/control_plane/execution_request_record.schema.json",
+      "owner": "execution.execution_request_audit_adapter"
+    },
+    "execution_dispatch_class": {
+      "schema_path": "schemas/control_plane/execution_dispatch_class.schema.json",
+      "owner": "execution.execution_dispatch_registry"
+    },
+    "execution_dispatch_template": {
+      "schema_path": "schemas/control_plane/execution_dispatch_template.schema.json",
+      "owner": "execution.execution_dispatch_registry"
+    },
+    "execution_dispatch_record": {
+      "schema_path": "schemas/control_plane/execution_dispatch_record.schema.json",
+      "owner": "execution.execution_dispatch_audit_adapter"
+    },
+    "execution_outcome_class": {
+      "schema_path": "schemas/control_plane/execution_outcome_class.schema.json",
+      "owner": "execution.execution_outcome_registry"
+    },
+    "execution_outcome_template": {
+      "schema_path": "schemas/control_plane/execution_outcome_template.schema.json",
+      "owner": "execution.execution_outcome_registry"
+    },
+    "execution_outcome_record": {
+      "schema_path": "schemas/control_plane/execution_outcome_record.schema.json",
+      "owner": "execution.execution_outcome_audit_adapter"
+    },
+    "post_mortem_judgment_class": {
+      "schema_path": "schemas/control_plane/post_mortem_judgment_class.schema.json",
+      "owner": "decision.post_mortem.post_mortem_judgment_registry"
+    },
+    "post_mortem_judgment_template": {
+      "schema_path": "schemas/control_plane/post_mortem_judgment_template.schema.json",
+      "owner": "decision.post_mortem.post_mortem_judgment_registry"
+    },
+    "post_mortem_judgment_record": {
+      "schema_path": "schemas/control_plane/post_mortem_judgment_record.schema.json",
+      "owner": "decision.post_mortem.post_mortem_judgment_audit_adapter"
+    },
+    "policy_learning_evidence_admission_class": {
+      "schema_path": "schemas/control_plane/policy_learning_evidence_admission_class.schema.json",
+      "owner": "decision.policy_learning.policy_learning_evidence_admission_registry"
+    },
+    "policy_learning_evidence_admission_template": {
+      "schema_path": "schemas/control_plane/policy_learning_evidence_admission_template.schema.json",
+      "owner": "decision.policy_learning.policy_learning_evidence_admission_registry"
+    },
+    "policy_learning_evidence_admission_record": {
+      "schema_path": "schemas/control_plane/policy_learning_evidence_admission_record.schema.json",
+      "owner": "decision.policy_learning.policy_learning_evidence_admission_audit_adapter"
+    },
+    "policy_learning_update_threshold_class": {
+      "schema_path": "schemas/control_plane/policy_learning_update_threshold_class.schema.json",
+      "owner": "decision.policy_learning.policy_learning_update_threshold_registry"
+    },
+    "policy_learning_update_threshold_template": {
+      "schema_path": "schemas/control_plane/policy_learning_update_threshold_template.schema.json",
+      "owner": "decision.policy_learning.policy_learning_update_threshold_registry"
+    },
+    "policy_learning_update_threshold_record": {
+      "schema_path": "schemas/control_plane/policy_learning_update_threshold_record.schema.json",
+      "owner": "decision.policy_learning.policy_learning_update_threshold_audit_adapter"
+    },
+    "policy_learning_update_approval_class": {
+      "schema_path": "schemas/control_plane/policy_learning_update_approval_class.schema.json",
+      "owner": "decision.policy_learning.policy_learning_update_approval_registry"
+    },
+    "policy_learning_update_approval_template": {
+      "schema_path": "schemas/control_plane/policy_learning_update_approval_template.schema.json",
+      "owner": "decision.policy_learning.policy_learning_update_approval_registry"
+    },
+    "policy_learning_update_approval_record": {
+      "schema_path": "schemas/control_plane/policy_learning_update_approval_record.schema.json",
+      "owner": "decision.policy_learning.policy_learning_update_approval_audit_adapter"
+    },
+    "policy_learning_update_preparation_class": {
+      "schema_path": "schemas/control_plane/policy_learning_update_preparation_class.schema.json",
+      "owner": "decision.policy_learning.policy_learning_update_preparation_registry"
+    },
+    "policy_learning_update_preparation_template": {
+      "schema_path": "schemas/control_plane/policy_learning_update_preparation_template.schema.json",
+      "owner": "decision.policy_learning.policy_learning_update_preparation_registry"
+    },
+    "policy_learning_update_preparation_record": {
+      "schema_path": "schemas/control_plane/policy_learning_update_preparation_record.schema.json",
+      "owner": "decision.policy_learning.policy_learning_update_preparation_audit_adapter"
+    },
+    "policy_learning_update_mutation_planning_class": {
+      "schema_path": "schemas/control_plane/policy_learning_update_mutation_planning_class.schema.json",
+      "owner": "decision.policy_learning.policy_learning_update_mutation_planning_registry"
+    },
+    "policy_learning_update_mutation_planning_template": {
+      "schema_path": "schemas/control_plane/policy_learning_update_mutation_planning_template.schema.json",
+      "owner": "decision.policy_learning.policy_learning_update_mutation_planning_registry"
+    },
+    "policy_learning_update_mutation_planning_record": {
+      "schema_path": "schemas/control_plane/policy_learning_update_mutation_planning_record.schema.json",
+      "owner": "decision.policy_learning.policy_learning_update_mutation_planning_audit_adapter"
+    },
+    "policy_learning_update_mutation_execution_class": {
+      "schema_path": "schemas/control_plane/policy_learning_update_mutation_execution_class.schema.json",
+      "owner": "decision.policy_learning.policy_learning_update_mutation_execution_registry"
+    },
+    "policy_learning_update_mutation_execution_template": {
+      "schema_path": "schemas/control_plane/policy_learning_update_mutation_execution_template.schema.json",
+      "owner": "decision.policy_learning.policy_learning_update_mutation_execution_registry"
+    },
+    "policy_learning_update_mutation_execution_record": {
+      "schema_path": "schemas/control_plane/policy_learning_update_mutation_execution_record.schema.json",
+      "owner": "decision.policy_learning.policy_learning_update_mutation_execution_audit_adapter"
+    },
+    "promotion_readiness_class": {
+      "schema_path": "schemas/control_plane/promotion_readiness_class.schema.json",
+      "owner": "runtime.release.release_registry"
+    },
+    "promotion_readiness_template": {
+      "schema_path": "schemas/control_plane/promotion_readiness_template.schema.json",
+      "owner": "runtime.release.release_registry"
+    },
+    "promotion_readiness_record": {
+      "schema_path": "schemas/control_plane/promotion_readiness_record.schema.json",
+      "owner": "runtime.release.promotion_readiness_audit_adapter"
+    },
+    "rollout_scope_class": {
+      "schema_path": "schemas/control_plane/rollout_scope_class.schema.json",
+      "owner": "runtime.release.release_registry"
+    },
+    "rollout_scope_template": {
+      "schema_path": "schemas/control_plane/rollout_scope_template.schema.json",
+      "owner": "runtime.release.release_registry"
+    },
+    "rollout_scope_record": {
+      "schema_path": "schemas/control_plane/rollout_scope_record.schema.json",
+      "owner": "runtime.release.rollout_scope_audit_adapter"
+    },
+    "rollback_trigger_class": {
+      "schema_path": "schemas/control_plane/rollback_trigger_class.schema.json",
+      "owner": "runtime.release.release_registry"
+    },
+    "rollback_trigger_template": {
+      "schema_path": "schemas/control_plane/rollback_trigger_template.schema.json",
+      "owner": "runtime.release.release_registry"
+    },
+    "rollback_trigger_record": {
+      "schema_path": "schemas/control_plane/rollback_trigger_record.schema.json",
+      "owner": "runtime.release.rollback_trigger_audit_adapter"
+    },
+    "release_watch_discipline_class": {
+      "schema_path": "schemas/control_plane/release_watch_discipline_class.schema.json",
+      "owner": "runtime.release.release_registry"
+    },
+    "release_watch_discipline_template": {
+      "schema_path": "schemas/control_plane/release_watch_discipline_template.schema.json",
+      "owner": "runtime.release.release_registry"
+    },
+    "release_watch_discipline_record": {
+      "schema_path": "schemas/control_plane/release_watch_discipline_record.schema.json",
+      "owner": "runtime.release.release_watch_discipline_audit_adapter"
+    },
+    "release_confirmation_class": {
+      "schema_path": "schemas/control_plane/release_confirmation_class.schema.json",
+      "owner": "runtime.release.release_registry"
+    },
+    "release_confirmation_template": {
+      "schema_path": "schemas/control_plane/release_confirmation_template.schema.json",
+      "owner": "runtime.release.release_registry"
+    },
+    "release_confirmation_record": {
+      "schema_path": "schemas/control_plane/release_confirmation_record.schema.json",
+      "owner": "runtime.release.release_confirmation_audit_adapter"
+    },
+    "production_entitlement_check_class": {
+      "schema_path": "schemas/control_plane/production_entitlement_check_class.schema.json",
+      "owner": "runtime.release.release_registry"
+    },
+    "production_entitlement_check_template": {
+      "schema_path": "schemas/control_plane/production_entitlement_check_template.schema.json",
+      "owner": "runtime.release.release_registry"
+    },
+    "production_entitlement_check_record": {
+      "schema_path": "schemas/control_plane/production_entitlement_check_record.schema.json",
+      "owner": "runtime.release.production_entitlement_check_audit_adapter"
+    },
+    "contained_rollback_class": {
+      "schema_path": "schemas/control_plane/contained_rollback_class.schema.json",
+      "owner": "runtime.release.release_registry"
+    },
+    "contained_rollback_template": {
+      "schema_path": "schemas/control_plane/contained_rollback_template.schema.json",
+      "owner": "runtime.release.release_registry"
+    },
+    "contained_rollback_record": {
+      "schema_path": "schemas/control_plane/contained_rollback_record.schema.json",
+      "owner": "runtime.release.contained_rollback_audit_adapter"
+    },
+    "release_audit_trace_class": {
+      "schema_path": "schemas/control_plane/release_audit_trace_class.schema.json",
+      "owner": "runtime.release.release_registry"
+    },
+    "release_audit_trace_template": {
+      "schema_path": "schemas/control_plane/release_audit_trace_template.schema.json",
+      "owner": "runtime.release.release_registry"
+    },
+    "release_audit_trace_record": {
+      "schema_path": "schemas/control_plane/release_audit_trace_record.schema.json",
+      "owner": "runtime.release.release_audit_trace_audit_adapter"
+    },
+    "case_episode": {
+      "schema_path": "schemas/control_plane/case_episode.schema.json",
+      "owner": "decision.case.case_episode_orchestrator"
+    }
+  }
+}

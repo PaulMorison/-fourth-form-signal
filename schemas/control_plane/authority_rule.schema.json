@@ -1,0 +1,85 @@
+{
+  "type": "object",
+  "required": [
+    "authority_rule_id",
+    "decision_right",
+    "allowed_roles",
+    "delegated_roles",
+    "authority_scope",
+    "authority_ceiling",
+    "authority_floor",
+    "review_required",
+    "status",
+    "lineage"
+  ],
+  "additional_properties": false,
+  "properties": {
+    "authority_rule_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "decision_right": {
+      "type": "string",
+      "min_length": 1
+    },
+    "allowed_roles": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "delegated_roles": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "authority_scope": {
+      "type": "string",
+      "min_length": 1
+    },
+    "authority_ceiling": {
+      "type": "string",
+      "min_length": 1
+    },
+    "authority_floor": {
+      "type": "string",
+      "min_length": 1
+    },
+    "fallback_role": {
+      "type": "string",
+      "min_length": 1
+    },
+    "review_required": {
+      "type": "boolean"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object",
+      "required": [
+        "version",
+        "source"
+      ],
+      "additional_properties": false,
+      "properties": {
+        "version": {
+          "type": "string",
+          "min_length": 1
+        },
+        "source": {
+          "type": "string",
+          "min_length": 1
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,281 @@
+{
+  "type": "object",
+  "required": [
+    "execution_dispatch_id",
+    "execution_dispatch_status",
+    "reason",
+    "execution_dispatch_class_id",
+    "execution_dispatch_template_id",
+    "execution_dispatch_readiness",
+    "dispatch_boundary_posture",
+    "execution_request_id",
+    "execution_request_status",
+    "execution_request_class_id",
+    "execution_request_template_id",
+    "execution_request_readiness",
+    "execution_request_action_boundary_posture",
+    "semantic_scope",
+    "case_type",
+    "case_key",
+    "state_model_name",
+    "episode_id",
+    "transition_name",
+    "transition_class",
+    "source_stage",
+    "target_stage",
+    "execution_request_author_role",
+    "execution_request_author_id",
+    "execution_dispatch_author_role",
+    "execution_dispatch_author_id",
+    "authority_resolution_kind",
+    "authority_review_required",
+    "router_rule_id",
+    "routing_resolution_status",
+    "routing_review_required",
+    "review_mode",
+    "required_execution_dispatch_fields",
+    "optional_execution_dispatch_fields",
+    "required_audit_fields",
+    "prohibited_dispatch_fields",
+    "required_execution_dispatch_snapshot",
+    "optional_execution_dispatch_snapshot",
+    "required_audit_snapshot",
+    "lineage",
+    "generated_at"
+  ],
+  "properties": {
+    "execution_dispatch_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "execution_dispatch_status": {
+      "type": "string",
+      "enum": [
+        "blocked",
+        "ready_for_downstream_use",
+        "fallback_template_applied"
+      ]
+    },
+    "reason": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_dispatch_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_dispatch_template_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_dispatch_readiness": {
+      "type": "string",
+      "enum": [
+        "dispatch_boundary_ready",
+        "dispatch_boundary_blocked_pending_authority",
+        "dispatch_boundary_blocked_pending_prerequisite",
+        "dispatch_boundary_blocked_pending_timing",
+        "dispatch_boundary_prohibited",
+        "dispatch_boundary_incomplete"
+      ]
+    },
+    "dispatch_boundary_posture": {
+      "type": "string",
+      "enum": [
+        "dispatch_boundary_ready_non_executing",
+        "dispatch_boundary_conditioned_non_executing",
+        "dispatch_boundary_hold_non_executing"
+      ]
+    },
+    "execution_request_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "execution_request_status": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_request_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_request_template_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_request_readiness": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_request_action_boundary_posture": {
+      "type": "string",
+      "min_length": 1
+    },
+    "semantic_scope": {
+      "type": "string",
+      "min_length": 1
+    },
+    "case_type": {
+      "type": "string",
+      "min_length": 1
+    },
+    "case_key": {
+      "type": "string",
+      "min_length": 1
+    },
+    "state_model_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "episode_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "transition_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "transition_class": {
+      "type": "string",
+      "min_length": 1
+    },
+    "source_stage": {
+      "type": "string",
+      "min_length": 1
+    },
+    "target_stage": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_request_author_role": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_request_author_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_dispatch_author_role": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_dispatch_author_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "authority_resolution_kind": {
+      "type": "string",
+      "min_length": 1
+    },
+    "authority_review_required": {
+      "type": "boolean"
+    },
+    "router_rule_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "routing_resolution_status": {
+      "type": "string",
+      "min_length": 1
+    },
+    "routing_review_required": {
+      "type": "boolean"
+    },
+    "review_mode": {
+      "type": "string",
+      "min_length": 1
+    },
+    "route_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "threshold_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "trigger_class": {
+      "type": "string",
+      "min_length": 1
+    },
+    "executable_scope_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "blocking_condition_kind": {
+      "type": "string",
+      "min_length": 1
+    },
+    "blocking_condition_references": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "required_execution_dispatch_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "optional_execution_dispatch_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "required_audit_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "prohibited_dispatch_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "required_execution_dispatch_snapshot": {
+      "type": "object"
+    },
+    "optional_execution_dispatch_snapshot": {
+      "type": "object"
+    },
+    "required_audit_snapshot": {
+      "type": "object"
+    },
+    "lineage": {
+      "type": "object"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "missing_execution_dispatch_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "prohibited_dispatch_fields_present": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    }
+  },
+  "additional_properties": false
+}

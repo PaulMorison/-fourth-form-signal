@@ -1,0 +1,87 @@
+{
+  "type": "object",
+  "required": [
+    "policy_learning_update_mutation_planning_template_id",
+    "semantic_scope",
+    "policy_learning_update_preparation_class_id",
+    "policy_learning_update_mutation_planning_class_id",
+    "required_update_mutation_planning_fields",
+    "optional_update_mutation_planning_fields",
+    "required_audit_fields",
+    "policy_learning_update_mutation_planning_status",
+    "policy_learning_update_mutation_planning_outcome",
+    "status",
+    "lineage"
+  ],
+  "properties": {
+    "policy_learning_update_mutation_planning_template_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "semantic_scope": {
+      "type": "string",
+      "min_length": 1
+    },
+    "policy_learning_update_preparation_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "policy_learning_update_mutation_planning_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "route_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "required_update_mutation_planning_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "optional_update_mutation_planning_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "required_audit_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "policy_learning_update_mutation_planning_status": {
+      "type": "string",
+      "enum": [
+        "mutation_planning_ready",
+        "fallback_template_applied"
+      ]
+    },
+    "policy_learning_update_mutation_planning_outcome": {
+      "type": "string",
+      "enum": [
+        "ready_for_policy_mutation_planning",
+        "ready_for_policy_mutation_planning_with_restrictions",
+        "deferred_pending_mutation_planning_prerequisites"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object"
+    }
+  },
+  "additional_properties": false
+}

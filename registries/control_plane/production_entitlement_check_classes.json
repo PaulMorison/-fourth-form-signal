@@ -1,0 +1,119 @@
+{
+  "production_entitlement_check_classes": {
+    "full_scope_production_promotion_candidate": {
+      "production_entitlement_check_class_id": "full_scope_production_promotion_candidate",
+      "description": "A governed production-entitlement-check class for releases whose confirmation and entitlement evidence support crossing from bounded exposure into broader trusted production entitlement without widening into contained rollback, rollback execution, release closure, monitoring admission, runtime verification, reopen handling, or orchestration ownership.",
+      "allowed_release_confirmation_statuses": [
+        "release_confirmation_judged"
+      ],
+      "allowed_release_confirmation_outcomes": [
+        "confirmed_for_broader_trusted_production_use"
+      ],
+      "allow_production_entitlement_restrictions": false,
+      "allow_production_entitlement_prerequisite_deferral": false,
+      "prohibited_production_entitlement_fields": [
+        "policy_rollout_reference",
+        "release_activation_reference",
+        "release_watch_execution_reference",
+        "release_observation_reference",
+        "rollback_decision_reference",
+        "rollback_execution_reference",
+        "contained_rollback_reference",
+        "release_closure_reference",
+        "promotion_completion_reference",
+        "runtime_verification_reference",
+        "monitoring_admission_reference",
+        "monitor_alert_reference",
+        "drift_monitor_reference",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "orchestration_owner_reference",
+        "lifecycle_state_override"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-24",
+        "source": "production_entitlement_check_class_seed"
+      }
+    },
+    "conditional_production_release": {
+      "production_entitlement_check_class_id": "conditional_production_release",
+      "description": "A governed production-entitlement-check class for bounded conditional production exposure whose entitlement posture preserves narrowed production use without granting broader trusted production entitlement.",
+      "allowed_release_confirmation_statuses": [
+        "release_confirmation_judged",
+        "fallback_template_applied"
+      ],
+      "allowed_release_confirmation_outcomes": [
+        "confirmed_for_broader_trusted_production_use",
+        "conditionally_confirmed_for_bounded_production_use"
+      ],
+      "allow_production_entitlement_restrictions": true,
+      "allow_production_entitlement_prerequisite_deferral": false,
+      "prohibited_production_entitlement_fields": [
+        "policy_rollout_reference",
+        "release_activation_reference",
+        "release_watch_execution_reference",
+        "release_observation_reference",
+        "rollback_decision_reference",
+        "rollback_execution_reference",
+        "contained_rollback_reference",
+        "release_closure_reference",
+        "promotion_completion_reference",
+        "runtime_verification_reference",
+        "monitoring_admission_reference",
+        "monitor_alert_reference",
+        "drift_monitor_reference",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "orchestration_owner_reference",
+        "lifecycle_state_override"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-24",
+        "source": "production_entitlement_check_class_seed"
+      }
+    },
+    "deferred_release_state": {
+      "production_entitlement_check_class_id": "deferred_release_state",
+      "description": "A governed production-entitlement-check class for releases whose entitlement evidence or authority prerequisites remain too incomplete for broader trusted production entitlement even though rollback execution is not owned here.",
+      "allowed_release_confirmation_statuses": [
+        "release_confirmation_judged",
+        "fallback_template_applied"
+      ],
+      "allowed_release_confirmation_outcomes": [
+        "confirmed_for_broader_trusted_production_use",
+        "conditionally_confirmed_for_bounded_production_use"
+      ],
+      "allow_production_entitlement_restrictions": true,
+      "allow_production_entitlement_prerequisite_deferral": true,
+      "prohibited_production_entitlement_fields": [
+        "policy_rollout_reference",
+        "release_activation_reference",
+        "release_watch_execution_reference",
+        "release_observation_reference",
+        "rollback_decision_reference",
+        "rollback_execution_reference",
+        "contained_rollback_reference",
+        "release_closure_reference",
+        "promotion_completion_reference",
+        "runtime_verification_reference",
+        "monitoring_admission_reference",
+        "monitor_alert_reference",
+        "drift_monitor_reference",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "orchestration_owner_reference",
+        "lifecycle_state_override"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-24",
+        "source": "production_entitlement_check_class_seed"
+      }
+    }
+  }
+}

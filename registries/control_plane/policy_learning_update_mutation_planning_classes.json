@@ -1,0 +1,110 @@
+{
+  "policy_learning_update_mutation_planning_classes": {
+    "policy_mutation_plan_candidate": {
+      "policy_learning_update_mutation_planning_class_id": "policy_mutation_plan_candidate",
+      "description": "A governed policy-learning update-mutation-planning class for prepared candidates that are ready for bounded policy-mutation planning while remaining separate from actual policy mutation execution, rollout, deployment, retraining, monitoring, reopen handling, and orchestration ownership.",
+      "allowed_policy_learning_update_preparation_statuses": [
+        "preparation_ready"
+      ],
+      "allowed_policy_learning_update_preparation_outcomes": [
+        "prepared_for_policy_mutation_planning"
+      ],
+      "minimum_dimension_strength": "strong",
+      "allow_mutation_planning_restrictions": false,
+      "allow_mutation_planning_prerequisite_deferral": false,
+      "prohibited_update_mutation_planning_fields": [
+        "policy_mutation_payload",
+        "policy_mutation_execution_reference",
+        "policy_rollout_reference",
+        "deployment_plan_reference",
+        "model_retraining_reference",
+        "model_update_execution_reference",
+        "model_deployment_reference",
+        "drift_monitor_reference",
+        "monitor_alert_reference",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "orchestration_owner_reference",
+        "lifecycle_state_override"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-24",
+        "source": "policy_learning_update_mutation_planning_class_seed"
+      }
+    },
+    "restricted_policy_mutation_plan_candidate": {
+      "policy_learning_update_mutation_planning_class_id": "restricted_policy_mutation_plan_candidate",
+      "description": "A governed policy-learning update-mutation-planning class for prepared candidates that may proceed only with explicit mutation-planning restrictions and preserved scope boundaries.",
+      "allowed_policy_learning_update_preparation_statuses": [
+        "preparation_ready",
+        "fallback_template_applied"
+      ],
+      "allowed_policy_learning_update_preparation_outcomes": [
+        "prepared_for_policy_mutation_planning",
+        "prepared_with_restrictions"
+      ],
+      "minimum_dimension_strength": "moderate",
+      "allow_mutation_planning_restrictions": true,
+      "allow_mutation_planning_prerequisite_deferral": false,
+      "prohibited_update_mutation_planning_fields": [
+        "policy_mutation_payload",
+        "policy_mutation_execution_reference",
+        "policy_rollout_reference",
+        "deployment_plan_reference",
+        "model_retraining_reference",
+        "model_update_execution_reference",
+        "model_deployment_reference",
+        "drift_monitor_reference",
+        "monitor_alert_reference",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "orchestration_owner_reference",
+        "lifecycle_state_override"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-24",
+        "source": "policy_learning_update_mutation_planning_class_seed"
+      }
+    },
+    "deferred_policy_mutation_plan_candidate": {
+      "policy_learning_update_mutation_planning_class_id": "deferred_policy_mutation_plan_candidate",
+      "description": "A governed policy-learning update-mutation-planning class for prepared candidates that remain unsuitable for present mutation planning until explicit mutation-planning prerequisites are completed.",
+      "allowed_policy_learning_update_preparation_statuses": [
+        "preparation_ready",
+        "fallback_template_applied"
+      ],
+      "allowed_policy_learning_update_preparation_outcomes": [
+        "prepared_for_policy_mutation_planning",
+        "prepared_with_restrictions"
+      ],
+      "minimum_dimension_strength": "weak",
+      "allow_mutation_planning_restrictions": true,
+      "allow_mutation_planning_prerequisite_deferral": true,
+      "prohibited_update_mutation_planning_fields": [
+        "policy_mutation_payload",
+        "policy_mutation_execution_reference",
+        "policy_rollout_reference",
+        "deployment_plan_reference",
+        "model_retraining_reference",
+        "model_update_execution_reference",
+        "model_deployment_reference",
+        "drift_monitor_reference",
+        "monitor_alert_reference",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "orchestration_owner_reference",
+        "lifecycle_state_override"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-24",
+        "source": "policy_learning_update_mutation_planning_class_seed"
+      }
+    }
+  }
+}

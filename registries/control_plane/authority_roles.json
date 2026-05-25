@@ -1,0 +1,59 @@
+{
+  "authority_roles": {
+    "case_operator": {
+      "role_id": "case_operator",
+      "authority_scope": "shared_control_plane",
+      "authority_ceiling": "case_interrupted",
+      "authority_floor": "raw_intake_ready",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "authority_role_seed"
+      }
+    },
+    "assistant_case_operator": {
+      "role_id": "assistant_case_operator",
+      "authority_scope": "shared_control_plane",
+      "authority_ceiling": "feature_review_ready",
+      "authority_floor": "raw_intake_ready",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "authority_role_seed"
+      }
+    },
+    "shadow_case_delegate": {
+      "role_id": "shadow_case_delegate",
+      "authority_scope": "shared_control_plane",
+      "authority_ceiling": "feature_review_ready",
+      "authority_floor": "raw_intake_ready",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "authority_role_seed"
+      }
+    },
+    "case_supervisor": {
+      "role_id": "case_supervisor",
+      "authority_scope": "shared_control_plane",
+      "authority_ceiling": "case_interrupted",
+      "authority_floor": "raw_intake_ready",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "authority_role_seed"
+      }
+    },
+    "observer": {
+      "role_id": "observer",
+      "authority_scope": "shared_control_plane",
+      "authority_ceiling": "raw_intake_ready",
+      "authority_floor": "raw_intake_ready",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "authority_role_seed"
+      }
+    }
+  }
+}

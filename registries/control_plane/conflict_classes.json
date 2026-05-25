@@ -1,0 +1,64 @@
+{
+  "conflict_classes": {
+    "single_route_conflict": {
+      "conflict_class": "single_route_conflict",
+      "description": "A single eligible route can be selected without arbitration.",
+      "resolution_basis": "single_candidate",
+      "allows_tie_break": false,
+      "allows_fallback": false,
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "conflict_class_seed"
+      }
+    },
+    "precedence_required_conflict": {
+      "conflict_class": "precedence_required_conflict",
+      "description": "Multiple eligible routes require precedence comparison before selection.",
+      "resolution_basis": "precedence",
+      "allows_tie_break": true,
+      "allows_fallback": false,
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "conflict_class_seed"
+      }
+    },
+    "tie_break_required_conflict": {
+      "conflict_class": "tie_break_required_conflict",
+      "description": "Multiple highest-ranked routes require an explicit tie-break policy.",
+      "resolution_basis": "tie_break",
+      "allows_tie_break": true,
+      "allows_fallback": false,
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "conflict_class_seed"
+      }
+    },
+    "unresolved_route_conflict": {
+      "conflict_class": "unresolved_route_conflict",
+      "description": "Eligible routes cannot be resolved without explicit fallback or later review handling.",
+      "resolution_basis": "unresolved",
+      "allows_tie_break": false,
+      "allows_fallback": true,
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "conflict_class_seed"
+      }
+    },
+    "no_route_available": {
+      "conflict_class": "no_route_available",
+      "description": "No governed route matched the current routing request.",
+      "resolution_basis": "blocked",
+      "allows_tie_break": false,
+      "allows_fallback": false,
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "conflict_class_seed"
+      }
+    }
+  }
+}

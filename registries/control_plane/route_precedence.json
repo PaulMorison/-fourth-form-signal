@@ -1,0 +1,104 @@
+{
+  "route_precedence": [
+    {
+      "router_rule_id": "default_case_route",
+      "route_name": "primary_case_path",
+      "precedence_rank": 200,
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "route_precedence_seed"
+      }
+    },
+    {
+      "router_rule_id": "default_case_route",
+      "route_name": "review_gate_path",
+      "precedence_rank": 100,
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "route_precedence_seed"
+      }
+    },
+    {
+      "router_rule_id": "fallback_case_route",
+      "route_name": "contained_fallback_path",
+      "precedence_rank": 150,
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "route_precedence_seed"
+      }
+    },
+    {
+      "router_rule_id": "tie_break_case_route",
+      "route_name": "alpha_tie_path",
+      "precedence_rank": 50,
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "route_precedence_seed"
+      }
+    },
+    {
+      "router_rule_id": "tie_break_case_route",
+      "route_name": "zeta_tie_path",
+      "precedence_rank": 50,
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "route_precedence_seed"
+      }
+    },
+    {
+      "router_rule_id": "unresolved_case_route",
+      "route_name": "review_conflict_path",
+      "precedence_rank": 90,
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "route_precedence_seed"
+      }
+    },
+    {
+      "router_rule_id": "unresolved_case_route",
+      "route_name": "operations_conflict_path",
+      "precedence_rank": 90,
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "route_precedence_seed"
+      }
+    },
+    {
+      "router_rule_id": "fallback_resolution_case_route",
+      "route_name": "review_triage_path",
+      "precedence_rank": 80,
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "route_precedence_seed"
+      }
+    },
+    {
+      "router_rule_id": "fallback_resolution_case_route",
+      "route_name": "operations_triage_path",
+      "precedence_rank": 80,
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "route_precedence_seed"
+      }
+    },
+    {
+      "router_rule_id": "fallback_resolution_case_route",
+      "route_name": "contained_manual_fallback_path",
+      "precedence_rank": 10,
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "route_precedence_seed"
+      }
+    }
+  ]
+}

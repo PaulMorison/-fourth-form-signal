@@ -1,0 +1,136 @@
+{
+  "type": "object",
+  "required": [
+    "release_watch_discipline_id",
+    "release_watch_discipline_status",
+    "reason",
+    "release_watch_discipline_class_id",
+    "release_watch_discipline_template_id",
+    "release_watch_discipline_outcome",
+    "release_watch_discipline_summary",
+    "release_confirmation_window",
+    "release_response_threshold_reference",
+    "release_watch_owner_reference",
+    "rollback_trigger_reference",
+    "rollback_plan_reference",
+    "promotion_candidate_reference",
+    "promotion_threshold_reference",
+    "production_entitlement_boundary",
+    "rollback_posture_reference",
+    "release_watch_window",
+    "release_confirmation_threshold_reference",
+    "promotion_scope_reference",
+    "promotion_boundary_summary",
+    "rollout_scope_boundary_reference",
+    "exposure_boundary_reference",
+    "rollout_boundary_summary",
+    "rollback_trigger_id",
+    "rollback_trigger_status",
+    "rollback_trigger_class_id",
+    "rollback_trigger_template_id",
+    "rollback_trigger_outcome",
+    "semantic_scope",
+    "case_type",
+    "case_key",
+    "state_model_name",
+    "episode_id",
+    "transition_name",
+    "transition_class",
+    "domain_reference",
+    "decision_scope_reference",
+    "tenant_scope_reference",
+    "learning_scope_reference",
+    "release_watch_discipline_author_role",
+    "release_watch_discipline_author_id",
+    "required_release_watch_discipline_fields",
+    "optional_release_watch_discipline_fields",
+    "required_audit_fields",
+    "prohibited_release_watch_discipline_fields",
+    "required_release_watch_discipline_snapshot",
+    "optional_release_watch_discipline_snapshot",
+    "required_audit_snapshot",
+    "lineage",
+    "generated_at"
+  ],
+  "properties": {
+    "release_watch_discipline_status": {
+      "type": "string",
+      "enum": [
+        "release_watch_discipline_defined",
+        "fallback_template_applied",
+        "blocked_missing_context",
+        "rejected_for_release_watch_discipline_use",
+        "prohibited_overlap_blocked"
+      ]
+    },
+    "release_watch_discipline_outcome": {
+      "type": "string",
+      "enum": [
+        "ready_for_release_confirmation",
+        "conditionally_ready_for_release_confirmation",
+        "deferred_pending_release_watch_discipline_evidence",
+        "blocked_missing_context",
+        "rejected_for_release_watch_discipline_use",
+        "prohibited_overlap_blocked"
+      ]
+    },
+    "rollback_trigger_status": {
+      "type": "string",
+      "enum": [
+        "rollback_trigger_named",
+        "fallback_template_applied",
+        "blocked_missing_context",
+        "rejected_for_rollback_trigger_use",
+        "prohibited_overlap_blocked"
+      ]
+    },
+    "rollback_trigger_outcome": {
+      "type": "string",
+      "enum": [
+        "ready_for_release_watch_discipline",
+        "conditionally_ready_for_release_watch_discipline",
+        "deferred_pending_rollback_trigger_evidence",
+        "blocked_missing_context",
+        "rejected_for_rollback_trigger_use",
+        "prohibited_overlap_blocked"
+      ]
+    },
+    "required_release_watch_discipline_fields": {
+      "type": "array"
+    },
+    "optional_release_watch_discipline_fields": {
+      "type": "array"
+    },
+    "required_audit_fields": {
+      "type": "array"
+    },
+    "prohibited_release_watch_discipline_fields": {
+      "type": "array"
+    },
+    "required_release_watch_discipline_snapshot": {
+      "type": "object"
+    },
+    "optional_release_watch_discipline_snapshot": {
+      "type": "object"
+    },
+    "required_audit_snapshot": {
+      "type": "object"
+    },
+    "lineage": {
+      "type": "object"
+    },
+    "generated_at": {
+      "type": "string",
+      "min_length": 1
+    },
+    "outstanding_release_watch_prerequisites": {
+      "type": "array"
+    },
+    "missing_release_watch_discipline_fields": {
+      "type": "array"
+    },
+    "prohibited_release_watch_discipline_fields_present": {
+      "type": "array"
+    }
+  }
+}

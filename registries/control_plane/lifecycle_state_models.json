@@ -1,0 +1,131 @@
+{
+  "state_models": {
+    "shared_control_plane_lifecycle": {
+      "semantic_scope": "shared_control_plane",
+      "initial_state": "raw_intake_ready",
+      "entry_transition_name": "enter_case_lifecycle",
+      "states": {
+        "raw_intake_ready": {
+          "entry_basis": "At least one raw record is accepted and the case can be opened.",
+          "exit_basis": "Feature review is ready to begin.",
+          "allowed_transition_classes": [
+            "forward_progression"
+          ],
+          "blocked_transition_classes": [
+            "fallback",
+            "resumption"
+          ]
+        },
+        "feature_review_ready": {
+          "entry_basis": "Raw intake is lineaged and eligible for semantic review.",
+          "exit_basis": "Feature review completes or the case is interrupted.",
+          "allowed_transition_classes": [
+            "forward_progression",
+            "interruption"
+          ],
+          "blocked_transition_classes": [
+            "fallback",
+            "resumption"
+          ]
+        },
+        "case_assessment_active": {
+          "entry_basis": "Feature review completed and the case may enter active assessment.",
+          "exit_basis": "Assessment completes, interrupts, or falls back.",
+          "allowed_transition_classes": [
+            "interruption",
+            "fallback"
+          ],
+          "blocked_transition_classes": [
+            "resumption"
+          ]
+        },
+        "case_interrupted": {
+          "entry_basis": "A legitimate interruption pauses the case without losing lineage.",
+          "exit_basis": "A legitimate resumption returns the case to active assessment.",
+          "allowed_transition_classes": [
+            "resumption"
+          ],
+          "blocked_transition_classes": [
+            "forward_progression",
+            "fallback",
+            "interruption"
+          ]
+        }
+      },
+      "transitions": [
+        {
+          "transition_name": "enter_case_lifecycle",
+          "from_state": "__entry__",
+          "to_state": "raw_intake_ready",
+          "transition_class": "entry",
+          "authority_rule_id": "case_transition_operator",
+          "router_rule": "default_case_route",
+          "resulting_status": "active",
+          "allowed_current_statuses": [
+            "active"
+          ]
+        },
+        {
+          "transition_name": "promote_to_feature_review",
+          "from_state": "raw_intake_ready",
+          "to_state": "feature_review_ready",
+          "transition_class": "forward_progression",
+          "authority_rule_id": "case_transition_operator",
+          "router_rule": "default_case_route",
+          "resulting_status": "active",
+          "allowed_current_statuses": [
+            "active"
+          ]
+        },
+        {
+          "transition_name": "promote_to_case_assessment",
+          "from_state": "feature_review_ready",
+          "to_state": "case_assessment_active",
+          "transition_class": "forward_progression",
+          "authority_rule_id": "case_transition_operator",
+          "router_rule": "default_case_route",
+          "resulting_status": "active",
+          "allowed_current_statuses": [
+            "active"
+          ]
+        },
+        {
+          "transition_name": "interrupt_case_assessment",
+          "from_state": "case_assessment_active",
+          "to_state": "case_interrupted",
+          "transition_class": "interruption",
+          "authority_rule_id": "case_transition_operator",
+          "router_rule": "default_case_route",
+          "resulting_status": "interrupted",
+          "allowed_current_statuses": [
+            "active"
+          ]
+        },
+        {
+          "transition_name": "resume_case_assessment",
+          "from_state": "case_interrupted",
+          "to_state": "case_assessment_active",
+          "transition_class": "resumption",
+          "authority_rule_id": "case_transition_operator",
+          "router_rule": "default_case_route",
+          "resulting_status": "active",
+          "allowed_current_statuses": [
+            "interrupted"
+          ]
+        },
+        {
+          "transition_name": "fallback_to_feature_review",
+          "from_state": "case_assessment_active",
+          "to_state": "feature_review_ready",
+          "transition_class": "fallback",
+          "authority_rule_id": "case_transition_operator",
+          "router_rule": "fallback_case_route",
+          "resulting_status": "active",
+          "allowed_current_statuses": [
+            "active"
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "type": "object",
+  "required": [
+    "execution_outcome_template_id",
+    "semantic_scope",
+    "execution_dispatch_class_id",
+    "execution_outcome_class_id",
+    "required_execution_outcome_fields",
+    "optional_execution_outcome_fields",
+    "required_audit_fields",
+    "execution_outcome_status",
+    "feedback_capture_readiness",
+    "status",
+    "lineage"
+  ],
+  "properties": {
+    "execution_outcome_template_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "semantic_scope": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_dispatch_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_outcome_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "route_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "required_execution_outcome_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "optional_execution_outcome_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "required_audit_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "execution_outcome_status": {
+      "type": "string",
+      "enum": [
+        "ready_for_downstream_use",
+        "fallback_template_applied"
+      ]
+    },
+    "feedback_capture_readiness": {
+      "type": "string",
+      "enum": [
+        "feedback_capture_ready_for_post_mortem",
+        "feedback_capture_deferred",
+        "feedback_capture_incomplete"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object"
+    }
+  },
+  "additional_properties": false
+}

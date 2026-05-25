@@ -1,0 +1,122 @@
+{
+  "policy_learning_update_preparation_templates": {
+    "policy_mutation_planning_candidate_primary": {
+      "policy_learning_update_preparation_template_id": "policy_mutation_planning_candidate_primary",
+      "semantic_scope": "shared_control_plane",
+      "policy_learning_update_approval_class_id": "policy_update_preparation_candidate",
+      "policy_learning_update_preparation_class_id": "policy_mutation_planning_candidate",
+      "route_name": "primary_case_path",
+      "required_update_preparation_fields": [
+        "domain_reference",
+        "decision_scope_reference",
+        "tenant_scope_reference",
+        "learning_scope_reference",
+        "candidate_update_reference",
+        "preparation_package_reference",
+        "preparation_summary",
+        "mutation_planning_scope_reference",
+        "preparation_artifact_boundary_summary",
+        "artifact_readiness",
+        "planning_readiness",
+        "prerequisite_readiness"
+      ],
+      "optional_update_preparation_fields": [
+        "reporting_scope_reference",
+        "restriction_summary",
+        "preparation_scope_restriction_reference",
+        "follow_up_review_reference",
+        "preparation_prerequisite_reference",
+        "outstanding_preparation_prerequisites"
+      ],
+      "required_audit_fields": [
+        "policy_learning_update_preparation_author_id",
+        "policy_learning_update_preparation_author_role"
+      ],
+      "policy_learning_update_preparation_status": "preparation_ready",
+      "policy_learning_update_preparation_outcome": "prepared_for_policy_mutation_planning",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "policy_learning_update_preparation_template_seed"
+      }
+    },
+    "restricted_policy_mutation_planning_candidate_primary": {
+      "policy_learning_update_preparation_template_id": "restricted_policy_mutation_planning_candidate_primary",
+      "semantic_scope": "shared_control_plane",
+      "policy_learning_update_approval_class_id": "restricted_policy_update_preparation_candidate",
+      "policy_learning_update_preparation_class_id": "restricted_policy_mutation_planning_candidate",
+      "required_update_preparation_fields": [
+        "domain_reference",
+        "decision_scope_reference",
+        "tenant_scope_reference",
+        "learning_scope_reference",
+        "candidate_update_reference",
+        "preparation_package_reference",
+        "preparation_summary",
+        "mutation_planning_scope_reference",
+        "preparation_artifact_boundary_summary",
+        "artifact_readiness",
+        "planning_readiness",
+        "prerequisite_readiness",
+        "restriction_summary",
+        "preparation_scope_restriction_reference"
+      ],
+      "optional_update_preparation_fields": [
+        "reporting_scope_reference",
+        "follow_up_review_reference",
+        "preparation_prerequisite_reference",
+        "outstanding_preparation_prerequisites"
+      ],
+      "required_audit_fields": [
+        "policy_learning_update_preparation_author_id",
+        "policy_learning_update_preparation_author_role"
+      ],
+      "policy_learning_update_preparation_status": "fallback_template_applied",
+      "policy_learning_update_preparation_outcome": "prepared_with_restrictions",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "policy_learning_update_preparation_template_seed"
+      }
+    },
+    "deferred_policy_mutation_planning_candidate_fallback": {
+      "policy_learning_update_preparation_template_id": "deferred_policy_mutation_planning_candidate_fallback",
+      "semantic_scope": "shared_control_plane",
+      "policy_learning_update_approval_class_id": "policy_update_preparation_candidate",
+      "policy_learning_update_preparation_class_id": "deferred_policy_mutation_planning_candidate",
+      "required_update_preparation_fields": [
+        "domain_reference",
+        "decision_scope_reference",
+        "tenant_scope_reference",
+        "learning_scope_reference",
+        "candidate_update_reference",
+        "preparation_package_reference",
+        "preparation_summary",
+        "mutation_planning_scope_reference",
+        "preparation_artifact_boundary_summary",
+        "artifact_readiness",
+        "planning_readiness",
+        "prerequisite_readiness",
+        "preparation_prerequisite_reference",
+        "outstanding_preparation_prerequisites"
+      ],
+      "optional_update_preparation_fields": [
+        "reporting_scope_reference",
+        "restriction_summary",
+        "preparation_scope_restriction_reference",
+        "follow_up_review_reference"
+      ],
+      "required_audit_fields": [
+        "policy_learning_update_preparation_author_id",
+        "policy_learning_update_preparation_author_role"
+      ],
+      "policy_learning_update_preparation_status": "fallback_template_applied",
+      "policy_learning_update_preparation_outcome": "deferred_pending_preparation_prerequisites",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "policy_learning_update_preparation_template_seed"
+      }
+    }
+  }
+}

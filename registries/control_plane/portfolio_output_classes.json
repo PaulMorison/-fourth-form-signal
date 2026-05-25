@@ -1,0 +1,103 @@
+{
+  "portfolio_output_classes": {
+    "portfolio_bounded_allocation": {
+      "portfolio_output_class_id": "portfolio_bounded_allocation",
+      "description": "A governed portfolio output that preserves bounded allocation posture for downstream portfolio planning without turning allocation meaning into commitment or instruction.",
+      "allocation_posture": "bounded_allocation",
+      "weight_posture": "weighted_allocation",
+      "action_boundary_posture": "allocative_non_instructional",
+      "promotion_safe_use": "promotion_safe_output",
+      "allowed_policy_output_class_ids": [
+        "policy_shaped_allowance"
+      ],
+      "allowed_recommendation_class_ids": [
+        "recommend_act_now"
+      ],
+      "allowed_resolution_class_ids": [
+        "resolved_with_action"
+      ],
+      "allowed_disposition_class_ids": [
+        "closed_pending_downstream_execution"
+      ],
+      "prohibited_context_fields": [
+        "instruction_id",
+        "instruction_reference",
+        "instruction_status",
+        "commitment_id",
+        "commitment_reference",
+        "commitment_status"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "portfolio_output_class_seed"
+      }
+    },
+    "portfolio_ranked_preference": {
+      "portfolio_output_class_id": "portfolio_ranked_preference",
+      "description": "A governed portfolio output that preserves explicit ranked preference for downstream portfolio ordering without silently changing policy meaning or issuing instruction.",
+      "allocation_posture": "ranked_preference",
+      "weight_posture": "priority_rank_only",
+      "action_boundary_posture": "allocative_non_instructional",
+      "promotion_safe_use": "promotion_safe_output",
+      "allowed_policy_output_class_ids": [
+        "policy_shaped_information_requirement"
+      ],
+      "allowed_recommendation_class_ids": [
+        "recommend_gather_more_information"
+      ],
+      "allowed_resolution_class_ids": [
+        "returned_for_clarification"
+      ],
+      "allowed_disposition_class_ids": [
+        "returned_for_clarification_open"
+      ],
+      "prohibited_context_fields": [
+        "instruction_id",
+        "instruction_reference",
+        "instruction_status",
+        "commitment_id",
+        "commitment_reference",
+        "commitment_status"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "portfolio_output_class_seed"
+      }
+    },
+    "portfolio_suppression_hold": {
+      "portfolio_output_class_id": "portfolio_suppression_hold",
+      "description": "A governed portfolio output that preserves explicit suppression hold posture for downstream portfolio handling without becoming executable instruction.",
+      "allocation_posture": "suppression_hold",
+      "weight_posture": "not_applicable",
+      "action_boundary_posture": "policy_shaped_non_instructional",
+      "promotion_safe_use": "promotion_safe_output",
+      "allowed_policy_output_class_ids": [
+        "policy_shaped_suppression"
+      ],
+      "allowed_recommendation_class_ids": [
+        "abstain_from_strong_recommendation"
+      ],
+      "allowed_resolution_class_ids": [
+        "manual_fallback_resolution"
+      ],
+      "allowed_disposition_class_ids": [
+        "manual_fallback_hold"
+      ],
+      "prohibited_context_fields": [
+        "instruction_id",
+        "instruction_reference",
+        "instruction_status",
+        "commitment_id",
+        "commitment_reference",
+        "commitment_status"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "portfolio_output_class_seed"
+      }
+    }
+  }
+}

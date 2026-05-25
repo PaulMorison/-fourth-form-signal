@@ -1,0 +1,100 @@
+{
+  "case_disposition_classes": {
+    "closed_pending_downstream_execution": {
+      "disposition_class_id": "closed_pending_downstream_execution",
+      "description": "A governed terminal disposition that closes the current review layer while downstream execution remains pending.",
+      "disposition_state": "action_routing",
+      "closure_state": "closed_pending_downstream_execution",
+      "closure_quality": "complete",
+      "terminality": true,
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "case_disposition_class_seed"
+      }
+    },
+    "closed_non_action": {
+      "disposition_class_id": "closed_non_action",
+      "description": "A governed terminal disposition that closes the case through deliberate non-action.",
+      "disposition_state": "non_action_closure",
+      "closure_state": "closed",
+      "closure_quality": "complete",
+      "terminality": true,
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "case_disposition_class_seed"
+      }
+    },
+    "escalated_pending_later_review": {
+      "disposition_class_id": "escalated_pending_later_review",
+      "description": "A governed non-terminal disposition that records onward escalated handling while preserving later review responsibility explicitly.",
+      "disposition_state": "reroute",
+      "closure_state": "closed_pending_later_review",
+      "closure_quality": "qualified",
+      "terminality": false,
+      "reopen_reference": "future_reopen_reinstatement_service",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "case_disposition_class_seed"
+      }
+    },
+    "returned_for_rework_open": {
+      "disposition_class_id": "returned_for_rework_open",
+      "description": "A governed non-terminal disposition that keeps the case open while explicit rework is required.",
+      "disposition_state": "rework",
+      "closure_state": "open",
+      "closure_quality": "qualified",
+      "terminality": false,
+      "reopen_reference": "future_reopen_reinstatement_service",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "case_disposition_class_seed"
+      }
+    },
+    "returned_for_clarification_open": {
+      "disposition_class_id": "returned_for_clarification_open",
+      "description": "A governed non-terminal disposition that keeps the case open while explicit clarification is required.",
+      "disposition_state": "clarification",
+      "closure_state": "open",
+      "closure_quality": "qualified",
+      "terminality": false,
+      "reopen_reference": "future_reopen_reinstatement_service",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "case_disposition_class_seed"
+      }
+    },
+    "deferred_continuation_pending_review": {
+      "disposition_class_id": "deferred_continuation_pending_review",
+      "description": "A governed non-terminal disposition that records deferred continuation without erasing later review responsibility.",
+      "disposition_state": "deferred_continuation",
+      "closure_state": "closed_pending_later_review",
+      "closure_quality": "qualified",
+      "terminality": false,
+      "reopen_reference": "future_reopen_reinstatement_service",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "case_disposition_class_seed"
+      }
+    },
+    "manual_fallback_hold": {
+      "disposition_class_id": "manual_fallback_hold",
+      "description": "A governed non-terminal disposition that preserves fallback manual triage as explicit later review work rather than silent resolution.",
+      "disposition_state": "deferred_continuation",
+      "closure_state": "closed_pending_later_review",
+      "closure_quality": "qualified",
+      "terminality": false,
+      "reopen_reference": "future_reopen_reinstatement_service",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "case_disposition_class_seed"
+      }
+    }
+  }
+}

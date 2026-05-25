@@ -1,0 +1,67 @@
+{
+  "execution_request_classes": {
+    "direct_dispatch_request": {
+      "execution_request_class_id": "direct_dispatch_request",
+      "description": "A governed execution request that preserves direct downstream dispatch preparation without collapsing request meaning into actual execution.",
+      "action_boundary_posture": "request_ready_non_executing",
+      "allowed_action_instruction_class_ids": [
+        "direct_action_instruction"
+      ],
+      "prohibited_execution_fields": [
+        "execution_started_at",
+        "execution_completed_at",
+        "execution_result",
+        "execution_outcome_id",
+        "execution_deviation_id",
+        "actual_execution_status"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "execution_request_class_seed"
+      }
+    },
+    "prerequisite_dispatch_request": {
+      "execution_request_class_id": "prerequisite_dispatch_request",
+      "description": "A governed execution request that preserves prerequisite-bounded dispatch preparation without silently becoming an actual dispatch event.",
+      "action_boundary_posture": "request_conditioned_non_executing",
+      "allowed_action_instruction_class_ids": [
+        "prerequisite_bounded_instruction"
+      ],
+      "prohibited_execution_fields": [
+        "execution_started_at",
+        "execution_completed_at",
+        "execution_result",
+        "execution_outcome_id",
+        "execution_deviation_id",
+        "actual_execution_status"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "execution_request_class_seed"
+      }
+    },
+    "hold_dispatch_request": {
+      "execution_request_class_id": "hold_dispatch_request",
+      "description": "A governed execution request that preserves a hold-only downstream boundary without becoming actual dispatch, execution, or reopen logic.",
+      "action_boundary_posture": "request_hold_non_executing",
+      "allowed_action_instruction_class_ids": [
+        "suppression_hold_instruction"
+      ],
+      "prohibited_execution_fields": [
+        "execution_started_at",
+        "execution_completed_at",
+        "execution_result",
+        "execution_outcome_id",
+        "execution_deviation_id",
+        "actual_execution_status"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "execution_request_class_seed"
+      }
+    }
+  }
+}

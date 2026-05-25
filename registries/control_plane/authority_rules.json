@@ -1,0 +1,26 @@
+{
+  "authority_rules": {
+    "case_transition_operator": {
+      "authority_rule_id": "case_transition_operator",
+      "decision_right": "shared_control_plane_case_transition",
+      "allowed_roles": [
+        "case_operator"
+      ],
+      "delegated_roles": [
+        "assistant_case_operator",
+        "shadow_case_delegate"
+      ],
+      "authority_scope": "shared_control_plane",
+      "authority_ceiling": "case_interrupted",
+      "authority_floor": "raw_intake_ready",
+      "fallback_role": "case_supervisor",
+      "review_required": false,
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "authority_registry_seed"
+      }
+    }
+  }
+}
+

@@ -1,0 +1,99 @@
+{
+  "type": "object",
+  "required": [
+    "router_rule_id",
+    "route_name",
+    "semantic_scope",
+    "allowed_transition_classes",
+    "allowed_sources",
+    "allowed_targets",
+    "conflict_class",
+    "tie_break_policy",
+    "review_required",
+    "status",
+    "lineage"
+  ],
+  "additional_properties": false,
+  "properties": {
+    "router_rule_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "route_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "semantic_scope": {
+      "type": "string",
+      "min_length": 1
+    },
+    "allowed_transition_classes": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "allowed_sources": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "allowed_targets": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "conflict_class": {
+      "type": "string",
+      "min_length": 1
+    },
+    "tie_break_policy": {
+      "type": "string",
+      "enum": [
+        "none",
+        "lexicographic_route_name",
+        "manual_resolution_required"
+      ]
+    },
+    "fallback_route_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "review_required": {
+      "type": "boolean"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object",
+      "required": [
+        "version",
+        "source"
+      ],
+      "additional_properties": false,
+      "properties": {
+        "version": {
+          "type": "string",
+          "min_length": 1
+        },
+        "source": {
+          "type": "string",
+          "min_length": 1
+        }
+      }
+    }
+  }
+}

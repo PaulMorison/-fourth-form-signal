@@ -1,0 +1,856 @@
+{
+  "event_types": [
+    {
+      "name": "platform.validation.contract_validated",
+      "owner": "platform.validation.contract_schema_validator"
+    },
+    {
+      "name": "platform.validation.contract_validation_failed",
+      "owner": "platform.validation.contract_schema_validator"
+    },
+    {
+      "name": "data.ingestion.raw_record_ingested",
+      "owner": "data.ingestion.raw_ingestion_pipeline"
+    },
+    {
+      "name": "data.ingestion.raw_record_rejected",
+      "owner": "data.ingestion.raw_ingestion_pipeline"
+    },
+    {
+      "name": "state.features.feature_registered",
+      "owner": "state.features.feature_registry"
+    },
+    {
+      "name": "decision.case.episode_opened",
+      "owner": "decision.case.case_episode_orchestrator"
+    },
+    {
+      "name": "decision.case.handoff_recorded",
+      "owner": "decision.case.case_episode_orchestrator"
+    },
+    {
+      "name": "decision.case.interruption_recorded",
+      "owner": "decision.case.case_episode_orchestrator"
+    },
+    {
+      "name": "decision.case.resumption_recorded",
+      "owner": "decision.case.case_episode_orchestrator"
+    },
+    {
+      "name": "decision.case.fallback_recorded",
+      "owner": "decision.case.case_episode_orchestrator"
+    },
+    {
+      "name": "decision.authority.authority_resolution_succeeded",
+      "owner": "decision.authority.authority_audit_adapter"
+    },
+    {
+      "name": "decision.authority.authority_resolution_blocked",
+      "owner": "decision.authority.authority_audit_adapter"
+    },
+    {
+      "name": "decision.authority.delegation_applied",
+      "owner": "decision.authority.authority_audit_adapter"
+    },
+    {
+      "name": "decision.authority.delegation_missing",
+      "owner": "decision.authority.authority_audit_adapter"
+    },
+    {
+      "name": "decision.authority.authority_scope_violation",
+      "owner": "decision.authority.authority_audit_adapter"
+    },
+    {
+      "name": "decision.authority.authority_fallback_applied",
+      "owner": "decision.authority.authority_audit_adapter"
+    },
+    {
+      "name": "decision.router.router_resolution_succeeded",
+      "owner": "decision.router.router_audit_adapter"
+    },
+    {
+      "name": "decision.router.router_resolution_blocked",
+      "owner": "decision.router.router_audit_adapter"
+    },
+    {
+      "name": "decision.router.conflict_classified",
+      "owner": "decision.router.router_audit_adapter"
+    },
+    {
+      "name": "decision.router.tie_break_applied",
+      "owner": "decision.router.router_audit_adapter"
+    },
+    {
+      "name": "decision.router.fallback_route_applied",
+      "owner": "decision.router.router_audit_adapter"
+    },
+    {
+      "name": "decision.router.unresolved_conflict_detected",
+      "owner": "decision.router.router_audit_adapter"
+    },
+    {
+      "name": "decision.review.threshold_evaluation_succeeded",
+      "owner": "decision.review.review_audit_adapter"
+    },
+    {
+      "name": "decision.review.threshold_triggered",
+      "owner": "decision.review.review_audit_adapter"
+    },
+    {
+      "name": "decision.review.threshold_not_triggered",
+      "owner": "decision.review.review_audit_adapter"
+    },
+    {
+      "name": "decision.review.threshold_evaluation_blocked",
+      "owner": "decision.review.review_audit_adapter"
+    },
+    {
+      "name": "decision.review.calibration_profile_applied",
+      "owner": "decision.review.review_audit_adapter"
+    },
+    {
+      "name": "decision.review.fallback_review_mode_applied",
+      "owner": "decision.review.review_audit_adapter"
+    },
+    {
+      "name": "decision.review.review_trigger_required",
+      "owner": "decision.review.review_audit_adapter"
+    },
+    {
+      "name": "decision.review.review_trigger_optional",
+      "owner": "decision.review.review_audit_adapter"
+    },
+    {
+      "name": "decision.review.human_review_packet_built",
+      "owner": "decision.review.review_packet_audit_adapter"
+    },
+    {
+      "name": "decision.review.human_review_packet_build_blocked",
+      "owner": "decision.review.review_packet_audit_adapter"
+    },
+    {
+      "name": "decision.review.human_review_packet_ready_for_handoff",
+      "owner": "decision.review.review_packet_audit_adapter"
+    },
+    {
+      "name": "decision.review.human_review_packet_missing_context",
+      "owner": "decision.review.review_packet_audit_adapter"
+    },
+    {
+      "name": "decision.review.human_review_packet_fallback_template_applied",
+      "owner": "decision.review.review_packet_audit_adapter"
+    },
+    {
+      "name": "decision.review.review_resolution_recorded",
+      "owner": "decision.review.review_resolution_audit_adapter"
+    },
+    {
+      "name": "decision.review.review_resolution_blocked",
+      "owner": "decision.review.review_resolution_audit_adapter"
+    },
+    {
+      "name": "decision.review.review_resolution_ready_for_disposition",
+      "owner": "decision.review.review_resolution_audit_adapter"
+    },
+    {
+      "name": "decision.review.review_resolution_missing_context",
+      "owner": "decision.review.review_resolution_audit_adapter"
+    },
+    {
+      "name": "decision.review.review_resolution_fallback_applied",
+      "owner": "decision.review.review_resolution_audit_adapter"
+    },
+    {
+      "name": "decision.output.recommendation_recorded",
+      "owner": "decision.output.recommendation_audit_adapter"
+    },
+    {
+      "name": "decision.output.recommendation_blocked",
+      "owner": "decision.output.recommendation_audit_adapter"
+    },
+    {
+      "name": "decision.output.recommendation_ready_for_downstream_use",
+      "owner": "decision.output.recommendation_audit_adapter"
+    },
+    {
+      "name": "decision.output.recommendation_missing_context",
+      "owner": "decision.output.recommendation_audit_adapter"
+    },
+    {
+      "name": "decision.output.recommendation_fallback_template_applied",
+      "owner": "decision.output.recommendation_audit_adapter"
+    },
+    {
+      "name": "decision.output.policy_output_recorded",
+      "owner": "decision.output.policy_output_audit_adapter"
+    },
+    {
+      "name": "decision.output.policy_output_blocked",
+      "owner": "decision.output.policy_output_audit_adapter"
+    },
+    {
+      "name": "decision.output.policy_output_ready_for_downstream_use",
+      "owner": "decision.output.policy_output_audit_adapter"
+    },
+    {
+      "name": "decision.output.policy_output_missing_context",
+      "owner": "decision.output.policy_output_audit_adapter"
+    },
+    {
+      "name": "decision.output.policy_output_fallback_template_applied",
+      "owner": "decision.output.policy_output_audit_adapter"
+    },
+    {
+      "name": "decision.output.portfolio_output_recorded",
+      "owner": "decision.output.portfolio_output_audit_adapter"
+    },
+    {
+      "name": "decision.output.portfolio_output_blocked",
+      "owner": "decision.output.portfolio_output_audit_adapter"
+    },
+    {
+      "name": "decision.output.portfolio_output_ready_for_downstream_use",
+      "owner": "decision.output.portfolio_output_audit_adapter"
+    },
+    {
+      "name": "decision.output.portfolio_output_missing_context",
+      "owner": "decision.output.portfolio_output_audit_adapter"
+    },
+    {
+      "name": "decision.output.portfolio_output_fallback_template_applied",
+      "owner": "decision.output.portfolio_output_audit_adapter"
+    },
+    {
+      "name": "decision.output.action_instruction_recorded",
+      "owner": "decision.output.action_instruction_audit_adapter"
+    },
+    {
+      "name": "decision.output.action_instruction_blocked",
+      "owner": "decision.output.action_instruction_audit_adapter"
+    },
+    {
+      "name": "decision.output.action_instruction_ready_for_downstream_use",
+      "owner": "decision.output.action_instruction_audit_adapter"
+    },
+    {
+      "name": "decision.output.action_instruction_missing_context",
+      "owner": "decision.output.action_instruction_audit_adapter"
+    },
+    {
+      "name": "decision.output.action_instruction_fallback_template_applied",
+      "owner": "decision.output.action_instruction_audit_adapter"
+    },
+    {
+      "name": "execution_request_recorded",
+      "owner": "execution.execution_request_audit_adapter"
+    },
+    {
+      "name": "execution_request_blocked",
+      "owner": "execution.execution_request_audit_adapter"
+    },
+    {
+      "name": "execution_request_ready_for_downstream_use",
+      "owner": "execution.execution_request_audit_adapter"
+    },
+    {
+      "name": "execution_request_missing_context",
+      "owner": "execution.execution_request_audit_adapter"
+    },
+    {
+      "name": "execution_request_fallback_template_applied",
+      "owner": "execution.execution_request_audit_adapter"
+    },
+    {
+      "name": "execution_dispatch_recorded",
+      "owner": "execution.execution_dispatch_audit_adapter"
+    },
+    {
+      "name": "execution_dispatch_blocked",
+      "owner": "execution.execution_dispatch_audit_adapter"
+    },
+    {
+      "name": "execution_dispatch_ready_for_downstream_use",
+      "owner": "execution.execution_dispatch_audit_adapter"
+    },
+    {
+      "name": "execution_dispatch_missing_context",
+      "owner": "execution.execution_dispatch_audit_adapter"
+    },
+    {
+      "name": "execution_dispatch_fallback_template_applied",
+      "owner": "execution.execution_dispatch_audit_adapter"
+    },
+    {
+      "name": "execution_outcome_recorded",
+      "owner": "execution.execution_outcome_audit_adapter"
+    },
+    {
+      "name": "execution_outcome_blocked",
+      "owner": "execution.execution_outcome_audit_adapter"
+    },
+    {
+      "name": "execution_outcome_ready_for_downstream_use",
+      "owner": "execution.execution_outcome_audit_adapter"
+    },
+    {
+      "name": "execution_outcome_missing_context",
+      "owner": "execution.execution_outcome_audit_adapter"
+    },
+    {
+      "name": "execution_outcome_fallback_template_applied",
+      "owner": "execution.execution_outcome_audit_adapter"
+    },
+    {
+      "name": "decision.post_mortem.post_mortem_judgment_recorded",
+      "owner": "decision.post_mortem.post_mortem_judgment_audit_adapter"
+    },
+    {
+      "name": "decision.post_mortem.post_mortem_judgment_blocked",
+      "owner": "decision.post_mortem.post_mortem_judgment_audit_adapter"
+    },
+    {
+      "name": "decision.post_mortem.post_mortem_judgment_ready_for_downstream_use",
+      "owner": "decision.post_mortem.post_mortem_judgment_audit_adapter"
+    },
+    {
+      "name": "decision.post_mortem.post_mortem_judgment_missing_context",
+      "owner": "decision.post_mortem.post_mortem_judgment_audit_adapter"
+    },
+    {
+      "name": "decision.post_mortem.post_mortem_judgment_fallback_template_applied",
+      "owner": "decision.post_mortem.post_mortem_judgment_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_evidence_admission_recorded",
+      "owner": "decision.policy_learning.policy_learning_evidence_admission_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_evidence_admission_blocked",
+      "owner": "decision.policy_learning.policy_learning_evidence_admission_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_evidence_admission_admitted_for_update_consideration",
+      "owner": "decision.policy_learning.policy_learning_evidence_admission_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_evidence_admission_admitted_with_restrictions",
+      "owner": "decision.policy_learning.policy_learning_evidence_admission_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_evidence_admission_deferred_pending_more_evidence",
+      "owner": "decision.policy_learning.policy_learning_evidence_admission_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_evidence_admission_missing_context",
+      "owner": "decision.policy_learning.policy_learning_evidence_admission_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_evidence_admission_rejected_for_learning_use",
+      "owner": "decision.policy_learning.policy_learning_evidence_admission_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_evidence_admission_fallback_template_applied",
+      "owner": "decision.policy_learning.policy_learning_evidence_admission_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_evidence_admission_prohibited_overlap_blocked",
+      "owner": "decision.policy_learning.policy_learning_evidence_admission_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_threshold_recorded",
+      "owner": "decision.policy_learning.policy_learning_update_threshold_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_threshold_blocked",
+      "owner": "decision.policy_learning.policy_learning_update_threshold_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_threshold_accepted",
+      "owner": "decision.policy_learning.policy_learning_update_threshold_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_threshold_accepted_with_narrowed_scope",
+      "owner": "decision.policy_learning.policy_learning_update_threshold_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_threshold_deferred_for_continued_monitoring",
+      "owner": "decision.policy_learning.policy_learning_update_threshold_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_threshold_missing_context",
+      "owner": "decision.policy_learning.policy_learning_update_threshold_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_threshold_rejected",
+      "owner": "decision.policy_learning.policy_learning_update_threshold_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_threshold_fallback_template_applied",
+      "owner": "decision.policy_learning.policy_learning_update_threshold_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_threshold_prohibited_overlap_blocked",
+      "owner": "decision.policy_learning.policy_learning_update_threshold_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_approval_recorded",
+      "owner": "decision.policy_learning.policy_learning_update_approval_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_approval_blocked",
+      "owner": "decision.policy_learning.policy_learning_update_approval_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_approval_approved_for_policy_update_preparation",
+      "owner": "decision.policy_learning.policy_learning_update_approval_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_approval_approved_with_restrictions",
+      "owner": "decision.policy_learning.policy_learning_update_approval_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_approval_deferred_pending_additional_governance",
+      "owner": "decision.policy_learning.policy_learning_update_approval_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_approval_missing_context",
+      "owner": "decision.policy_learning.policy_learning_update_approval_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_approval_rejected_for_policy_update_use",
+      "owner": "decision.policy_learning.policy_learning_update_approval_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_approval_fallback_template_applied",
+      "owner": "decision.policy_learning.policy_learning_update_approval_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_approval_prohibited_overlap_blocked",
+      "owner": "decision.policy_learning.policy_learning_update_approval_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_preparation_recorded",
+      "owner": "decision.policy_learning.policy_learning_update_preparation_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_preparation_blocked",
+      "owner": "decision.policy_learning.policy_learning_update_preparation_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_preparation_prepared_for_policy_mutation_planning",
+      "owner": "decision.policy_learning.policy_learning_update_preparation_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_preparation_prepared_with_restrictions",
+      "owner": "decision.policy_learning.policy_learning_update_preparation_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_preparation_deferred_pending_preparation_prerequisites",
+      "owner": "decision.policy_learning.policy_learning_update_preparation_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_preparation_missing_context",
+      "owner": "decision.policy_learning.policy_learning_update_preparation_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_preparation_rejected_for_preparation_use",
+      "owner": "decision.policy_learning.policy_learning_update_preparation_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_preparation_fallback_template_applied",
+      "owner": "decision.policy_learning.policy_learning_update_preparation_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_preparation_prohibited_overlap_blocked",
+      "owner": "decision.policy_learning.policy_learning_update_preparation_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_mutation_planning_recorded",
+      "owner": "decision.policy_learning.policy_learning_update_mutation_planning_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_mutation_planning_blocked",
+      "owner": "decision.policy_learning.policy_learning_update_mutation_planning_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_mutation_planning_ready_for_policy_mutation_planning",
+      "owner": "decision.policy_learning.policy_learning_update_mutation_planning_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_mutation_planning_ready_for_policy_mutation_planning_with_restrictions",
+      "owner": "decision.policy_learning.policy_learning_update_mutation_planning_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_mutation_planning_deferred_pending_mutation_planning_prerequisites",
+      "owner": "decision.policy_learning.policy_learning_update_mutation_planning_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_mutation_planning_missing_context",
+      "owner": "decision.policy_learning.policy_learning_update_mutation_planning_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_mutation_planning_rejected_for_mutation_planning_use",
+      "owner": "decision.policy_learning.policy_learning_update_mutation_planning_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_mutation_planning_fallback_template_applied",
+      "owner": "decision.policy_learning.policy_learning_update_mutation_planning_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_mutation_planning_prohibited_overlap_blocked",
+      "owner": "decision.policy_learning.policy_learning_update_mutation_planning_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_mutation_execution_recorded",
+      "owner": "decision.policy_learning.policy_learning_update_mutation_execution_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_mutation_execution_blocked",
+      "owner": "decision.policy_learning.policy_learning_update_mutation_execution_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_mutation_execution_ready_for_policy_mutation_execution",
+      "owner": "decision.policy_learning.policy_learning_update_mutation_execution_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_mutation_execution_ready_for_policy_mutation_execution_with_restrictions",
+      "owner": "decision.policy_learning.policy_learning_update_mutation_execution_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_mutation_execution_deferred_pending_mutation_execution_prerequisites",
+      "owner": "decision.policy_learning.policy_learning_update_mutation_execution_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_mutation_execution_missing_context",
+      "owner": "decision.policy_learning.policy_learning_update_mutation_execution_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_mutation_execution_rejected_for_mutation_execution_use",
+      "owner": "decision.policy_learning.policy_learning_update_mutation_execution_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_mutation_execution_fallback_template_applied",
+      "owner": "decision.policy_learning.policy_learning_update_mutation_execution_audit_adapter"
+    },
+    {
+      "name": "decision.policy_learning.policy_learning_update_mutation_execution_prohibited_overlap_blocked",
+      "owner": "decision.policy_learning.policy_learning_update_mutation_execution_audit_adapter"
+    },
+    {
+      "name": "runtime.release.promotion_readiness_recorded",
+      "owner": "runtime.release.promotion_readiness_audit_adapter"
+    },
+    {
+      "name": "runtime.release.promotion_readiness_blocked",
+      "owner": "runtime.release.promotion_readiness_audit_adapter"
+    },
+    {
+      "name": "runtime.release.promotion_readiness_ready_for_rollout_scope_control",
+      "owner": "runtime.release.promotion_readiness_audit_adapter"
+    },
+    {
+      "name": "runtime.release.promotion_readiness_conditionally_ready_for_rollout_scope_control",
+      "owner": "runtime.release.promotion_readiness_audit_adapter"
+    },
+    {
+      "name": "runtime.release.promotion_readiness_deferred_pending_promotion_readiness_evidence",
+      "owner": "runtime.release.promotion_readiness_audit_adapter"
+    },
+    {
+      "name": "runtime.release.promotion_readiness_missing_context",
+      "owner": "runtime.release.promotion_readiness_audit_adapter"
+    },
+    {
+      "name": "runtime.release.promotion_readiness_rejected_for_promotion_use",
+      "owner": "runtime.release.promotion_readiness_audit_adapter"
+    },
+    {
+      "name": "runtime.release.promotion_readiness_fallback_template_applied",
+      "owner": "runtime.release.promotion_readiness_audit_adapter"
+    },
+    {
+      "name": "runtime.release.promotion_readiness_prohibited_overlap_blocked",
+      "owner": "runtime.release.promotion_readiness_audit_adapter"
+    },
+    {
+      "name": "runtime.release.rollout_scope_recorded",
+      "owner": "runtime.release.rollout_scope_audit_adapter"
+    },
+    {
+      "name": "runtime.release.rollout_scope_blocked",
+      "owner": "runtime.release.rollout_scope_audit_adapter"
+    },
+    {
+      "name": "runtime.release.rollout_scope_ready_for_rollback_trigger_guard",
+      "owner": "runtime.release.rollout_scope_audit_adapter"
+    },
+    {
+      "name": "runtime.release.rollout_scope_conditionally_ready_for_rollback_trigger_guard",
+      "owner": "runtime.release.rollout_scope_audit_adapter"
+    },
+    {
+      "name": "runtime.release.rollout_scope_deferred_pending_rollout_scope_evidence",
+      "owner": "runtime.release.rollout_scope_audit_adapter"
+    },
+    {
+      "name": "runtime.release.rollout_scope_missing_context",
+      "owner": "runtime.release.rollout_scope_audit_adapter"
+    },
+    {
+      "name": "runtime.release.rollout_scope_rejected_for_rollout_scope_use",
+      "owner": "runtime.release.rollout_scope_audit_adapter"
+    },
+    {
+      "name": "runtime.release.rollout_scope_fallback_template_applied",
+      "owner": "runtime.release.rollout_scope_audit_adapter"
+    },
+    {
+      "name": "runtime.release.rollout_scope_prohibited_overlap_blocked",
+      "owner": "runtime.release.rollout_scope_audit_adapter"
+    },
+    {
+      "name": "runtime.release.rollback_trigger_recorded",
+      "owner": "runtime.release.rollback_trigger_audit_adapter"
+    },
+    {
+      "name": "runtime.release.rollback_trigger_blocked",
+      "owner": "runtime.release.rollback_trigger_audit_adapter"
+    },
+    {
+      "name": "runtime.release.rollback_trigger_ready_for_release_watch_discipline",
+      "owner": "runtime.release.rollback_trigger_audit_adapter"
+    },
+    {
+      "name": "runtime.release.rollback_trigger_conditionally_ready_for_release_watch_discipline",
+      "owner": "runtime.release.rollback_trigger_audit_adapter"
+    },
+    {
+      "name": "runtime.release.rollback_trigger_deferred_pending_rollback_trigger_evidence",
+      "owner": "runtime.release.rollback_trigger_audit_adapter"
+    },
+    {
+      "name": "runtime.release.rollback_trigger_missing_context",
+      "owner": "runtime.release.rollback_trigger_audit_adapter"
+    },
+    {
+      "name": "runtime.release.rollback_trigger_rejected_for_rollback_trigger_use",
+      "owner": "runtime.release.rollback_trigger_audit_adapter"
+    },
+    {
+      "name": "runtime.release.rollback_trigger_fallback_template_applied",
+      "owner": "runtime.release.rollback_trigger_audit_adapter"
+    },
+    {
+      "name": "runtime.release.rollback_trigger_prohibited_overlap_blocked",
+      "owner": "runtime.release.rollback_trigger_audit_adapter"
+    },
+    {
+      "name": "runtime.release.release_watch_discipline_recorded",
+      "owner": "runtime.release.release_watch_discipline_audit_adapter"
+    },
+    {
+      "name": "runtime.release.release_watch_discipline_blocked",
+      "owner": "runtime.release.release_watch_discipline_audit_adapter"
+    },
+    {
+      "name": "runtime.release.release_watch_discipline_ready_for_release_confirmation",
+      "owner": "runtime.release.release_watch_discipline_audit_adapter"
+    },
+    {
+      "name": "runtime.release.release_watch_discipline_conditionally_ready_for_release_confirmation",
+      "owner": "runtime.release.release_watch_discipline_audit_adapter"
+    },
+    {
+      "name": "runtime.release.release_watch_discipline_deferred_pending_release_watch_discipline_evidence",
+      "owner": "runtime.release.release_watch_discipline_audit_adapter"
+    },
+    {
+      "name": "runtime.release.release_watch_discipline_missing_context",
+      "owner": "runtime.release.release_watch_discipline_audit_adapter"
+    },
+    {
+      "name": "runtime.release.release_watch_discipline_rejected_for_release_watch_discipline_use",
+      "owner": "runtime.release.release_watch_discipline_audit_adapter"
+    },
+    {
+      "name": "runtime.release.release_watch_discipline_fallback_template_applied",
+      "owner": "runtime.release.release_watch_discipline_audit_adapter"
+    },
+    {
+      "name": "runtime.release.release_watch_discipline_prohibited_overlap_blocked",
+      "owner": "runtime.release.release_watch_discipline_audit_adapter"
+    },
+    {
+      "name": "runtime.release.release_confirmation_recorded",
+      "owner": "runtime.release.release_confirmation_audit_adapter"
+    },
+    {
+      "name": "runtime.release.release_confirmation_blocked",
+      "owner": "runtime.release.release_confirmation_audit_adapter"
+    },
+    {
+      "name": "runtime.release.release_confirmation_confirmed_for_broader_trusted_production_use",
+      "owner": "runtime.release.release_confirmation_audit_adapter"
+    },
+    {
+      "name": "runtime.release.release_confirmation_conditionally_confirmed_for_bounded_production_use",
+      "owner": "runtime.release.release_confirmation_audit_adapter"
+    },
+    {
+      "name": "runtime.release.release_confirmation_deferred_pending_release_confirmation_evidence",
+      "owner": "runtime.release.release_confirmation_audit_adapter"
+    },
+    {
+      "name": "runtime.release.release_confirmation_missing_context",
+      "owner": "runtime.release.release_confirmation_audit_adapter"
+    },
+    {
+      "name": "runtime.release.release_confirmation_rejected_for_release_confirmation_use",
+      "owner": "runtime.release.release_confirmation_audit_adapter"
+    },
+    {
+      "name": "runtime.release.release_confirmation_fallback_template_applied",
+      "owner": "runtime.release.release_confirmation_audit_adapter"
+    },
+    {
+      "name": "runtime.release.release_confirmation_prohibited_overlap_blocked",
+      "owner": "runtime.release.release_confirmation_audit_adapter"
+    },
+    {
+      "name": "runtime.release.production_entitlement_check_recorded",
+      "owner": "runtime.release.production_entitlement_check_audit_adapter"
+    },
+    {
+      "name": "runtime.release.production_entitlement_check_blocked",
+      "owner": "runtime.release.production_entitlement_check_audit_adapter"
+    },
+    {
+      "name": "runtime.release.production_entitlement_check_approved_for_broader_trusted_production_entitlement",
+      "owner": "runtime.release.production_entitlement_check_audit_adapter"
+    },
+    {
+      "name": "runtime.release.production_entitlement_check_conditionally_approved_for_bounded_production_entitlement",
+      "owner": "runtime.release.production_entitlement_check_audit_adapter"
+    },
+    {
+      "name": "runtime.release.production_entitlement_check_deferred_pending_production_entitlement_evidence",
+      "owner": "runtime.release.production_entitlement_check_audit_adapter"
+    },
+    {
+      "name": "runtime.release.production_entitlement_check_missing_context",
+      "owner": "runtime.release.production_entitlement_check_audit_adapter"
+    },
+    {
+      "name": "runtime.release.production_entitlement_check_rejected_for_production_entitlement_use",
+      "owner": "runtime.release.production_entitlement_check_audit_adapter"
+    },
+    {
+      "name": "runtime.release.production_entitlement_check_fallback_template_applied",
+      "owner": "runtime.release.production_entitlement_check_audit_adapter"
+    },
+    {
+      "name": "runtime.release.production_entitlement_check_prohibited_overlap_blocked",
+      "owner": "runtime.release.production_entitlement_check_audit_adapter"
+    },
+    {
+      "name": "runtime.release.contained_rollback_recorded",
+      "owner": "runtime.release.contained_rollback_audit_adapter"
+    },
+    {
+      "name": "runtime.release.contained_rollback_blocked",
+      "owner": "runtime.release.contained_rollback_audit_adapter"
+    },
+    {
+      "name": "runtime.release.contained_rollback_bounded_exposure_preserved",
+      "owner": "runtime.release.contained_rollback_audit_adapter"
+    },
+    {
+      "name": "runtime.release.contained_rollback_partial_reversal_bounded",
+      "owner": "runtime.release.contained_rollback_audit_adapter"
+    },
+    {
+      "name": "runtime.release.contained_rollback_deferred_pending_contained_rollback_evidence",
+      "owner": "runtime.release.contained_rollback_audit_adapter"
+    },
+    {
+      "name": "runtime.release.contained_rollback_missing_context",
+      "owner": "runtime.release.contained_rollback_audit_adapter"
+    },
+    {
+      "name": "runtime.release.contained_rollback_rejected_for_contained_rollback_use",
+      "owner": "runtime.release.contained_rollback_audit_adapter"
+    },
+    {
+      "name": "runtime.release.contained_rollback_fallback_template_applied",
+      "owner": "runtime.release.contained_rollback_audit_adapter"
+    },
+    {
+      "name": "runtime.release.contained_rollback_prohibited_overlap_blocked",
+      "owner": "runtime.release.contained_rollback_audit_adapter"
+    },
+    {
+      "name": "runtime.release.release_audit_trace_recorded",
+      "owner": "runtime.release.release_audit_trace_audit_adapter"
+    },
+    {
+      "name": "runtime.release.release_audit_trace_blocked",
+      "owner": "runtime.release.release_audit_trace_audit_adapter"
+    },
+    {
+      "name": "runtime.release.release_audit_trace_release_control_lineage_preserved",
+      "owner": "runtime.release.release_audit_trace_audit_adapter"
+    },
+    {
+      "name": "runtime.release.release_audit_trace_invalid_release_state_visible",
+      "owner": "runtime.release.release_audit_trace_audit_adapter"
+    },
+    {
+      "name": "runtime.release.release_audit_trace_invalid_exposure_visible",
+      "owner": "runtime.release.release_audit_trace_audit_adapter"
+    },
+    {
+      "name": "runtime.release.release_audit_trace_no_silent_promotion_preserved",
+      "owner": "runtime.release.release_audit_trace_audit_adapter"
+    },
+    {
+      "name": "runtime.release.release_audit_trace_deferred_pending_release_audit_trace_evidence",
+      "owner": "runtime.release.release_audit_trace_audit_adapter"
+    },
+    {
+      "name": "runtime.release.release_audit_trace_missing_context",
+      "owner": "runtime.release.release_audit_trace_audit_adapter"
+    },
+    {
+      "name": "runtime.release.release_audit_trace_rejected_for_release_audit_trace_use",
+      "owner": "runtime.release.release_audit_trace_audit_adapter"
+    },
+    {
+      "name": "runtime.release.release_audit_trace_fallback_template_applied",
+      "owner": "runtime.release.release_audit_trace_audit_adapter"
+    },
+    {
+      "name": "runtime.release.release_audit_trace_prohibited_overlap_blocked",
+      "owner": "runtime.release.release_audit_trace_audit_adapter"
+    },
+    {
+      "name": "decision.case.transition_accepted",
+      "owner": "decision.case.case_transition_audit_adapter"
+    },
+    {
+      "name": "decision.case.transition_blocked",
+      "owner": "decision.case.case_transition_audit_adapter"
+    },
+    {
+      "name": "decision.case.transition_invalid",
+      "owner": "decision.case.case_transition_audit_adapter"
+    },
+    {
+      "name": "decision.case.transition_fallback",
+      "owner": "decision.case.case_transition_audit_adapter"
+    },
+    {
+      "name": "decision.case.transition_resumed",
+      "owner": "decision.case.case_transition_audit_adapter"
+    }
+  ]
+}

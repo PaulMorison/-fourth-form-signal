@@ -1,0 +1,89 @@
+{
+  "type": "object",
+  "required": [
+    "event_name",
+    "authority_rule_id",
+    "decision_right",
+    "actor_role",
+    "resolution_kind",
+    "authority_scope",
+    "authority_ceiling",
+    "authority_floor",
+    "review_required",
+    "transition_name",
+    "transition_class",
+    "reason"
+  ],
+  "additional_properties": false,
+  "properties": {
+    "event_name": {
+      "type": "string",
+      "enum": [
+        "decision.authority.authority_resolution_succeeded",
+        "decision.authority.authority_resolution_blocked",
+        "decision.authority.delegation_applied",
+        "decision.authority.delegation_missing",
+        "decision.authority.authority_scope_violation",
+        "decision.authority.authority_fallback_applied"
+      ]
+    },
+    "authority_rule_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "decision_right": {
+      "type": "string",
+      "min_length": 1
+    },
+    "actor_role": {
+      "type": "string",
+      "min_length": 1
+    },
+    "resolution_kind": {
+      "type": "string",
+      "enum": [
+        "direct",
+        "delegated",
+        "fallback",
+        "blocked",
+        "delegated_missing",
+        "scope_violation"
+      ]
+    },
+    "authority_scope": {
+      "type": "string",
+      "min_length": 1
+    },
+    "authority_ceiling": {
+      "type": "string",
+      "min_length": 1
+    },
+    "authority_floor": {
+      "type": "string",
+      "min_length": 1
+    },
+    "review_required": {
+      "type": "boolean"
+    },
+    "transition_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "transition_class": {
+      "type": "string",
+      "min_length": 1
+    },
+    "resolved_role": {
+      "type": "string",
+      "min_length": 1
+    },
+    "grant_source_role": {
+      "type": "string",
+      "min_length": 1
+    },
+    "reason": {
+      "type": "string",
+      "min_length": 1
+    }
+  }
+}

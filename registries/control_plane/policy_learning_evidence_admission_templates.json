@@ -1,0 +1,161 @@
+{
+  "policy_learning_evidence_admission_templates": {
+    "policy_learning_review_candidate_primary": {
+      "policy_learning_evidence_template_id": "policy_learning_review_candidate_primary",
+      "semantic_scope": "shared_control_plane",
+      "post_mortem_judgment_class_id": "correct_recommendation_correct_execution",
+      "policy_learning_evidence_class_id": "policy_learning_review_candidate",
+      "route_name": "primary_case_path",
+      "required_evidence_fields": [
+        "domain_reference",
+        "decision_scope_reference",
+        "tenant_scope_reference",
+        "learning_scope_reference",
+        "candidate_update_direction",
+        "comparability_judgment",
+        "commercial_interpretability_summary",
+        "proposed_update_scope"
+      ],
+      "optional_evidence_fields": [
+        "reporting_scope_reference",
+        "comparable_case_set_reference",
+        "memory_object_reference",
+        "restriction_summary",
+        "executed_action_reference",
+        "realized_outcome_reference",
+        "execution_deviation_reference",
+        "override_reference",
+        "competing_explanations",
+        "evidence_gaps"
+      ],
+      "required_audit_fields": [
+        "policy_learning_evidence_author_id",
+        "policy_learning_evidence_author_role"
+      ],
+      "policy_learning_evidence_admission_status": "admitted_ready",
+      "policy_learning_evidence_admission_outcome": "admitted_for_update_consideration",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "policy_learning_evidence_template_seed"
+      }
+    },
+    "policy_learning_review_candidate_insufficient_attempt": {
+      "policy_learning_evidence_template_id": "policy_learning_review_candidate_insufficient_attempt",
+      "semantic_scope": "shared_control_plane",
+      "post_mortem_judgment_class_id": "insufficient_evidence_for_confident_judgment",
+      "policy_learning_evidence_class_id": "policy_learning_review_candidate",
+      "required_evidence_fields": [
+        "domain_reference",
+        "decision_scope_reference",
+        "tenant_scope_reference",
+        "learning_scope_reference",
+        "candidate_update_direction",
+        "comparability_judgment",
+        "commercial_interpretability_summary",
+        "proposed_update_scope"
+      ],
+      "optional_evidence_fields": [
+        "reporting_scope_reference",
+        "comparable_case_set_reference",
+        "memory_object_reference",
+        "restriction_summary",
+        "executed_action_reference",
+        "realized_outcome_reference",
+        "execution_deviation_reference",
+        "override_reference",
+        "competing_explanations",
+        "evidence_gaps"
+      ],
+      "required_audit_fields": [
+        "policy_learning_evidence_author_id",
+        "policy_learning_evidence_author_role"
+      ],
+      "policy_learning_evidence_admission_status": "admitted_ready",
+      "policy_learning_evidence_admission_outcome": "admitted_for_update_consideration",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "policy_learning_evidence_template_seed"
+      }
+    },
+    "restricted_policy_learning_review_candidate_primary": {
+      "policy_learning_evidence_template_id": "restricted_policy_learning_review_candidate_primary",
+      "semantic_scope": "shared_control_plane",
+      "post_mortem_judgment_class_id": "correct_recommendation_weak_execution",
+      "policy_learning_evidence_class_id": "restricted_policy_learning_review_candidate",
+      "required_evidence_fields": [
+        "domain_reference",
+        "decision_scope_reference",
+        "tenant_scope_reference",
+        "learning_scope_reference",
+        "candidate_update_direction",
+        "comparability_judgment",
+        "commercial_interpretability_summary",
+        "proposed_update_scope"
+      ],
+      "optional_evidence_fields": [
+        "reporting_scope_reference",
+        "comparable_case_set_reference",
+        "memory_object_reference",
+        "restriction_summary",
+        "executed_action_reference",
+        "realized_outcome_reference",
+        "execution_deviation_reference",
+        "override_reference",
+        "competing_explanations",
+        "evidence_gaps"
+      ],
+      "required_audit_fields": [
+        "policy_learning_evidence_author_id",
+        "policy_learning_evidence_author_role"
+      ],
+      "policy_learning_evidence_admission_status": "fallback_template_applied",
+      "policy_learning_evidence_admission_outcome": "admitted_with_restrictions",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "policy_learning_evidence_template_seed"
+      }
+    },
+    "deferred_policy_learning_review_candidate_fallback": {
+      "policy_learning_evidence_template_id": "deferred_policy_learning_review_candidate_fallback",
+      "semantic_scope": "shared_control_plane",
+      "post_mortem_judgment_class_id": "insufficient_evidence_for_confident_judgment",
+      "policy_learning_evidence_class_id": "deferred_policy_learning_review_candidate",
+      "required_evidence_fields": [
+        "domain_reference",
+        "decision_scope_reference",
+        "tenant_scope_reference",
+        "learning_scope_reference",
+        "candidate_update_direction",
+        "comparability_judgment",
+        "commercial_interpretability_summary",
+        "proposed_update_scope"
+      ],
+      "optional_evidence_fields": [
+        "reporting_scope_reference",
+        "comparable_case_set_reference",
+        "memory_object_reference",
+        "restriction_summary",
+        "executed_action_reference",
+        "realized_outcome_reference",
+        "execution_deviation_reference",
+        "override_reference",
+        "competing_explanations",
+        "evidence_gaps"
+      ],
+      "required_audit_fields": [
+        "policy_learning_evidence_author_id",
+        "policy_learning_evidence_author_role"
+      ],
+      "policy_learning_evidence_admission_status": "fallback_template_applied",
+      "policy_learning_evidence_admission_outcome": "deferred_pending_more_evidence",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "policy_learning_evidence_template_seed"
+      }
+    }
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "policy_learning_update_threshold_templates": {
+    "policy_update_candidate_primary": {
+      "policy_learning_update_threshold_template_id": "policy_update_candidate_primary",
+      "semantic_scope": "shared_control_plane",
+      "policy_learning_evidence_class_id": "policy_learning_review_candidate",
+      "policy_learning_update_threshold_class_id": "policy_update_candidate",
+      "route_name": "primary_case_path",
+      "required_update_threshold_fields": [
+        "domain_reference",
+        "decision_scope_reference",
+        "tenant_scope_reference",
+        "learning_scope_reference",
+        "policy_behavior_change",
+        "update_severity",
+        "update_scope",
+        "evidence_base_summary",
+        "evidence_completeness",
+        "evidence_consistency",
+        "evidence_comparability",
+        "attribution_quality",
+        "scope_legitimacy",
+        "transfer_validity",
+        "magnitude_alignment",
+        "repetition_posture",
+        "commercial_significance",
+        "governance_sensitivity"
+      ],
+      "optional_update_threshold_fields": [
+        "reporting_scope_reference",
+        "candidate_update_direction",
+        "comparability_judgment",
+        "commercial_interpretability_summary",
+        "proposed_update_scope",
+        "comparable_case_set_reference",
+        "restriction_summary",
+        "memory_object_reference",
+        "local_contradiction_posture",
+        "narrowed_scope_reference",
+        "monitoring_recommendation",
+        "unresolved_competing_explanations",
+        "evidence_gaps"
+      ],
+      "required_audit_fields": [
+        "policy_learning_update_threshold_author_id",
+        "policy_learning_update_threshold_author_role"
+      ],
+      "policy_learning_update_threshold_status": "threshold_met",
+      "policy_learning_update_decision_outcome": "accepted",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "policy_learning_update_threshold_template_seed"
+      }
+    },
+    "narrowed_policy_update_candidate_primary": {
+      "policy_learning_update_threshold_template_id": "narrowed_policy_update_candidate_primary",
+      "semantic_scope": "shared_control_plane",
+      "policy_learning_evidence_class_id": "restricted_policy_learning_review_candidate",
+      "policy_learning_update_threshold_class_id": "narrowed_policy_update_candidate",
+      "required_update_threshold_fields": [
+        "domain_reference",
+        "decision_scope_reference",
+        "tenant_scope_reference",
+        "learning_scope_reference",
+        "policy_behavior_change",
+        "update_severity",
+        "update_scope",
+        "evidence_base_summary",
+        "evidence_completeness",
+        "evidence_consistency",
+        "evidence_comparability",
+        "attribution_quality",
+        "scope_legitimacy",
+        "transfer_validity",
+        "magnitude_alignment",
+        "repetition_posture",
+        "commercial_significance",
+        "governance_sensitivity",
+        "local_contradiction_posture",
+        "narrowed_scope_reference"
+      ],
+      "optional_update_threshold_fields": [
+        "reporting_scope_reference",
+        "candidate_update_direction",
+        "comparability_judgment",
+        "commercial_interpretability_summary",
+        "proposed_update_scope",
+        "comparable_case_set_reference",
+        "restriction_summary",
+        "memory_object_reference",
+        "monitoring_recommendation",
+        "unresolved_competing_explanations",
+        "evidence_gaps"
+      ],
+      "required_audit_fields": [
+        "policy_learning_update_threshold_author_id",
+        "policy_learning_update_threshold_author_role"
+      ],
+      "policy_learning_update_threshold_status": "fallback_template_applied",
+      "policy_learning_update_decision_outcome": "accepted_with_narrowed_scope",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "policy_learning_update_threshold_template_seed"
+      }
+    },
+    "deferred_policy_update_candidate_fallback": {
+      "policy_learning_update_threshold_template_id": "deferred_policy_update_candidate_fallback",
+      "semantic_scope": "shared_control_plane",
+      "policy_learning_evidence_class_id": "deferred_policy_learning_review_candidate",
+      "policy_learning_update_threshold_class_id": "deferred_policy_update_candidate",
+      "required_update_threshold_fields": [
+        "domain_reference",
+        "decision_scope_reference",
+        "tenant_scope_reference",
+        "learning_scope_reference",
+        "policy_behavior_change",
+        "update_severity",
+        "update_scope",
+        "evidence_base_summary",
+        "evidence_completeness",
+        "evidence_consistency",
+        "evidence_comparability",
+        "attribution_quality",
+        "scope_legitimacy",
+        "transfer_validity",
+        "magnitude_alignment",
+        "repetition_posture",
+        "commercial_significance",
+        "governance_sensitivity",
+        "monitoring_recommendation"
+      ],
+      "optional_update_threshold_fields": [
+        "reporting_scope_reference",
+        "candidate_update_direction",
+        "comparability_judgment",
+        "commercial_interpretability_summary",
+        "proposed_update_scope",
+        "comparable_case_set_reference",
+        "restriction_summary",
+        "memory_object_reference",
+        "local_contradiction_posture",
+        "narrowed_scope_reference",
+        "unresolved_competing_explanations",
+        "evidence_gaps"
+      ],
+      "required_audit_fields": [
+        "policy_learning_update_threshold_author_id",
+        "policy_learning_update_threshold_author_role"
+      ],
+      "policy_learning_update_threshold_status": "fallback_template_applied",
+      "policy_learning_update_decision_outcome": "deferred_for_continued_monitoring",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "policy_learning_update_threshold_template_seed"
+      }
+    }
+  }
+}

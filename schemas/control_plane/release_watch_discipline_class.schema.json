@@ -1,0 +1,76 @@
+{
+  "type": "object",
+  "required": [
+    "release_watch_discipline_class_id",
+    "description",
+    "allowed_rollback_trigger_statuses",
+    "allowed_rollback_trigger_outcomes",
+    "allow_release_watch_discipline_restrictions",
+    "allow_release_watch_discipline_prerequisite_deferral",
+    "prohibited_release_watch_discipline_fields",
+    "status",
+    "lineage"
+  ],
+  "properties": {
+    "release_watch_discipline_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "description": {
+      "type": "string",
+      "min_length": 1
+    },
+    "allowed_rollback_trigger_statuses": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "rollback_trigger_named",
+          "fallback_template_applied",
+          "blocked_missing_context",
+          "rejected_for_rollback_trigger_use",
+          "prohibited_overlap_blocked"
+        ]
+      }
+    },
+    "allowed_rollback_trigger_outcomes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "ready_for_release_watch_discipline",
+          "conditionally_ready_for_release_watch_discipline",
+          "deferred_pending_rollback_trigger_evidence",
+          "blocked_missing_context",
+          "rejected_for_rollback_trigger_use",
+          "prohibited_overlap_blocked"
+        ]
+      }
+    },
+    "allow_release_watch_discipline_restrictions": {
+      "type": "boolean"
+    },
+    "allow_release_watch_discipline_prerequisite_deferral": {
+      "type": "boolean"
+    },
+    "prohibited_release_watch_discipline_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object"
+    }
+  }
+}

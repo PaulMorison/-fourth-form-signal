@@ -1,0 +1,70 @@
+{
+  "type": "object",
+  "required": [
+    "disposition_class_id",
+    "description",
+    "disposition_state",
+    "closure_state",
+    "closure_quality",
+    "terminality",
+    "status",
+    "lineage"
+  ],
+  "properties": {
+    "disposition_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "description": {
+      "type": "string",
+      "min_length": 1
+    },
+    "disposition_state": {
+      "type": "string",
+      "enum": [
+        "action_routing",
+        "non_action_closure",
+        "reroute",
+        "rework",
+        "clarification",
+        "deferred_continuation",
+        "governed_unresolved_closure"
+      ]
+    },
+    "closure_state": {
+      "type": "string",
+      "enum": [
+        "open",
+        "closed",
+        "closed_pending_downstream_execution",
+        "closed_pending_later_review",
+        "closed_with_qualified_finality"
+      ]
+    },
+    "closure_quality": {
+      "type": "string",
+      "enum": [
+        "complete",
+        "qualified"
+      ]
+    },
+    "terminality": {
+      "type": "boolean"
+    },
+    "reopen_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object"
+    }
+  },
+  "additional_properties": false
+}

@@ -1,0 +1,104 @@
+{
+  "release_confirmation_classes": {
+    "full_scope_production_promotion_candidate": {
+      "release_confirmation_class_id": "full_scope_production_promotion_candidate",
+      "description": "A governed release-confirmation class for promoted candidates whose confirmation threshold evidence and confirmation judgment are explicit enough to treat broader trusted production use as durably legitimate without widening into watch execution, observation capture, rollback execution, or monitoring.",
+      "allowed_release_watch_discipline_statuses": [
+        "release_watch_discipline_defined"
+      ],
+      "allowed_release_watch_discipline_outcomes": [
+        "ready_for_release_confirmation"
+      ],
+      "allow_release_confirmation_restrictions": false,
+      "allow_release_confirmation_prerequisite_deferral": false,
+      "prohibited_release_confirmation_fields": [
+        "policy_rollout_reference",
+        "release_activation_reference",
+        "release_watch_execution_reference",
+        "release_observation_reference",
+        "rollback_decision_reference",
+        "contained_rollback_reference",
+        "monitor_alert_reference",
+        "drift_monitor_reference",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "orchestration_owner_reference",
+        "lifecycle_state_override"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-24",
+        "source": "release_confirmation_class_seed"
+      }
+    },
+    "conditional_production_release": {
+      "release_confirmation_class_id": "conditional_production_release",
+      "description": "A governed release-confirmation class for bounded conditional production exposure whose threshold evidence and confirmation judgment preserve narrowed production use without granting broader entitlement.",
+      "allowed_release_watch_discipline_statuses": [
+        "release_watch_discipline_defined",
+        "fallback_template_applied"
+      ],
+      "allowed_release_watch_discipline_outcomes": [
+        "ready_for_release_confirmation",
+        "conditionally_ready_for_release_confirmation"
+      ],
+      "allow_release_confirmation_restrictions": true,
+      "allow_release_confirmation_prerequisite_deferral": false,
+      "prohibited_release_confirmation_fields": [
+        "policy_rollout_reference",
+        "release_activation_reference",
+        "release_watch_execution_reference",
+        "release_observation_reference",
+        "rollback_decision_reference",
+        "contained_rollback_reference",
+        "monitor_alert_reference",
+        "drift_monitor_reference",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "orchestration_owner_reference",
+        "lifecycle_state_override"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-24",
+        "source": "release_confirmation_class_seed"
+      }
+    },
+    "deferred_release_state": {
+      "release_confirmation_class_id": "deferred_release_state",
+      "description": "A governed release-confirmation class for promoted candidates whose confirmation threshold evidence remains too incomplete for present durable legitimacy even though immediate rollback execution is not owned here.",
+      "allowed_release_watch_discipline_statuses": [
+        "release_watch_discipline_defined",
+        "fallback_template_applied"
+      ],
+      "allowed_release_watch_discipline_outcomes": [
+        "ready_for_release_confirmation",
+        "conditionally_ready_for_release_confirmation"
+      ],
+      "allow_release_confirmation_restrictions": true,
+      "allow_release_confirmation_prerequisite_deferral": true,
+      "prohibited_release_confirmation_fields": [
+        "policy_rollout_reference",
+        "release_activation_reference",
+        "release_watch_execution_reference",
+        "release_observation_reference",
+        "rollback_decision_reference",
+        "contained_rollback_reference",
+        "monitor_alert_reference",
+        "drift_monitor_reference",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "orchestration_owner_reference",
+        "lifecycle_state_override"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-24",
+        "source": "release_confirmation_class_seed"
+      }
+    }
+  }
+}

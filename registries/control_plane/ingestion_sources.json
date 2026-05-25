@@ -1,0 +1,18 @@
+{
+  "sources": {
+    "domain_01_promotional_allocation": {
+      "entity_type": "promotion_candidate",
+      "allowed_scopes": [
+        "store",
+        "network"
+      ],
+      "required_payload_fields": [
+        "store_id",
+        "sku",
+        "candidate_revenue",
+        "baseline_revenue",
+        "event_type"
+      ]
+    }
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "execution_request_templates": {
+    "direct_execution_request_primary": {
+      "execution_request_template_id": "direct_execution_request_primary",
+      "semantic_scope": "shared_control_plane",
+      "resolution_class_id": "resolved_with_action",
+      "disposition_class_id": "closed_pending_downstream_execution",
+      "recommendation_class_id": "recommend_act_now",
+      "policy_output_class_id": "policy_shaped_allowance",
+      "portfolio_output_class_id": "portfolio_bounded_allocation",
+      "action_instruction_class_id": "direct_action_instruction",
+      "execution_request_class_id": "direct_dispatch_request",
+      "route_name": "primary_case_path",
+      "required_execution_request_fields": [
+        "action_instruction_reference",
+        "upstream_commitment_reference",
+        "instruction_authority_reference",
+        "execution_request_summary",
+        "execution_request_reference",
+        "execution_target_reference",
+        "execution_scope_reference",
+        "execution_timing_reference",
+        "execution_request_channel"
+      ],
+      "optional_execution_request_fields": [
+        "instruction_summary",
+        "portfolio_summary",
+        "policy_summary",
+        "recommendation_summary",
+        "review_summary",
+        "resolution_rationale",
+        "policy_rationale",
+        "portfolio_rationale",
+        "allocation_reference",
+        "allocation_weight_reference",
+        "intended_action_reference",
+        "action_delivery_channel",
+        "execution_payload_reference",
+        "execution_priority_reference",
+        "dispatch_window_reference",
+        "reopen_reference"
+      ],
+      "required_audit_fields": [
+        "execution_request_author_id",
+        "execution_request_author_role"
+      ],
+      "execution_request_status": "ready_for_downstream_use",
+      "execution_request_readiness": "dispatch_ready",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "execution_request_template_seed"
+      }
+    },
+    "prerequisite_execution_request_primary": {
+      "execution_request_template_id": "prerequisite_execution_request_primary",
+      "semantic_scope": "shared_control_plane",
+      "resolution_class_id": "returned_for_clarification",
+      "disposition_class_id": "returned_for_clarification_open",
+      "recommendation_class_id": "recommend_gather_more_information",
+      "policy_output_class_id": "policy_shaped_information_requirement",
+      "portfolio_output_class_id": "portfolio_ranked_preference",
+      "action_instruction_class_id": "prerequisite_bounded_instruction",
+      "execution_request_class_id": "prerequisite_dispatch_request",
+      "route_name": "primary_case_path",
+      "required_execution_request_fields": [
+        "action_instruction_reference",
+        "upstream_commitment_reference",
+        "instruction_authority_reference",
+        "blocking_condition_reference",
+        "clarification_reference",
+        "execution_request_summary",
+        "execution_request_reference",
+        "execution_target_reference",
+        "execution_scope_reference",
+        "execution_timing_reference",
+        "execution_request_channel"
+      ],
+      "optional_execution_request_fields": [
+        "instruction_summary",
+        "portfolio_summary",
+        "policy_summary",
+        "recommendation_summary",
+        "review_summary",
+        "resolution_rationale",
+        "policy_rationale",
+        "portfolio_rationale",
+        "preference_rank_reference",
+        "blocking_condition_kind",
+        "intended_action_reference",
+        "action_delivery_channel",
+        "execution_payload_reference",
+        "execution_priority_reference",
+        "dispatch_window_reference",
+        "reopen_reference"
+      ],
+      "required_audit_fields": [
+        "execution_request_author_id",
+        "execution_request_author_role"
+      ],
+      "execution_request_status": "ready_for_downstream_use",
+      "execution_request_readiness": "dispatch_blocked_pending_prerequisite",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "execution_request_template_seed"
+      }
+    },
+    "hold_execution_request_fallback": {
+      "execution_request_template_id": "hold_execution_request_fallback",
+      "semantic_scope": "shared_control_plane",
+      "resolution_class_id": "manual_fallback_resolution",
+      "disposition_class_id": "manual_fallback_hold",
+      "recommendation_class_id": "abstain_from_strong_recommendation",
+      "policy_output_class_id": "policy_shaped_suppression",
+      "portfolio_output_class_id": "portfolio_suppression_hold",
+      "action_instruction_class_id": "suppression_hold_instruction",
+      "execution_request_class_id": "hold_dispatch_request",
+      "required_execution_request_fields": [
+        "action_instruction_reference",
+        "upstream_commitment_reference",
+        "instruction_authority_reference",
+        "execution_request_summary",
+        "execution_request_reference",
+        "execution_target_reference",
+        "execution_scope_reference",
+        "execution_timing_reference",
+        "execution_request_channel",
+        "fallback_reference"
+      ],
+      "optional_execution_request_fields": [
+        "instruction_summary",
+        "portfolio_summary",
+        "policy_summary",
+        "recommendation_summary",
+        "review_summary",
+        "resolution_rationale",
+        "policy_rationale",
+        "portfolio_rationale",
+        "suppression_reference",
+        "intended_action_reference",
+        "action_delivery_channel",
+        "execution_payload_reference",
+        "execution_priority_reference",
+        "dispatch_window_reference",
+        "reopen_reference"
+      ],
+      "required_audit_fields": [
+        "execution_request_author_id",
+        "execution_request_author_role"
+      ],
+      "execution_request_status": "fallback_template_applied",
+      "execution_request_readiness": "dispatch_prohibited",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "execution_request_template_seed"
+      }
+    }
+  }
+}

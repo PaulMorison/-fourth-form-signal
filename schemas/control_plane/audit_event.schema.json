@@ -1,0 +1,60 @@
+{
+  "type": "object",
+  "required": [
+    "event_id",
+    "event_type",
+    "owner",
+    "correlation_id",
+    "entity_type",
+    "entity_id",
+    "actor_id",
+    "occurred_at",
+    "payload",
+    "tags"
+  ],
+  "additional_properties": false,
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "event_type": {
+      "type": "string",
+      "min_length": 1
+    },
+    "owner": {
+      "type": "string",
+      "min_length": 1
+    },
+    "correlation_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "entity_type": {
+      "type": "string",
+      "min_length": 1
+    },
+    "entity_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "actor_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "iso-datetime"
+    },
+    "payload": {
+      "type": "object"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    }
+  }
+}

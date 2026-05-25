@@ -1,0 +1,159 @@
+{
+  "type": "object",
+  "required": [
+    "contained_rollback_id",
+    "contained_rollback_status",
+    "reason",
+    "contained_rollback_class_id",
+    "contained_rollback_template_id",
+    "contained_rollback_outcome",
+    "contained_rollback_judgment",
+    "rollback_execution_reference",
+    "containment_evidence_reference",
+    "bounded_exposure_reference",
+    "downstream_effects_boundary_reference",
+    "release_lineage_reconstruction_reference",
+    "contained_rollback_authority_reference",
+    "production_entitlement_check_id",
+    "production_entitlement_check_status",
+    "production_entitlement_check_class_id",
+    "production_entitlement_check_template_id",
+    "production_entitlement_check_outcome",
+    "production_entitlement_judgment",
+    "production_entitlement_evidence_reference",
+    "production_entitlement_authority_reference",
+    "release_confirmation_id",
+    "release_confirmation_status",
+    "release_confirmation_class_id",
+    "release_confirmation_template_id",
+    "release_confirmation_outcome",
+    "release_confirmation_judgment",
+    "release_confirmation_threshold_evidence_reference",
+    "release_confirmation_authority_reference",
+    "release_watch_discipline_id",
+    "release_watch_discipline_status",
+    "release_watch_discipline_class_id",
+    "release_watch_discipline_template_id",
+    "release_watch_discipline_outcome",
+    "release_watch_discipline_summary",
+    "release_confirmation_window",
+    "release_response_threshold_reference",
+    "release_watch_owner_reference",
+    "rollback_trigger_reference",
+    "rollback_plan_reference",
+    "promotion_candidate_reference",
+    "promotion_threshold_reference",
+    "production_entitlement_boundary",
+    "rollback_posture_reference",
+    "release_watch_window",
+    "release_confirmation_threshold_reference",
+    "promotion_scope_reference",
+    "promotion_boundary_summary",
+    "rollout_scope_boundary_reference",
+    "exposure_boundary_reference",
+    "rollout_boundary_summary",
+    "semantic_scope",
+    "case_type",
+    "case_key",
+    "state_model_name",
+    "episode_id",
+    "transition_name",
+    "transition_class",
+    "domain_reference",
+    "decision_scope_reference",
+    "tenant_scope_reference",
+    "learning_scope_reference",
+    "contained_rollback_author_role",
+    "contained_rollback_author_id",
+    "required_contained_rollback_fields",
+    "optional_contained_rollback_fields",
+    "required_audit_fields",
+    "prohibited_contained_rollback_fields",
+    "required_contained_rollback_snapshot",
+    "optional_contained_rollback_snapshot",
+    "required_audit_snapshot",
+    "lineage",
+    "generated_at"
+  ],
+  "properties": {
+    "contained_rollback_status": {
+      "type": "string",
+      "enum": [
+        "contained_rollback_bounded",
+        "fallback_template_applied",
+        "blocked_missing_context",
+        "rejected_for_contained_rollback_use",
+        "prohibited_overlap_blocked"
+      ]
+    },
+    "contained_rollback_outcome": {
+      "type": "string",
+      "enum": [
+        "bounded_exposure_preserved",
+        "partial_reversal_bounded",
+        "deferred_pending_contained_rollback_evidence",
+        "blocked_missing_context",
+        "rejected_for_contained_rollback_use",
+        "prohibited_overlap_blocked"
+      ]
+    },
+    "production_entitlement_check_status": {
+      "type": "string",
+      "enum": [
+        "production_entitlement_checked",
+        "fallback_template_applied",
+        "blocked_missing_context",
+        "rejected_for_production_entitlement_use",
+        "prohibited_overlap_blocked"
+      ]
+    },
+    "production_entitlement_check_outcome": {
+      "type": "string",
+      "enum": [
+        "approved_for_broader_trusted_production_entitlement",
+        "conditionally_approved_for_bounded_production_entitlement",
+        "deferred_pending_production_entitlement_evidence",
+        "blocked_missing_context",
+        "rejected_for_production_entitlement_use",
+        "prohibited_overlap_blocked"
+      ]
+    },
+    "required_contained_rollback_fields": {
+      "type": "array"
+    },
+    "optional_contained_rollback_fields": {
+      "type": "array"
+    },
+    "required_audit_fields": {
+      "type": "array"
+    },
+    "prohibited_contained_rollback_fields": {
+      "type": "array"
+    },
+    "required_contained_rollback_snapshot": {
+      "type": "object"
+    },
+    "optional_contained_rollback_snapshot": {
+      "type": "object"
+    },
+    "required_audit_snapshot": {
+      "type": "object"
+    },
+    "lineage": {
+      "type": "object"
+    },
+    "generated_at": {
+      "type": "string",
+      "min_length": 1
+    },
+    "outstanding_contained_rollback_prerequisites": {
+      "type": "array"
+    },
+    "missing_contained_rollback_fields": {
+      "type": "array"
+    },
+    "prohibited_contained_rollback_fields_present": {
+      "type": "array"
+    }
+  }
+}

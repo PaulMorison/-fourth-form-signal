@@ -1,0 +1,107 @@
+{
+  "type": "object",
+  "required": [
+    "action_instruction_class_id",
+    "description",
+    "bounded_action_posture",
+    "execution_boundary_posture",
+    "promotion_safe_use",
+    "allowed_portfolio_output_class_ids",
+    "allowed_policy_output_class_ids",
+    "allowed_recommendation_class_ids",
+    "allowed_resolution_class_ids",
+    "allowed_disposition_class_ids",
+    "prohibited_execution_fields",
+    "status",
+    "lineage"
+  ],
+  "properties": {
+    "action_instruction_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "description": {
+      "type": "string",
+      "min_length": 1
+    },
+    "bounded_action_posture": {
+      "type": "string",
+      "enum": [
+        "direct_action_instruction",
+        "prerequisite_bounded_instruction",
+        "suppression_hold_instruction"
+      ]
+    },
+    "execution_boundary_posture": {
+      "type": "string",
+      "enum": [
+        "instruction_not_executed"
+      ]
+    },
+    "promotion_safe_use": {
+      "type": "string",
+      "enum": [
+        "promotion_safe_instruction"
+      ]
+    },
+    "allowed_portfolio_output_class_ids": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "allowed_policy_output_class_ids": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "allowed_recommendation_class_ids": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "allowed_resolution_class_ids": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "allowed_disposition_class_ids": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "prohibited_execution_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object"
+    }
+  },
+  "additional_properties": false
+}

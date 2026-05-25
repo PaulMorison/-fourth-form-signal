@@ -1,0 +1,82 @@
+{
+  "type": "object",
+  "required": [
+    "promotion_readiness_class_id",
+    "description",
+    "allowed_policy_learning_update_mutation_execution_statuses",
+    "allowed_policy_learning_update_mutation_execution_outcomes",
+    "minimum_dimension_strength",
+    "allow_promotion_restrictions",
+    "allow_promotion_prerequisite_deferral",
+    "prohibited_promotion_readiness_fields",
+    "status",
+    "lineage"
+  ],
+  "properties": {
+    "promotion_readiness_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "description": {
+      "type": "string",
+      "min_length": 1
+    },
+    "allowed_policy_learning_update_mutation_execution_statuses": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "mutation_execution_ready",
+          "fallback_template_applied"
+        ]
+      }
+    },
+    "allowed_policy_learning_update_mutation_execution_outcomes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "ready_for_policy_mutation_execution",
+          "ready_for_policy_mutation_execution_with_restrictions",
+          "deferred_pending_mutation_execution_prerequisites",
+          "blocked_missing_context",
+          "rejected_for_mutation_execution_use",
+          "prohibited_overlap_blocked"
+        ]
+      }
+    },
+    "minimum_dimension_strength": {
+      "type": "string",
+      "enum": [
+        "weak",
+        "moderate",
+        "strong"
+      ]
+    },
+    "allow_promotion_restrictions": {
+      "type": "boolean"
+    },
+    "allow_promotion_prerequisite_deferral": {
+      "type": "boolean"
+    },
+    "prohibited_promotion_readiness_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object"
+    }
+  }
+}

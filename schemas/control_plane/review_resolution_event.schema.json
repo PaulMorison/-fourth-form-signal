@@ -1,0 +1,300 @@
+{
+  "type": "object",
+  "required": [
+    "resolution_id",
+    "resolution_status",
+    "reason",
+    "resolution_class_id",
+    "disposition_class_id",
+    "resolution_state",
+    "review_outcome",
+    "disposition_state",
+    "closure_state",
+    "closure_quality",
+    "terminality",
+    "packet_id",
+    "packet_template_id",
+    "packet_status",
+    "handoff_ready",
+    "semantic_scope",
+    "case_type",
+    "case_key",
+    "state_model_name",
+    "episode_id",
+    "transition_name",
+    "transition_class",
+    "source_stage",
+    "target_stage",
+    "reviewer_role",
+    "reviewer_id",
+    "authority_resolution_kind",
+    "authority_review_required",
+    "router_rule_id",
+    "routing_resolution_status",
+    "routing_review_required",
+    "review_mode",
+    "reason_class",
+    "packet_scope",
+    "handoff_channel",
+    "handoff_purpose",
+    "required_resolution_fields",
+    "optional_resolution_fields",
+    "required_audit_fields",
+    "required_resolution_snapshot",
+    "optional_resolution_snapshot",
+    "required_audit_snapshot",
+    "lineage"
+  ],
+  "properties": {
+    "resolution_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "resolution_status": {
+      "type": "string",
+      "enum": [
+        "resolved",
+        "blocked",
+        "fallback_applied",
+        "ready_for_disposition"
+      ]
+    },
+    "reason": {
+      "type": "string",
+      "min_length": 1
+    },
+    "resolution_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "disposition_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "resolution_state": {
+      "type": "string",
+      "enum": [
+        "settled",
+        "returned",
+        "deferred",
+        "unresolved"
+      ]
+    },
+    "review_outcome": {
+      "type": "string",
+      "enum": [
+        "resolved_with_action",
+        "resolved_with_non_action",
+        "resolved_with_escalation",
+        "returned_for_rework",
+        "returned_for_clarification",
+        "deferred_continuation",
+        "unresolved_state",
+        "rejected_resolution"
+      ]
+    },
+    "disposition_state": {
+      "type": "string",
+      "enum": [
+        "action_routing",
+        "non_action_closure",
+        "reroute",
+        "rework",
+        "clarification",
+        "deferred_continuation",
+        "governed_unresolved_closure"
+      ]
+    },
+    "closure_state": {
+      "type": "string",
+      "enum": [
+        "open",
+        "closed",
+        "closed_pending_downstream_execution",
+        "closed_pending_later_review",
+        "closed_with_qualified_finality"
+      ]
+    },
+    "closure_quality": {
+      "type": "string",
+      "enum": [
+        "complete",
+        "qualified"
+      ]
+    },
+    "terminality": {
+      "type": "boolean"
+    },
+    "packet_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "packet_template_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "packet_status": {
+      "type": "string",
+      "enum": [
+        "ready_for_handoff",
+        "blocked",
+        "fallback_template_applied"
+      ]
+    },
+    "handoff_ready": {
+      "type": "boolean"
+    },
+    "semantic_scope": {
+      "type": "string",
+      "min_length": 1
+    },
+    "case_type": {
+      "type": "string",
+      "min_length": 1
+    },
+    "case_key": {
+      "type": "string",
+      "min_length": 1
+    },
+    "state_model_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "episode_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "transition_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "transition_class": {
+      "type": "string",
+      "min_length": 1
+    },
+    "source_stage": {
+      "type": "string",
+      "min_length": 1
+    },
+    "target_stage": {
+      "type": "string",
+      "min_length": 1
+    },
+    "reviewer_role": {
+      "type": "string",
+      "min_length": 1
+    },
+    "reviewer_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "authority_resolution_kind": {
+      "type": "string",
+      "min_length": 1
+    },
+    "authority_review_required": {
+      "type": "boolean"
+    },
+    "router_rule_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "route_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "routing_resolution_status": {
+      "type": "string",
+      "min_length": 1
+    },
+    "routing_review_required": {
+      "type": "boolean"
+    },
+    "review_mode": {
+      "type": "string",
+      "enum": [
+        "required",
+        "optional"
+      ]
+    },
+    "threshold_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "trigger_class": {
+      "type": "string",
+      "min_length": 1
+    },
+    "reason_class": {
+      "type": "string",
+      "min_length": 1
+    },
+    "packet_scope": {
+      "type": "string",
+      "min_length": 1
+    },
+    "handoff_channel": {
+      "type": "string",
+      "min_length": 1
+    },
+    "handoff_purpose": {
+      "type": "string",
+      "min_length": 1
+    },
+    "playbook_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "recommendation_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "reopen_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "required_resolution_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "optional_resolution_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "required_audit_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "required_resolution_snapshot": {
+      "type": "object"
+    },
+    "optional_resolution_snapshot": {
+      "type": "object"
+    },
+    "required_audit_snapshot": {
+      "type": "object"
+    },
+    "missing_resolution_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "lineage": {
+      "type": "object"
+    }
+  },
+  "additional_properties": false
+}

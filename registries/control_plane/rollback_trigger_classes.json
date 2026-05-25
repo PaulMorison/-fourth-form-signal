@@ -1,0 +1,110 @@
+{
+  "rollback_trigger_classes": {
+    "full_scope_production_promotion_candidate": {
+      "rollback_trigger_class_id": "full_scope_production_promotion_candidate",
+      "description": "A governed rollback-trigger class for promotion candidates whose named rollback triggers and rollback-plan completeness are explicit enough for downstream release-watch discipline without widening into watch execution or rollback execution.",
+      "allowed_rollout_scope_statuses": [
+        "rollout_scope_defined"
+      ],
+      "allowed_rollout_scope_outcomes": [
+        "ready_for_rollback_trigger_guard"
+      ],
+      "allow_rollback_trigger_restrictions": false,
+      "allow_rollback_trigger_prerequisite_deferral": false,
+      "prohibited_rollback_trigger_fields": [
+        "policy_rollout_reference",
+        "release_activation_reference",
+        "release_observation_reference",
+        "release_watch_owner_reference",
+        "release_response_threshold_reference",
+        "release_escalation_path_reference",
+        "rollback_decision_reference",
+        "contained_rollback_reference",
+        "monitor_alert_reference",
+        "drift_monitor_reference",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "orchestration_owner_reference",
+        "lifecycle_state_override"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-24",
+        "source": "rollback_trigger_class_seed"
+      }
+    },
+    "conditional_production_release": {
+      "rollback_trigger_class_id": "conditional_production_release",
+      "description": "A governed rollback-trigger class for promotion candidates in bounded conditional production exposure whose named rollback triggers remain explicit before downstream release-watch discipline begins.",
+      "allowed_rollout_scope_statuses": [
+        "rollout_scope_defined",
+        "fallback_template_applied"
+      ],
+      "allowed_rollout_scope_outcomes": [
+        "ready_for_rollback_trigger_guard",
+        "conditionally_ready_for_rollback_trigger_guard"
+      ],
+      "allow_rollback_trigger_restrictions": true,
+      "allow_rollback_trigger_prerequisite_deferral": false,
+      "prohibited_rollback_trigger_fields": [
+        "policy_rollout_reference",
+        "release_activation_reference",
+        "release_observation_reference",
+        "release_watch_owner_reference",
+        "release_response_threshold_reference",
+        "release_escalation_path_reference",
+        "rollback_decision_reference",
+        "contained_rollback_reference",
+        "monitor_alert_reference",
+        "drift_monitor_reference",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "orchestration_owner_reference",
+        "lifecycle_state_override"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-24",
+        "source": "rollback_trigger_class_seed"
+      }
+    },
+    "deferred_release_state": {
+      "rollback_trigger_class_id": "deferred_release_state",
+      "description": "A governed rollback-trigger class for promotion candidates whose rollback-trigger evidence or rollback-plan completeness remains too incomplete for present downstream release-watch discipline even though immediate rejection is not required.",
+      "allowed_rollout_scope_statuses": [
+        "rollout_scope_defined",
+        "fallback_template_applied"
+      ],
+      "allowed_rollout_scope_outcomes": [
+        "ready_for_rollback_trigger_guard",
+        "conditionally_ready_for_rollback_trigger_guard"
+      ],
+      "allow_rollback_trigger_restrictions": true,
+      "allow_rollback_trigger_prerequisite_deferral": true,
+      "prohibited_rollback_trigger_fields": [
+        "policy_rollout_reference",
+        "release_activation_reference",
+        "release_observation_reference",
+        "release_watch_owner_reference",
+        "release_response_threshold_reference",
+        "release_escalation_path_reference",
+        "rollback_decision_reference",
+        "contained_rollback_reference",
+        "monitor_alert_reference",
+        "drift_monitor_reference",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "orchestration_owner_reference",
+        "lifecycle_state_override"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-24",
+        "source": "rollback_trigger_class_seed"
+      }
+    }
+  }
+}

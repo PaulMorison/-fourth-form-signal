@@ -1,0 +1,10 @@
+{
+  "owners": {
+    "shared_control_plane": {
+      "allowed_namespaces": [
+        "shared.control"
+      ],
+      "semantic_scope": "shared_control_plane"
+    }
+  }
+}

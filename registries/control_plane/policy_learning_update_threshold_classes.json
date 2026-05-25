@@ -1,0 +1,114 @@
+{
+  "policy_learning_update_threshold_classes": {
+    "policy_update_candidate": {
+      "policy_learning_update_threshold_class_id": "policy_update_candidate",
+      "description": "A governed policy-learning update-threshold class for admitted evidence strong enough to justify the proposed policy change within the approved scope without absorbing policy mutation, model retraining, deployment, monitoring, reopen, or orchestration semantics.",
+      "allowed_policy_learning_evidence_statuses": [
+        "admitted_ready"
+      ],
+      "allowed_policy_learning_evidence_outcomes": [
+        "admitted_for_update_consideration"
+      ],
+      "minimum_policy_learning_evidence_sufficiency": "learning_grade_evidence_sufficient",
+      "minimum_policy_learning_evidence_attribution_readiness": "attribution_ready_for_learning",
+      "minimum_dimension_strength": "strong",
+      "minimum_repetition_posture": "repeated_comparable_cases",
+      "allow_local_scope_narrowing": false,
+      "allow_monitoring_deferral": false,
+      "prohibited_update_threshold_fields": [
+        "policy_mutation_payload",
+        "policy_update_execution_reference",
+        "model_retraining_reference",
+        "model_deployment_reference",
+        "drift_monitor_reference",
+        "monitor_alert_reference",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "orchestration_owner_reference",
+        "lifecycle_state_override",
+        "attribution_rewrite_instruction"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "policy_learning_update_threshold_class_seed"
+      }
+    },
+    "narrowed_policy_update_candidate": {
+      "policy_learning_update_threshold_class_id": "narrowed_policy_update_candidate",
+      "description": "A governed policy-learning update-threshold class for admitted evidence that supports adaptation only within a narrower local scope while remaining separate from policy mutation, model retraining, deployment, monitoring, reopen, and orchestration semantics.",
+      "allowed_policy_learning_evidence_statuses": [
+        "admitted_ready",
+        "fallback_template_applied"
+      ],
+      "allowed_policy_learning_evidence_outcomes": [
+        "admitted_for_update_consideration",
+        "admitted_with_restrictions"
+      ],
+      "minimum_policy_learning_evidence_sufficiency": "learning_evidence_restricted",
+      "minimum_policy_learning_evidence_attribution_readiness": "attribution_pending_more_evidence",
+      "minimum_dimension_strength": "moderate",
+      "minimum_repetition_posture": "limited_repetition",
+      "allow_local_scope_narrowing": true,
+      "allow_monitoring_deferral": false,
+      "prohibited_update_threshold_fields": [
+        "policy_mutation_payload",
+        "policy_update_execution_reference",
+        "model_retraining_reference",
+        "model_deployment_reference",
+        "drift_monitor_reference",
+        "monitor_alert_reference",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "orchestration_owner_reference",
+        "lifecycle_state_override",
+        "attribution_rewrite_instruction"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "policy_learning_update_threshold_class_seed"
+      }
+    },
+    "deferred_policy_update_candidate": {
+      "policy_learning_update_threshold_class_id": "deferred_policy_update_candidate",
+      "description": "A governed policy-learning update-threshold class for admitted evidence that is meaningful enough to preserve but still too weak, too recent, or too unresolved for present adaptation and must remain deferred for continued monitoring.",
+      "allowed_policy_learning_evidence_statuses": [
+        "admitted_ready",
+        "fallback_template_applied"
+      ],
+      "allowed_policy_learning_evidence_outcomes": [
+        "admitted_for_update_consideration",
+        "admitted_with_restrictions",
+        "deferred_pending_more_evidence"
+      ],
+      "minimum_policy_learning_evidence_sufficiency": "learning_evidence_deferred",
+      "minimum_policy_learning_evidence_attribution_readiness": "attribution_pending_more_evidence",
+      "minimum_dimension_strength": "weak",
+      "minimum_repetition_posture": "single_case_only",
+      "allow_local_scope_narrowing": true,
+      "allow_monitoring_deferral": true,
+      "prohibited_update_threshold_fields": [
+        "policy_mutation_payload",
+        "policy_update_execution_reference",
+        "model_retraining_reference",
+        "model_deployment_reference",
+        "drift_monitor_reference",
+        "monitor_alert_reference",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "orchestration_owner_reference",
+        "lifecycle_state_override",
+        "attribution_rewrite_instruction"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "policy_learning_update_threshold_class_seed"
+      }
+    }
+  }
+}

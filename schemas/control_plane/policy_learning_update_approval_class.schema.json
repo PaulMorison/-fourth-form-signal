@@ -1,0 +1,104 @@
+{
+  "type": "object",
+  "required": [
+    "policy_learning_update_approval_class_id",
+    "description",
+    "allowed_policy_learning_update_threshold_statuses",
+    "allowed_policy_learning_update_decision_outcomes",
+    "minimum_evidence_sufficiency",
+    "minimum_weak_evidence_check",
+    "minimum_dimension_strength",
+    "allow_preparation_restrictions",
+    "allow_additional_governance_deferral",
+    "prohibited_update_approval_fields",
+    "status",
+    "lineage"
+  ],
+  "properties": {
+    "policy_learning_update_approval_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "description": {
+      "type": "string",
+      "min_length": 1
+    },
+    "allowed_policy_learning_update_threshold_statuses": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "threshold_met",
+          "fallback_template_applied"
+        ]
+      }
+    },
+    "allowed_policy_learning_update_decision_outcomes": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "accepted",
+          "accepted_with_narrowed_scope",
+          "deferred_for_continued_monitoring",
+          "rejected"
+        ]
+      }
+    },
+    "minimum_evidence_sufficiency": {
+      "type": "string",
+      "enum": [
+        "sufficient_for_proposed_update",
+        "sufficient_only_for_narrowed_scope",
+        "insufficient_pending_more_evidence",
+        "threshold_evidence_incomplete",
+        "threshold_evidence_overlap_prohibited",
+        "insufficient_for_update_threshold"
+      ]
+    },
+    "minimum_weak_evidence_check": {
+      "type": "string",
+      "enum": [
+        "weak_evidence_check_passed",
+        "weak_evidence_check_requires_narrowing",
+        "weak_evidence_check_requires_monitoring",
+        "weak_evidence_check_blocked_for_overlap",
+        "weak_evidence_check_failed"
+      ]
+    },
+    "minimum_dimension_strength": {
+      "type": "string",
+      "enum": [
+        "weak",
+        "moderate",
+        "strong"
+      ]
+    },
+    "allow_preparation_restrictions": {
+      "type": "boolean"
+    },
+    "allow_additional_governance_deferral": {
+      "type": "boolean"
+    },
+    "prohibited_update_approval_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object"
+    }
+  },
+  "additional_properties": false
+}

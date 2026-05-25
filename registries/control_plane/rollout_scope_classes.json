@@ -1,0 +1,104 @@
+{
+  "rollout_scope_classes": {
+    "full_scope_production_promotion_candidate": {
+      "rollout_scope_class_id": "full_scope_production_promotion_candidate",
+      "description": "A governed rollout-scope class for promotion candidates whose rollout scope and exposure boundary are explicit enough for downstream rollback-trigger guard without widening into rollback execution or post-release watch execution.",
+      "allowed_promotion_readiness_statuses": [
+        "promotion_ready"
+      ],
+      "allowed_promotion_readiness_outcomes": [
+        "ready_for_rollout_scope_control"
+      ],
+      "allow_rollout_scope_restrictions": false,
+      "allow_rollout_scope_prerequisite_deferral": false,
+      "prohibited_rollout_scope_fields": [
+        "policy_rollout_reference",
+        "release_activation_reference",
+        "release_observation_reference",
+        "rollback_trigger_reference",
+        "rollback_decision_reference",
+        "contained_rollback_reference",
+        "monitor_alert_reference",
+        "drift_monitor_reference",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "orchestration_owner_reference",
+        "lifecycle_state_override"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-24",
+        "source": "rollout_scope_class_seed"
+      }
+    },
+    "conditional_production_release": {
+      "rollout_scope_class_id": "conditional_production_release",
+      "description": "A governed rollout-scope class for promotion candidates permitted into bounded production exposure under conditional release posture with explicit exposure limits and explicit downstream rollback-trigger guard.",
+      "allowed_promotion_readiness_statuses": [
+        "promotion_ready",
+        "fallback_template_applied"
+      ],
+      "allowed_promotion_readiness_outcomes": [
+        "ready_for_rollout_scope_control",
+        "conditionally_ready_for_rollout_scope_control"
+      ],
+      "allow_rollout_scope_restrictions": true,
+      "allow_rollout_scope_prerequisite_deferral": false,
+      "prohibited_rollout_scope_fields": [
+        "policy_rollout_reference",
+        "release_activation_reference",
+        "release_observation_reference",
+        "rollback_trigger_reference",
+        "rollback_decision_reference",
+        "contained_rollback_reference",
+        "monitor_alert_reference",
+        "drift_monitor_reference",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "orchestration_owner_reference",
+        "lifecycle_state_override"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-24",
+        "source": "rollout_scope_class_seed"
+      }
+    },
+    "deferred_release_state": {
+      "rollout_scope_class_id": "deferred_release_state",
+      "description": "A governed rollout-scope class for promotion candidates whose rollout boundary evidence remains too incomplete for present exposure control even though immediate rejection is not required.",
+      "allowed_promotion_readiness_statuses": [
+        "promotion_ready",
+        "fallback_template_applied"
+      ],
+      "allowed_promotion_readiness_outcomes": [
+        "ready_for_rollout_scope_control",
+        "conditionally_ready_for_rollout_scope_control"
+      ],
+      "allow_rollout_scope_restrictions": true,
+      "allow_rollout_scope_prerequisite_deferral": true,
+      "prohibited_rollout_scope_fields": [
+        "policy_rollout_reference",
+        "release_activation_reference",
+        "release_observation_reference",
+        "rollback_trigger_reference",
+        "rollback_decision_reference",
+        "contained_rollback_reference",
+        "monitor_alert_reference",
+        "drift_monitor_reference",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "orchestration_owner_reference",
+        "lifecycle_state_override"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-24",
+        "source": "rollout_scope_class_seed"
+      }
+    }
+  }
+}

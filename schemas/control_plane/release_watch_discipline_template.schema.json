@@ -1,0 +1,86 @@
+{
+  "type": "object",
+  "required": [
+    "release_watch_discipline_template_id",
+    "semantic_scope",
+    "rollback_trigger_class_id",
+    "release_watch_discipline_class_id",
+    "required_release_watch_discipline_fields",
+    "optional_release_watch_discipline_fields",
+    "required_audit_fields",
+    "release_watch_discipline_status",
+    "release_watch_discipline_outcome",
+    "status",
+    "lineage"
+  ],
+  "properties": {
+    "release_watch_discipline_template_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "semantic_scope": {
+      "type": "string",
+      "min_length": 1
+    },
+    "rollback_trigger_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "release_watch_discipline_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "required_release_watch_discipline_fields": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "optional_release_watch_discipline_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "required_audit_fields": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "release_watch_discipline_status": {
+      "type": "string",
+      "enum": [
+        "release_watch_discipline_defined",
+        "fallback_template_applied"
+      ]
+    },
+    "release_watch_discipline_outcome": {
+      "type": "string",
+      "enum": [
+        "ready_for_release_confirmation",
+        "conditionally_ready_for_release_confirmation",
+        "deferred_pending_release_watch_discipline_evidence"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object"
+    },
+    "route_name": {
+      "type": "string",
+      "min_length": 1
+    }
+  }
+}

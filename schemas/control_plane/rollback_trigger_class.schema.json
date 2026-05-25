@@ -1,0 +1,76 @@
+{
+  "type": "object",
+  "required": [
+    "rollback_trigger_class_id",
+    "description",
+    "allowed_rollout_scope_statuses",
+    "allowed_rollout_scope_outcomes",
+    "allow_rollback_trigger_restrictions",
+    "allow_rollback_trigger_prerequisite_deferral",
+    "prohibited_rollback_trigger_fields",
+    "status",
+    "lineage"
+  ],
+  "properties": {
+    "rollback_trigger_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "description": {
+      "type": "string",
+      "min_length": 1
+    },
+    "allowed_rollout_scope_statuses": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "rollout_scope_defined",
+          "fallback_template_applied",
+          "blocked_missing_context",
+          "rejected_for_rollout_scope_use",
+          "prohibited_overlap_blocked"
+        ]
+      }
+    },
+    "allowed_rollout_scope_outcomes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "ready_for_rollback_trigger_guard",
+          "conditionally_ready_for_rollback_trigger_guard",
+          "deferred_pending_rollout_scope_evidence",
+          "blocked_missing_context",
+          "rejected_for_rollout_scope_use",
+          "prohibited_overlap_blocked"
+        ]
+      }
+    },
+    "allow_rollback_trigger_restrictions": {
+      "type": "boolean"
+    },
+    "allow_rollback_trigger_prerequisite_deferral": {
+      "type": "boolean"
+    },
+    "prohibited_rollback_trigger_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object"
+    }
+  }
+}

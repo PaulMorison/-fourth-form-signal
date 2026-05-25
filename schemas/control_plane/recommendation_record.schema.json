@@ -1,0 +1,378 @@
+{
+  "type": "object",
+  "required": [
+    "recommendation_id",
+    "recommendation_status",
+    "reason",
+    "recommendation_class_id",
+    "recommendation_template_id",
+    "action_class",
+    "advisory_posture",
+    "advisory_status",
+    "commitment_readiness",
+    "review_resolution_id",
+    "review_resolution_status",
+    "resolution_class_id",
+    "resolution_state",
+    "review_outcome",
+    "disposition_class_id",
+    "disposition_state",
+    "closure_state",
+    "closure_quality",
+    "packet_id",
+    "packet_template_id",
+    "packet_status",
+    "handoff_ready",
+    "semantic_scope",
+    "case_type",
+    "case_key",
+    "state_model_name",
+    "episode_id",
+    "transition_name",
+    "transition_class",
+    "source_stage",
+    "target_stage",
+    "reviewer_role",
+    "reviewer_id",
+    "recommender_role",
+    "recommender_id",
+    "authority_resolution_kind",
+    "authority_review_required",
+    "router_rule_id",
+    "routing_resolution_status",
+    "routing_review_required",
+    "review_mode",
+    "reason_class",
+    "packet_scope",
+    "handoff_channel",
+    "handoff_purpose",
+    "required_context_fields",
+    "optional_context_fields",
+    "required_audit_fields",
+    "prohibited_context_fields",
+    "required_context_snapshot",
+    "optional_context_snapshot",
+    "required_audit_snapshot",
+    "lineage",
+    "recommended_at"
+  ],
+  "properties": {
+    "recommendation_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "recommendation_status": {
+      "type": "string",
+      "enum": [
+        "blocked",
+        "ready_for_downstream_use",
+        "fallback_template_applied"
+      ]
+    },
+    "reason": {
+      "type": "string",
+      "min_length": 1
+    },
+    "recommendation_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "recommendation_template_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "action_class": {
+      "type": "string",
+      "enum": [
+        "recommend_act_now",
+        "recommend_wait",
+        "recommend_simulate_first",
+        "recommend_gather_more_information",
+        "escalate_for_review",
+        "abstain_from_strong_recommendation"
+      ]
+    },
+    "advisory_posture": {
+      "type": "string",
+      "enum": [
+        "advisory_only"
+      ]
+    },
+    "advisory_status": {
+      "type": "string",
+      "enum": [
+        "recommendation_issued",
+        "recommendation_withheld"
+      ]
+    },
+    "commitment_readiness": {
+      "type": "string",
+      "enum": [
+        "non_committable",
+        "commitment_review_ready"
+      ]
+    },
+    "review_resolution_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "review_resolution_status": {
+      "type": "string",
+      "enum": [
+        "resolved",
+        "blocked",
+        "fallback_applied",
+        "ready_for_disposition"
+      ]
+    },
+    "resolution_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "resolution_state": {
+      "type": "string",
+      "enum": [
+        "settled",
+        "returned",
+        "deferred",
+        "unresolved"
+      ]
+    },
+    "review_outcome": {
+      "type": "string",
+      "enum": [
+        "resolved_with_action",
+        "resolved_with_non_action",
+        "resolved_with_escalation",
+        "returned_for_rework",
+        "returned_for_clarification",
+        "deferred_continuation",
+        "unresolved_state",
+        "rejected_resolution"
+      ]
+    },
+    "disposition_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "disposition_state": {
+      "type": "string",
+      "enum": [
+        "action_routing",
+        "non_action_closure",
+        "reroute",
+        "rework",
+        "clarification",
+        "deferred_continuation",
+        "governed_unresolved_closure"
+      ]
+    },
+    "closure_state": {
+      "type": "string",
+      "enum": [
+        "open",
+        "closed",
+        "closed_pending_downstream_execution",
+        "closed_pending_later_review",
+        "closed_with_qualified_finality"
+      ]
+    },
+    "closure_quality": {
+      "type": "string",
+      "enum": [
+        "complete",
+        "qualified"
+      ]
+    },
+    "packet_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "packet_template_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "packet_status": {
+      "type": "string",
+      "enum": [
+        "ready_for_handoff",
+        "blocked",
+        "fallback_template_applied"
+      ]
+    },
+    "handoff_ready": {
+      "type": "boolean"
+    },
+    "semantic_scope": {
+      "type": "string",
+      "min_length": 1
+    },
+    "case_type": {
+      "type": "string",
+      "min_length": 1
+    },
+    "case_key": {
+      "type": "string",
+      "min_length": 1
+    },
+    "state_model_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "episode_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "transition_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "transition_class": {
+      "type": "string",
+      "min_length": 1
+    },
+    "source_stage": {
+      "type": "string",
+      "min_length": 1
+    },
+    "target_stage": {
+      "type": "string",
+      "min_length": 1
+    },
+    "reviewer_role": {
+      "type": "string",
+      "min_length": 1
+    },
+    "reviewer_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "recommender_role": {
+      "type": "string",
+      "min_length": 1
+    },
+    "recommender_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "authority_resolution_kind": {
+      "type": "string",
+      "min_length": 1
+    },
+    "authority_review_required": {
+      "type": "boolean"
+    },
+    "router_rule_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "route_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "routing_resolution_status": {
+      "type": "string",
+      "min_length": 1
+    },
+    "routing_review_required": {
+      "type": "boolean"
+    },
+    "review_mode": {
+      "type": "string",
+      "enum": [
+        "required",
+        "optional"
+      ]
+    },
+    "threshold_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "trigger_class": {
+      "type": "string",
+      "min_length": 1
+    },
+    "reason_class": {
+      "type": "string",
+      "min_length": 1
+    },
+    "packet_scope": {
+      "type": "string",
+      "min_length": 1
+    },
+    "handoff_channel": {
+      "type": "string",
+      "min_length": 1
+    },
+    "handoff_purpose": {
+      "type": "string",
+      "min_length": 1
+    },
+    "playbook_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "required_context_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "optional_context_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "required_audit_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "prohibited_context_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "required_context_snapshot": {
+      "type": "object"
+    },
+    "optional_context_snapshot": {
+      "type": "object"
+    },
+    "required_audit_snapshot": {
+      "type": "object"
+    },
+    "missing_context_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "prohibited_context_fields_present": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "lineage": {
+      "type": "object"
+    },
+    "recommended_at": {
+      "type": "string",
+      "format": "iso-datetime"
+    }
+  },
+  "additional_properties": false
+}

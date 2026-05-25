@@ -1,0 +1,76 @@
+{
+  "type": "object",
+  "required": [
+    "rollout_scope_class_id",
+    "description",
+    "allowed_promotion_readiness_statuses",
+    "allowed_promotion_readiness_outcomes",
+    "allow_rollout_scope_restrictions",
+    "allow_rollout_scope_prerequisite_deferral",
+    "prohibited_rollout_scope_fields",
+    "status",
+    "lineage"
+  ],
+  "properties": {
+    "rollout_scope_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "description": {
+      "type": "string",
+      "min_length": 1
+    },
+    "allowed_promotion_readiness_statuses": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "promotion_ready",
+          "fallback_template_applied",
+          "blocked_missing_context",
+          "rejected_for_promotion_use",
+          "prohibited_overlap_blocked"
+        ]
+      }
+    },
+    "allowed_promotion_readiness_outcomes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "ready_for_rollout_scope_control",
+          "conditionally_ready_for_rollout_scope_control",
+          "deferred_pending_promotion_readiness_evidence",
+          "blocked_missing_context",
+          "rejected_for_promotion_use",
+          "prohibited_overlap_blocked"
+        ]
+      }
+    },
+    "allow_rollout_scope_restrictions": {
+      "type": "boolean"
+    },
+    "allow_rollout_scope_prerequisite_deferral": {
+      "type": "boolean"
+    },
+    "prohibited_rollout_scope_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object"
+    }
+  }
+}

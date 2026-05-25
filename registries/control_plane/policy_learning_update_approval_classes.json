@@ -1,0 +1,114 @@
+{
+  "policy_learning_update_approval_classes": {
+    "policy_update_preparation_candidate": {
+      "policy_learning_update_approval_class_id": "policy_update_preparation_candidate",
+      "description": "A governed policy-learning update-approval class for threshold candidates that are ready for policy-update preparation while remaining separate from actual mutation, rollout, deployment, retraining, monitoring, reopen handling, and orchestration ownership.",
+      "allowed_policy_learning_update_threshold_statuses": [
+        "threshold_met"
+      ],
+      "allowed_policy_learning_update_decision_outcomes": [
+        "accepted"
+      ],
+      "minimum_evidence_sufficiency": "sufficient_for_proposed_update",
+      "minimum_weak_evidence_check": "weak_evidence_check_passed",
+      "minimum_dimension_strength": "strong",
+      "allow_preparation_restrictions": false,
+      "allow_additional_governance_deferral": false,
+      "prohibited_update_approval_fields": [
+        "policy_mutation_payload",
+        "policy_rollout_reference",
+        "deployment_plan_reference",
+        "model_retraining_reference",
+        "model_update_execution_reference",
+        "model_deployment_reference",
+        "drift_monitor_reference",
+        "monitor_alert_reference",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "orchestration_owner_reference",
+        "lifecycle_state_override"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "policy_learning_update_approval_class_seed"
+      }
+    },
+    "restricted_policy_update_preparation_candidate": {
+      "policy_learning_update_approval_class_id": "restricted_policy_update_preparation_candidate",
+      "description": "A governed policy-learning update-approval class for threshold candidates that may proceed only with explicit preparation restrictions and preserved scope boundaries.",
+      "allowed_policy_learning_update_threshold_statuses": [
+        "threshold_met",
+        "fallback_template_applied"
+      ],
+      "allowed_policy_learning_update_decision_outcomes": [
+        "accepted",
+        "accepted_with_narrowed_scope"
+      ],
+      "minimum_evidence_sufficiency": "sufficient_only_for_narrowed_scope",
+      "minimum_weak_evidence_check": "weak_evidence_check_requires_narrowing",
+      "minimum_dimension_strength": "moderate",
+      "allow_preparation_restrictions": true,
+      "allow_additional_governance_deferral": false,
+      "prohibited_update_approval_fields": [
+        "policy_mutation_payload",
+        "policy_rollout_reference",
+        "deployment_plan_reference",
+        "model_retraining_reference",
+        "model_update_execution_reference",
+        "model_deployment_reference",
+        "drift_monitor_reference",
+        "monitor_alert_reference",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "orchestration_owner_reference",
+        "lifecycle_state_override"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "policy_learning_update_approval_class_seed"
+      }
+    },
+    "deferred_policy_update_preparation_candidate": {
+      "policy_learning_update_approval_class_id": "deferred_policy_update_preparation_candidate",
+      "description": "A governed policy-learning update-approval class for threshold candidates that remain unsuitable for present update preparation until additional governance is completed.",
+      "allowed_policy_learning_update_threshold_statuses": [
+        "threshold_met",
+        "fallback_template_applied"
+      ],
+      "allowed_policy_learning_update_decision_outcomes": [
+        "accepted",
+        "accepted_with_narrowed_scope",
+        "deferred_for_continued_monitoring"
+      ],
+      "minimum_evidence_sufficiency": "insufficient_pending_more_evidence",
+      "minimum_weak_evidence_check": "weak_evidence_check_requires_monitoring",
+      "minimum_dimension_strength": "weak",
+      "allow_preparation_restrictions": true,
+      "allow_additional_governance_deferral": true,
+      "prohibited_update_approval_fields": [
+        "policy_mutation_payload",
+        "policy_rollout_reference",
+        "deployment_plan_reference",
+        "model_retraining_reference",
+        "model_update_execution_reference",
+        "model_deployment_reference",
+        "drift_monitor_reference",
+        "monitor_alert_reference",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "orchestration_owner_reference",
+        "lifecycle_state_override"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "policy_learning_update_approval_class_seed"
+      }
+    }
+  }
+}

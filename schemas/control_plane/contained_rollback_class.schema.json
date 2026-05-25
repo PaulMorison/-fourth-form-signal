@@ -1,0 +1,76 @@
+{
+  "type": "object",
+  "required": [
+    "contained_rollback_class_id",
+    "description",
+    "allowed_production_entitlement_check_statuses",
+    "allowed_production_entitlement_check_outcomes",
+    "allow_contained_rollback_restrictions",
+    "allow_contained_rollback_prerequisite_deferral",
+    "prohibited_contained_rollback_fields",
+    "status",
+    "lineage"
+  ],
+  "properties": {
+    "contained_rollback_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "description": {
+      "type": "string",
+      "min_length": 1
+    },
+    "allowed_production_entitlement_check_statuses": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "production_entitlement_checked",
+          "fallback_template_applied",
+          "blocked_missing_context",
+          "rejected_for_production_entitlement_use",
+          "prohibited_overlap_blocked"
+        ]
+      }
+    },
+    "allowed_production_entitlement_check_outcomes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "approved_for_broader_trusted_production_entitlement",
+          "conditionally_approved_for_bounded_production_entitlement",
+          "deferred_pending_production_entitlement_evidence",
+          "blocked_missing_context",
+          "rejected_for_production_entitlement_use",
+          "prohibited_overlap_blocked"
+        ]
+      }
+    },
+    "allow_contained_rollback_restrictions": {
+      "type": "boolean"
+    },
+    "allow_contained_rollback_prerequisite_deferral": {
+      "type": "boolean"
+    },
+    "prohibited_contained_rollback_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object"
+    }
+  }
+}

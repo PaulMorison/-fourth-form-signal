@@ -1,0 +1,19 @@
+{
+  "delegation_policies": {
+    "case_transition_assistant_delegate": {
+      "delegation_policy_id": "case_transition_assistant_delegate",
+      "authority_rule_id": "case_transition_operator",
+      "delegating_role": "case_operator",
+      "delegated_role": "assistant_case_operator",
+      "authority_scope": "shared_control_plane",
+      "authority_ceiling": "feature_review_ready",
+      "authority_floor": "raw_intake_ready",
+      "review_required": false,
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "delegation_policy_seed"
+      }
+    }
+  }
+}

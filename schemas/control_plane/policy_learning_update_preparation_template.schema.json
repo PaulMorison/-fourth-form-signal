@@ -1,0 +1,87 @@
+{
+  "type": "object",
+  "required": [
+    "policy_learning_update_preparation_template_id",
+    "semantic_scope",
+    "policy_learning_update_approval_class_id",
+    "policy_learning_update_preparation_class_id",
+    "required_update_preparation_fields",
+    "optional_update_preparation_fields",
+    "required_audit_fields",
+    "policy_learning_update_preparation_status",
+    "policy_learning_update_preparation_outcome",
+    "status",
+    "lineage"
+  ],
+  "properties": {
+    "policy_learning_update_preparation_template_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "semantic_scope": {
+      "type": "string",
+      "min_length": 1
+    },
+    "policy_learning_update_approval_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "policy_learning_update_preparation_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "route_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "required_update_preparation_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "optional_update_preparation_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "required_audit_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "policy_learning_update_preparation_status": {
+      "type": "string",
+      "enum": [
+        "preparation_ready",
+        "fallback_template_applied"
+      ]
+    },
+    "policy_learning_update_preparation_outcome": {
+      "type": "string",
+      "enum": [
+        "prepared_for_policy_mutation_planning",
+        "prepared_with_restrictions",
+        "deferred_pending_preparation_prerequisites"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object"
+    }
+  },
+  "additional_properties": false
+}

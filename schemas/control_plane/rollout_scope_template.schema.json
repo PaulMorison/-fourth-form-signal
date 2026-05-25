@@ -1,0 +1,86 @@
+{
+  "type": "object",
+  "required": [
+    "rollout_scope_template_id",
+    "semantic_scope",
+    "promotion_readiness_class_id",
+    "rollout_scope_class_id",
+    "required_rollout_scope_fields",
+    "optional_rollout_scope_fields",
+    "required_audit_fields",
+    "rollout_scope_status",
+    "rollout_scope_outcome",
+    "status",
+    "lineage"
+  ],
+  "properties": {
+    "rollout_scope_template_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "semantic_scope": {
+      "type": "string",
+      "min_length": 1
+    },
+    "promotion_readiness_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "rollout_scope_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "required_rollout_scope_fields": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "optional_rollout_scope_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "required_audit_fields": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "rollout_scope_status": {
+      "type": "string",
+      "enum": [
+        "rollout_scope_defined",
+        "fallback_template_applied"
+      ]
+    },
+    "rollout_scope_outcome": {
+      "type": "string",
+      "enum": [
+        "ready_for_rollback_trigger_guard",
+        "conditionally_ready_for_rollback_trigger_guard",
+        "deferred_pending_rollout_scope_evidence"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object"
+    },
+    "route_name": {
+      "type": "string",
+      "min_length": 1
+    }
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "type": "object",
+  "required": [
+    "release_confirmation_template_id",
+    "semantic_scope",
+    "release_watch_discipline_class_id",
+    "release_confirmation_class_id",
+    "required_release_confirmation_fields",
+    "optional_release_confirmation_fields",
+    "required_audit_fields",
+    "release_confirmation_status",
+    "release_confirmation_outcome",
+    "status",
+    "lineage"
+  ],
+  "properties": {
+    "release_confirmation_template_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "semantic_scope": {
+      "type": "string",
+      "min_length": 1
+    },
+    "release_watch_discipline_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "release_confirmation_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "required_release_confirmation_fields": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "optional_release_confirmation_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "required_audit_fields": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "release_confirmation_status": {
+      "type": "string",
+      "enum": [
+        "release_confirmation_judged",
+        "fallback_template_applied"
+      ]
+    },
+    "release_confirmation_outcome": {
+      "type": "string",
+      "enum": [
+        "confirmed_for_broader_trusted_production_use",
+        "conditionally_confirmed_for_bounded_production_use",
+        "deferred_pending_release_confirmation_evidence"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object"
+    },
+    "route_name": {
+      "type": "string",
+      "min_length": 1
+    }
+  }
+}

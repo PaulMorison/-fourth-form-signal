@@ -1,0 +1,83 @@
+{
+  "type": "object",
+  "required": [
+    "policy_learning_update_preparation_class_id",
+    "description",
+    "allowed_policy_learning_update_approval_statuses",
+    "allowed_policy_learning_update_approval_outcomes",
+    "minimum_dimension_strength",
+    "allow_preparation_restrictions",
+    "allow_prerequisite_deferral",
+    "prohibited_update_preparation_fields",
+    "status",
+    "lineage"
+  ],
+  "properties": {
+    "policy_learning_update_preparation_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "description": {
+      "type": "string",
+      "min_length": 1
+    },
+    "allowed_policy_learning_update_approval_statuses": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "approval_ready",
+          "fallback_template_applied"
+        ]
+      }
+    },
+    "allowed_policy_learning_update_approval_outcomes": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "approved_for_policy_update_preparation",
+          "approved_with_restrictions",
+          "deferred_pending_additional_governance",
+          "blocked_missing_context",
+          "rejected_for_policy_update_use",
+          "prohibited_overlap_blocked"
+        ]
+      }
+    },
+    "minimum_dimension_strength": {
+      "type": "string",
+      "enum": [
+        "weak",
+        "moderate",
+        "strong"
+      ]
+    },
+    "allow_preparation_restrictions": {
+      "type": "boolean"
+    },
+    "allow_prerequisite_deferral": {
+      "type": "boolean"
+    },
+    "prohibited_update_preparation_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object"
+    }
+  },
+  "additional_properties": false
+}

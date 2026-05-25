@@ -1,0 +1,89 @@
+{
+  "type": "object",
+  "required": [
+    "name",
+    "namespace",
+    "owner_id",
+    "description",
+    "semantic_scope",
+    "formula",
+    "unit",
+    "time_basis",
+    "window",
+    "data_type",
+    "status",
+    "source_fields",
+    "created_at"
+  ],
+  "additional_properties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "min_length": 3
+    },
+    "namespace": {
+      "type": "string",
+      "min_length": 3
+    },
+    "owner_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "description": {
+      "type": "string",
+      "min_length": 10
+    },
+    "semantic_scope": {
+      "type": "string",
+      "min_length": 1
+    },
+    "formula": {
+      "type": "string",
+      "min_length": 3
+    },
+    "unit": {
+      "type": "string",
+      "min_length": 1
+    },
+    "denominator": {
+      "type": "string"
+    },
+    "time_basis": {
+      "type": "string",
+      "min_length": 1
+    },
+    "window": {
+      "type": "string",
+      "min_length": 1
+    },
+    "data_type": {
+      "type": "string",
+      "enum": [
+        "float",
+        "integer",
+        "string",
+        "boolean"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated",
+        "invalidated"
+      ]
+    },
+    "source_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "created_at": {
+      "type": "string",
+      "format": "iso-datetime"
+    }
+  }
+}

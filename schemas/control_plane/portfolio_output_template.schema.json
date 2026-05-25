@@ -1,0 +1,93 @@
+{
+  "type": "object",
+  "required": [
+    "portfolio_output_template_id",
+    "semantic_scope",
+    "resolution_class_id",
+    "disposition_class_id",
+    "recommendation_class_id",
+    "policy_output_class_id",
+    "portfolio_output_class_id",
+    "required_context_fields",
+    "optional_context_fields",
+    "required_audit_fields",
+    "portfolio_output_status",
+    "status",
+    "lineage"
+  ],
+  "properties": {
+    "portfolio_output_template_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "semantic_scope": {
+      "type": "string",
+      "min_length": 1
+    },
+    "resolution_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "disposition_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "recommendation_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "policy_output_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "portfolio_output_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "route_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "required_context_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "optional_context_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "required_audit_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "portfolio_output_status": {
+      "type": "string",
+      "enum": [
+        "ready_for_downstream_use",
+        "fallback_template_applied"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object"
+    }
+  },
+  "additional_properties": false
+}

@@ -1,0 +1,106 @@
+{
+  "execution_dispatch_templates": {
+    "direct_execution_dispatch_primary": {
+      "execution_dispatch_template_id": "direct_execution_dispatch_primary",
+      "semantic_scope": "shared_control_plane",
+      "execution_request_class_id": "direct_dispatch_request",
+      "execution_dispatch_class_id": "direct_dispatch_boundary",
+      "route_name": "primary_case_path",
+      "required_execution_dispatch_fields": [
+        "execution_request_reference",
+        "execution_target_reference",
+        "execution_scope_reference",
+        "dispatch_summary",
+        "dispatch_reference",
+        "dispatch_channel",
+        "dispatch_payload_reference"
+      ],
+      "optional_execution_dispatch_fields": [
+        "execution_request_summary",
+        "execution_priority_reference",
+        "dispatch_priority_reference",
+        "dispatch_window_reference"
+      ],
+      "required_audit_fields": [
+        "execution_dispatch_author_id",
+        "execution_dispatch_author_role"
+      ],
+      "execution_dispatch_status": "ready_for_downstream_use",
+      "execution_dispatch_readiness": "dispatch_boundary_ready",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "execution_dispatch_template_seed"
+      }
+    },
+    "prerequisite_execution_dispatch_primary": {
+      "execution_dispatch_template_id": "prerequisite_execution_dispatch_primary",
+      "semantic_scope": "shared_control_plane",
+      "execution_request_class_id": "prerequisite_dispatch_request",
+      "execution_dispatch_class_id": "conditioned_dispatch_boundary",
+      "route_name": "primary_case_path",
+      "required_execution_dispatch_fields": [
+        "execution_request_reference",
+        "execution_target_reference",
+        "execution_scope_reference",
+        "blocking_condition_reference",
+        "clarification_reference",
+        "dispatch_summary",
+        "dispatch_reference",
+        "dispatch_channel",
+        "dispatch_payload_reference"
+      ],
+      "optional_execution_dispatch_fields": [
+        "execution_request_summary",
+        "execution_priority_reference",
+        "dispatch_priority_reference",
+        "dispatch_window_reference",
+        "blocking_condition_kind"
+      ],
+      "required_audit_fields": [
+        "execution_dispatch_author_id",
+        "execution_dispatch_author_role"
+      ],
+      "execution_dispatch_status": "ready_for_downstream_use",
+      "execution_dispatch_readiness": "dispatch_boundary_blocked_pending_prerequisite",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "execution_dispatch_template_seed"
+      }
+    },
+    "hold_execution_dispatch_fallback": {
+      "execution_dispatch_template_id": "hold_execution_dispatch_fallback",
+      "semantic_scope": "shared_control_plane",
+      "execution_request_class_id": "hold_dispatch_request",
+      "execution_dispatch_class_id": "hold_dispatch_boundary",
+      "required_execution_dispatch_fields": [
+        "execution_request_reference",
+        "execution_target_reference",
+        "execution_scope_reference",
+        "dispatch_summary",
+        "dispatch_reference",
+        "dispatch_channel",
+        "dispatch_hold_reference"
+      ],
+      "optional_execution_dispatch_fields": [
+        "execution_request_summary",
+        "execution_priority_reference",
+        "dispatch_priority_reference",
+        "dispatch_window_reference",
+        "fallback_reference"
+      ],
+      "required_audit_fields": [
+        "execution_dispatch_author_id",
+        "execution_dispatch_author_role"
+      ],
+      "execution_dispatch_status": "fallback_template_applied",
+      "execution_dispatch_readiness": "dispatch_boundary_prohibited",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "execution_dispatch_template_seed"
+      }
+    }
+  }
+}

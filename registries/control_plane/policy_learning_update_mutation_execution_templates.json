@@ -1,0 +1,149 @@
+{
+  "policy_learning_update_mutation_execution_templates": {
+    "policy_mutation_execution_candidate_primary": {
+      "policy_learning_update_mutation_execution_template_id": "policy_mutation_execution_candidate_primary",
+      "semantic_scope": "shared_control_plane",
+      "policy_learning_update_mutation_planning_class_id": "policy_mutation_plan_candidate",
+      "policy_learning_update_mutation_execution_class_id": "policy_mutation_execution_candidate",
+      "route_name": "primary_case_path",
+      "required_update_mutation_execution_fields": [
+        "domain_reference",
+        "decision_scope_reference",
+        "tenant_scope_reference",
+        "learning_scope_reference",
+        "candidate_update_reference",
+        "mutation_plan_reference",
+        "mutation_planning_summary",
+        "mutation_plan_scope_reference",
+        "mutation_planning_boundary_summary",
+        "policy_mutation_payload",
+        "policy_mutation_execution_reference",
+        "mutated_policy_reference",
+        "mutation_execution_summary",
+        "mutation_execution_scope_reference",
+        "mutation_execution_boundary_summary",
+        "mutation_readiness",
+        "safeguard_readiness",
+        "rollback_readiness",
+        "execution_readiness",
+        "verification_readiness",
+        "rollback_execution_readiness"
+      ],
+      "optional_update_mutation_execution_fields": [
+        "reporting_scope_reference",
+        "restriction_summary",
+        "mutation_execution_scope_restriction_reference",
+        "follow_up_review_reference",
+        "mutation_execution_prerequisite_reference",
+        "outstanding_mutation_execution_prerequisites"
+      ],
+      "required_audit_fields": [
+        "policy_learning_update_mutation_execution_author_id",
+        "policy_learning_update_mutation_execution_author_role"
+      ],
+      "policy_learning_update_mutation_execution_status": "mutation_execution_ready",
+      "policy_learning_update_mutation_execution_outcome": "ready_for_policy_mutation_execution",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-24",
+        "source": "policy_learning_update_mutation_execution_template_seed"
+      }
+    },
+    "restricted_policy_mutation_execution_candidate_primary": {
+      "policy_learning_update_mutation_execution_template_id": "restricted_policy_mutation_execution_candidate_primary",
+      "semantic_scope": "shared_control_plane",
+      "policy_learning_update_mutation_planning_class_id": "restricted_policy_mutation_plan_candidate",
+      "policy_learning_update_mutation_execution_class_id": "restricted_policy_mutation_execution_candidate",
+      "required_update_mutation_execution_fields": [
+        "domain_reference",
+        "decision_scope_reference",
+        "tenant_scope_reference",
+        "learning_scope_reference",
+        "candidate_update_reference",
+        "mutation_plan_reference",
+        "mutation_planning_summary",
+        "mutation_plan_scope_reference",
+        "mutation_planning_boundary_summary",
+        "policy_mutation_payload",
+        "policy_mutation_execution_reference",
+        "mutated_policy_reference",
+        "mutation_execution_summary",
+        "mutation_execution_scope_reference",
+        "mutation_execution_boundary_summary",
+        "mutation_readiness",
+        "safeguard_readiness",
+        "rollback_readiness",
+        "execution_readiness",
+        "verification_readiness",
+        "rollback_execution_readiness",
+        "restriction_summary",
+        "mutation_execution_scope_restriction_reference"
+      ],
+      "optional_update_mutation_execution_fields": [
+        "reporting_scope_reference",
+        "follow_up_review_reference",
+        "mutation_execution_prerequisite_reference",
+        "outstanding_mutation_execution_prerequisites"
+      ],
+      "required_audit_fields": [
+        "policy_learning_update_mutation_execution_author_id",
+        "policy_learning_update_mutation_execution_author_role"
+      ],
+      "policy_learning_update_mutation_execution_status": "fallback_template_applied",
+      "policy_learning_update_mutation_execution_outcome": "ready_for_policy_mutation_execution_with_restrictions",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-24",
+        "source": "policy_learning_update_mutation_execution_template_seed"
+      }
+    },
+    "deferred_policy_mutation_execution_candidate_fallback": {
+      "policy_learning_update_mutation_execution_template_id": "deferred_policy_mutation_execution_candidate_fallback",
+      "semantic_scope": "shared_control_plane",
+      "policy_learning_update_mutation_planning_class_id": "policy_mutation_plan_candidate",
+      "policy_learning_update_mutation_execution_class_id": "deferred_policy_mutation_execution_candidate",
+      "required_update_mutation_execution_fields": [
+        "domain_reference",
+        "decision_scope_reference",
+        "tenant_scope_reference",
+        "learning_scope_reference",
+        "candidate_update_reference",
+        "mutation_plan_reference",
+        "mutation_planning_summary",
+        "mutation_plan_scope_reference",
+        "mutation_planning_boundary_summary",
+        "policy_mutation_payload",
+        "policy_mutation_execution_reference",
+        "mutated_policy_reference",
+        "mutation_execution_summary",
+        "mutation_execution_scope_reference",
+        "mutation_execution_boundary_summary",
+        "mutation_readiness",
+        "safeguard_readiness",
+        "rollback_readiness",
+        "execution_readiness",
+        "verification_readiness",
+        "rollback_execution_readiness",
+        "mutation_execution_prerequisite_reference",
+        "outstanding_mutation_execution_prerequisites"
+      ],
+      "optional_update_mutation_execution_fields": [
+        "reporting_scope_reference",
+        "restriction_summary",
+        "mutation_execution_scope_restriction_reference",
+        "follow_up_review_reference"
+      ],
+      "required_audit_fields": [
+        "policy_learning_update_mutation_execution_author_id",
+        "policy_learning_update_mutation_execution_author_role"
+      ],
+      "policy_learning_update_mutation_execution_status": "fallback_template_applied",
+      "policy_learning_update_mutation_execution_outcome": "deferred_pending_mutation_execution_prerequisites",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-24",
+        "source": "policy_learning_update_mutation_execution_template_seed"
+      }
+    }
+  }
+}

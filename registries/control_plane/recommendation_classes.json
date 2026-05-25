@@ -1,0 +1,156 @@
+{
+  "recommendation_classes": {
+    "recommend_act_now": {
+      "recommendation_class_id": "recommend_act_now",
+      "description": "A governed advisory recommendation that preserves immediate action as the preferred next path without turning that advice into commitment or instruction.",
+      "action_class": "recommend_act_now",
+      "advisory_posture": "advisory_only",
+      "commitment_readiness": "non_committable",
+      "allowed_resolution_class_ids": [
+        "resolved_with_action"
+      ],
+      "allowed_disposition_class_ids": [
+        "closed_pending_downstream_execution"
+      ],
+      "prohibited_context_fields": [
+        "instruction_id",
+        "instruction_reference",
+        "instruction_status",
+        "commitment_id",
+        "commitment_reference"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "recommendation_class_seed"
+      }
+    },
+    "recommend_wait": {
+      "recommendation_class_id": "recommend_wait",
+      "description": "A governed advisory recommendation that preserves deliberate waiting as the preferred next step without implying closure or commitment.",
+      "action_class": "recommend_wait",
+      "advisory_posture": "advisory_only",
+      "commitment_readiness": "non_committable",
+      "allowed_resolution_class_ids": [
+        "deferred_continuation"
+      ],
+      "allowed_disposition_class_ids": [
+        "deferred_continuation_pending_review"
+      ],
+      "prohibited_context_fields": [
+        "instruction_id",
+        "instruction_reference",
+        "instruction_status",
+        "commitment_id",
+        "commitment_reference"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "recommendation_class_seed"
+      }
+    },
+    "recommend_simulate_first": {
+      "recommendation_class_id": "recommend_simulate_first",
+      "description": "A governed advisory recommendation that preserves simulation as the preferred next step before stronger downstream handling is considered.",
+      "action_class": "recommend_simulate_first",
+      "advisory_posture": "advisory_only",
+      "commitment_readiness": "non_committable",
+      "allowed_resolution_class_ids": [
+        "returned_for_rework"
+      ],
+      "allowed_disposition_class_ids": [
+        "returned_for_rework_open"
+      ],
+      "prohibited_context_fields": [
+        "instruction_id",
+        "instruction_reference",
+        "instruction_status",
+        "commitment_id",
+        "commitment_reference"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "recommendation_class_seed"
+      }
+    },
+    "recommend_gather_more_information": {
+      "recommendation_class_id": "recommend_gather_more_information",
+      "description": "A governed advisory recommendation that preserves further information gathering as the preferred next step before stronger downstream handling is considered.",
+      "action_class": "recommend_gather_more_information",
+      "advisory_posture": "advisory_only",
+      "commitment_readiness": "non_committable",
+      "allowed_resolution_class_ids": [
+        "returned_for_clarification"
+      ],
+      "allowed_disposition_class_ids": [
+        "returned_for_clarification_open"
+      ],
+      "prohibited_context_fields": [
+        "instruction_id",
+        "instruction_reference",
+        "instruction_status",
+        "commitment_id",
+        "commitment_reference"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "recommendation_class_seed"
+      }
+    },
+    "escalate_for_review": {
+      "recommendation_class_id": "escalate_for_review",
+      "description": "A governed advisory recommendation that preserves onward accountable review as the preferred next path without executing escalation workflow here.",
+      "action_class": "escalate_for_review",
+      "advisory_posture": "advisory_only",
+      "commitment_readiness": "non_committable",
+      "allowed_resolution_class_ids": [
+        "resolved_with_escalation"
+      ],
+      "allowed_disposition_class_ids": [
+        "escalated_pending_later_review"
+      ],
+      "prohibited_context_fields": [
+        "instruction_id",
+        "instruction_reference",
+        "instruction_status",
+        "commitment_id",
+        "commitment_reference"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "recommendation_class_seed"
+      }
+    },
+    "abstain_from_strong_recommendation": {
+      "recommendation_class_id": "abstain_from_strong_recommendation",
+      "description": "A governed advisory recommendation that explicitly preserves the absence of a stronger directional recommendation under current conditions.",
+      "action_class": "abstain_from_strong_recommendation",
+      "advisory_posture": "advisory_only",
+      "commitment_readiness": "non_committable",
+      "allowed_resolution_class_ids": [
+        "resolved_with_non_action",
+        "manual_fallback_resolution"
+      ],
+      "allowed_disposition_class_ids": [
+        "closed_non_action",
+        "manual_fallback_hold"
+      ],
+      "prohibited_context_fields": [
+        "instruction_id",
+        "instruction_reference",
+        "instruction_status",
+        "commitment_id",
+        "commitment_reference"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "recommendation_class_seed"
+      }
+    }
+  }
+}

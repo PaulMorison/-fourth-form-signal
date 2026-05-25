@@ -1,0 +1,200 @@
+{
+  "review_resolution_classes": {
+    "resolved_with_action": {
+      "resolution_class_id": "resolved_with_action",
+      "description": "A governed terminal review resolution that closes the review layer with downstream action routing still pending execution.",
+      "resolution_state": "settled",
+      "review_outcome": "resolved_with_action",
+      "disposition_class_id": "closed_pending_downstream_execution",
+      "allowed_packet_statuses": [
+        "ready_for_handoff"
+      ],
+      "required_resolution_fields": [
+        "review_summary",
+        "resolution_rationale"
+      ],
+      "optional_resolution_fields": [
+        "recommendation_reference",
+        "playbook_reference",
+        "downstream_execution_reference"
+      ],
+      "required_audit_fields": [
+        "reviewer_id",
+        "reviewer_role"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "review_resolution_class_seed"
+      }
+    },
+    "resolved_with_non_action": {
+      "resolution_class_id": "resolved_with_non_action",
+      "description": "A governed terminal review resolution that closes the case through deliberate non-action.",
+      "resolution_state": "settled",
+      "review_outcome": "resolved_with_non_action",
+      "disposition_class_id": "closed_non_action",
+      "allowed_packet_statuses": [
+        "ready_for_handoff"
+      ],
+      "required_resolution_fields": [
+        "review_summary",
+        "resolution_rationale"
+      ],
+      "optional_resolution_fields": [
+        "recommendation_reference",
+        "playbook_reference",
+        "non_action_reference"
+      ],
+      "required_audit_fields": [
+        "reviewer_id",
+        "reviewer_role"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "review_resolution_class_seed"
+      }
+    },
+    "resolved_with_escalation": {
+      "resolution_class_id": "resolved_with_escalation",
+      "description": "A governed non-terminal review resolution that routes the case onward for later accountable handling without executing escalation workflow here.",
+      "resolution_state": "settled",
+      "review_outcome": "resolved_with_escalation",
+      "disposition_class_id": "escalated_pending_later_review",
+      "allowed_packet_statuses": [
+        "ready_for_handoff"
+      ],
+      "required_resolution_fields": [
+        "review_summary",
+        "resolution_rationale",
+        "escalation_reference"
+      ],
+      "optional_resolution_fields": [
+        "recommendation_reference",
+        "playbook_reference"
+      ],
+      "required_audit_fields": [
+        "reviewer_id",
+        "reviewer_role"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "review_resolution_class_seed"
+      }
+    },
+    "returned_for_rework": {
+      "resolution_class_id": "returned_for_rework",
+      "description": "A governed non-terminal review resolution that explicitly returns the packet for rework without treating the case as rejected.",
+      "resolution_state": "returned",
+      "review_outcome": "returned_for_rework",
+      "disposition_class_id": "returned_for_rework_open",
+      "allowed_packet_statuses": [
+        "ready_for_handoff"
+      ],
+      "required_resolution_fields": [
+        "review_summary",
+        "resolution_rationale",
+        "rework_reference"
+      ],
+      "optional_resolution_fields": [
+        "recommendation_reference",
+        "playbook_reference"
+      ],
+      "required_audit_fields": [
+        "reviewer_id",
+        "reviewer_role"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "review_resolution_class_seed"
+      }
+    },
+    "returned_for_clarification": {
+      "resolution_class_id": "returned_for_clarification",
+      "description": "A governed non-terminal review resolution that explicitly returns the packet for clarification without collapsing that path into rejection.",
+      "resolution_state": "returned",
+      "review_outcome": "returned_for_clarification",
+      "disposition_class_id": "returned_for_clarification_open",
+      "allowed_packet_statuses": [
+        "ready_for_handoff"
+      ],
+      "required_resolution_fields": [
+        "review_summary",
+        "resolution_rationale",
+        "clarification_reference"
+      ],
+      "optional_resolution_fields": [
+        "recommendation_reference",
+        "playbook_reference"
+      ],
+      "required_audit_fields": [
+        "reviewer_id",
+        "reviewer_role"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "review_resolution_class_seed"
+      }
+    },
+    "deferred_continuation": {
+      "resolution_class_id": "deferred_continuation",
+      "description": "A governed non-terminal review resolution that preserves deferred continuation without converting it into abstention or silent closure.",
+      "resolution_state": "deferred",
+      "review_outcome": "deferred_continuation",
+      "disposition_class_id": "deferred_continuation_pending_review",
+      "allowed_packet_statuses": [
+        "ready_for_handoff"
+      ],
+      "required_resolution_fields": [
+        "review_summary",
+        "resolution_rationale",
+        "revisit_reference"
+      ],
+      "optional_resolution_fields": [
+        "recommendation_reference",
+        "playbook_reference"
+      ],
+      "required_audit_fields": [
+        "reviewer_id",
+        "reviewer_role"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "review_resolution_class_seed"
+      }
+    },
+    "manual_fallback_resolution": {
+      "resolution_class_id": "manual_fallback_resolution",
+      "description": "A governed fallback review resolution used when a fallback review packet must be preserved for later manual triage without executing escalation workflow here.",
+      "resolution_state": "deferred",
+      "review_outcome": "deferred_continuation",
+      "disposition_class_id": "manual_fallback_hold",
+      "allowed_packet_statuses": [
+        "fallback_template_applied"
+      ],
+      "required_resolution_fields": [
+        "review_summary",
+        "resolution_rationale",
+        "fallback_reference"
+      ],
+      "optional_resolution_fields": [
+        "recommendation_reference",
+        "playbook_reference"
+      ],
+      "required_audit_fields": [
+        "reviewer_id",
+        "reviewer_role"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "review_resolution_class_seed"
+      }
+    }
+  }
+}

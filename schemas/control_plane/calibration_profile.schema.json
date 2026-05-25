@@ -1,0 +1,60 @@
+{
+  "type": "object",
+  "required": [
+    "calibration_profile_id",
+    "threshold_type",
+    "adjustment_kind",
+    "adjustment_value",
+    "status",
+    "lineage"
+  ],
+  "additional_properties": false,
+  "properties": {
+    "calibration_profile_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "threshold_type": {
+      "type": "string",
+      "enum": [
+        "numeric_comparison",
+        "boolean_signal"
+      ]
+    },
+    "adjustment_kind": {
+      "type": "string",
+      "enum": [
+        "offset",
+        "multiplier"
+      ]
+    },
+    "adjustment_value": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object",
+      "required": [
+        "version",
+        "source"
+      ],
+      "additional_properties": false,
+      "properties": {
+        "version": {
+          "type": "string",
+          "min_length": 1
+        },
+        "source": {
+          "type": "string",
+          "min_length": 1
+        }
+      }
+    }
+  }
+}

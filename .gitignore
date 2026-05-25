@@ -1,0 +1,31 @@
+.env
+
+# Python/runtime caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Local environments and editor state
+.venv/
+.vscode/
+
+# Build and packaging outputs
+build/
+dist/
+*.egg-info/
+
+# Generated runtime/artifact trees
+artifacts/
+tmp/
+
+# Logs and local command outputs
+*.log
+test_output.log
+test_results.txt
+
+# Binary/generated data and model artifacts
+*.parquet
+*.pkl
+*.joblib
+*.sqlite
+*.db

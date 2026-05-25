@@ -1,0 +1,256 @@
+{
+  "type": "object",
+  "required": [
+    "policy_learning_update_mutation_execution_id",
+    "policy_learning_update_mutation_execution_status",
+    "reason",
+    "policy_learning_update_mutation_execution_class_id",
+    "policy_learning_update_mutation_execution_template_id",
+    "policy_learning_update_mutation_execution_outcome",
+    "mutation_readiness",
+    "safeguard_readiness",
+    "rollback_readiness",
+    "execution_readiness",
+    "verification_readiness",
+    "rollback_execution_readiness",
+    "mutation_plan_reference",
+    "mutation_planning_summary",
+    "mutation_plan_scope_reference",
+    "mutation_planning_boundary_summary",
+    "policy_mutation_payload",
+    "policy_mutation_execution_reference",
+    "mutated_policy_reference",
+    "mutation_execution_summary",
+    "mutation_execution_scope_reference",
+    "mutation_execution_boundary_summary",
+    "policy_learning_update_mutation_planning_id",
+    "policy_learning_update_mutation_planning_status",
+    "policy_learning_update_mutation_planning_class_id",
+    "policy_learning_update_mutation_planning_template_id",
+    "policy_learning_update_mutation_planning_outcome",
+    "artifact_readiness",
+    "planning_readiness",
+    "prerequisite_readiness",
+    "preparation_package_reference",
+    "preparation_summary",
+    "mutation_planning_scope_reference",
+    "preparation_artifact_boundary_summary",
+    "policy_learning_update_preparation_id",
+    "policy_learning_update_preparation_status",
+    "policy_learning_update_preparation_class_id",
+    "policy_learning_update_preparation_template_id",
+    "policy_learning_update_preparation_outcome",
+    "policy_learning_update_approval_id",
+    "policy_learning_update_approval_status",
+    "policy_learning_update_approval_class_id",
+    "policy_learning_update_approval_template_id",
+    "policy_learning_update_approval_outcome",
+    "governance_readiness",
+    "change_control_readiness",
+    "boundary_control_strength",
+    "preparation_readiness",
+    "candidate_update_reference",
+    "approval_summary",
+    "change_control_reference",
+    "preparation_scope_reference",
+    "preparation_boundary_summary",
+    "policy_learning_update_threshold_id",
+    "policy_learning_update_threshold_status",
+    "policy_learning_update_threshold_class_id",
+    "policy_learning_update_threshold_template_id",
+    "policy_learning_update_decision_outcome",
+    "evidence_sufficiency",
+    "weak_evidence_check",
+    "policy_behavior_change",
+    "update_severity",
+    "update_scope",
+    "policy_learning_evidence_admission_id",
+    "policy_learning_evidence_admission_status",
+    "policy_learning_evidence_class_id",
+    "policy_learning_evidence_template_id",
+    "policy_learning_evidence_admission_outcome",
+    "post_mortem_judgment_id",
+    "post_mortem_judgment_status",
+    "post_mortem_judgment_class_id",
+    "post_mortem_judgment_template_id",
+    "execution_outcome_id",
+    "execution_outcome_status",
+    "execution_outcome_class_id",
+    "execution_dispatch_id",
+    "execution_dispatch_class_id",
+    "execution_request_id",
+    "semantic_scope",
+    "case_type",
+    "case_key",
+    "state_model_name",
+    "episode_id",
+    "transition_name",
+    "transition_class",
+    "source_stage",
+    "target_stage",
+    "policy_learning_update_threshold_author_role",
+    "policy_learning_update_threshold_author_id",
+    "policy_learning_update_approval_author_role",
+    "policy_learning_update_approval_author_id",
+    "policy_learning_update_preparation_author_role",
+    "policy_learning_update_preparation_author_id",
+    "policy_learning_update_mutation_planning_author_role",
+    "policy_learning_update_mutation_planning_author_id",
+    "policy_learning_update_mutation_execution_author_role",
+    "policy_learning_update_mutation_execution_author_id",
+    "authority_resolution_kind",
+    "authority_review_required",
+    "router_rule_id",
+    "routing_resolution_status",
+    "routing_review_required",
+    "review_mode",
+    "required_update_mutation_execution_fields",
+    "optional_update_mutation_execution_fields",
+    "required_audit_fields",
+    "prohibited_update_mutation_execution_fields",
+    "required_update_mutation_execution_snapshot",
+    "optional_update_mutation_execution_snapshot",
+    "required_audit_snapshot",
+    "lineage",
+    "generated_at"
+  ],
+  "properties": {
+    "policy_learning_update_mutation_execution_status": {
+      "type": "string",
+      "enum": [
+        "mutation_execution_ready",
+        "fallback_template_applied",
+        "blocked_missing_context",
+        "rejected_for_mutation_execution_use",
+        "prohibited_overlap_blocked"
+      ]
+    },
+    "policy_learning_update_mutation_execution_outcome": {
+      "type": "string",
+      "enum": [
+        "ready_for_policy_mutation_execution",
+        "ready_for_policy_mutation_execution_with_restrictions",
+        "deferred_pending_mutation_execution_prerequisites",
+        "blocked_missing_context",
+        "rejected_for_mutation_execution_use",
+        "prohibited_overlap_blocked"
+      ]
+    },
+    "policy_learning_update_mutation_planning_status": {
+      "type": "string",
+      "enum": [
+        "mutation_planning_ready",
+        "fallback_template_applied",
+        "blocked_missing_context",
+        "rejected_for_mutation_planning_use",
+        "prohibited_overlap_blocked"
+      ]
+    },
+    "policy_learning_update_mutation_planning_outcome": {
+      "type": "string",
+      "enum": [
+        "ready_for_policy_mutation_planning",
+        "ready_for_policy_mutation_planning_with_restrictions",
+        "deferred_pending_mutation_planning_prerequisites",
+        "blocked_missing_context",
+        "rejected_for_mutation_planning_use",
+        "prohibited_overlap_blocked"
+      ]
+    },
+    "policy_learning_update_preparation_status": {
+      "type": "string",
+      "enum": [
+        "preparation_ready",
+        "fallback_template_applied",
+        "blocked_missing_context",
+        "rejected_for_preparation_use",
+        "prohibited_overlap_blocked"
+      ]
+    },
+    "policy_learning_update_preparation_outcome": {
+      "type": "string",
+      "enum": [
+        "prepared_for_policy_mutation_planning",
+        "prepared_with_restrictions",
+        "deferred_pending_preparation_prerequisites",
+        "blocked_missing_context",
+        "rejected_for_preparation_use",
+        "prohibited_overlap_blocked"
+      ]
+    },
+    "policy_learning_update_approval_status": {
+      "type": "string",
+      "enum": [
+        "approval_ready",
+        "fallback_template_applied",
+        "blocked_missing_context",
+        "rejected_for_policy_update_use",
+        "prohibited_overlap_blocked"
+      ]
+    },
+    "policy_learning_update_approval_outcome": {
+      "type": "string",
+      "enum": [
+        "approved_for_policy_update_preparation",
+        "approved_with_restrictions",
+        "deferred_pending_additional_governance",
+        "blocked_missing_context",
+        "rejected_for_policy_update_use",
+        "prohibited_overlap_blocked"
+      ]
+    },
+    "policy_learning_update_threshold_status": {
+      "type": "string",
+      "enum": [
+        "threshold_met",
+        "fallback_template_applied",
+        "blocked_missing_context",
+        "blocked_below_threshold",
+        "prohibited_overlap_blocked"
+      ]
+    },
+    "authority_review_required": {
+      "type": "boolean"
+    },
+    "routing_review_required": {
+      "type": "boolean"
+    },
+    "required_update_mutation_execution_fields": {
+      "type": "array"
+    },
+    "optional_update_mutation_execution_fields": {
+      "type": "array"
+    },
+    "required_audit_fields": {
+      "type": "array"
+    },
+    "prohibited_update_mutation_execution_fields": {
+      "type": "array"
+    },
+    "required_update_mutation_execution_snapshot": {
+      "type": "object"
+    },
+    "optional_update_mutation_execution_snapshot": {
+      "type": "object"
+    },
+    "required_audit_snapshot": {
+      "type": "object"
+    },
+    "lineage": {
+      "type": "object"
+    },
+    "generated_at": {
+      "type": "string",
+      "min_length": 1
+    },
+    "outstanding_mutation_execution_prerequisites": {
+      "type": "array"
+    },
+    "missing_update_mutation_execution_fields": {
+      "type": "array"
+    },
+    "prohibited_update_mutation_execution_fields_present": {
+      "type": "array"
+    }
+  }
+}

@@ -1,0 +1,498 @@
+{
+  "type": "object",
+  "required": [
+    "portfolio_output_id",
+    "portfolio_output_status",
+    "reason",
+    "portfolio_output_class_id",
+    "portfolio_output_template_id",
+    "allocation_posture",
+    "weight_posture",
+    "action_boundary_posture",
+    "promotion_safe_use",
+    "policy_output_id",
+    "policy_output_status",
+    "policy_output_class_id",
+    "policy_output_template_id",
+    "bounded_policy_posture",
+    "policy_output_action_boundary_posture",
+    "policy_output_promotion_safe_use",
+    "recommendation_id",
+    "recommendation_status",
+    "recommendation_class_id",
+    "recommendation_template_id",
+    "recommendation_action_class",
+    "recommendation_advisory_status",
+    "recommendation_commitment_readiness",
+    "review_resolution_id",
+    "review_resolution_status",
+    "resolution_class_id",
+    "resolution_state",
+    "review_outcome",
+    "disposition_class_id",
+    "disposition_state",
+    "closure_state",
+    "closure_quality",
+    "packet_id",
+    "packet_template_id",
+    "packet_status",
+    "handoff_ready",
+    "semantic_scope",
+    "case_type",
+    "case_key",
+    "state_model_name",
+    "episode_id",
+    "transition_name",
+    "transition_class",
+    "source_stage",
+    "target_stage",
+    "reviewer_role",
+    "reviewer_id",
+    "recommender_role",
+    "recommender_id",
+    "policy_author_role",
+    "policy_author_id",
+    "portfolio_author_role",
+    "portfolio_author_id",
+    "authority_resolution_kind",
+    "authority_review_required",
+    "router_rule_id",
+    "routing_resolution_status",
+    "routing_review_required",
+    "review_mode",
+    "reason_class",
+    "packet_scope",
+    "handoff_channel",
+    "handoff_purpose",
+    "required_context_fields",
+    "optional_context_fields",
+    "required_audit_fields",
+    "prohibited_context_fields",
+    "required_context_snapshot",
+    "optional_context_snapshot",
+    "required_audit_snapshot",
+    "lineage",
+    "generated_at"
+  ],
+  "properties": {
+    "portfolio_output_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "portfolio_output_status": {
+      "type": "string",
+      "enum": [
+        "blocked",
+        "ready_for_downstream_use",
+        "fallback_template_applied"
+      ]
+    },
+    "reason": {
+      "type": "string",
+      "min_length": 1
+    },
+    "portfolio_output_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "portfolio_output_template_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "allocation_posture": {
+      "type": "string",
+      "enum": [
+        "bounded_allocation",
+        "ranked_preference",
+        "suppression_hold"
+      ]
+    },
+    "weight_posture": {
+      "type": "string",
+      "enum": [
+        "weighted_allocation",
+        "priority_rank_only",
+        "not_applicable"
+      ]
+    },
+    "action_boundary_posture": {
+      "type": "string",
+      "enum": [
+        "allocative_non_instructional",
+        "policy_shaped_non_instructional"
+      ]
+    },
+    "promotion_safe_use": {
+      "type": "string",
+      "enum": [
+        "promotion_safe_output"
+      ]
+    },
+    "policy_output_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "policy_output_status": {
+      "type": "string",
+      "enum": [
+        "blocked",
+        "ready_for_downstream_use",
+        "fallback_template_applied"
+      ]
+    },
+    "policy_output_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "policy_output_template_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "bounded_policy_posture": {
+      "type": "string",
+      "enum": [
+        "policy_shaped_allowance",
+        "policy_shaped_wait_boundary",
+        "policy_shaped_simulation_requirement",
+        "policy_shaped_information_requirement",
+        "policy_shaped_escalation_boundary",
+        "policy_shaped_suppression"
+      ]
+    },
+    "policy_output_action_boundary_posture": {
+      "type": "string",
+      "enum": [
+        "policy_shaped_non_instructional"
+      ]
+    },
+    "policy_output_promotion_safe_use": {
+      "type": "string",
+      "enum": [
+        "promotion_safe_output"
+      ]
+    },
+    "recommendation_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "recommendation_status": {
+      "type": "string",
+      "enum": [
+        "blocked",
+        "ready_for_downstream_use",
+        "fallback_template_applied"
+      ]
+    },
+    "recommendation_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "recommendation_template_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "recommendation_action_class": {
+      "type": "string",
+      "enum": [
+        "recommend_act_now",
+        "recommend_wait",
+        "recommend_simulate_first",
+        "recommend_gather_more_information",
+        "escalate_for_review",
+        "abstain_from_strong_recommendation"
+      ]
+    },
+    "recommendation_advisory_status": {
+      "type": "string",
+      "enum": [
+        "recommendation_issued",
+        "recommendation_withheld"
+      ]
+    },
+    "recommendation_commitment_readiness": {
+      "type": "string",
+      "enum": [
+        "non_committable",
+        "commitment_review_ready"
+      ]
+    },
+    "review_resolution_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "review_resolution_status": {
+      "type": "string",
+      "enum": [
+        "resolved",
+        "blocked",
+        "fallback_applied",
+        "ready_for_disposition"
+      ]
+    },
+    "resolution_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "resolution_state": {
+      "type": "string",
+      "enum": [
+        "settled",
+        "returned",
+        "deferred",
+        "unresolved"
+      ]
+    },
+    "review_outcome": {
+      "type": "string",
+      "enum": [
+        "resolved_with_action",
+        "resolved_with_non_action",
+        "resolved_with_escalation",
+        "returned_for_rework",
+        "returned_for_clarification",
+        "deferred_continuation",
+        "unresolved_state",
+        "rejected_resolution"
+      ]
+    },
+    "disposition_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "disposition_state": {
+      "type": "string",
+      "enum": [
+        "action_routing",
+        "non_action_closure",
+        "reroute",
+        "rework",
+        "clarification",
+        "deferred_continuation",
+        "governed_unresolved_closure"
+      ]
+    },
+    "closure_state": {
+      "type": "string",
+      "enum": [
+        "open",
+        "closed",
+        "closed_pending_downstream_execution",
+        "closed_pending_later_review",
+        "closed_with_qualified_finality"
+      ]
+    },
+    "closure_quality": {
+      "type": "string",
+      "enum": [
+        "complete",
+        "qualified"
+      ]
+    },
+    "packet_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "packet_template_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "packet_status": {
+      "type": "string",
+      "enum": [
+        "ready_for_handoff",
+        "blocked",
+        "fallback_template_applied"
+      ]
+    },
+    "handoff_ready": {
+      "type": "boolean"
+    },
+    "semantic_scope": {
+      "type": "string",
+      "min_length": 1
+    },
+    "case_type": {
+      "type": "string",
+      "min_length": 1
+    },
+    "case_key": {
+      "type": "string",
+      "min_length": 1
+    },
+    "state_model_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "episode_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "transition_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "transition_class": {
+      "type": "string",
+      "min_length": 1
+    },
+    "source_stage": {
+      "type": "string",
+      "min_length": 1
+    },
+    "target_stage": {
+      "type": "string",
+      "min_length": 1
+    },
+    "reviewer_role": {
+      "type": "string",
+      "min_length": 1
+    },
+    "reviewer_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "recommender_role": {
+      "type": "string",
+      "min_length": 1
+    },
+    "recommender_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "policy_author_role": {
+      "type": "string",
+      "min_length": 1
+    },
+    "policy_author_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "portfolio_author_role": {
+      "type": "string",
+      "min_length": 1
+    },
+    "portfolio_author_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "authority_resolution_kind": {
+      "type": "string",
+      "min_length": 1
+    },
+    "authority_review_required": {
+      "type": "boolean"
+    },
+    "router_rule_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "route_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "routing_resolution_status": {
+      "type": "string",
+      "min_length": 1
+    },
+    "routing_review_required": {
+      "type": "boolean"
+    },
+    "review_mode": {
+      "type": "string",
+      "enum": [
+        "required",
+        "optional"
+      ]
+    },
+    "threshold_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "trigger_class": {
+      "type": "string",
+      "min_length": 1
+    },
+    "playbook_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "reason_class": {
+      "type": "string",
+      "min_length": 1
+    },
+    "packet_scope": {
+      "type": "string",
+      "min_length": 1
+    },
+    "handoff_channel": {
+      "type": "string",
+      "min_length": 1
+    },
+    "handoff_purpose": {
+      "type": "string",
+      "min_length": 1
+    },
+    "required_context_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "optional_context_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "required_audit_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "prohibited_context_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "required_context_snapshot": {
+      "type": "object"
+    },
+    "optional_context_snapshot": {
+      "type": "object"
+    },
+    "required_audit_snapshot": {
+      "type": "object"
+    },
+    "lineage": {
+      "type": "object"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "missing_context_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "prohibited_context_fields_present": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    }
+  },
+  "additional_properties": false
+}

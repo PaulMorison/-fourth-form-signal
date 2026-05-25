@@ -1,0 +1,180 @@
+{
+  "policy_output_classes": {
+    "policy_shaped_allowance": {
+      "policy_output_class_id": "policy_shaped_allowance",
+      "description": "A governed policy output that preserves bounded allowance for downstream action preparation without turning policy posture into commitment or instruction.",
+      "bounded_policy_posture": "policy_shaped_allowance",
+      "action_boundary_posture": "policy_shaped_non_instructional",
+      "promotion_safe_use": "promotion_safe_output",
+      "allowed_recommendation_class_ids": [
+        "recommend_act_now"
+      ],
+      "allowed_resolution_class_ids": [
+        "resolved_with_action"
+      ],
+      "allowed_disposition_class_ids": [
+        "closed_pending_downstream_execution"
+      ],
+      "prohibited_context_fields": [
+        "instruction_id",
+        "instruction_reference",
+        "instruction_status",
+        "commitment_id",
+        "commitment_reference",
+        "commitment_status"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "policy_output_class_seed"
+      }
+    },
+    "policy_shaped_wait_boundary": {
+      "policy_output_class_id": "policy_shaped_wait_boundary",
+      "description": "A governed policy output that preserves deliberate waiting as a bounded policy posture without silently authorizing action.",
+      "bounded_policy_posture": "policy_shaped_wait_boundary",
+      "action_boundary_posture": "policy_shaped_non_instructional",
+      "promotion_safe_use": "promotion_safe_output",
+      "allowed_recommendation_class_ids": [
+        "recommend_wait"
+      ],
+      "allowed_resolution_class_ids": [
+        "deferred_continuation"
+      ],
+      "allowed_disposition_class_ids": [
+        "deferred_continuation_pending_review"
+      ],
+      "prohibited_context_fields": [
+        "instruction_id",
+        "instruction_reference",
+        "instruction_status",
+        "commitment_id",
+        "commitment_reference",
+        "commitment_status"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "policy_output_class_seed"
+      }
+    },
+    "policy_shaped_simulation_requirement": {
+      "policy_output_class_id": "policy_shaped_simulation_requirement",
+      "description": "A governed policy output that preserves simulation as a required bounded step before stronger downstream handling is considered.",
+      "bounded_policy_posture": "policy_shaped_simulation_requirement",
+      "action_boundary_posture": "policy_shaped_non_instructional",
+      "promotion_safe_use": "promotion_safe_output",
+      "allowed_recommendation_class_ids": [
+        "recommend_simulate_first"
+      ],
+      "allowed_resolution_class_ids": [
+        "returned_for_rework"
+      ],
+      "allowed_disposition_class_ids": [
+        "returned_for_rework_open"
+      ],
+      "prohibited_context_fields": [
+        "instruction_id",
+        "instruction_reference",
+        "instruction_status",
+        "commitment_id",
+        "commitment_reference",
+        "commitment_status"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "policy_output_class_seed"
+      }
+    },
+    "policy_shaped_information_requirement": {
+      "policy_output_class_id": "policy_shaped_information_requirement",
+      "description": "A governed policy output that preserves additional information gathering as the bounded policy posture before stronger downstream handling is considered.",
+      "bounded_policy_posture": "policy_shaped_information_requirement",
+      "action_boundary_posture": "policy_shaped_non_instructional",
+      "promotion_safe_use": "promotion_safe_output",
+      "allowed_recommendation_class_ids": [
+        "recommend_gather_more_information"
+      ],
+      "allowed_resolution_class_ids": [
+        "returned_for_clarification"
+      ],
+      "allowed_disposition_class_ids": [
+        "returned_for_clarification_open"
+      ],
+      "prohibited_context_fields": [
+        "instruction_id",
+        "instruction_reference",
+        "instruction_status",
+        "commitment_id",
+        "commitment_reference",
+        "commitment_status"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "policy_output_class_seed"
+      }
+    },
+    "policy_shaped_escalation_boundary": {
+      "policy_output_class_id": "policy_shaped_escalation_boundary",
+      "description": "A governed policy output that preserves onward escalation as bounded policy posture without executing escalation workflow here.",
+      "bounded_policy_posture": "policy_shaped_escalation_boundary",
+      "action_boundary_posture": "policy_shaped_non_instructional",
+      "promotion_safe_use": "promotion_safe_output",
+      "allowed_recommendation_class_ids": [
+        "escalate_for_review"
+      ],
+      "allowed_resolution_class_ids": [
+        "resolved_with_escalation"
+      ],
+      "allowed_disposition_class_ids": [
+        "escalated_pending_later_review"
+      ],
+      "prohibited_context_fields": [
+        "instruction_id",
+        "instruction_reference",
+        "instruction_status",
+        "commitment_id",
+        "commitment_reference",
+        "commitment_status"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "policy_output_class_seed"
+      }
+    },
+    "policy_shaped_suppression": {
+      "policy_output_class_id": "policy_shaped_suppression",
+      "description": "A governed policy output that preserves non-action or fallback suppression posture without silently becoming executable instruction.",
+      "bounded_policy_posture": "policy_shaped_suppression",
+      "action_boundary_posture": "policy_shaped_non_instructional",
+      "promotion_safe_use": "promotion_safe_output",
+      "allowed_recommendation_class_ids": [
+        "abstain_from_strong_recommendation"
+      ],
+      "allowed_resolution_class_ids": [
+        "resolved_with_non_action",
+        "manual_fallback_resolution"
+      ],
+      "allowed_disposition_class_ids": [
+        "closed_non_action",
+        "manual_fallback_hold"
+      ],
+      "prohibited_context_fields": [
+        "instruction_id",
+        "instruction_reference",
+        "instruction_status",
+        "commitment_id",
+        "commitment_reference",
+        "commitment_status"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "policy_output_class_seed"
+      }
+    }
+  }
+}

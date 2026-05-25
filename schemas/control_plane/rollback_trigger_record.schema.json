@@ -1,0 +1,132 @@
+{
+  "type": "object",
+  "required": [
+    "rollback_trigger_id",
+    "rollback_trigger_status",
+    "reason",
+    "rollback_trigger_class_id",
+    "rollback_trigger_template_id",
+    "rollback_trigger_outcome",
+    "rollback_trigger_reference",
+    "rollback_plan_reference",
+    "promotion_candidate_reference",
+    "promotion_threshold_reference",
+    "production_entitlement_boundary",
+    "rollback_posture_reference",
+    "release_watch_window",
+    "release_confirmation_threshold_reference",
+    "promotion_scope_reference",
+    "promotion_boundary_summary",
+    "rollout_scope_boundary_reference",
+    "exposure_boundary_reference",
+    "rollout_boundary_summary",
+    "rollout_scope_id",
+    "rollout_scope_status",
+    "rollout_scope_class_id",
+    "rollout_scope_template_id",
+    "rollout_scope_outcome",
+    "semantic_scope",
+    "case_type",
+    "case_key",
+    "state_model_name",
+    "episode_id",
+    "transition_name",
+    "transition_class",
+    "domain_reference",
+    "decision_scope_reference",
+    "tenant_scope_reference",
+    "learning_scope_reference",
+    "rollback_trigger_author_role",
+    "rollback_trigger_author_id",
+    "required_rollback_trigger_fields",
+    "optional_rollback_trigger_fields",
+    "required_audit_fields",
+    "prohibited_rollback_trigger_fields",
+    "required_rollback_trigger_snapshot",
+    "optional_rollback_trigger_snapshot",
+    "required_audit_snapshot",
+    "lineage",
+    "generated_at"
+  ],
+  "properties": {
+    "rollback_trigger_status": {
+      "type": "string",
+      "enum": [
+        "rollback_trigger_named",
+        "fallback_template_applied",
+        "blocked_missing_context",
+        "rejected_for_rollback_trigger_use",
+        "prohibited_overlap_blocked"
+      ]
+    },
+    "rollback_trigger_outcome": {
+      "type": "string",
+      "enum": [
+        "ready_for_release_watch_discipline",
+        "conditionally_ready_for_release_watch_discipline",
+        "deferred_pending_rollback_trigger_evidence",
+        "blocked_missing_context",
+        "rejected_for_rollback_trigger_use",
+        "prohibited_overlap_blocked"
+      ]
+    },
+    "rollout_scope_status": {
+      "type": "string",
+      "enum": [
+        "rollout_scope_defined",
+        "fallback_template_applied",
+        "blocked_missing_context",
+        "rejected_for_rollout_scope_use",
+        "prohibited_overlap_blocked"
+      ]
+    },
+    "rollout_scope_outcome": {
+      "type": "string",
+      "enum": [
+        "ready_for_rollback_trigger_guard",
+        "conditionally_ready_for_rollback_trigger_guard",
+        "deferred_pending_rollout_scope_evidence",
+        "blocked_missing_context",
+        "rejected_for_rollout_scope_use",
+        "prohibited_overlap_blocked"
+      ]
+    },
+    "required_rollback_trigger_fields": {
+      "type": "array"
+    },
+    "optional_rollback_trigger_fields": {
+      "type": "array"
+    },
+    "required_audit_fields": {
+      "type": "array"
+    },
+    "prohibited_rollback_trigger_fields": {
+      "type": "array"
+    },
+    "required_rollback_trigger_snapshot": {
+      "type": "object"
+    },
+    "optional_rollback_trigger_snapshot": {
+      "type": "object"
+    },
+    "required_audit_snapshot": {
+      "type": "object"
+    },
+    "lineage": {
+      "type": "object"
+    },
+    "generated_at": {
+      "type": "string",
+      "min_length": 1
+    },
+    "outstanding_rollback_trigger_prerequisites": {
+      "type": "array"
+    },
+    "missing_rollback_trigger_fields": {
+      "type": "array"
+    },
+    "prohibited_rollback_trigger_fields_present": {
+      "type": "array"
+    }
+  }
+}

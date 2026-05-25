@@ -1,0 +1,137 @@
+{
+  "rollback_trigger_templates": {
+    "full_scope_production_promotion_candidate_primary": {
+      "rollback_trigger_template_id": "full_scope_production_promotion_candidate_primary",
+      "semantic_scope": "shared_control_plane",
+      "rollout_scope_class_id": "full_scope_production_promotion_candidate",
+      "rollback_trigger_class_id": "full_scope_production_promotion_candidate",
+      "route_name": "primary_case_path",
+      "required_rollback_trigger_fields": [
+        "domain_reference",
+        "decision_scope_reference",
+        "tenant_scope_reference",
+        "learning_scope_reference",
+        "promotion_candidate_reference",
+        "promotion_threshold_reference",
+        "production_entitlement_boundary",
+        "rollback_posture_reference",
+        "release_watch_window",
+        "release_confirmation_threshold_reference",
+        "promotion_scope_reference",
+        "promotion_boundary_summary",
+        "rollout_scope_boundary_reference",
+        "exposure_boundary_reference",
+        "rollout_boundary_summary",
+        "rollback_trigger_reference",
+        "rollback_plan_reference"
+      ],
+      "optional_rollback_trigger_fields": [
+        "reporting_scope_reference",
+        "restriction_summary",
+        "promotion_scope_restriction_reference",
+        "follow_up_review_reference",
+        "rollback_trigger_prerequisite_reference",
+        "outstanding_rollback_trigger_prerequisites"
+      ],
+      "required_audit_fields": [
+        "rollback_trigger_author_id",
+        "rollback_trigger_author_role"
+      ],
+      "rollback_trigger_status": "rollback_trigger_named",
+      "rollback_trigger_outcome": "ready_for_release_watch_discipline",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-24",
+        "source": "rollback_trigger_template_seed"
+      }
+    },
+    "conditional_production_release_primary": {
+      "rollback_trigger_template_id": "conditional_production_release_primary",
+      "semantic_scope": "shared_control_plane",
+      "rollout_scope_class_id": "conditional_production_release",
+      "rollback_trigger_class_id": "conditional_production_release",
+      "required_rollback_trigger_fields": [
+        "domain_reference",
+        "decision_scope_reference",
+        "tenant_scope_reference",
+        "learning_scope_reference",
+        "promotion_candidate_reference",
+        "promotion_threshold_reference",
+        "production_entitlement_boundary",
+        "rollback_posture_reference",
+        "release_watch_window",
+        "release_confirmation_threshold_reference",
+        "promotion_scope_reference",
+        "promotion_boundary_summary",
+        "rollout_scope_boundary_reference",
+        "exposure_boundary_reference",
+        "rollout_boundary_summary",
+        "rollback_trigger_reference",
+        "rollback_plan_reference",
+        "restriction_summary",
+        "promotion_scope_restriction_reference"
+      ],
+      "optional_rollback_trigger_fields": [
+        "reporting_scope_reference",
+        "follow_up_review_reference",
+        "rollback_trigger_prerequisite_reference",
+        "outstanding_rollback_trigger_prerequisites"
+      ],
+      "required_audit_fields": [
+        "rollback_trigger_author_id",
+        "rollback_trigger_author_role"
+      ],
+      "rollback_trigger_status": "fallback_template_applied",
+      "rollback_trigger_outcome": "conditionally_ready_for_release_watch_discipline",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-24",
+        "source": "rollback_trigger_template_seed"
+      }
+    },
+    "deferred_release_state_fallback": {
+      "rollback_trigger_template_id": "deferred_release_state_fallback",
+      "semantic_scope": "shared_control_plane",
+      "rollout_scope_class_id": "full_scope_production_promotion_candidate",
+      "rollback_trigger_class_id": "deferred_release_state",
+      "required_rollback_trigger_fields": [
+        "domain_reference",
+        "decision_scope_reference",
+        "tenant_scope_reference",
+        "learning_scope_reference",
+        "promotion_candidate_reference",
+        "promotion_threshold_reference",
+        "production_entitlement_boundary",
+        "rollback_posture_reference",
+        "release_watch_window",
+        "release_confirmation_threshold_reference",
+        "promotion_scope_reference",
+        "promotion_boundary_summary",
+        "rollout_scope_boundary_reference",
+        "exposure_boundary_reference",
+        "rollout_boundary_summary",
+        "rollback_trigger_reference",
+        "rollback_plan_reference",
+        "rollback_trigger_prerequisite_reference",
+        "outstanding_rollback_trigger_prerequisites"
+      ],
+      "optional_rollback_trigger_fields": [
+        "reporting_scope_reference",
+        "restriction_summary",
+        "promotion_scope_restriction_reference",
+        "follow_up_review_reference"
+      ],
+      "required_audit_fields": [
+        "rollback_trigger_author_id",
+        "rollback_trigger_author_role"
+      ],
+      "rollback_trigger_status": "fallback_template_applied",
+      "rollback_trigger_outcome": "deferred_pending_rollback_trigger_evidence",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-24",
+        "source": "rollback_trigger_template_seed"
+      }
+    }
+  }
+}

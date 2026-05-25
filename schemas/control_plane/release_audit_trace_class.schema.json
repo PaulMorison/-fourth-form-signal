@@ -1,0 +1,76 @@
+{
+  "type": "object",
+  "required": [
+    "release_audit_trace_class_id",
+    "description",
+    "allowed_contained_rollback_statuses",
+    "allowed_contained_rollback_outcomes",
+    "allow_release_audit_trace_restrictions",
+    "allow_release_audit_trace_prerequisite_deferral",
+    "prohibited_release_audit_trace_fields",
+    "status",
+    "lineage"
+  ],
+  "properties": {
+    "release_audit_trace_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "description": {
+      "type": "string",
+      "min_length": 1
+    },
+    "allowed_contained_rollback_statuses": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "contained_rollback_bounded",
+          "fallback_template_applied",
+          "blocked_missing_context",
+          "rejected_for_contained_rollback_use",
+          "prohibited_overlap_blocked"
+        ]
+      }
+    },
+    "allowed_contained_rollback_outcomes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "bounded_exposure_preserved",
+          "partial_reversal_bounded",
+          "deferred_pending_contained_rollback_evidence",
+          "blocked_missing_context",
+          "rejected_for_contained_rollback_use",
+          "prohibited_overlap_blocked"
+        ]
+      }
+    },
+    "allow_release_audit_trace_restrictions": {
+      "type": "boolean"
+    },
+    "allow_release_audit_trace_prerequisite_deferral": {
+      "type": "boolean"
+    },
+    "prohibited_release_audit_trace_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object"
+    }
+  }
+}

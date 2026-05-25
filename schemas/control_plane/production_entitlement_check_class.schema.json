@@ -1,0 +1,76 @@
+{
+  "type": "object",
+  "required": [
+    "production_entitlement_check_class_id",
+    "description",
+    "allowed_release_confirmation_statuses",
+    "allowed_release_confirmation_outcomes",
+    "allow_production_entitlement_restrictions",
+    "allow_production_entitlement_prerequisite_deferral",
+    "prohibited_production_entitlement_fields",
+    "status",
+    "lineage"
+  ],
+  "properties": {
+    "production_entitlement_check_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "description": {
+      "type": "string",
+      "min_length": 1
+    },
+    "allowed_release_confirmation_statuses": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "release_confirmation_judged",
+          "fallback_template_applied",
+          "blocked_missing_context",
+          "rejected_for_release_confirmation_use",
+          "prohibited_overlap_blocked"
+        ]
+      }
+    },
+    "allowed_release_confirmation_outcomes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "confirmed_for_broader_trusted_production_use",
+          "conditionally_confirmed_for_bounded_production_use",
+          "deferred_pending_release_confirmation_evidence",
+          "blocked_missing_context",
+          "rejected_for_release_confirmation_use",
+          "prohibited_overlap_blocked"
+        ]
+      }
+    },
+    "allow_production_entitlement_restrictions": {
+      "type": "boolean"
+    },
+    "allow_production_entitlement_prerequisite_deferral": {
+      "type": "boolean"
+    },
+    "prohibited_production_entitlement_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object"
+    }
+  }
+}

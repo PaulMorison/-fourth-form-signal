@@ -1,0 +1,15 @@
+{
+  "calibration_profiles": {
+    "high_sensitivity_review": {
+      "calibration_profile_id": "high_sensitivity_review",
+      "threshold_type": "numeric_comparison",
+      "adjustment_kind": "offset",
+      "adjustment_value": -0.05,
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "calibration_profile_seed"
+      }
+    }
+  }
+}

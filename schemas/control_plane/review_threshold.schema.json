@@ -1,0 +1,126 @@
+{
+  "type": "object",
+  "required": [
+    "threshold_id",
+    "semantic_scope",
+    "router_rule_id",
+    "transition_name",
+    "trigger_class",
+    "review_mode",
+    "threshold_type",
+    "operator",
+    "value_source",
+    "comparison_value",
+    "required_context_fields",
+    "status",
+    "lineage"
+  ],
+  "additional_properties": false,
+  "properties": {
+    "threshold_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "semantic_scope": {
+      "type": "string",
+      "min_length": 1
+    },
+    "router_rule_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "transition_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "route_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "trigger_class": {
+      "type": "string",
+      "min_length": 1
+    },
+    "review_mode": {
+      "type": "string",
+      "enum": [
+        "required",
+        "optional"
+      ]
+    },
+    "threshold_type": {
+      "type": "string",
+      "enum": [
+        "numeric_comparison",
+        "boolean_signal"
+      ]
+    },
+    "operator": {
+      "type": "string",
+      "enum": [
+        "gt",
+        "gte",
+        "lt",
+        "lte",
+        "eq",
+        "neq"
+      ]
+    },
+    "value_source": {
+      "type": "string",
+      "min_length": 1
+    },
+    "comparison_value": {
+      "type": "string",
+      "min_length": 1
+    },
+    "calibration_profile_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "required_context_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "fallback_review_mode": {
+      "type": "string",
+      "enum": [
+        "required",
+        "optional"
+      ]
+    },
+    "playbook_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object",
+      "required": [
+        "version",
+        "source"
+      ],
+      "additional_properties": false,
+      "properties": {
+        "version": {
+          "type": "string",
+          "min_length": 1
+        },
+        "source": {
+          "type": "string",
+          "min_length": 1
+        }
+      }
+    }
+  }
+}

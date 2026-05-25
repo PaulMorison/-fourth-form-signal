@@ -1,0 +1,447 @@
+{
+  "type": "object",
+  "required": [
+    "execution_request_id",
+    "execution_request_status",
+    "reason",
+    "execution_request_class_id",
+    "execution_request_template_id",
+    "execution_request_readiness",
+    "action_boundary_posture",
+    "action_instruction_id",
+    "action_instruction_status",
+    "action_instruction_class_id",
+    "action_instruction_template_id",
+    "instruction_status",
+    "bounded_action_posture",
+    "execution_boundary_posture",
+    "action_instruction_promotion_safe_use",
+    "portfolio_output_id",
+    "portfolio_output_status",
+    "portfolio_output_class_id",
+    "portfolio_output_template_id",
+    "policy_output_id",
+    "policy_output_status",
+    "policy_output_class_id",
+    "policy_output_template_id",
+    "recommendation_id",
+    "recommendation_status",
+    "recommendation_class_id",
+    "recommendation_template_id",
+    "review_resolution_id",
+    "review_resolution_status",
+    "resolution_class_id",
+    "disposition_class_id",
+    "packet_id",
+    "packet_template_id",
+    "packet_status",
+    "semantic_scope",
+    "case_type",
+    "case_key",
+    "state_model_name",
+    "episode_id",
+    "transition_name",
+    "transition_class",
+    "source_stage",
+    "target_stage",
+    "reviewer_role",
+    "reviewer_id",
+    "recommender_role",
+    "recommender_id",
+    "policy_author_role",
+    "policy_author_id",
+    "portfolio_author_role",
+    "portfolio_author_id",
+    "instruction_author_role",
+    "instruction_author_id",
+    "execution_request_author_role",
+    "execution_request_author_id",
+    "authority_resolution_kind",
+    "authority_review_required",
+    "router_rule_id",
+    "routing_resolution_status",
+    "routing_review_required",
+    "review_mode",
+    "required_execution_request_fields",
+    "optional_execution_request_fields",
+    "required_audit_fields",
+    "prohibited_execution_fields",
+    "required_execution_request_snapshot",
+    "optional_execution_request_snapshot",
+    "required_audit_snapshot",
+    "lineage",
+    "generated_at"
+  ],
+  "properties": {
+    "execution_request_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "execution_request_status": {
+      "type": "string",
+      "enum": [
+        "blocked",
+        "ready_for_downstream_use",
+        "fallback_template_applied"
+      ]
+    },
+    "reason": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_request_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_request_template_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_request_readiness": {
+      "type": "string",
+      "enum": [
+        "dispatch_ready",
+        "dispatch_blocked_pending_authority",
+        "dispatch_blocked_pending_prerequisite",
+        "dispatch_blocked_pending_timing",
+        "dispatch_prohibited",
+        "request_incomplete"
+      ]
+    },
+    "action_boundary_posture": {
+      "type": "string",
+      "enum": [
+        "request_ready_non_executing",
+        "request_conditioned_non_executing",
+        "request_hold_non_executing"
+      ]
+    },
+    "action_instruction_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "action_instruction_status": {
+      "type": "string",
+      "min_length": 1
+    },
+    "action_instruction_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "action_instruction_template_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "instruction_status": {
+      "type": "string",
+      "min_length": 1
+    },
+    "bounded_action_posture": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_boundary_posture": {
+      "type": "string",
+      "min_length": 1
+    },
+    "action_instruction_promotion_safe_use": {
+      "type": "string",
+      "min_length": 1
+    },
+    "portfolio_output_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "portfolio_output_status": {
+      "type": "string",
+      "min_length": 1
+    },
+    "portfolio_output_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "portfolio_output_template_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "policy_output_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "policy_output_status": {
+      "type": "string",
+      "min_length": 1
+    },
+    "policy_output_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "policy_output_template_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "recommendation_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "recommendation_status": {
+      "type": "string",
+      "min_length": 1
+    },
+    "recommendation_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "recommendation_template_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "review_resolution_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "review_resolution_status": {
+      "type": "string",
+      "min_length": 1
+    },
+    "resolution_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "disposition_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "packet_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "packet_template_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "packet_status": {
+      "type": "string",
+      "min_length": 1
+    },
+    "semantic_scope": {
+      "type": "string",
+      "min_length": 1
+    },
+    "case_type": {
+      "type": "string",
+      "min_length": 1
+    },
+    "case_key": {
+      "type": "string",
+      "min_length": 1
+    },
+    "state_model_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "episode_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "transition_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "transition_class": {
+      "type": "string",
+      "min_length": 1
+    },
+    "source_stage": {
+      "type": "string",
+      "min_length": 1
+    },
+    "target_stage": {
+      "type": "string",
+      "min_length": 1
+    },
+    "reviewer_role": {
+      "type": "string",
+      "min_length": 1
+    },
+    "reviewer_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "recommender_role": {
+      "type": "string",
+      "min_length": 1
+    },
+    "recommender_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "policy_author_role": {
+      "type": "string",
+      "min_length": 1
+    },
+    "policy_author_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "portfolio_author_role": {
+      "type": "string",
+      "min_length": 1
+    },
+    "portfolio_author_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "instruction_author_role": {
+      "type": "string",
+      "min_length": 1
+    },
+    "instruction_author_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_request_author_role": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_request_author_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "authority_resolution_kind": {
+      "type": "string",
+      "min_length": 1
+    },
+    "authority_review_required": {
+      "type": "boolean"
+    },
+    "router_rule_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "routing_resolution_status": {
+      "type": "string",
+      "min_length": 1
+    },
+    "routing_review_required": {
+      "type": "boolean"
+    },
+    "review_mode": {
+      "type": "string",
+      "min_length": 1
+    },
+    "route_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "threshold_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "trigger_class": {
+      "type": "string",
+      "min_length": 1
+    },
+    "playbook_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "upstream_commitment_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "instruction_authority_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "executable_scope_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "blocking_condition_kind": {
+      "type": "string",
+      "min_length": 1
+    },
+    "blocking_condition_references": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "invalidation_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "unauthorized_instruction_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "reopen_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "required_execution_request_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "optional_execution_request_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "required_audit_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "prohibited_execution_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "required_execution_request_snapshot": {
+      "type": "object"
+    },
+    "optional_execution_request_snapshot": {
+      "type": "object"
+    },
+    "required_audit_snapshot": {
+      "type": "object"
+    },
+    "lineage": {
+      "type": "object"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "missing_execution_request_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "prohibited_execution_fields_present": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    }
+  },
+  "additional_properties": false
+}

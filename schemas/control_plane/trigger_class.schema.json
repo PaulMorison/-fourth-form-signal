@@ -1,0 +1,61 @@
+{
+  "type": "object",
+  "required": [
+    "trigger_class",
+    "description",
+    "allowed_review_modes",
+    "allows_fallback_review_mode",
+    "status",
+    "lineage"
+  ],
+  "additional_properties": false,
+  "properties": {
+    "trigger_class": {
+      "type": "string",
+      "min_length": 1
+    },
+    "description": {
+      "type": "string",
+      "min_length": 1
+    },
+    "allowed_review_modes": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "required",
+          "optional"
+        ]
+      }
+    },
+    "allows_fallback_review_mode": {
+      "type": "boolean"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object",
+      "required": [
+        "version",
+        "source"
+      ],
+      "additional_properties": false,
+      "properties": {
+        "version": {
+          "type": "string",
+          "min_length": 1
+        },
+        "source": {
+          "type": "string",
+          "min_length": 1
+        }
+      }
+    }
+  }
+}

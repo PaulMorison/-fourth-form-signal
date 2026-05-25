@@ -1,0 +1,86 @@
+{
+  "type": "object",
+  "required": [
+    "production_entitlement_check_template_id",
+    "semantic_scope",
+    "release_confirmation_class_id",
+    "production_entitlement_check_class_id",
+    "required_production_entitlement_check_fields",
+    "optional_production_entitlement_check_fields",
+    "required_audit_fields",
+    "production_entitlement_check_status",
+    "production_entitlement_check_outcome",
+    "status",
+    "lineage"
+  ],
+  "properties": {
+    "production_entitlement_check_template_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "semantic_scope": {
+      "type": "string",
+      "min_length": 1
+    },
+    "release_confirmation_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "production_entitlement_check_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "required_production_entitlement_check_fields": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "optional_production_entitlement_check_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "required_audit_fields": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "production_entitlement_check_status": {
+      "type": "string",
+      "enum": [
+        "production_entitlement_checked",
+        "fallback_template_applied"
+      ]
+    },
+    "production_entitlement_check_outcome": {
+      "type": "string",
+      "enum": [
+        "approved_for_broader_trusted_production_entitlement",
+        "conditionally_approved_for_bounded_production_entitlement",
+        "deferred_pending_production_entitlement_evidence"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object"
+    },
+    "route_name": {
+      "type": "string",
+      "min_length": 1
+    }
+  }
+}

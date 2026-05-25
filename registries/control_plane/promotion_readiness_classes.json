@@ -1,0 +1,113 @@
+{
+  "promotion_readiness_classes": {
+    "full_scope_production_promotion_candidate": {
+      "promotion_readiness_class_id": "full_scope_production_promotion_candidate",
+      "description": "A governed promotion-readiness class for mutated policy candidates whose readiness evidence supports full downstream rollout-scope control without widening into rollout execution, rollback-trigger control, or post-release watch execution.",
+      "allowed_policy_learning_update_mutation_execution_statuses": [
+        "mutation_execution_ready"
+      ],
+      "allowed_policy_learning_update_mutation_execution_outcomes": [
+        "ready_for_policy_mutation_execution"
+      ],
+      "minimum_dimension_strength": "strong",
+      "allow_promotion_restrictions": false,
+      "allow_promotion_prerequisite_deferral": false,
+      "prohibited_promotion_readiness_fields": [
+        "rollout_scope_boundary_reference",
+        "exposure_boundary_reference",
+        "policy_rollout_reference",
+        "release_activation_reference",
+        "release_observation_reference",
+        "rollback_trigger_reference",
+        "rollback_decision_reference",
+        "contained_rollback_reference",
+        "monitor_alert_reference",
+        "drift_monitor_reference",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "orchestration_owner_reference",
+        "lifecycle_state_override"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-24",
+        "source": "promotion_readiness_class_seed"
+      }
+    },
+    "local_scope_release_candidate": {
+      "promotion_readiness_class_id": "local_scope_release_candidate",
+      "description": "A governed promotion-readiness class for mutated policy candidates whose readiness evidence supports only narrowed downstream rollout-scope control under explicit local-scope restrictions.",
+      "allowed_policy_learning_update_mutation_execution_statuses": [
+        "mutation_execution_ready",
+        "fallback_template_applied"
+      ],
+      "allowed_policy_learning_update_mutation_execution_outcomes": [
+        "ready_for_policy_mutation_execution",
+        "ready_for_policy_mutation_execution_with_restrictions"
+      ],
+      "minimum_dimension_strength": "moderate",
+      "allow_promotion_restrictions": true,
+      "allow_promotion_prerequisite_deferral": false,
+      "prohibited_promotion_readiness_fields": [
+        "rollout_scope_boundary_reference",
+        "exposure_boundary_reference",
+        "policy_rollout_reference",
+        "release_activation_reference",
+        "release_observation_reference",
+        "rollback_trigger_reference",
+        "rollback_decision_reference",
+        "contained_rollback_reference",
+        "monitor_alert_reference",
+        "drift_monitor_reference",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "orchestration_owner_reference",
+        "lifecycle_state_override"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-24",
+        "source": "promotion_readiness_class_seed"
+      }
+    },
+    "deferred_promotion_readiness_candidate": {
+      "promotion_readiness_class_id": "deferred_promotion_readiness_candidate",
+      "description": "A governed promotion-readiness class for mutated policy candidates that remain unsuitable for present rollout-scope control until explicit readiness evidence and promotion prerequisites are completed.",
+      "allowed_policy_learning_update_mutation_execution_statuses": [
+        "mutation_execution_ready",
+        "fallback_template_applied"
+      ],
+      "allowed_policy_learning_update_mutation_execution_outcomes": [
+        "ready_for_policy_mutation_execution",
+        "ready_for_policy_mutation_execution_with_restrictions"
+      ],
+      "minimum_dimension_strength": "weak",
+      "allow_promotion_restrictions": true,
+      "allow_promotion_prerequisite_deferral": true,
+      "prohibited_promotion_readiness_fields": [
+        "rollout_scope_boundary_reference",
+        "exposure_boundary_reference",
+        "policy_rollout_reference",
+        "release_activation_reference",
+        "release_observation_reference",
+        "rollback_trigger_reference",
+        "rollback_decision_reference",
+        "contained_rollback_reference",
+        "monitor_alert_reference",
+        "drift_monitor_reference",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "orchestration_owner_reference",
+        "lifecycle_state_override"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-24",
+        "source": "promotion_readiness_class_seed"
+      }
+    }
+  }
+}

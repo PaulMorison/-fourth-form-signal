@@ -1,0 +1,81 @@
+{
+  "execution_outcome_classes": {
+    "favorable_realized_outcome": {
+      "execution_outcome_class_id": "favorable_realized_outcome",
+      "description": "A governed execution-outcome class that preserves explicit favorable realized-result meaning without collapsing outcome capture into post-mortem judgment, broker execution, or learning admission.",
+      "realized_result_class": "favorable",
+      "allowed_execution_dispatch_class_ids": [
+        "direct_dispatch_boundary"
+      ],
+      "prohibited_observation_fields": [
+        "broker_identifier",
+        "venue_identifier",
+        "order_identifier",
+        "execution_command",
+        "execution_started_at",
+        "execution_completed_at",
+        "post_mortem_judgment",
+        "attribution_judgment",
+        "policy_learning_admission",
+        "release_readiness_reference"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "execution_outcome_class_seed"
+      }
+    },
+    "negative_realized_outcome": {
+      "execution_outcome_class_id": "negative_realized_outcome",
+      "description": "A governed execution-outcome class that keeps negative realized-result meaning explicit and lineage-safe without turning variance into attribution or learning admission.",
+      "realized_result_class": "negative",
+      "allowed_execution_dispatch_class_ids": [
+        "direct_dispatch_boundary",
+        "conditioned_dispatch_boundary"
+      ],
+      "prohibited_observation_fields": [
+        "broker_identifier",
+        "venue_identifier",
+        "order_identifier",
+        "execution_command",
+        "execution_started_at",
+        "execution_completed_at",
+        "post_mortem_judgment",
+        "attribution_judgment",
+        "policy_learning_admission",
+        "release_readiness_reference"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "execution_outcome_class_seed"
+      }
+    },
+    "deferred_realized_outcome": {
+      "execution_outcome_class_id": "deferred_realized_outcome",
+      "description": "A governed execution-outcome class that preserves explicit deferred observation posture without pretending that a hold-only dispatch has already become a settled realized result.",
+      "realized_result_class": "deferred",
+      "allowed_execution_dispatch_class_ids": [
+        "hold_dispatch_boundary",
+        "conditioned_dispatch_boundary"
+      ],
+      "prohibited_observation_fields": [
+        "broker_identifier",
+        "venue_identifier",
+        "order_identifier",
+        "execution_command",
+        "execution_started_at",
+        "execution_completed_at",
+        "post_mortem_judgment",
+        "attribution_judgment",
+        "policy_learning_admission",
+        "release_readiness_reference"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "execution_outcome_class_seed"
+      }
+    }
+  }
+}

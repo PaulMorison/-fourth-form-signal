@@ -1,0 +1,34 @@
+{
+  "review_reason_classes": {
+    "impact_assessment_required": {
+      "reason_class": "impact_assessment_required",
+      "description": "A governed required-review packet for materially elevated assessment impact.",
+      "handoff_purpose": "review_only",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "review_reason_class_seed"
+      }
+    },
+    "impact_assessment_optional": {
+      "reason_class": "impact_assessment_optional",
+      "description": "A governed optional-review packet for materially notable assessment impact.",
+      "handoff_purpose": "review_only",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "review_reason_class_seed"
+      }
+    },
+    "manual_fallback_review": {
+      "reason_class": "manual_fallback_review",
+      "description": "A governed fallback review packet for manually triaged review-gate handling.",
+      "handoff_purpose": "manual_triage",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-22",
+        "source": "review_reason_class_seed"
+      }
+    }
+  }
+}

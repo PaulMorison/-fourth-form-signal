@@ -1,0 +1,113 @@
+{
+  "type": "object",
+  "required": [
+    "policy_learning_update_threshold_class_id",
+    "description",
+    "allowed_policy_learning_evidence_statuses",
+    "allowed_policy_learning_evidence_outcomes",
+    "minimum_policy_learning_evidence_sufficiency",
+    "minimum_policy_learning_evidence_attribution_readiness",
+    "minimum_dimension_strength",
+    "minimum_repetition_posture",
+    "allow_local_scope_narrowing",
+    "allow_monitoring_deferral",
+    "prohibited_update_threshold_fields",
+    "status",
+    "lineage"
+  ],
+  "properties": {
+    "policy_learning_update_threshold_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "description": {
+      "type": "string",
+      "min_length": 1
+    },
+    "allowed_policy_learning_evidence_statuses": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "admitted_ready",
+          "fallback_template_applied"
+        ]
+      }
+    },
+    "allowed_policy_learning_evidence_outcomes": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "admitted_for_update_consideration",
+          "admitted_with_restrictions",
+          "deferred_pending_more_evidence",
+          "rejected_for_learning_use"
+        ]
+      }
+    },
+    "minimum_policy_learning_evidence_sufficiency": {
+      "type": "string",
+      "enum": [
+        "learning_grade_evidence_sufficient",
+        "learning_evidence_restricted",
+        "learning_evidence_deferred",
+        "learning_evidence_incomplete",
+        "learning_evidence_overlap_prohibited",
+        "insufficient_for_learning_admission"
+      ]
+    },
+    "minimum_policy_learning_evidence_attribution_readiness": {
+      "type": "string",
+      "enum": [
+        "attribution_ready_for_learning",
+        "attribution_restricted_for_learning",
+        "attribution_pending_more_evidence",
+        "attribution_not_ready_for_learning"
+      ]
+    },
+    "minimum_dimension_strength": {
+      "type": "string",
+      "enum": [
+        "weak",
+        "moderate",
+        "strong"
+      ]
+    },
+    "minimum_repetition_posture": {
+      "type": "string",
+      "enum": [
+        "single_case_only",
+        "limited_repetition",
+        "repeated_comparable_cases",
+        "exceptional_single_case"
+      ]
+    },
+    "allow_local_scope_narrowing": {
+      "type": "boolean"
+    },
+    "allow_monitoring_deferral": {
+      "type": "boolean"
+    },
+    "prohibited_update_threshold_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object"
+    }
+  },
+  "additional_properties": false
+}

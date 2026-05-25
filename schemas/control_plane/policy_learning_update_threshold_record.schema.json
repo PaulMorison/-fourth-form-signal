@@ -1,0 +1,484 @@
+{
+  "type": "object",
+  "required": [
+    "policy_learning_update_threshold_id",
+    "policy_learning_update_threshold_status",
+    "reason",
+    "policy_learning_update_threshold_class_id",
+    "policy_learning_update_threshold_template_id",
+    "policy_learning_update_decision_outcome",
+    "evidence_sufficiency",
+    "weak_evidence_check",
+    "policy_behavior_change",
+    "update_severity",
+    "update_scope",
+    "policy_learning_evidence_admission_id",
+    "policy_learning_evidence_admission_status",
+    "policy_learning_evidence_class_id",
+    "policy_learning_evidence_template_id",
+    "policy_learning_evidence_admission_outcome",
+    "policy_learning_evidence_attribution_readiness",
+    "policy_learning_evidence_sufficiency",
+    "policy_learning_evidence_weak_evidence_protection",
+    "post_mortem_judgment_id",
+    "post_mortem_judgment_status",
+    "post_mortem_judgment_class_id",
+    "post_mortem_judgment_template_id",
+    "primary_attribution_category",
+    "post_mortem_evidence_quality",
+    "post_mortem_confidence_posture",
+    "post_mortem_learning_direction",
+    "post_mortem_comparison_posture",
+    "execution_outcome_id",
+    "execution_outcome_status",
+    "execution_outcome_class_id",
+    "execution_dispatch_id",
+    "execution_dispatch_class_id",
+    "execution_request_id",
+    "semantic_scope",
+    "case_type",
+    "case_key",
+    "state_model_name",
+    "episode_id",
+    "transition_name",
+    "transition_class",
+    "source_stage",
+    "target_stage",
+    "policy_learning_evidence_author_role",
+    "policy_learning_evidence_author_id",
+    "policy_learning_update_threshold_author_role",
+    "policy_learning_update_threshold_author_id",
+    "authority_resolution_kind",
+    "authority_review_required",
+    "router_rule_id",
+    "routing_resolution_status",
+    "routing_review_required",
+    "review_mode",
+    "required_update_threshold_fields",
+    "optional_update_threshold_fields",
+    "required_audit_fields",
+    "prohibited_update_threshold_fields",
+    "required_update_threshold_snapshot",
+    "optional_update_threshold_snapshot",
+    "required_audit_snapshot",
+    "lineage",
+    "generated_at"
+  ],
+  "properties": {
+    "policy_learning_update_threshold_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "policy_learning_update_threshold_status": {
+      "type": "string",
+      "enum": [
+        "threshold_met",
+        "blocked_missing_context",
+        "blocked_below_threshold",
+        "fallback_template_applied",
+        "prohibited_overlap_blocked"
+      ]
+    },
+    "reason": {
+      "type": "string",
+      "min_length": 1
+    },
+    "policy_learning_update_threshold_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "policy_learning_update_threshold_template_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "policy_learning_update_decision_outcome": {
+      "type": "string",
+      "enum": [
+        "accepted",
+        "accepted_with_narrowed_scope",
+        "deferred_for_continued_monitoring",
+        "rejected"
+      ]
+    },
+    "evidence_sufficiency": {
+      "type": "string",
+      "min_length": 1
+    },
+    "weak_evidence_check": {
+      "type": "string",
+      "min_length": 1
+    },
+    "policy_behavior_change": {
+      "type": "string",
+      "min_length": 1
+    },
+    "update_severity": {
+      "type": "string",
+      "min_length": 1
+    },
+    "update_scope": {
+      "type": "string",
+      "min_length": 1
+    },
+    "policy_learning_evidence_admission_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "policy_learning_evidence_admission_status": {
+      "type": "string",
+      "enum": [
+        "admitted_ready",
+        "blocked_missing_context",
+        "blocked_insufficient_evidence",
+        "fallback_template_applied",
+        "prohibited_overlap_blocked"
+      ]
+    },
+    "policy_learning_evidence_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "policy_learning_evidence_template_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "policy_learning_evidence_admission_outcome": {
+      "type": "string",
+      "enum": [
+        "admitted_for_update_consideration",
+        "admitted_with_restrictions",
+        "deferred_pending_more_evidence",
+        "rejected_for_learning_use"
+      ]
+    },
+    "policy_learning_evidence_attribution_readiness": {
+      "type": "string",
+      "min_length": 1
+    },
+    "policy_learning_evidence_sufficiency": {
+      "type": "string",
+      "min_length": 1
+    },
+    "policy_learning_evidence_weak_evidence_protection": {
+      "type": "string",
+      "min_length": 1
+    },
+    "post_mortem_judgment_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "post_mortem_judgment_status": {
+      "type": "string",
+      "enum": [
+        "blocked",
+        "ready_for_downstream_use",
+        "fallback_template_applied"
+      ]
+    },
+    "post_mortem_judgment_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "post_mortem_judgment_template_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "primary_attribution_category": {
+      "type": "string",
+      "min_length": 1
+    },
+    "post_mortem_evidence_quality": {
+      "type": "string",
+      "min_length": 1
+    },
+    "post_mortem_confidence_posture": {
+      "type": "string",
+      "min_length": 1
+    },
+    "post_mortem_learning_direction": {
+      "type": "string",
+      "min_length": 1
+    },
+    "post_mortem_comparison_posture": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_outcome_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_outcome_status": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_outcome_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_dispatch_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_dispatch_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "execution_request_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "semantic_scope": {
+      "type": "string",
+      "min_length": 1
+    },
+    "case_type": {
+      "type": "string",
+      "min_length": 1
+    },
+    "case_key": {
+      "type": "string",
+      "min_length": 1
+    },
+    "state_model_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "episode_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "transition_name": {
+      "type": "string",
+      "min_length": 1
+    },
+    "transition_class": {
+      "type": "string",
+      "min_length": 1
+    },
+    "source_stage": {
+      "type": "string",
+      "min_length": 1
+    },
+    "target_stage": {
+      "type": "string",
+      "min_length": 1
+    },
+    "policy_learning_evidence_author_role": {
+      "type": "string",
+      "min_length": 1
+    },
+    "policy_learning_evidence_author_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "policy_learning_update_threshold_author_role": {
+      "type": "string",
+      "min_length": 1
+    },
+    "policy_learning_update_threshold_author_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "authority_resolution_kind": {
+      "type": "string",
+      "min_length": 1
+    },
+    "authority_review_required": {
+      "type": "boolean"
+    },
+    "router_rule_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "routing_resolution_status": {
+      "type": "string",
+      "min_length": 1
+    },
+    "routing_review_required": {
+      "type": "boolean"
+    },
+    "review_mode": {
+      "type": "string",
+      "min_length": 1
+    },
+    "required_update_threshold_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "optional_update_threshold_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "required_audit_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "prohibited_update_threshold_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "required_update_threshold_snapshot": {
+      "type": "object"
+    },
+    "optional_update_threshold_snapshot": {
+      "type": "object"
+    },
+    "required_audit_snapshot": {
+      "type": "object"
+    },
+    "lineage": {
+      "type": "object"
+    },
+    "generated_at": {
+      "type": "string",
+      "min_length": 1
+    },
+    "domain_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "decision_scope_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "reporting_scope_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "tenant_scope_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "learning_scope_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "candidate_update_direction": {
+      "type": "string",
+      "min_length": 1
+    },
+    "comparability_judgment": {
+      "type": "string",
+      "min_length": 1
+    },
+    "commercial_interpretability_summary": {
+      "type": "string",
+      "min_length": 1
+    },
+    "proposed_update_scope": {
+      "type": "string",
+      "min_length": 1
+    },
+    "comparable_case_set_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "restriction_summary": {
+      "type": "string",
+      "min_length": 1
+    },
+    "memory_object_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "evidence_base_summary": {
+      "type": "string",
+      "min_length": 1
+    },
+    "evidence_completeness": {
+      "type": "string",
+      "min_length": 1
+    },
+    "evidence_consistency": {
+      "type": "string",
+      "min_length": 1
+    },
+    "evidence_comparability": {
+      "type": "string",
+      "min_length": 1
+    },
+    "attribution_quality": {
+      "type": "string",
+      "min_length": 1
+    },
+    "scope_legitimacy": {
+      "type": "string",
+      "min_length": 1
+    },
+    "transfer_validity": {
+      "type": "string",
+      "min_length": 1
+    },
+    "magnitude_alignment": {
+      "type": "string",
+      "min_length": 1
+    },
+    "repetition_posture": {
+      "type": "string",
+      "min_length": 1
+    },
+    "commercial_significance": {
+      "type": "string",
+      "min_length": 1
+    },
+    "governance_sensitivity": {
+      "type": "string",
+      "min_length": 1
+    },
+    "local_contradiction_posture": {
+      "type": "string",
+      "min_length": 1
+    },
+    "narrowed_scope_reference": {
+      "type": "string",
+      "min_length": 1
+    },
+    "monitoring_recommendation": {
+      "type": "string",
+      "min_length": 1
+    },
+    "unresolved_competing_explanations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "evidence_gaps": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "missing_update_threshold_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "prohibited_update_threshold_fields_present": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    }
+  },
+  "additional_properties": false
+}

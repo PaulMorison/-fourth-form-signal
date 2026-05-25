@@ -1,0 +1,281 @@
+{
+  "post_mortem_judgment_classes": {
+    "correct_recommendation_correct_execution": {
+      "post_mortem_judgment_class_id": "correct_recommendation_correct_execution",
+      "description": "A governed post-mortem class for episodes where disciplined recommendation and execution aligned with realized outcome without collapsing the judgment into policy-learning admission or monitoring semantics.",
+      "primary_attribution_category": "correct_recommendation_correct_execution",
+      "allowed_execution_outcome_class_ids": [
+        "favorable_realized_outcome"
+      ],
+      "prohibited_judgment_fields": [
+        "policy_learning_admission",
+        "policy_update_authority",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "monitor_alert_reference",
+        "drift_monitor_reference",
+        "broker_identifier",
+        "venue_identifier",
+        "execution_command"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "post_mortem_judgment_class_seed"
+      }
+    },
+    "correct_recommendation_weak_execution": {
+      "post_mortem_judgment_class_id": "correct_recommendation_weak_execution",
+      "description": "A governed post-mortem class for episodes where recommendation remained sound but execution or realized delivery conditions weakened the outcome.",
+      "primary_attribution_category": "correct_recommendation_weak_execution",
+      "allowed_execution_outcome_class_ids": [
+        "negative_realized_outcome"
+      ],
+      "prohibited_judgment_fields": [
+        "policy_learning_admission",
+        "policy_update_authority",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "monitor_alert_reference",
+        "drift_monitor_reference",
+        "broker_identifier",
+        "venue_identifier",
+        "execution_command"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "post_mortem_judgment_class_seed"
+      }
+    },
+    "correct_recommendation_environment_changed": {
+      "post_mortem_judgment_class_id": "correct_recommendation_environment_changed",
+      "description": "A governed post-mortem class for episodes where disciplined recommendation was sound but environmental change altered realized outcome.",
+      "primary_attribution_category": "correct_recommendation_environment_changed",
+      "allowed_execution_outcome_class_ids": [
+        "negative_realized_outcome"
+      ],
+      "prohibited_judgment_fields": [
+        "policy_learning_admission",
+        "policy_update_authority",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "monitor_alert_reference",
+        "drift_monitor_reference",
+        "broker_identifier",
+        "venue_identifier",
+        "execution_command"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "post_mortem_judgment_class_seed"
+      }
+    },
+    "weak_recommendation_good_execution": {
+      "post_mortem_judgment_class_id": "weak_recommendation_good_execution",
+      "description": "A governed post-mortem class for episodes where execution was materially sound but the recommendation itself was weak.",
+      "primary_attribution_category": "weak_recommendation_good_execution",
+      "allowed_execution_outcome_class_ids": [
+        "negative_realized_outcome"
+      ],
+      "prohibited_judgment_fields": [
+        "policy_learning_admission",
+        "policy_update_authority",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "monitor_alert_reference",
+        "drift_monitor_reference",
+        "broker_identifier",
+        "venue_identifier",
+        "execution_command"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "post_mortem_judgment_class_seed"
+      }
+    },
+    "weak_recommendation_weak_causal_logic": {
+      "post_mortem_judgment_class_id": "weak_recommendation_weak_causal_logic",
+      "description": "A governed post-mortem class for episodes where the intervention reasoning was materially incomplete or distorted.",
+      "primary_attribution_category": "weak_recommendation_weak_causal_logic",
+      "allowed_execution_outcome_class_ids": [
+        "negative_realized_outcome"
+      ],
+      "prohibited_judgment_fields": [
+        "policy_learning_admission",
+        "policy_update_authority",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "monitor_alert_reference",
+        "drift_monitor_reference",
+        "broker_identifier",
+        "venue_identifier",
+        "execution_command"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "post_mortem_judgment_class_seed"
+      }
+    },
+    "weak_recommendation_poor_local_state_capture": {
+      "post_mortem_judgment_class_id": "weak_recommendation_poor_local_state_capture",
+      "description": "A governed post-mortem class for episodes where materially relevant local state was absent or underrepresented.",
+      "primary_attribution_category": "weak_recommendation_poor_local_state_capture",
+      "allowed_execution_outcome_class_ids": [
+        "negative_realized_outcome"
+      ],
+      "prohibited_judgment_fields": [
+        "policy_learning_admission",
+        "policy_update_authority",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "monitor_alert_reference",
+        "drift_monitor_reference",
+        "broker_identifier",
+        "venue_identifier",
+        "execution_command"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "post_mortem_judgment_class_seed"
+      }
+    },
+    "weak_recommendation_simulation_miss": {
+      "post_mortem_judgment_class_id": "weak_recommendation_simulation_miss",
+      "description": "A governed post-mortem class for episodes where simulation or counterfactual expectation materially misrepresented likely consequence.",
+      "primary_attribution_category": "weak_recommendation_simulation_miss",
+      "allowed_execution_outcome_class_ids": [
+        "negative_realized_outcome"
+      ],
+      "prohibited_judgment_fields": [
+        "policy_learning_admission",
+        "policy_update_authority",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "monitor_alert_reference",
+        "drift_monitor_reference",
+        "broker_identifier",
+        "venue_identifier",
+        "execution_command"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "post_mortem_judgment_class_seed"
+      }
+    },
+    "weak_recommendation_constraint_miss": {
+      "post_mortem_judgment_class_id": "weak_recommendation_constraint_miss",
+      "description": "A governed post-mortem class for episodes where the recommendation treated the action as more feasible or commercially valid than real constraints allowed.",
+      "primary_attribution_category": "weak_recommendation_constraint_miss",
+      "allowed_execution_outcome_class_ids": [
+        "negative_realized_outcome"
+      ],
+      "prohibited_judgment_fields": [
+        "policy_learning_admission",
+        "policy_update_authority",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "monitor_alert_reference",
+        "drift_monitor_reference",
+        "broker_identifier",
+        "venue_identifier",
+        "execution_command"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "post_mortem_judgment_class_seed"
+      }
+    },
+    "override_improved_outcome": {
+      "post_mortem_judgment_class_id": "override_improved_outcome",
+      "description": "A governed post-mortem class for episodes where override materially improved realized outcome or exposed missing-context weakness.",
+      "primary_attribution_category": "override_improved_outcome",
+      "allowed_execution_outcome_class_ids": [
+        "favorable_realized_outcome"
+      ],
+      "prohibited_judgment_fields": [
+        "policy_learning_admission",
+        "policy_update_authority",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "monitor_alert_reference",
+        "drift_monitor_reference",
+        "broker_identifier",
+        "venue_identifier",
+        "execution_command"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "post_mortem_judgment_class_seed"
+      }
+    },
+    "override_worsened_outcome": {
+      "post_mortem_judgment_class_id": "override_worsened_outcome",
+      "description": "A governed post-mortem class for episodes where override materially degraded realized outcome or displaced a sound system recommendation.",
+      "primary_attribution_category": "override_worsened_outcome",
+      "allowed_execution_outcome_class_ids": [
+        "negative_realized_outcome"
+      ],
+      "prohibited_judgment_fields": [
+        "policy_learning_admission",
+        "policy_update_authority",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "monitor_alert_reference",
+        "drift_monitor_reference",
+        "broker_identifier",
+        "venue_identifier",
+        "execution_command"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "post_mortem_judgment_class_seed"
+      }
+    },
+    "insufficient_evidence_for_confident_judgment": {
+      "post_mortem_judgment_class_id": "insufficient_evidence_for_confident_judgment",
+      "description": "A governed post-mortem class for episodes where evidence is too weak, incomplete, contradictory, or immature to support strong attribution.",
+      "primary_attribution_category": "insufficient_evidence_for_confident_judgment",
+      "allowed_execution_outcome_class_ids": [
+        "favorable_realized_outcome",
+        "negative_realized_outcome",
+        "deferred_realized_outcome"
+      ],
+      "prohibited_judgment_fields": [
+        "policy_learning_admission",
+        "policy_update_authority",
+        "reopen_context",
+        "revisit_context",
+        "reinstatement_context",
+        "monitor_alert_reference",
+        "drift_monitor_reference",
+        "broker_identifier",
+        "venue_identifier",
+        "execution_command"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "post_mortem_judgment_class_seed"
+      }
+    }
+  }
+}

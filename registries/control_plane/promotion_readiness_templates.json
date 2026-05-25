@@ -1,0 +1,155 @@
+{
+  "promotion_readiness_templates": {
+    "full_scope_production_promotion_candidate_primary": {
+      "promotion_readiness_template_id": "full_scope_production_promotion_candidate_primary",
+      "semantic_scope": "shared_control_plane",
+      "policy_learning_update_mutation_execution_class_id": "policy_mutation_execution_candidate",
+      "promotion_readiness_class_id": "full_scope_production_promotion_candidate",
+      "route_name": "primary_case_path",
+      "required_promotion_readiness_fields": [
+        "domain_reference",
+        "decision_scope_reference",
+        "tenant_scope_reference",
+        "learning_scope_reference",
+        "candidate_update_reference",
+        "promotion_candidate_reference",
+        "promotion_readiness_summary",
+        "readiness_evidence_reference",
+        "promotion_threshold_reference",
+        "production_entitlement_boundary",
+        "rollback_posture_reference",
+        "release_watch_window",
+        "release_confirmation_threshold_reference",
+        "promotion_scope_reference",
+        "promotion_boundary_summary",
+        "validation_readiness",
+        "scope_transfer_readiness",
+        "exposure_control_readiness",
+        "security_posture_readiness",
+        "performance_posture_readiness",
+        "rollback_posture_readiness",
+        "operational_reversibility_readiness",
+        "confirmation_readiness"
+      ],
+      "optional_promotion_readiness_fields": [
+        "reporting_scope_reference",
+        "restriction_summary",
+        "promotion_scope_restriction_reference",
+        "follow_up_review_reference",
+        "promotion_prerequisite_reference",
+        "outstanding_promotion_prerequisites"
+      ],
+      "required_audit_fields": [
+        "promotion_readiness_author_id",
+        "promotion_readiness_author_role"
+      ],
+      "promotion_readiness_status": "promotion_ready",
+      "promotion_readiness_outcome": "ready_for_rollout_scope_control",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-24",
+        "source": "promotion_readiness_template_seed"
+      }
+    },
+    "local_scope_release_candidate_primary": {
+      "promotion_readiness_template_id": "local_scope_release_candidate_primary",
+      "semantic_scope": "shared_control_plane",
+      "policy_learning_update_mutation_execution_class_id": "restricted_policy_mutation_execution_candidate",
+      "promotion_readiness_class_id": "local_scope_release_candidate",
+      "required_promotion_readiness_fields": [
+        "domain_reference",
+        "decision_scope_reference",
+        "tenant_scope_reference",
+        "learning_scope_reference",
+        "candidate_update_reference",
+        "promotion_candidate_reference",
+        "promotion_readiness_summary",
+        "readiness_evidence_reference",
+        "promotion_threshold_reference",
+        "production_entitlement_boundary",
+        "rollback_posture_reference",
+        "release_watch_window",
+        "release_confirmation_threshold_reference",
+        "promotion_scope_reference",
+        "promotion_boundary_summary",
+        "validation_readiness",
+        "scope_transfer_readiness",
+        "exposure_control_readiness",
+        "security_posture_readiness",
+        "performance_posture_readiness",
+        "rollback_posture_readiness",
+        "operational_reversibility_readiness",
+        "confirmation_readiness",
+        "restriction_summary",
+        "promotion_scope_restriction_reference"
+      ],
+      "optional_promotion_readiness_fields": [
+        "reporting_scope_reference",
+        "follow_up_review_reference",
+        "promotion_prerequisite_reference",
+        "outstanding_promotion_prerequisites"
+      ],
+      "required_audit_fields": [
+        "promotion_readiness_author_id",
+        "promotion_readiness_author_role"
+      ],
+      "promotion_readiness_status": "fallback_template_applied",
+      "promotion_readiness_outcome": "conditionally_ready_for_rollout_scope_control",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-24",
+        "source": "promotion_readiness_template_seed"
+      }
+    },
+    "deferred_promotion_readiness_candidate_fallback": {
+      "promotion_readiness_template_id": "deferred_promotion_readiness_candidate_fallback",
+      "semantic_scope": "shared_control_plane",
+      "policy_learning_update_mutation_execution_class_id": "policy_mutation_execution_candidate",
+      "promotion_readiness_class_id": "deferred_promotion_readiness_candidate",
+      "required_promotion_readiness_fields": [
+        "domain_reference",
+        "decision_scope_reference",
+        "tenant_scope_reference",
+        "learning_scope_reference",
+        "candidate_update_reference",
+        "promotion_candidate_reference",
+        "promotion_readiness_summary",
+        "readiness_evidence_reference",
+        "promotion_threshold_reference",
+        "production_entitlement_boundary",
+        "rollback_posture_reference",
+        "release_watch_window",
+        "release_confirmation_threshold_reference",
+        "promotion_scope_reference",
+        "promotion_boundary_summary",
+        "validation_readiness",
+        "scope_transfer_readiness",
+        "exposure_control_readiness",
+        "security_posture_readiness",
+        "performance_posture_readiness",
+        "rollback_posture_readiness",
+        "operational_reversibility_readiness",
+        "confirmation_readiness",
+        "promotion_prerequisite_reference",
+        "outstanding_promotion_prerequisites"
+      ],
+      "optional_promotion_readiness_fields": [
+        "reporting_scope_reference",
+        "restriction_summary",
+        "promotion_scope_restriction_reference",
+        "follow_up_review_reference"
+      ],
+      "required_audit_fields": [
+        "promotion_readiness_author_id",
+        "promotion_readiness_author_role"
+      ],
+      "promotion_readiness_status": "fallback_template_applied",
+      "promotion_readiness_outcome": "deferred_pending_promotion_readiness_evidence",
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-24",
+        "source": "promotion_readiness_template_seed"
+      }
+    }
+  }
+}

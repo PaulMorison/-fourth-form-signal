@@ -1,0 +1,82 @@
+{
+  "type": "object",
+  "required": [
+    "policy_learning_update_mutation_execution_class_id",
+    "description",
+    "allowed_policy_learning_update_mutation_planning_statuses",
+    "allowed_policy_learning_update_mutation_planning_outcomes",
+    "minimum_dimension_strength",
+    "allow_mutation_execution_restrictions",
+    "allow_mutation_execution_prerequisite_deferral",
+    "prohibited_update_mutation_execution_fields",
+    "status",
+    "lineage"
+  ],
+  "properties": {
+    "policy_learning_update_mutation_execution_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "description": {
+      "type": "string",
+      "min_length": 1
+    },
+    "allowed_policy_learning_update_mutation_planning_statuses": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "mutation_planning_ready",
+          "fallback_template_applied"
+        ]
+      }
+    },
+    "allowed_policy_learning_update_mutation_planning_outcomes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "ready_for_policy_mutation_planning",
+          "ready_for_policy_mutation_planning_with_restrictions",
+          "deferred_pending_mutation_planning_prerequisites",
+          "blocked_missing_context",
+          "rejected_for_mutation_planning_use",
+          "prohibited_overlap_blocked"
+        ]
+      }
+    },
+    "minimum_dimension_strength": {
+      "type": "string",
+      "enum": [
+        "weak",
+        "moderate",
+        "strong"
+      ]
+    },
+    "allow_mutation_execution_restrictions": {
+      "type": "boolean"
+    },
+    "allow_mutation_execution_prerequisite_deferral": {
+      "type": "boolean"
+    },
+    "prohibited_update_mutation_execution_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object"
+    }
+  }
+}

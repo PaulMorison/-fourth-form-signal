@@ -1,0 +1,65 @@
+{
+  "type": "object",
+  "required": [
+    "post_mortem_judgment_class_id",
+    "description",
+    "primary_attribution_category",
+    "allowed_execution_outcome_class_ids",
+    "prohibited_judgment_fields",
+    "status",
+    "lineage"
+  ],
+  "properties": {
+    "post_mortem_judgment_class_id": {
+      "type": "string",
+      "min_length": 1
+    },
+    "description": {
+      "type": "string",
+      "min_length": 1
+    },
+    "primary_attribution_category": {
+      "type": "string",
+      "enum": [
+        "correct_recommendation_correct_execution",
+        "correct_recommendation_weak_execution",
+        "correct_recommendation_environment_changed",
+        "weak_recommendation_good_execution",
+        "weak_recommendation_weak_causal_logic",
+        "weak_recommendation_poor_local_state_capture",
+        "weak_recommendation_simulation_miss",
+        "weak_recommendation_constraint_miss",
+        "override_improved_outcome",
+        "override_worsened_outcome",
+        "insufficient_evidence_for_confident_judgment"
+      ]
+    },
+    "allowed_execution_outcome_class_ids": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "prohibited_judgment_fields": {
+      "type": "array",
+      "min_items": 1,
+      "items": {
+        "type": "string",
+        "min_length": 1
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "deprecated"
+      ]
+    },
+    "lineage": {
+      "type": "object"
+    }
+  },
+  "additional_properties": false
+}

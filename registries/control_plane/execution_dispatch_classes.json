@@ -1,0 +1,76 @@
+{
+  "execution_dispatch_classes": {
+    "direct_dispatch_boundary": {
+      "execution_dispatch_class_id": "direct_dispatch_boundary",
+      "description": "A governed execution-dispatch boundary that preserves direct downstream handoff posture without collapsing dispatch-boundary meaning into broker placement or actual execution.",
+      "dispatch_boundary_posture": "dispatch_boundary_ready_non_executing",
+      "allowed_execution_request_class_ids": [
+        "direct_dispatch_request"
+      ],
+      "prohibited_dispatch_fields": [
+        "broker_identifier",
+        "venue_identifier",
+        "order_identifier",
+        "execution_started_at",
+        "execution_completed_at",
+        "execution_result",
+        "execution_outcome_id",
+        "execution_deviation_id",
+        "actual_execution_status"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "execution_dispatch_class_seed"
+      }
+    },
+    "conditioned_dispatch_boundary": {
+      "execution_dispatch_class_id": "conditioned_dispatch_boundary",
+      "description": "A governed execution-dispatch boundary that preserves prerequisite-bounded dispatch posture without silently becoming broker placement, actual execution, or outcome observation.",
+      "dispatch_boundary_posture": "dispatch_boundary_conditioned_non_executing",
+      "allowed_execution_request_class_ids": [
+        "prerequisite_dispatch_request"
+      ],
+      "prohibited_dispatch_fields": [
+        "broker_identifier",
+        "venue_identifier",
+        "order_identifier",
+        "execution_started_at",
+        "execution_completed_at",
+        "execution_result",
+        "execution_outcome_id",
+        "execution_deviation_id",
+        "actual_execution_status"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "execution_dispatch_class_seed"
+      }
+    },
+    "hold_dispatch_boundary": {
+      "execution_dispatch_class_id": "hold_dispatch_boundary",
+      "description": "A governed execution-dispatch boundary that preserves a hold-only downstream boundary without becoming broker placement, actual execution, reopen handling, or execution outcome logic.",
+      "dispatch_boundary_posture": "dispatch_boundary_hold_non_executing",
+      "allowed_execution_request_class_ids": [
+        "hold_dispatch_request"
+      ],
+      "prohibited_dispatch_fields": [
+        "broker_identifier",
+        "venue_identifier",
+        "order_identifier",
+        "execution_started_at",
+        "execution_completed_at",
+        "execution_result",
+        "execution_outcome_id",
+        "execution_deviation_id",
+        "actual_execution_status"
+      ],
+      "status": "active",
+      "lineage": {
+        "version": "2026-04-23",
+        "source": "execution_dispatch_class_seed"
+      }
+    }
+  }
+}

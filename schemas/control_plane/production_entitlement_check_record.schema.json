@@ -1,0 +1,168 @@
+{
+  "type": "object",
+  "required": [
+    "production_entitlement_check_id",
+    "production_entitlement_check_status",
+    "reason",
+    "production_entitlement_check_class_id",
+    "production_entitlement_check_template_id",
+    "production_entitlement_check_outcome",
+    "production_entitlement_judgment",
+    "production_entitlement_evidence_reference",
+    "production_entitlement_authority_reference",
+    "release_confirmation_id",
+    "release_confirmation_status",
+    "release_confirmation_class_id",
+    "release_confirmation_template_id",
+    "release_confirmation_outcome",
+    "release_confirmation_judgment",
+    "release_confirmation_threshold_evidence_reference",
+    "release_confirmation_authority_reference",
+    "release_watch_discipline_id",
+    "release_watch_discipline_status",
+    "release_watch_discipline_class_id",
+    "release_watch_discipline_template_id",
+    "release_watch_discipline_outcome",
+    "release_watch_discipline_summary",
+    "release_confirmation_window",
+    "release_response_threshold_reference",
+    "release_watch_owner_reference",
+    "rollback_trigger_reference",
+    "rollback_plan_reference",
+    "promotion_candidate_reference",
+    "promotion_threshold_reference",
+    "production_entitlement_boundary",
+    "rollback_posture_reference",
+    "release_watch_window",
+    "release_confirmation_threshold_reference",
+    "promotion_scope_reference",
+    "promotion_boundary_summary",
+    "rollout_scope_boundary_reference",
+    "exposure_boundary_reference",
+    "rollout_boundary_summary",
+    "semantic_scope",
+    "case_type",
+    "case_key",
+    "state_model_name",
+    "episode_id",
+    "transition_name",
+    "transition_class",
+    "domain_reference",
+    "decision_scope_reference",
+    "tenant_scope_reference",
+    "learning_scope_reference",
+    "production_entitlement_check_author_role",
+    "production_entitlement_check_author_id",
+    "required_production_entitlement_check_fields",
+    "optional_production_entitlement_check_fields",
+    "required_audit_fields",
+    "prohibited_production_entitlement_fields",
+    "required_production_entitlement_check_snapshot",
+    "optional_production_entitlement_check_snapshot",
+    "required_audit_snapshot",
+    "lineage",
+    "generated_at"
+  ],
+  "properties": {
+    "production_entitlement_check_status": {
+      "type": "string",
+      "enum": [
+        "production_entitlement_checked",
+        "fallback_template_applied",
+        "blocked_missing_context",
+        "rejected_for_production_entitlement_use",
+        "prohibited_overlap_blocked"
+      ]
+    },
+    "production_entitlement_check_outcome": {
+      "type": "string",
+      "enum": [
+        "approved_for_broader_trusted_production_entitlement",
+        "conditionally_approved_for_bounded_production_entitlement",
+        "deferred_pending_production_entitlement_evidence",
+        "blocked_missing_context",
+        "rejected_for_production_entitlement_use",
+        "prohibited_overlap_blocked"
+      ]
+    },
+    "release_confirmation_status": {
+      "type": "string",
+      "enum": [
+        "release_confirmation_judged",
+        "fallback_template_applied",
+        "blocked_missing_context",
+        "rejected_for_release_confirmation_use",
+        "prohibited_overlap_blocked"
+      ]
+    },
+    "release_confirmation_outcome": {
+      "type": "string",
+      "enum": [
+        "confirmed_for_broader_trusted_production_use",
+        "conditionally_confirmed_for_bounded_production_use",
+        "deferred_pending_release_confirmation_evidence",
+        "blocked_missing_context",
+        "rejected_for_release_confirmation_use",
+        "prohibited_overlap_blocked"
+      ]
+    },
+    "release_watch_discipline_status": {
+      "type": "string",
+      "enum": [
+        "release_watch_discipline_defined",
+        "fallback_template_applied",
+        "blocked_missing_context",
+        "rejected_for_release_watch_discipline_use",
+        "prohibited_overlap_blocked"
+      ]
+    },
+    "release_watch_discipline_outcome": {
+      "type": "string",
+      "enum": [
+        "ready_for_release_confirmation",
+        "conditionally_ready_for_release_confirmation",
+        "deferred_pending_release_watch_discipline_evidence",
+        "blocked_missing_context",
+        "rejected_for_release_watch_discipline_use",
+        "prohibited_overlap_blocked"
+      ]
+    },
+    "required_production_entitlement_check_fields": {
+      "type": "array"
+    },
+    "optional_production_entitlement_check_fields": {
+      "type": "array"
+    },
+    "required_audit_fields": {
+      "type": "array"
+    },
+    "prohibited_production_entitlement_fields": {
+      "type": "array"
+    },
+    "required_production_entitlement_check_snapshot": {
+      "type": "object"
+    },
+    "optional_production_entitlement_check_snapshot": {
+      "type": "object"
+    },
+    "required_audit_snapshot": {
+      "type": "object"
+    },
+    "lineage": {
+      "type": "object"
+    },
+    "generated_at": {
+      "type": "string",
+      "min_length": 1
+    },
+    "outstanding_production_entitlement_prerequisites": {
+      "type": "array"
+    },
+    "missing_production_entitlement_check_fields": {
+      "type": "array"
+    },
+    "prohibited_production_entitlement_fields_present": {
+      "type": "array"
+    }
+  }
+}
