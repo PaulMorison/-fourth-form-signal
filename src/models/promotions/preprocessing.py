@@ -10,6 +10,22 @@ from models.promotions.model_input_quality import (
     PromotionModelInputQualityReport,
     prepare_governed_model_input,
 )
+from state.promotions.feature_engineering.demand.ft_growth_curve_shape import (
+    GROWTH_CURVE_SHAPE_FEATURE_COLUMNS,
+)
+from state.promotions.feature_engineering.demand.ft_growth_survival_interactions import (
+    GROWTH_SURVIVAL_INTERACTION_FEATURE_COLUMNS,
+)
+from state.promotions.feature_engineering.demand.ft_survival_convexity import (
+    SURVIVAL_CONVEXITY_FEATURE_COLUMNS,
+)
+
+
+_GROWTH_SURVIVAL_MODEL_INPUT_COLUMNS: tuple[str, ...] = (
+    *GROWTH_CURVE_SHAPE_FEATURE_COLUMNS,
+    *SURVIVAL_CONVEXITY_FEATURE_COLUMNS,
+    *GROWTH_SURVIVAL_INTERACTION_FEATURE_COLUMNS,
+)
 
 
 _BASE_NUMERIC_COLUMNS = (
@@ -124,12 +140,15 @@ def prepare_model_input_frame(
     working["model_promo_start_week"] = promo_start.dt.isocalendar().week.fillna(0).astype(int)
     working["model_promo_start_dayofweek"] = promo_start.dt.dayofweek.fillna(0).astype(int)
 
+    effective_preserve_columns = tuple(
+        dict.fromkeys((*_GROWTH_SURVIVAL_MODEL_INPUT_COLUMNS, *(preserve_columns or ())))
+    )
     model_input, quality_report = prepare_governed_model_input(
         working,
         raw_numeric_feature_columns=_BASE_NUMERIC_COLUMNS,
         categorical_feature_columns=_BASE_CATEGORICAL_COLUMNS,
         engineered_feature_columns=feature_columns,
-        preserve_columns=preserve_columns,
+        preserve_columns=effective_preserve_columns,
     )
     return model_input, PromotionModelInputSchema(
         feature_columns=tuple(model_input.columns),

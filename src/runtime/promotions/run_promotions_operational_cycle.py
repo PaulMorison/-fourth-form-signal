@@ -3815,6 +3815,21 @@ def _complete_zero_future_scored_rows_noop(
         encoding="utf-8",
     )
 
+    (
+        zero_future_empty_output_pack_root,
+        zero_future_empty_output_pack_summary_path,
+        zero_future_empty_output_pack_note_path,
+    ) = _write_zero_future_empty_output_pack(
+        settings=settings,
+        run_id=run_id,
+        score_run_id=score_run_id,
+        as_of_date=settings.as_of_date.isoformat(),
+        noop_summary_path=noop_summary_path,
+        commercial_run_outcome_summary_path=commercial_run_outcome_summary_path,
+        publication_freshness_diagnostic_path=publication_freshness_diagnostic_path,
+        validation_skip_summary_path=validation_skip_summary_path,
+    )
+
     final_outputs = {
         "operational_cycle_manifest_path": str(manifest_path),
         "completed_base_path": completed_extraction.base_path,
@@ -3831,6 +3846,11 @@ def _complete_zero_future_scored_rows_noop(
         "publication_freshness_diagnostic_path": str(publication_freshness_diagnostic_path),
         "validation_skip_summary_path": str(validation_skip_summary_path),
         "commercial_run_outcome_summary_path": str(commercial_run_outcome_summary_path),
+        "zero_future_empty_output_pack_root": str(zero_future_empty_output_pack_root),
+        "zero_future_empty_output_pack_summary_path": str(
+            zero_future_empty_output_pack_summary_path
+        ),
+        "zero_future_empty_output_pack_note_path": str(zero_future_empty_output_pack_note_path),
         "decision_surface_status": "skipped",
         "stage8_skip_class": ZERO_FUTURE_SCORED_ROWS_SKIP_CLASS,
         "stage8_skip_reason": ZERO_FUTURE_SCORED_ROWS_REASON,
@@ -4007,6 +4027,10 @@ def _complete_zero_future_scored_rows_noop(
         "commercial_run_outcome_summary_path": str(commercial_run_outcome_summary_path),
         "publication_freshness_diagnostic_path": str(publication_freshness_diagnostic_path),
         "validation_skip_summary_path": str(validation_skip_summary_path),
+        "zero_future_empty_output_pack_summary_path": str(
+            zero_future_empty_output_pack_summary_path
+        ),
+        "zero_future_empty_output_pack_note_path": str(zero_future_empty_output_pack_note_path),
         "stage12_publish_status": PUBLISH_STATUS_NOOP_VALID_NO_PUBLISHABLE_ROWS,
         "stage12_publish_status_reason": ZERO_FUTURE_SCORED_ROWS_REASON,
         "commercial_outcome_class": commercial_outcome.commercial_outcome_class,
@@ -4060,8 +4084,15 @@ def _complete_zero_future_scored_rows_noop(
             str(noop_summary_path),
             str(publication_freshness_diagnostic_path),
             str(validation_skip_summary_path),
+            str(zero_future_empty_output_pack_summary_path),
+            str(zero_future_empty_output_pack_note_path),
         ),
-        commercial_skipped_paths=(str(noop_summary_path), str(validation_skip_summary_path)),
+        commercial_skipped_paths=(
+            str(noop_summary_path),
+            str(validation_skip_summary_path),
+            str(zero_future_empty_output_pack_summary_path),
+            str(zero_future_empty_output_pack_note_path),
+        ),
         pilot_validation_summary_csv_path=ZERO_FUTURE_SCORED_ROWS_PLACEHOLDER,
         pilot_validation_summary_json_path=ZERO_FUTURE_SCORED_ROWS_PLACEHOLDER,
         pilot_validation_failures_csv_path=ZERO_FUTURE_SCORED_ROWS_PLACEHOLDER,
@@ -4105,6 +4136,61 @@ def _complete_zero_future_scored_rows_noop(
         operator_summary_csv_path=operator_artifacts.summary_csv_path,
         operator_stage_timings_path=operator_artifacts.stage_timings_path,
     )
+
+
+def _write_zero_future_empty_output_pack(
+    *,
+    settings: PromotionPipelineSettings,
+    run_id: str,
+    score_run_id: str,
+    as_of_date: str,
+    noop_summary_path: Path,
+    commercial_run_outcome_summary_path: Path,
+    publication_freshness_diagnostic_path: Path,
+    validation_skip_summary_path: Path,
+) -> tuple[Path, Path, Path]:
+    empty_pack_root = settings.artifacts.store_prediction_download_run_root(run_id) / "empty_output_pack"
+    empty_pack_root.mkdir(parents=True, exist_ok=True)
+    summary_path = empty_pack_root / "empty_output_pack_summary.json"
+    note_path = empty_pack_root / "README_EMPTY_OUTPUT_PACK.md"
+
+    summary_payload = {
+        "run_id": run_id,
+        "score_run_id": score_run_id,
+        "as_of_date": as_of_date,
+        "empty_pack_class": ZERO_FUTURE_SCORED_ROWS_SKIP_CLASS,
+        "empty_pack_reason": ZERO_FUTURE_SCORED_ROWS_REASON,
+        "commercial_outcome_class": "COMMERCIAL_SUCCESS_GOVERNED_NOOP_NO_PUBLISHABLE_ROWS",
+        "stage12_publish_status": PUBLISH_STATUS_NOOP_VALID_NO_PUBLISHABLE_ROWS,
+        "skipped_stage_numbers": list(ZERO_FUTURE_SCORED_ROWS_SKIPPED_STAGE_NUMBERS),
+        "noop_summary_path": str(noop_summary_path),
+        "publication_freshness_diagnostic_path": str(publication_freshness_diagnostic_path),
+        "validation_skip_summary_path": str(validation_skip_summary_path),
+        "commercial_run_outcome_summary_path": str(commercial_run_outcome_summary_path),
+    }
+    summary_path.write_text(
+        json.dumps(summary_payload, indent=2, sort_keys=True),
+        encoding="utf-8",
+    )
+
+    note_lines = [
+        "# Zero Future Promotions Empty Output Pack",
+        "",
+        "This run completed as a governed NOOP.",
+        "",
+        f"- run_id: {run_id}",
+        f"- reason: {ZERO_FUTURE_SCORED_ROWS_REASON}",
+        f"- stage12_publish_status: {PUBLISH_STATUS_NOOP_VALID_NO_PUBLISHABLE_ROWS}",
+        "- skipped_stages: 8,9,10,11,12,13,14",
+        "",
+        "The files below contain the operator-facing evidence package for this NOOP outcome:",
+        f"- noop_summary_path: {noop_summary_path}",
+        f"- publication_freshness_diagnostic_path: {publication_freshness_diagnostic_path}",
+        f"- validation_skip_summary_path: {validation_skip_summary_path}",
+        f"- commercial_run_outcome_summary_path: {commercial_run_outcome_summary_path}",
+    ]
+    note_path.write_text("\n".join(note_lines) + "\n", encoding="utf-8")
+    return empty_pack_root, summary_path, note_path
 
 
 def _build_failure_final_outputs(

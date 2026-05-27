@@ -1101,6 +1101,7 @@ class PromotionOperationalCycleTests(unittest.TestCase):
             operator_summary = json.loads(Path(artifacts.operator_summary_path).read_text(encoding="utf-8"))
             operator_log = Path(artifacts.operator_log_path).read_text(encoding="utf-8")
             store_download = pd.read_csv(artifacts.store_prediction_download_path)
+            store_prediction_manifest_csv = pd.read_csv(artifacts.store_prediction_manifest_csv_path)
             inspection_review_packet = pd.read_csv(artifacts.inspection_review_packet_csv_path)
 
             self.assertEqual(manifest["run_id"], "operational-run")
@@ -1299,6 +1300,15 @@ class PromotionOperationalCycleTests(unittest.TestCase):
             self.assertIn("discount_percent", store_download.columns)
             self.assertIn("predicted_units_first_day", inspection_review_packet.columns)
             self.assertTrue(pd.api.types.is_numeric_dtype(inspection_review_packet["predicted_units_first_day"]))
+            self.assertIn("master", set(store_prediction_manifest_csv["file_type"]))
+            self.assertIn(
+                "store_promotion_manager_summary",
+                set(store_prediction_manifest_csv["file_type"]),
+            )
+            self.assertIn(
+                "store_promotion_feature_inspection",
+                set(store_prediction_manifest_csv["file_type"]),
+            )
             self.assertIn("reports", {directory["name"] for directory in nas_bootstrap_summary["directories"]})
             self.assertIn("FINAL OUTPUTS", operator_log)
             self.assertIn("local_inspection_csv_path", operator_log)
@@ -1526,6 +1536,12 @@ class PromotionOperationalCycleTests(unittest.TestCase):
             commercial_outcome_summary = json.loads(
                 Path(artifacts.commercial_run_outcome_summary_path).read_text(encoding="utf-8")
             )
+            validation_skip_summary = json.loads(
+                Path(artifacts.validation_skip_summary_path).read_text(encoding="utf-8")
+            )
+            publication_freshness = json.loads(
+                Path(artifacts.publication_freshness_diagnostic_path).read_text(encoding="utf-8")
+            )
             operator_summary = json.loads(Path(artifacts.operator_summary_path).read_text(encoding="utf-8"))
 
             self.assertEqual(manifest["future_extraction"]["manifest"]["row_count"], 0)
@@ -1543,6 +1559,11 @@ class PromotionOperationalCycleTests(unittest.TestCase):
                 "NOOP_VALID_NO_PUBLISHABLE_ROWS",
             )
             self.assertEqual(
+                manifest["commercial_execution_outputs"]["commercial_outcome_class"],
+                "COMMERCIAL_SUCCESS_GOVERNED_NOOP_NO_PUBLISHABLE_ROWS",
+            )
+            self.assertFalse(manifest["commercial_execution_outputs"]["commercial_failure_flag"])
+            self.assertEqual(
                 manifest["operational_noop"]["skipped_stage_numbers"],
                 [8, 9, 10, 11, 12, 13, 14],
             )
@@ -1552,6 +1573,12 @@ class PromotionOperationalCycleTests(unittest.TestCase):
             )
             self.assertEqual(commercial_outcome_summary["commercial_outcome_reason"], "zero_future_scored_rows")
             self.assertFalse(commercial_outcome_summary["commercial_failure_flag"])
+            self.assertEqual(validation_skip_summary["stage13_skip_class"], "STAGE12_NOOP_NO_PUBLISHABLE_ROWS")
+            self.assertTrue(validation_skip_summary["validation_skipped_flag"])
+            self.assertEqual(validation_skip_summary["stage12_publish_status"], "NOOP_VALID_NO_PUBLISHABLE_ROWS")
+            self.assertTrue(publication_freshness["stage8_skipped_flag"])
+            self.assertEqual(publication_freshness["noop_reason"], "zero_future_scored_rows")
+            self.assertFalse(publication_freshness["ready_for_fresh_publication_test_flag"])
             self.assertEqual(
                 operator_summary["final_outputs"]["commercial_outcome_class"],
                 "COMMERCIAL_SUCCESS_GOVERNED_NOOP_NO_PUBLISHABLE_ROWS",
@@ -1563,6 +1590,45 @@ class PromotionOperationalCycleTests(unittest.TestCase):
                 operator_summary["final_outputs"]["stage12_publish_status"],
                 "NOOP_VALID_NO_PUBLISHABLE_ROWS",
             )
+            self.assertIn(
+                "zero_future_empty_output_pack_summary_path",
+                operator_summary["final_outputs"],
+            )
+            self.assertIn(
+                "zero_future_empty_output_pack_note_path",
+                operator_summary["final_outputs"],
+            )
+            empty_output_pack_summary_path = Path(
+                operator_summary["final_outputs"]["zero_future_empty_output_pack_summary_path"]
+            )
+            empty_output_pack_note_path = Path(
+                operator_summary["final_outputs"]["zero_future_empty_output_pack_note_path"]
+            )
+            self.assertTrue(empty_output_pack_summary_path.exists())
+            self.assertTrue(empty_output_pack_note_path.exists())
+            empty_output_pack_summary = json.loads(
+                empty_output_pack_summary_path.read_text(encoding="utf-8")
+            )
+            self.assertEqual(
+                empty_output_pack_summary["empty_pack_class"],
+                "ZERO_FUTURE_SCORED_ROWS",
+            )
+            self.assertEqual(
+                empty_output_pack_summary["commercial_run_outcome_summary_path"],
+                str(Path(artifacts.commercial_run_outcome_summary_path)),
+            )
+            self.assertEqual(
+                empty_output_pack_summary["validation_skip_summary_path"],
+                str(Path(artifacts.validation_skip_summary_path)),
+            )
+            self.assertEqual(
+                empty_output_pack_summary["publication_freshness_diagnostic_path"],
+                str(Path(artifacts.publication_freshness_diagnostic_path)),
+            )
+            empty_output_pack_note = empty_output_pack_note_path.read_text(encoding="utf-8")
+            self.assertIn("NOOP_VALID_NO_PUBLISHABLE_ROWS", empty_output_pack_note)
+            self.assertIn("zero_future_scored_rows", empty_output_pack_note)
+            self.assertIn(str(Path(artifacts.commercial_run_outcome_summary_path)), empty_output_pack_note)
 
     def test_operational_cycle_partitioned_completed_extraction_combines_child_partitions(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

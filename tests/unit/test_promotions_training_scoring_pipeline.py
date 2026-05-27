@@ -5,6 +5,7 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.append(str(REPO_ROOT / "src"))
@@ -212,13 +213,17 @@ class PromotionTrainingScoringPipelineTests(unittest.TestCase):
             )
             empty_future_frame = build_future_promotions_base_frame().iloc[0:0].copy()
 
-            scoring_artifacts = PromotionModelScorer().score(
-                run_id="promotions-score-run",
-                model_run_id="promotions-train-run",
-                future_base_frame=empty_future_frame,
-                historical_reference_frame=dataset.frame,
-                artifact_paths=artifact_paths,
-            )
+            with patch(
+                "runtime.promotions.scoring_service.joblib.load",
+                side_effect=AssertionError("zero-row scoring must not load sklearn predictors"),
+            ):
+                scoring_artifacts = PromotionModelScorer().score(
+                    run_id="promotions-score-run",
+                    model_run_id="promotions-train-run",
+                    future_base_frame=empty_future_frame,
+                    historical_reference_frame=dataset.frame,
+                    artifact_paths=artifact_paths,
+                )
 
             self.assertEqual(len(scoring_artifacts.row_frame.index), 0)
             for column_name in DISCOUNT_ELASTICITY_FEATURE_COLUMNS:
@@ -236,6 +241,18 @@ class PromotionTrainingScoringPipelineTests(unittest.TestCase):
             manifest_payload = json.loads(Path(scoring_artifacts.manifest_path).read_text(encoding="utf-8"))
             self.assertEqual(manifest_payload["row_count"], 0)
             self.assertEqual(len(scoring_artifacts.summary_frames["promotion_summary"].index), 0)
+            inspection_root = artifact_paths.inspection_run_root("promotions-score-run")
+            model_input_metadata = json.loads(
+                (inspection_root / "model_scoring_input_metadata.json").read_text(encoding="utf-8")
+            )
+            contract_validation = json.loads(
+                (inspection_root / "final_model_contract_validation_scoring.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(model_input_metadata["row_count"], 0)
+            self.assertEqual(contract_validation["row_count"], 0)
+            self.assertTrue((inspection_root / "model_scoring_input.parquet").exists())
+            self.assertTrue((inspection_root / "model_scoring_input_sample.csv").exists())
+            self.assertTrue((inspection_root / "feature_lineage_audit_scoring.csv").exists())
             diagnostic_payload = json.loads(
                 Path(scoring_artifacts.diagnostic_paths["allocation_decision_diagnostics_json_path"]).read_text(
                     encoding="utf-8"

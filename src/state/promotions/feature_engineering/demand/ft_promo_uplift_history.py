@@ -11,6 +11,32 @@ from state.promotions.feature_engineering.shared.ft_safe_division import safe_ra
 from state.promotions.feature_engineering.shared.ft_schema_helpers import coerce_promotions_frame_types
 
 
+_HISTORY_REFERENCE_COLUMNS: tuple[str, ...] = (
+    "promotion_row_key",
+    "store_number_key",
+    "sku_number_key",
+    "promotion_start_date_date",
+    "promotional_end_date_date",
+    "target_realised_uplift_vs_baseline",
+    "actual_units_sold",
+    "target_actual_units_sold",
+    "baseline_expected_units",
+)
+_ROW_KEY_SOURCE_COLUMNS: tuple[str, ...] = (
+    "store_number",
+    "store_number_key",
+    "sku_number",
+    "sku_number_key",
+    "promotion_start_date",
+    "promotion_start_date_date",
+    "promotional_end_date",
+    "promotional_end_date_date",
+    "promotional_sku_id",
+    "promotional_sku_id_key",
+    "promotion_name",
+)
+
+
 def apply_ft_promo_uplift_history(
     frame: pd.DataFrame,
     *,
@@ -83,7 +109,10 @@ def apply_ft_promo_uplift_history(
 
 def _build_history_reference(reference_frame: pd.DataFrame, candidate_frame: pd.DataFrame) -> pd.DataFrame:
     combined = pd.concat(
-        [coerce_promotions_frame_types(reference_frame), coerce_promotions_frame_types(candidate_frame)],
+        [
+            coerce_promotions_frame_types(_select_history_reference_columns(reference_frame)),
+            coerce_promotions_frame_types(_select_history_reference_columns(candidate_frame)),
+        ],
         ignore_index=True,
         sort=False,
     )
@@ -92,6 +121,14 @@ def _build_history_reference(reference_frame: pd.DataFrame, candidate_frame: pd.
         ["promotion_start_date_date", "promotional_end_date_date", "promotion_row_key"],
         kind="mergesort",
     ).reset_index(drop=True)
+
+
+def _select_history_reference_columns(frame: pd.DataFrame) -> pd.DataFrame:
+    selected_columns = list(_HISTORY_REFERENCE_COLUMNS)
+    if "promotion_row_key" not in frame.columns:
+        selected_columns.extend(_ROW_KEY_SOURCE_COLUMNS)
+    available_columns = tuple(dict.fromkeys(column_name for column_name in selected_columns if column_name in frame.columns))
+    return frame.loc[:, available_columns].copy()
 
 
 def _resolve_realised_uplift_reference(frame: pd.DataFrame) -> pd.Series:
