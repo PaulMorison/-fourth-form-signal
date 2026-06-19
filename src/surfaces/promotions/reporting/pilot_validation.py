@@ -61,6 +61,27 @@ class PromotionPilotValidationArtifacts:
     validation_skip_summary_path: str
 
 
+@dataclass(frozen=True)
+class _ResolvedPromotionCyclePaths:
+    """Canonical published file paths for one store-promotion validation cycle."""
+
+    store_csv_path: str
+    review_csv_path: str
+    pos_csv_path: str
+    reconciliation_csv_path: str
+
+
+@dataclass(frozen=True)
+class _ResolvedPilotValidationPaths:
+    """Canonical Stage 12 artifact paths resolved for Stage 13 validation."""
+
+    stage11_store_paths: tuple[str, ...]
+    stage13_review_paths: tuple[str, ...]
+    stage13_pos_upload_paths: tuple[str, ...]
+    stage13_reconciliation_paths: tuple[str, ...]
+    stage11_key_by_path: dict[str, tuple[str, str]]
+
+
 class PromotionPilotValidationService:
     """Validate Stage 11 and Stage 13 outputs for pilot and gold-standard promotion safety."""
 
@@ -413,10 +434,29 @@ class PromotionPilotValidationService:
             )
 
         source_groups = _build_source_group_map(source_frame)
-        stage11_groups = _build_stage11_group_map(stage11_store_promotion_paths, source_groups=source_groups)
-        review_groups, review_schema_by_key = _build_stage13_review_group_map(stage13_review_paths)
-        pos_schema_by_cycle = _validate_pos_schema_by_cycle(stage13_pos_upload_paths)
-        reconciliation_by_key = _build_reconciliation_map(stage13_reconciliation_paths)
+        resolved_paths = _resolve_pilot_validation_paths(
+            run_id=run_id,
+            artifact_paths=artifact_paths,
+            source_groups=source_groups,
+            stage11_store_promotion_paths=stage11_store_promotion_paths,
+            stage13_review_paths=stage13_review_paths,
+            stage13_pos_upload_paths=stage13_pos_upload_paths,
+            stage13_reconciliation_paths=stage13_reconciliation_paths,
+        )
+        stage11_groups = _build_stage11_group_map(
+            resolved_paths.stage11_store_paths,
+            source_groups=source_groups,
+            resolved_keys_by_path=resolved_paths.stage11_key_by_path,
+        )
+        review_groups, review_schema_by_key = _build_stage13_review_group_map(
+            resolved_paths.stage13_review_paths
+        )
+        pos_schema_by_cycle = _validate_pos_schema_by_cycle(
+            resolved_paths.stage13_pos_upload_paths
+        )
+        reconciliation_by_key = _build_reconciliation_map(
+            resolved_paths.stage13_reconciliation_paths
+        )
 
         selected_keys = _select_pilot_keys(source_groups, acceptance_records)
         if not selected_keys:
@@ -598,6 +638,7 @@ def _build_source_group_map(source_frame: pd.DataFrame) -> dict[tuple[str, str],
         )
         groups[key] = {
             "store_number": _normalize_store_number(store_number),
+            "store_number_raw": str(store_number).strip(),
             "promotion_header_key": _normalize_text(promotion_header_key),
             "promotion_id": promotion_id,
             "promotion_name": str(group.iloc[0].get("promotion_name", "")),
@@ -614,6 +655,7 @@ def _build_stage11_group_map(
     paths: tuple[str, ...],
     *,
     source_groups: dict[tuple[str, str], dict[str, object]] | None = None,
+    resolved_keys_by_path: dict[str, tuple[str, str]] | None = None,
 ) -> dict[tuple[str, str], dict[str, object]]:
     groups: dict[tuple[str, str], dict[str, object]] = {}
     for path_text in paths:
@@ -623,26 +665,288 @@ def _build_stage11_group_map(
         frame = pd.read_csv(path)
         if frame.empty:
             continue
-        if "store_number" not in frame.columns:
-            inferred_store_number = _infer_stage11_store_number_from_path(path)
-            if inferred_store_number == "":
-                continue
-            frame = frame.copy()
-            frame["store_number"] = inferred_store_number
-        if "promotion_header_key" in frame.columns:
-            key = (
-                _normalize_store_number(frame.iloc[0]["store_number"]),
-                _normalize_text(frame.iloc[0]["promotion_header_key"]),
-            )
-        else:
-            key = _resolve_stage11_store_facing_key(frame=frame, source_groups=source_groups or {})
-            if key is None:
-                continue
+        key = (resolved_keys_by_path or {}).get(str(path))
+        if key is None:
+            if "store_number" not in frame.columns:
+                inferred_store_number = _infer_stage11_store_number_from_path(path)
+                if inferred_store_number == "":
+                    continue
+                frame = frame.copy()
+                frame["store_number"] = inferred_store_number
+            if "promotion_header_key" in frame.columns:
+                key = (
+                    _normalize_store_number(frame.iloc[0]["store_number"]),
+                    _normalize_text(frame.iloc[0]["promotion_header_key"]),
+                )
+            else:
+                key = _resolve_stage11_store_facing_key(frame=frame, source_groups=source_groups or {})
+                if key is None:
+                    continue
         groups[key] = {
             "path": str(path),
             "frame": frame,
         }
     return groups
+
+
+def _resolve_pilot_validation_paths(
+    *,
+    run_id: str,
+    artifact_paths: PromotionArtifactPaths,
+    source_groups: dict[tuple[str, str], dict[str, object]],
+    stage11_store_promotion_paths: tuple[str, ...],
+    stage13_review_paths: tuple[str, ...],
+    stage13_pos_upload_paths: tuple[str, ...],
+    stage13_reconciliation_paths: tuple[str, ...],
+) -> _ResolvedPilotValidationPaths:
+    """Resolve canonical published validation paths for each source promotion group.
+
+    Manifest-backed cycle paths win whenever a Stage 12 prediction manifest is
+    available. When a manifest is absent, validation falls back to the governed
+    deterministic output path builder rather than trusting caller-local tuples.
+    """
+
+    manifest_paths_by_key = _build_manifest_cycle_paths_by_key(
+        stage11_store_promotion_paths=stage11_store_promotion_paths,
+        stage13_review_paths=stage13_review_paths,
+        stage13_pos_upload_paths=stage13_pos_upload_paths,
+        stage13_reconciliation_paths=stage13_reconciliation_paths,
+    )
+    store_paths: list[str] = []
+    review_paths: list[str] = []
+    pos_paths: list[str] = []
+    reconciliation_paths: list[str] = []
+    stage11_key_by_path: dict[str, tuple[str, str]] = {}
+
+    for key, source_group in source_groups.items():
+        resolved_cycle_paths = manifest_paths_by_key.get(key)
+        if resolved_cycle_paths is None:
+            resolved_cycle_paths = _build_deterministic_cycle_paths(
+                run_id=run_id,
+                artifact_paths=artifact_paths,
+                source_group=source_group,
+            )
+        store_paths.append(resolved_cycle_paths.store_csv_path)
+        review_paths.append(resolved_cycle_paths.review_csv_path)
+        pos_paths.append(resolved_cycle_paths.pos_csv_path)
+        reconciliation_paths.append(resolved_cycle_paths.reconciliation_csv_path)
+        stage11_key_by_path[resolved_cycle_paths.store_csv_path] = key
+
+    return _ResolvedPilotValidationPaths(
+        stage11_store_paths=_dedupe_path_texts(store_paths),
+        stage13_review_paths=_dedupe_path_texts(review_paths),
+        stage13_pos_upload_paths=_dedupe_path_texts(pos_paths),
+        stage13_reconciliation_paths=_dedupe_path_texts(reconciliation_paths),
+        stage11_key_by_path=stage11_key_by_path,
+    )
+
+
+def _build_manifest_cycle_paths_by_key(
+    *,
+    stage11_store_promotion_paths: tuple[str, ...],
+    stage13_review_paths: tuple[str, ...],
+    stage13_pos_upload_paths: tuple[str, ...],
+    stage13_reconciliation_paths: tuple[str, ...],
+) -> dict[tuple[str, str], _ResolvedPromotionCyclePaths]:
+    """Load canonical published cycle paths from available Stage 12 manifests."""
+
+    resolved_paths_by_key: dict[tuple[str, str], _ResolvedPromotionCyclePaths] = {}
+    manifest_paths = _candidate_prediction_manifest_paths(
+        stage11_store_promotion_paths=stage11_store_promotion_paths,
+        stage13_review_paths=stage13_review_paths,
+        stage13_pos_upload_paths=stage13_pos_upload_paths,
+        stage13_reconciliation_paths=stage13_reconciliation_paths,
+    )
+    for manifest_path in manifest_paths:
+        manifest_payload = _load_prediction_manifest_payload(manifest_path)
+        if manifest_payload is None:
+            continue
+        key = _prediction_manifest_group_key(manifest_payload)
+        if key is None:
+            continue
+        resolved_paths_by_key[key] = _build_cycle_paths_from_manifest(
+            manifest_payload=manifest_payload,
+            manifest_path=manifest_path,
+        )
+    return resolved_paths_by_key
+
+
+def _candidate_prediction_manifest_paths(
+    *,
+    stage11_store_promotion_paths: tuple[str, ...],
+    stage13_review_paths: tuple[str, ...],
+    stage13_pos_upload_paths: tuple[str, ...],
+    stage13_reconciliation_paths: tuple[str, ...],
+) -> tuple[Path, ...]:
+    """Derive sibling per-cycle prediction manifest paths from published artifacts."""
+
+    candidates: list[Path] = []
+    seen: set[str] = set()
+    for path_text in (
+        *stage11_store_promotion_paths,
+        *stage13_review_paths,
+        *stage13_pos_upload_paths,
+        *stage13_reconciliation_paths,
+    ):
+        manifest_path = _prediction_manifest_path_from_output_path(Path(path_text))
+        if manifest_path is None:
+            continue
+        normalized = str(manifest_path)
+        if normalized in seen:
+            continue
+        seen.add(normalized)
+        candidates.append(manifest_path)
+    return tuple(candidates)
+
+
+def _prediction_manifest_path_from_output_path(path: Path) -> Path | None:
+    """Map a published cycle artifact path to its sibling prediction manifest path."""
+
+    name = path.name
+    if name.endswith("_prediction-manifest.json"):
+        return path
+    suffixes = (
+        "_store-prediction-review.csv",
+        "_pos-order-upload.csv",
+        "_reconciliation.csv",
+        "_feature-inspection.csv",
+        ".csv",
+    )
+    for suffix in suffixes:
+        if name.endswith(suffix):
+            base_name = name[: -len(suffix)]
+            return path.with_name(f"{base_name}_prediction-manifest.json")
+    return None
+
+
+def _load_prediction_manifest_payload(path: Path) -> dict[str, object] | None:
+    """Load one Stage 12 prediction manifest payload when it exists."""
+
+    if not path.exists():
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as error:
+        raise PromotionPilotValidationError(
+            f"Prediction manifest is not valid JSON: {path}"
+        ) from error
+    if not isinstance(payload, dict):
+        raise PromotionPilotValidationError(
+            f"Prediction manifest must be a JSON object: {path}"
+        )
+    return payload
+
+
+def _prediction_manifest_group_key(
+    manifest_payload: dict[str, object],
+) -> tuple[str, str] | None:
+    """Extract the store/promotion identity key from a Stage 12 prediction manifest."""
+
+    store_number = _normalize_store_number(manifest_payload.get("store_number", ""))
+    promotion_header_key = _normalize_text(manifest_payload.get("promotion_header_key", ""))
+    if store_number == "" or promotion_header_key == "":
+        return None
+    return (store_number, promotion_header_key)
+
+
+def _build_cycle_paths_from_manifest(
+    *,
+    manifest_payload: dict[str, object],
+    manifest_path: Path,
+) -> _ResolvedPromotionCyclePaths:
+    """Resolve canonical published cycle paths from one Stage 12 prediction manifest."""
+
+    output_files = manifest_payload.get("output_files")
+    if not isinstance(output_files, dict):
+        output_files = {}
+    promotion_cycle_id = str(manifest_payload.get("promotion_cycle_id", "") or "").strip()
+    if promotion_cycle_id == "":
+        raise PromotionPilotValidationError(
+            f"Prediction manifest is missing promotion_cycle_id: {manifest_path}"
+        )
+    cycle_directory = manifest_path.parent
+    return _ResolvedPromotionCyclePaths(
+        store_csv_path=str(cycle_directory / f"{promotion_cycle_id}.csv"),
+        review_csv_path=str(
+            output_files.get("store_prediction_review_csv")
+            or (cycle_directory / f"{promotion_cycle_id}_store-prediction-review.csv")
+        ),
+        pos_csv_path=str(
+            output_files.get("pos_order_upload_csv")
+            or (cycle_directory / f"{promotion_cycle_id}_pos-order-upload.csv")
+        ),
+        reconciliation_csv_path=str(
+            output_files.get("reconciliation_csv")
+            or (cycle_directory / f"{promotion_cycle_id}_reconciliation.csv")
+        ),
+    )
+
+
+def _build_deterministic_cycle_paths(
+    *,
+    run_id: str,
+    artifact_paths: PromotionArtifactPaths,
+    source_group: dict[str, object],
+) -> _ResolvedPromotionCyclePaths:
+    """Reconstruct governed published cycle paths when no prediction manifest exists."""
+
+    store_number = str(source_group.get("store_number_raw") or source_group["store_number"])
+    promotion_start_date = str(source_group["promotion_start_date"])
+    promotion_name = str(source_group["promotion_name"])
+    return _ResolvedPromotionCyclePaths(
+        store_csv_path=str(
+            artifact_paths.store_prediction_store_promotion_csv_path(
+                run_id=run_id,
+                store_number=store_number,
+                promotion_start_date=promotion_start_date,
+                promotion_name=promotion_name,
+            )
+        ),
+        review_csv_path=str(
+            artifact_paths.store_prediction_store_promotion_artifact_path(
+                run_id=run_id,
+                store_number=store_number,
+                promotion_start_date=promotion_start_date,
+                promotion_name=promotion_name,
+                artifact_name="store-prediction-review",
+                extension="csv",
+            )
+        ),
+        pos_csv_path=str(
+            artifact_paths.store_prediction_store_promotion_artifact_path(
+                run_id=run_id,
+                store_number=store_number,
+                promotion_start_date=promotion_start_date,
+                promotion_name=promotion_name,
+                artifact_name="pos-order-upload",
+                extension="csv",
+            )
+        ),
+        reconciliation_csv_path=str(
+            artifact_paths.store_prediction_store_promotion_artifact_path(
+                run_id=run_id,
+                store_number=store_number,
+                promotion_start_date=promotion_start_date,
+                promotion_name=promotion_name,
+                artifact_name="reconciliation",
+                extension="csv",
+            )
+        ),
+    )
+
+
+def _dedupe_path_texts(paths: list[str]) -> tuple[str, ...]:
+    """Preserve path order while dropping blank and duplicate path strings."""
+
+    output: list[str] = []
+    seen: set[str] = set()
+    for path_text in paths:
+        normalized = str(path_text).strip()
+        if normalized == "" or normalized in seen:
+            continue
+        seen.add(normalized)
+        output.append(normalized)
+    return tuple(output)
 
 
 def _infer_stage11_store_number_from_path(path: Path) -> str:

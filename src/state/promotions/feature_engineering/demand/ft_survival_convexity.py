@@ -212,7 +212,9 @@ def _build_prior_survival_feature_frame(
         return pd.DataFrame({column_name: pd.Series(dtype="float64") for column_name in output_columns}, index=output_index)
 
     history = history_typed.copy()
-    history["_promotion_end"] = pd.to_datetime(history.get("promotional_end_date_date"), errors="coerce")
+    history["_promotion_end"] = _normalize_merge_asof_datetime_key(
+        history.get("promotional_end_date_date")
+    )
     history["_baseline_expected_units"] = first_non_null_series(
         history,
         ("baseline_expected_units", "pre_28d_units", "pre_56d_units"),
@@ -269,7 +271,9 @@ def _build_prior_survival_feature_frame(
         {
             "store_number_key": candidate_typed.get("store_number_key"),
             "sku_number_key": candidate_typed.get("sku_number_key"),
-            "_candidate_start": pd.to_datetime(candidate_typed.get("promotion_start_date_date"), errors="coerce"),
+            "_candidate_start": _normalize_merge_asof_datetime_key(
+                candidate_typed.get("promotion_start_date_date")
+            ),
             "_candidate_position": range(len(candidate_typed.index)),
         },
         index=candidate_typed.index,
@@ -286,9 +290,18 @@ def _build_prior_survival_feature_frame(
         history_group = history_by_key.get(key)
         if history_group is None or history_group.empty:
             continue
+        candidate_group_sorted = candidate_group.sort_values("_candidate_start", kind="mergesort")
+        history_group_sorted = history_group.sort_values("_promotion_end", kind="mergesort")
+        left_dtype = candidate_group_sorted["_candidate_start"].dtype
+        right_dtype = history_group_sorted["_promotion_end"].dtype
+        if left_dtype != right_dtype:
+            raise ValueError(
+                "ft_survival_convexity merge_asof key dtype mismatch: "
+                f"left={left_dtype}, right={right_dtype}"
+            )
         merged = pd.merge_asof(
-            candidate_group.sort_values("_candidate_start", kind="mergesort"),
-            history_group,
+            candidate_group_sorted,
+            history_group_sorted,
             left_on="_candidate_start",
             right_on="_promotion_end",
             direction="backward",
@@ -311,3 +324,12 @@ def _validate_required_columns(frame: pd.DataFrame) -> None:
             "ft_survival_convexity missing required columns: "
             + ", ".join(missing_columns)
         )
+
+
+def _normalize_merge_asof_datetime_key(values: pd.Series | object) -> pd.Series:
+    normalized = pd.to_datetime(values, errors="coerce")
+    if not isinstance(normalized, pd.Series):
+        normalized = pd.Series(normalized)
+    if getattr(normalized.dt, "tz", None) is not None:
+        normalized = normalized.dt.tz_localize(None)
+    return normalized.astype("datetime64[ns]")

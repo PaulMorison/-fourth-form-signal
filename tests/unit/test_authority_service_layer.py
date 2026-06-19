@@ -15,12 +15,12 @@ from decision.authority import (  # noqa: E402
     JsonAuthorityRegistry,
     JsonDelegationPolicyRegistry,
 )
-from platform.audit.audit_event_store import (  # noqa: E402
+from ff_platform.audit.audit_event_store import (  # noqa: E402
     AuditEventStore,
     InMemoryAuditEventRepository,
     JsonAuditEventTypeRegistry,
 )
-from platform.validation.contract_schema_validator import (  # noqa: E402
+from ff_platform.validation.contract_schema_validator import (  # noqa: E402
     ContractSchemaValidator,
     JsonContractSchemaRepository,
 )

@@ -17,6 +17,25 @@ dist/
 # Generated runtime/artifact trees
 artifacts/
 tmp/
+$tmp_dir/
+promotions_artifacts/
+
+# Local analysis outputs and test logs
+data/test_failure_report_latest.txt
+data/**/*.log
+data/**/reports/*.csv
+data/**/reports/exports/
+data/keypay/bronze/
+data/keypay/silver/
+data/keypay/quarantine/
+data/keypay/reports/*.csv
+data/prepush_*.txt
+reports/*.csv
+reports/*.md
+
+# Temp and cache files
+*.tmp
+*.cache
 
 # Logs and local command outputs
 *.log

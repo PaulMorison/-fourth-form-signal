@@ -34,6 +34,7 @@ class PublicationOpportunityClassifierTests(unittest.TestCase):
             stage11_true_zero_rows=0,
             stage11_cold_start_rows=1,
             stage11_low_nonzero_rows=1,
+            stage11_healthy_nonzero_rows=7,
             stage11_artificial_collapse_rows=1,
             stage12_publish_status="PASS",
             stage12_publish_status_reason="new_publications_written",
@@ -63,6 +64,7 @@ class PublicationOpportunityClassifierTests(unittest.TestCase):
             stage11_true_zero_rows=0,
             stage11_cold_start_rows=0,
             stage11_low_nonzero_rows=0,
+            stage11_healthy_nonzero_rows=5,
             stage11_artificial_collapse_rows=0,
             stage12_publish_status="NOOP_ALREADY_PUBLISHED",
             stage12_publish_status_reason="all_candidates_already_published",
@@ -92,6 +94,7 @@ class PublicationOpportunityClassifierTests(unittest.TestCase):
             stage11_true_zero_rows=6,
             stage11_cold_start_rows=1,
             stage11_low_nonzero_rows=1,
+            stage11_healthy_nonzero_rows=0,
             stage11_artificial_collapse_rows=0,
             stage12_publish_status="NOOP_VALID_NO_PUBLISHABLE_ROWS",
             stage12_publish_status_reason="no_publishable_rows_legitimate",
@@ -120,6 +123,7 @@ class PublicationOpportunityClassifierTests(unittest.TestCase):
             stage11_true_zero_rows=0,
             stage11_cold_start_rows=0,
             stage11_low_nonzero_rows=0,
+            stage11_healthy_nonzero_rows=4,
             stage11_artificial_collapse_rows=0,
             stage12_publish_status="NOOP_VALID_NO_PUBLISHABLE_ROWS",
             stage12_publish_status_reason="no_publishable_rows",
@@ -176,6 +180,7 @@ class PublicationOpportunityClassifierTests(unittest.TestCase):
             stage11_true_zero_rows=0,
             stage11_cold_start_rows=0,
             stage11_low_nonzero_rows=0,
+            stage11_healthy_nonzero_rows=12,
             stage11_artificial_collapse_rows=0,
             stage12_publish_status="NOOP_VALID_NO_PUBLISHABLE_ROWS",
             stage12_publish_status_reason="filtered_out_by_policy",
@@ -205,6 +210,7 @@ class PublicationOpportunityClassifierTests(unittest.TestCase):
             stage11_true_zero_rows=0,
             stage11_cold_start_rows=0,
             stage11_low_nonzero_rows=0,
+            stage11_healthy_nonzero_rows=5,
             stage11_artificial_collapse_rows=0,
             stage12_publish_status="FAIL",
             stage12_publish_status_reason="critical_defect",
@@ -233,6 +239,7 @@ class PublicationOpportunityClassifierTests(unittest.TestCase):
             stage11_true_zero_rows=0,
             stage11_cold_start_rows=0,
             stage11_low_nonzero_rows=0,
+            stage11_healthy_nonzero_rows=5,
             stage11_artificial_collapse_rows=0,
             stage12_publish_status="PASS",
             stage12_publish_status_reason="fresh_publications_written",
@@ -262,7 +269,8 @@ class ReconciliationTests(unittest.TestCase):
             stage11_true_zero_rows=1,
             stage11_cold_start_rows=1,
             stage11_low_nonzero_rows=1,
-            stage11_artificial_collapse_rows=0,
+            stage11_healthy_nonzero_rows=0,
+            stage11_artificial_collapse_rows=7,
             stage12_publish_status="PASS",
             stage12_publish_status_reason="fresh",
             stage12_candidate_row_count=7,
@@ -279,6 +287,56 @@ class ReconciliationTests(unittest.TestCase):
         self.assertEqual(summary.stage11_total_rows, 10)
         self.assertIn("reconciled", summary.reconciliation_message.lower())
 
+    def test_reconciliation_flags_order_rows_held_by_review_only_stage12(self) -> None:
+        payload = PublicationOpportunityInput(
+            stage11_total_rows=4,
+            stage11_order_rows=2,
+            stage11_review_rows=2,
+            stage11_true_zero_rows=0,
+            stage11_cold_start_rows=0,
+            stage11_low_nonzero_rows=4,
+            stage11_healthy_nonzero_rows=0,
+            stage11_artificial_collapse_rows=0,
+            stage12_publish_status="NOOP_VALID_NO_PUBLISHABLE_ROWS",
+            stage12_publish_status_reason="review_only_rows_no_publish",
+            stage12_candidate_row_count=4,
+            stage12_publishable_row_count=0,
+            stage12_review_only_row_count=4,
+            stage12_legitimate_excluded_row_count=0,
+            stage12_defect_excluded_row_count=0,
+            stage12_duplicate_registry_skip_count=0,
+        )
+
+        summary = build_publish_reconciliation_summary(payload)
+
+        self.assertFalse(summary.reconciled_flag)
+        self.assertIn("NOT auto-publish reconciled", summary.reconciliation_message)
+
+    def test_reconciliation_counts_healthy_nonzero_rows(self) -> None:
+        payload = PublicationOpportunityInput(
+            stage11_total_rows=10,
+            stage11_order_rows=6,
+            stage11_review_rows=4,
+            stage11_true_zero_rows=1,
+            stage11_cold_start_rows=1,
+            stage11_low_nonzero_rows=1,
+            stage11_healthy_nonzero_rows=7,
+            stage11_artificial_collapse_rows=0,
+            stage12_publish_status="PASS",
+            stage12_publish_status_reason="fresh",
+            stage12_candidate_row_count=10,
+            stage12_publishable_row_count=6,
+            stage12_review_only_row_count=4,
+            stage12_legitimate_excluded_row_count=0,
+            stage12_defect_excluded_row_count=0,
+            stage12_duplicate_registry_skip_count=0,
+        )
+
+        summary = build_publish_reconciliation_summary(payload)
+
+        self.assertTrue(summary.reconciled_flag)
+        self.assertEqual(summary.stage11_healthy_nonzero_rows, 7)
+
     def test_reconciliation_fails_when_counts_mismatch(self) -> None:
         payload = PublicationOpportunityInput(
             stage11_total_rows=15,  # Intentional mismatch
@@ -287,6 +345,7 @@ class ReconciliationTests(unittest.TestCase):
             stage11_true_zero_rows=1,
             stage11_cold_start_rows=1,
             stage11_low_nonzero_rows=1,
+            stage11_healthy_nonzero_rows=0,
             stage11_artificial_collapse_rows=0,
             stage12_publish_status="PASS",
             stage12_publish_status_reason="fresh",
@@ -310,16 +369,17 @@ class ReconciliationTests(unittest.TestCase):
             stage11_review_rows=0,
             stage11_true_zero_rows=2,
             stage11_cold_start_rows=1,
-            stage11_low_nonzero_rows=0,
+            stage11_low_nonzero_rows=5,
+            stage11_healthy_nonzero_rows=0,
             stage11_artificial_collapse_rows=0,
             stage12_publish_status="PASS",
             stage12_publish_status_reason="fresh",
-            stage12_candidate_row_count=5,
+            stage12_candidate_row_count=8,
             stage12_publishable_row_count=4,
             stage12_review_only_row_count=0,
             stage12_legitimate_excluded_row_count=1,
             stage12_defect_excluded_row_count=0,
-            stage12_duplicate_registry_skip_count=0,
+            stage12_duplicate_registry_skip_count=3,
         )
 
         summary = build_publish_reconciliation_summary(payload)

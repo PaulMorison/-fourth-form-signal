@@ -6,6 +6,7 @@ import sys
 import tempfile
 import unittest
 
+import numpy as np
 import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -17,12 +18,215 @@ from state.promotions.datasets.dataset_validators import (  # noqa: E402
     NegativeStockPosturePolicy,
     PromotionDatasetValidationError,
 )
+from state.promotions.feature_engineering.demand.ft_allocation_discipline import (  # noqa: E402
+    apply_ft_allocation_discipline,
+)
 from state.promotions.feature_engineering import PromotionFeatureEngineer  # noqa: E402
 from state.promotions.targets import PromotionTargetEngineer  # noqa: E402
 from tests.unit.promotions_test_data import build_completed_promotions_base_frame  # noqa: E402
 
 
 class PromotionDatasetAssemblerTests(unittest.TestCase):
+    def test_review_only_features_are_excluded_from_training_dataset_and_manifest(self) -> None:
+        base_frame = build_completed_promotions_base_frame().copy()
+        target_result = PromotionTargetEngineer().engineer(base_frame)
+        feature_result = PromotionFeatureEngineer().engineer(target_result.frame)
+
+        self.assertIn(
+            "feature_probability_units_given_multi_item_basket",
+            feature_result.frame.columns,
+        )
+        self.assertIn(
+            "feature_pca_structure_residual_score",
+            feature_result.frame.columns,
+        )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            assembled = PromotionDatasetAssembler().assemble_training_dataset(
+                run_id="review-only-feature-filter-test",
+                base_frame=base_frame,
+                target_frame=target_result.frame,
+                feature_frame=feature_result.frame,
+                target_columns=target_result.target_columns,
+                feature_columns=feature_result.feature_columns,
+                artifact_paths=PromotionArtifactPaths(root=Path(temp_dir)),
+            )
+
+            manifest_payload = json.loads(Path(assembled.manifest_path).read_text(encoding="utf-8"))
+
+        self.assertNotIn("feature_probability_units_given_multi_item_basket", assembled.frame.columns)
+        self.assertNotIn("feature_pca_structure_residual_score", assembled.frame.columns)
+        self.assertNotIn("feature_probability_units_given_multi_item_basket", assembled.manifest.feature_columns)
+        self.assertNotIn("feature_pca_structure_residual_score", assembled.manifest.feature_columns)
+        self.assertIn(
+            "feature_probability_units_given_multi_item_basket",
+            manifest_payload["excluded_review_only_feature_columns"],
+        )
+        self.assertIn(
+            "feature_pca_structure_residual_score",
+            manifest_payload["excluded_review_only_feature_columns"],
+        )
+
+    def test_all_null_model_visible_feature_fails_loud(self) -> None:
+        base_frame = build_completed_promotions_base_frame().copy()
+        target_result = PromotionTargetEngineer().engineer(base_frame)
+        feature_result = PromotionFeatureEngineer().engineer(target_result.frame)
+        broken_feature_frame = feature_result.frame.copy()
+        broken_feature_frame.loc[:, "feature_expected_incremental_uplift_units_same_discount"] = 1.5
+        broken_feature_frame.loc[:, "total_stock_available"] = 5.0
+        broken_feature_frame.loc[:, "feature_probability_model_use_flag"] = 1.0
+        broken_feature_frame["feature_uplift_allocation_discipline_score"] = pd.NA
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            with self.assertRaises(PromotionDatasetValidationError) as error_context:
+                PromotionDatasetAssembler().assemble_training_dataset(
+                    run_id="all-null-model-visible-feature-test",
+                    base_frame=base_frame,
+                    target_frame=target_result.frame,
+                    feature_frame=broken_feature_frame,
+                    target_columns=target_result.target_columns,
+                    feature_columns=feature_result.feature_columns,
+                    artifact_paths=PromotionArtifactPaths(root=Path(temp_dir)),
+                )
+
+        self.assertEqual(error_context.exception.details["rule"], "model_visible_feature_all_null")
+        self.assertIn(
+            "feature_uplift_allocation_discipline_score",
+            error_context.exception.details["all_null_feature_columns"],
+        )
+
+    def test_model_visible_feature_survives_dataset_assembly(self) -> None:
+        base_frame = build_completed_promotions_base_frame().copy()
+        target_result = PromotionTargetEngineer().engineer(base_frame)
+        feature_result = PromotionFeatureEngineer().engineer(target_result.frame)
+        repaired_feature_frame = feature_result.frame.copy()
+        repaired_feature_frame.loc[:, "feature_expected_incremental_uplift_units_same_discount"] = 1.5
+        repaired_feature_frame.loc[:, "total_stock_available"] = 5.0
+        repaired_feature_frame.loc[:, "feature_probability_model_use_flag"] = 1.0
+        repaired_feature_frame.loc[:, "feature_uplift_allocation_discipline_score"] = 0.42
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            assembled = PromotionDatasetAssembler().assemble_training_dataset(
+                run_id="model-visible-feature-survives-test",
+                base_frame=base_frame,
+                target_frame=target_result.frame,
+                feature_frame=repaired_feature_frame,
+                target_columns=target_result.target_columns,
+                feature_columns=feature_result.feature_columns,
+                artifact_paths=PromotionArtifactPaths(root=Path(temp_dir)),
+            )
+
+        self.assertIn("feature_uplift_allocation_discipline_score", assembled.frame.columns)
+        self.assertIn("feature_uplift_allocation_discipline_score", assembled.manifest.feature_columns)
+        self.assertFalse(assembled.frame["feature_uplift_allocation_discipline_score"].isna().all())
+
+    def test_completed_promotions_feature_path_populates_uplift_allocation_with_inventory_fallback(self) -> None:
+        base_frame = build_completed_promotions_base_frame().copy()
+        base_frame.loc[:, "stock_basis_units"] = np.nan
+        base_frame.loc[0, "total_stock_available"] = 25.0
+        base_frame.loc[0, "current_soh"] = 25.0
+        base_frame.loc[0, "qty_on_order"] = 0.0
+        support_key = str(base_frame.loc[0, "promotion_row_key"])
+
+        target_result = PromotionTargetEngineer().engineer(base_frame)
+        feature_result = PromotionFeatureEngineer().engineer(target_result.frame)
+        repaired_feature_frame = feature_result.frame.copy()
+        repaired_feature_frame.loc[0, "feature_expected_baseline_units_promo_window"] = 0.933333
+        repaired_feature_frame.loc[0, "feature_expected_incremental_uplift_units_same_discount"] = 14.939683
+        repaired_feature_frame.loc[0, "feature_probability_expected_units_consensus"] = 15.873016
+        repaired_feature_frame.loc[0, "feature_probability_model_use_flag"] = 1.0
+        repaired_feature_frame.loc[0, "feature_same_discount_history_available_flag"] = 1.0
+        repaired_feature_frame.loc[0, "feature_same_discount_prior_event_count"] = 2.0
+        repaired_feature_frame.loc[0, "feature_uplift_confidence_score"] = 0.527186
+        repaired_feature_frame.loc[0, "feature_discount_elasticity_confidence_score"] = 0.0
+        repaired_feature_frame.loc[0, "feature_probability_demand_confidence_score"] = 0.5
+        repaired_feature_frame.loc[0, "feature_probability_uplift_supported_units"] = 14.939683
+        repaired_feature_frame.loc[0, "feature_probability_uplift_upper_units"] = 14.939683
+        repaired_feature_frame.loc[0, "feature_expected_total_units_from_baseline_plus_uplift"] = 15.873016
+        repaired_feature_frame.loc[0, "feature_expected_total_units_first_7_days"] = 5.0
+        repaired_feature_frame.loc[0, "feature_pre_promo_baseline_daily_units"] = 0.0666667
+        repaired_feature_frame = apply_ft_allocation_discipline(repaired_feature_frame)
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            assembled = PromotionDatasetAssembler().assemble_training_dataset(
+                run_id="completed-promotions-uplift-fallback-test",
+                base_frame=base_frame,
+                target_frame=target_result.frame,
+                feature_frame=repaired_feature_frame,
+                target_columns=target_result.target_columns,
+                feature_columns=feature_result.feature_columns,
+                artifact_paths=PromotionArtifactPaths(root=Path(temp_dir)),
+            )
+
+        support_row = assembled.frame.loc[
+            assembled.frame["promotion_row_key"].astype(str).eq(support_key)
+        ].iloc[0]
+        self.assertFalse(pd.isna(support_row["feature_uplift_allocation_discipline_score"]))
+        self.assertNotIn("feature_probability_units_given_multi_item_basket", assembled.frame.columns)
+        self.assertNotIn("feature_pca_structure_residual_score", assembled.frame.columns)
+
+    def test_numeric_feature_target_and_input_blanks_are_zero_filled(self) -> None:
+        base_frame = build_completed_promotions_base_frame().copy()
+        base_frame.loc[0, "discount_percent"] = np.nan
+        base_frame.loc[0, "catalogue_position"] = "CATA"
+        target_result = PromotionTargetEngineer().engineer(base_frame)
+        target_frame = target_result.frame.copy()
+        target_frame.loc[0, target_result.target_columns[0]] = np.nan
+        feature_result = PromotionFeatureEngineer().engineer(target_result.frame)
+        feature_frame = feature_result.frame.copy()
+        feature_frame.loc[0, "feature_basket_anchor_sku_score"] = np.nan
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            assembled = PromotionDatasetAssembler().assemble_training_dataset(
+                run_id="zero-fill-dataset-test",
+                base_frame=base_frame,
+                target_frame=target_frame,
+                feature_frame=feature_frame,
+                target_columns=target_result.target_columns,
+                feature_columns=feature_result.feature_columns,
+                artifact_paths=PromotionArtifactPaths(root=Path(temp_dir)),
+                max_target_null_rate=1.0,
+            )
+            manifest_payload = json.loads(Path(assembled.manifest_path).read_text(encoding="utf-8"))
+
+        self.assertEqual(float(assembled.frame.loc[0, "discount_percent"]), 0.0)
+        self.assertEqual(float(assembled.frame.loc[0, target_result.target_columns[0]]), 0.0)
+        self.assertEqual(float(assembled.frame.loc[0, "feature_basket_anchor_sku_score"]), 0.0)
+        self.assertEqual(str(assembled.frame.loc[0, "catalogue_position"]), "CATA")
+        self.assertIn("governed_numeric_zero_fill_summary", manifest_payload)
+        self.assertGreater(
+            int(manifest_payload["governed_numeric_zero_fill_summary"]["numeric_zero_filled_cell_count"]),
+            0,
+        )
+
+    def test_invalid_numeric_junk_fails_loud_in_zero_fill_contract(self) -> None:
+        base_frame = build_completed_promotions_base_frame().copy()
+        target_result = PromotionTargetEngineer().engineer(base_frame)
+        feature_result = PromotionFeatureEngineer().engineer(target_result.frame)
+        broken_feature_frame = feature_result.frame.copy()
+        broken_feature_frame["feature_basket_anchor_sku_score"] = broken_feature_frame[
+            "feature_basket_anchor_sku_score"
+        ].astype(object)
+        broken_feature_frame.loc[0, "feature_basket_anchor_sku_score"] = "not-a-number"
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            with self.assertRaises(PromotionDatasetValidationError) as error_context:
+                PromotionDatasetAssembler().assemble_training_dataset(
+                    run_id="zero-fill-invalid-junk-test",
+                    base_frame=base_frame,
+                    target_frame=target_result.frame,
+                    feature_frame=broken_feature_frame,
+                    target_columns=target_result.target_columns,
+                    feature_columns=feature_result.feature_columns,
+                    artifact_paths=PromotionArtifactPaths(root=Path(temp_dir)),
+                )
+
+        self.assertEqual(error_context.exception.details["rule"], "numeric_zero_fill_contract")
+        self.assertIn(
+            "feature_basket_anchor_sku_score",
+            error_context.exception.details["invalid_numeric_columns"],
+        )
+
     def test_assembly_preserves_rows_with_display_sku_number_variants_when_key_valid(self) -> None:
         base_frame = build_completed_promotions_base_frame().copy()
         original_row_count = len(base_frame.index)

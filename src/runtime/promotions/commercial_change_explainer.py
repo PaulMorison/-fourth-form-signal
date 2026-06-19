@@ -147,12 +147,17 @@ def build_commercial_change_explainability_artifacts(
 
     duplicate_only_cycle = current_freshness_class == "NO_NEW_PUBLICATIONS_DUPLICATE_ONLY"
     defect_blocked_cycle = "FAILURE" in current_commercial_outcome_class or "DEFECT" in current_commercial_outcome_class
+    review_only_no_publish_cycle = (
+        current_freshness_class == "NO_NEW_PUBLICATIONS_REVIEW_ONLY"
+        or current_commercial_outcome_class == "COMMERCIAL_SUCCESS_GOVERNED_NOOP_NO_PUBLISHABLE_ROWS"
+    )
 
     explanations_frame = _build_explanations_frame(
         current_frame=current_frame,
         prior_frame=prior_frame,
         duplicate_only_cycle=duplicate_only_cycle,
         defect_blocked_cycle=defect_blocked_cycle,
+        review_only_no_publish_cycle=review_only_no_publish_cycle,
         duplicate_registry_skip_count=int(duplicate_registry_skip_count),
         current_delta_class=current_delta_class,
     )
@@ -179,10 +184,15 @@ def _build_explanations_frame(
     prior_frame: Optional[pd.DataFrame],
     duplicate_only_cycle: bool,
     defect_blocked_cycle: bool,
+    review_only_no_publish_cycle: bool,
     duplicate_registry_skip_count: int,
     current_delta_class: str,
 ) -> pd.DataFrame:
-    current_norm = _normalize_frame(current_frame, prefix="current")
+    current_norm = _normalize_frame(
+        current_frame,
+        prefix="current",
+        force_non_publishable=review_only_no_publish_cycle,
+    )
     if prior_frame is None:
         merged = current_norm.copy()
         for column in (
@@ -614,7 +624,12 @@ def _validate_explanation_consistency(
         )
 
 
-def _normalize_frame(frame: pd.DataFrame, *, prefix: str) -> pd.DataFrame:
+def _normalize_frame(
+    frame: pd.DataFrame,
+    *,
+    prefix: str,
+    force_non_publishable: bool = False,
+) -> pd.DataFrame:
     normalized = frame.copy()
 
     normalized["store_number"] = normalized.get("store_number", pd.Series(dtype="object")).astype(str)
@@ -631,7 +646,14 @@ def _normalize_frame(frame: pd.DataFrame, *, prefix: str) -> pd.DataFrame:
         errors="coerce",
     ).fillna(0.0)
 
-    publishable_flag = _infer_publishable(decision, review_reason, suggested_units)
+    publishable_flag = _infer_publishable(
+        decision,
+        review_reason,
+        suggested_units,
+        publish_eligibility=publish_eligibility,
+    )
+    if force_non_publishable:
+        publishable_flag = pd.Series(False, index=normalized.index, dtype=bool)
     review_required_flag = (review_reason.str.strip() != "")
     excluded_from_publish_flag = ~publishable_flag
 
@@ -657,12 +679,24 @@ def _infer_publishable(
     decision: pd.Series,
     review_reason: pd.Series,
     suggested_order_units: pd.Series,
+    *,
+    publish_eligibility: pd.Series | None = None,
 ) -> pd.Series:
     decision_upper = decision.str.upper()
     publishable_decision = decision_upper.isin({"ORDER", "PUBLISH", "RECOMMEND_ORDER", "AUTO_ORDER"})
     positive_units = suggested_order_units > 0
     blocked_by_review = review_reason.str.strip() != ""
-    return ((publishable_decision | positive_units) & (~blocked_by_review)).astype(bool)
+    blocked_by_publish_eligibility = pd.Series(False, index=decision.index, dtype=bool)
+    if publish_eligibility is not None:
+        eligibility_lower = publish_eligibility.reindex(decision.index).fillna("").astype(str).str.strip().str.lower()
+        blocked_by_publish_eligibility = (
+            eligibility_lower.eq("review_only")
+            | eligibility_lower.eq("manual_review")
+            | eligibility_lower.eq("review_required")
+            | eligibility_lower.str.startswith("excluded_")
+            | eligibility_lower.str.contains("review_required", regex=False)
+        )
+    return ((publishable_decision | positive_units) & (~blocked_by_review) & (~blocked_by_publish_eligibility)).astype(bool)
 
 
 def _nullable_string(value: object) -> Optional[str]:

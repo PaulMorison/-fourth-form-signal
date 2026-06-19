@@ -486,6 +486,192 @@ class PromotionStorePredictionPublisherTests(unittest.TestCase):
             self.assertEqual(artifacts.pos_upload_row_count, 0)
             self.assertEqual(artifacts.publish_status, "NOOP_VALID_NO_PUBLISHABLE_ROWS")
 
+    def test_hold_and_do_not_order_rows_are_legitimate_non_publishable(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_paths = PromotionArtifactPaths(
+                root=Path(temp_dir) / "promotions_runtime_governed",
+                local_inspection_root=Path(temp_dir) / "local_inspection",
+            )
+            _write_mapping(artifact_paths)
+
+            store_download = _store_download_frame().iloc[[0, 1]].copy().reset_index(drop=True)
+            store_download["decision_recommendation"] = ["HOLD", "DO_NOT_ORDER"]
+            store_download["publish_eligibility_reason"] = [
+                "excluded_legitimate_hold_inventory_sufficient",
+                "excluded_legitimate_do_not_order_low_incremental_value",
+            ]
+            store_download["review_reason"] = ["", ""]
+
+            artifacts = StorePredictionPublisher().publish(
+                run_id="publisher-run-non-buy-legitimate-noop",
+                as_of_date="2024-09-01",
+                scored_decision_surface_frame=_scored_frame().iloc[[0, 1]].reset_index(drop=True),
+                store_download_frame=store_download,
+                artifact_paths=artifact_paths,
+                model_version="model-v1",
+                allow_reprediction=False,
+                strict_store_mapping=True,
+            )
+
+            self.assertEqual(artifacts.pos_upload_row_count, 0)
+            self.assertEqual(artifacts.pos_excluded_row_count, 2)
+            self.assertEqual(artifacts.publish_status, "NOOP_VALID_NO_PUBLISHABLE_ROWS")
+            summary = pd.read_csv(artifacts.publication_summary_path, keep_default_na=False)
+            self.assertEqual(int(summary.iloc[0]["review_only_row_count"]), 0)
+            self.assertEqual(int(summary.iloc[0]["excluded_legitimate_row_count"]), 2)
+
+    def test_blank_review_reason_survives_stage11_csv_handoff_as_blank(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_root = Path(temp_dir)
+            artifact_paths = PromotionArtifactPaths(
+                root=temp_root / "promotions_runtime_governed",
+                local_inspection_root=temp_root / "local_inspection",
+            )
+            _write_mapping(artifact_paths)
+
+            store_download = _store_download_frame().iloc[[0]].copy().reset_index(drop=True)
+            store_download["decision_recommendation"] = ["HOLD"]
+            store_download["publish_eligibility_reason"] = ["excluded_legitimate_hold_inventory_sufficient"]
+            store_download["review_reason"] = [""]
+
+            csv_path = temp_root / "stage11_master_handoff.csv"
+            store_download.to_csv(csv_path, index=False)
+            round_tripped = pd.read_csv(csv_path, keep_default_na=False)
+            scored = _scored_frame().iloc[[0]].copy().reset_index(drop=True)
+            scored["store_number"] = [772]
+
+            self.assertEqual(str(round_tripped.loc[0, "review_reason"]), "")
+
+            artifacts = StorePredictionPublisher().publish(
+                run_id="publisher-run-blank-review-roundtrip",
+                as_of_date="2024-09-01",
+                scored_decision_surface_frame=scored,
+                store_download_frame=round_tripped,
+                artifact_paths=artifact_paths,
+                model_version="model-v1",
+                allow_reprediction=False,
+                strict_store_mapping=False,
+            )
+
+            summary = pd.read_csv(artifacts.publication_summary_path, keep_default_na=False)
+            self.assertEqual(artifacts.pos_upload_row_count, 0)
+            self.assertEqual(int(summary.iloc[0]["review_only_row_count"]), 0)
+            self.assertEqual(int(summary.iloc[0]["excluded_legitimate_row_count"]), 1)
+
+    def test_nan_review_reason_does_not_count_as_review_text(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_root = Path(temp_dir)
+            artifact_paths = PromotionArtifactPaths(
+                root=temp_root / "promotions_runtime_governed",
+                local_inspection_root=temp_root / "local_inspection",
+            )
+            _write_mapping(artifact_paths)
+
+            store_download = _store_download_frame().iloc[[0]].copy().reset_index(drop=True)
+            store_download["decision_recommendation"] = ["HOLD"]
+            store_download["publish_eligibility_reason"] = ["excluded_legitimate_hold_inventory_sufficient"]
+            store_download["review_reason"] = [""]
+
+            csv_path = temp_root / "stage11_master_nan_review.csv"
+            store_download.to_csv(csv_path, index=False)
+            default_round_tripped = pd.read_csv(csv_path)
+            scored = _scored_frame().iloc[[0]].copy().reset_index(drop=True)
+            scored["store_number"] = [772]
+
+            self.assertTrue(pd.isna(default_round_tripped.loc[0, "review_reason"]))
+
+            artifacts = StorePredictionPublisher().publish(
+                run_id="publisher-run-nan-review-text",
+                as_of_date="2024-09-01",
+                scored_decision_surface_frame=scored,
+                store_download_frame=default_round_tripped,
+                artifact_paths=artifact_paths,
+                model_version="model-v1",
+                allow_reprediction=False,
+                strict_store_mapping=False,
+            )
+
+            summary = pd.read_csv(artifacts.publication_summary_path, keep_default_na=False)
+            self.assertEqual(artifacts.pos_upload_row_count, 0)
+            self.assertEqual(int(summary.iloc[0]["review_only_row_count"]), 0)
+            self.assertEqual(int(summary.iloc[0]["excluded_legitimate_row_count"]), 1)
+
+    def test_true_review_row_stays_review_only(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_paths = PromotionArtifactPaths(
+                root=Path(temp_dir) / "promotions_runtime_governed",
+                local_inspection_root=Path(temp_dir) / "local_inspection",
+            )
+            _write_mapping(artifact_paths)
+
+            store_download = _store_download_frame().iloc[[0]].copy().reset_index(drop=True)
+            store_download["decision_recommendation"] = ["REVIEW"]
+            store_download["review_reason"] = ["policy_stock_gap_high"]
+
+            artifacts = StorePredictionPublisher().publish(
+                run_id="publisher-run-review-only-row",
+                as_of_date="2024-09-01",
+                scored_decision_surface_frame=_scored_frame().iloc[[0]].reset_index(drop=True),
+                store_download_frame=store_download,
+                artifact_paths=artifact_paths,
+                model_version="model-v1",
+                allow_reprediction=False,
+                strict_store_mapping=True,
+            )
+
+            summary = pd.read_csv(artifacts.publication_summary_path, keep_default_na=False)
+            self.assertEqual(artifacts.pos_upload_row_count, 0)
+            self.assertEqual(int(summary.iloc[0]["review_only_row_count"]), 1)
+            self.assertEqual(int(summary.iloc[0]["excluded_legitimate_row_count"]), 0)
+
+    def test_manual_review_rows_backfill_structured_review_reason_from_client_reason(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_paths = PromotionArtifactPaths(
+                root=Path(temp_dir) / "promotions_runtime_governed",
+                local_inspection_root=Path(temp_dir) / "local_inspection",
+            )
+            _write_mapping(artifact_paths)
+
+            store_download = _store_download_frame().iloc[[0, 1, 2]].copy().reset_index(drop=True)
+            store_download["decision_recommendation"] = ["REVIEW", "REVIEW", "REVIEW"]
+            store_download["review_reason"] = ["", "", ""]
+            store_download["publish_eligibility_reason"] = ["", "", ""]
+            store_download["client_reason"] = [
+                "Likely capital trap risk: resolve quantity manually before release.",
+                "Review required: confidence is below production threshold, so local store context should guide the final call.",
+                "Launch demand support is weaker than the total-promo signal; confirm replenishment timing before releasing quantity.",
+            ]
+
+            artifacts = StorePredictionPublisher().publish(
+                run_id="publisher-run-manual-review-reason-fallback",
+                as_of_date="2024-09-01",
+                scored_decision_surface_frame=_scored_frame().iloc[[0, 1, 2]].reset_index(drop=True),
+                store_download_frame=store_download,
+                artifact_paths=artifact_paths,
+                model_version="model-v1",
+                allow_reprediction=False,
+                strict_store_mapping=True,
+            )
+
+            review = pd.concat([pd.read_csv(path) for path in artifacts.review_paths], ignore_index=True)
+            self.assertEqual(artifacts.pos_upload_row_count, 0)
+            self.assertEqual(
+                set(review["review_reason"].astype(str)),
+                {
+                    "review_high_leftover_risk",
+                    "review_low_confidence",
+                    "review_launch_window_support_conflict",
+                },
+            )
+            self.assertEqual(
+                set(review["publish_eligibility_reason"].astype(str)),
+                {
+                    "review_high_leftover_risk",
+                    "review_low_confidence",
+                    "review_launch_window_support_conflict",
+                },
+            )
+
     def test_all_defect_rows_still_fail_loud(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             artifact_paths = PromotionArtifactPaths(
@@ -799,6 +985,7 @@ class PromotionStorePredictionPublisherTests(unittest.TestCase):
                 "",
                 "artificial_collapse_requires_review",
             ]
+            store_download.loc[2, "decision_recommendation"] = "ORDER"
             store_download["cold_start_flag"] = [0, 1, 0, 0]
             store_download["insufficient_history_flag"] = [0, 1, 0, 0]
 

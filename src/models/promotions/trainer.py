@@ -1279,10 +1279,11 @@ class PromotionModelTrainer:
         return artifact_files
 
     # Persist honest out-of-sample test-set predictions for the completed-promotion
-    # demand backtest. Predictions come from the units-gradient-boosting head (the
-    # same head that produces `predicted_units_total_promo` in scoring). Output
-    # parquet uses the `promotion_row_key` grain and carries through the segment
-    # columns the backtest orchestrator splits on.
+    # demand backtest. Predictions follow the governed live scoring path: raw head,
+    # allocation-aware calibration, then the post-calibration policy overlay that
+    # ultimately owns `predicted_units_total_promo` in scoring. Output parquet uses
+    # the `promotion_row_key` grain and carries through the segment columns the
+    # backtest orchestrator splits on.
     _BACKTEST_PASSTHROUGH_COLUMNS: tuple[str, ...] = (
         "promotion_row_key",
         "store_number",
@@ -1303,7 +1304,135 @@ class PromotionModelTrainer:
         "feature_prior_promo_28d_flag",
         "feature_prior_promo_56d_flag",
         "feature_prior_same_or_better_discount_56d_flag",
+        "feature_historical_promo_events_same_discount",
+        "feature_historical_units_same_discount_avg",
+        "feature_basket_anchor_sku_score",
+        "feature_basket_drag_along_dependency_score",
+        "feature_basket_lone_random_purchase_score",
+        "feature_basket_conditional_dependency_score",
+        "feature_high_seller_companion_presence_probability",
+        "feature_promo_anchor_absence_risk",
+        "feature_top_20pct_driver_flag",
+        "feature_long_tail_dependency_flag",
+        "feature_basket_fragility_score",
+        "feature_basket_convexity_support_score",
+        "feature_basket_structure_evidence_available_flag",
+        "feature_anchor_centrality_score",
+        "feature_anchor_presence_support_score",
+        "feature_top_anchor_dependency_score",
+        "feature_anchor_absence_risk_score",
+        "feature_companion_cluster_support_score",
+        "feature_companion_concentration_score",
+        "feature_multi_sku_promo_basket_rate",
+        "feature_three_plus_promo_sku_basket_rate",
+        "feature_solo_purchase_rate",
+        "feature_sparse_random_purchase_score",
+        "feature_basket_noise_score",
+        "feature_transaction_object_uncertainty_score",
+        "feature_conditional_sale_rate_with_anchor",
+        "feature_conditional_sale_rate_without_anchor",
+        "feature_conditional_lift_with_anchor",
+        "feature_conditional_lift_with_companion_cluster",
+        "feature_substitution_pressure_score",
+        "feature_promo_basket_depth_alignment_score",
+        "feature_anchor_mix_stability_score",
+        "feature_conditional_lift_with_anchor",
+        "feature_conditional_lift_with_companion_cluster",
+        "feature_basket_equilibrium_regime_class",
+        "feature_basket_equilibrium_score",
+        "feature_basket_equilibrium_fragility_score",
+        "feature_anchor_presence_dependency_score",
+        "feature_anchor_absence_suppressed_demand_score",
+        "feature_drag_along_probability",
+        "feature_conditional_sale_probability_given_anchor",
+        "feature_lone_purchase_noise_score",
+        "feature_transaction_object_stability_score",
+        "feature_basket_regime_class",
+        "feature_basket_anchor_strength_score",
+        "feature_basket_dependency_fragility_score",
+        "feature_companion_presence_support_score",
+        "feature_basket_depth_conditional_units_score",
+        "feature_micro_market_clearing_pressure",
+        "feature_local_equilibrium_gap_units",
+        "feature_local_equilibrium_gap_dollars",
+        "feature_substitute_pressure_score",
+        "feature_complement_support_score",
+        "feature_attention_competition_score",
+        "feature_promo_field_equilibrium_state",
+        "feature_inventory_constrained_demand_proxy",
+        "feature_small_unit_option_value",
+        "feature_convexity_to_capital_score",
+        "feature_trust_floor_convexity_score",
+        "feature_high_demand_underprotection_score",
+        "feature_end_shape_fragility_score",
+        "feature_sparse_demand_low_signal_flag",
+        "feature_sparse_demand_stable_low_trust_flag",
+        "feature_sparse_demand_random_tail_flag",
+        "feature_sparse_demand_repeatability_score",
+        "feature_sparse_demand_randomness_score",
+        "feature_sparse_demand_one_off_likelihood_score",
+        "feature_sparse_demand_daily_stability_score",
+        "feature_sparse_demand_outlier_shape_score",
+        "feature_sparse_demand_noise_regime_score",
+        "feature_sparse_demand_evidence_available_flag",
+        "feature_kalman_demand_state_level",
+        "feature_kalman_demand_state_trend",
+        "feature_kalman_demand_state_uncertainty",
+        "feature_kalman_demand_state_shift_score",
+        "feature_wasserstein_recent_vs_baseline_distance",
+        "feature_distribution_shape_shift_score",
+        "feature_distribution_tail_pressure_score",
+        "feature_distribution_sparse_support_distance",
+        "feature_fragility_adjusted_opportunity_score",
+        "feature_convex_upside_small_unit_flag",
+        "feature_dag_dependency_support_indicator",
+        "feature_dependency_support_confidence_score",
+        "feature_opportunity_tail_support_score",
         "feature_prior_promo_cannibalisation_risk_score",
+        "promo_allocated_units",
+        "pl_allocation_qty",
+        "suggested_order_units",
+        "recommended_order_units",
+        "target_end_stock_units",
+        "feature_promo_period_target_units",
+        "feature_day_one_target_stock_units",
+        "feature_end_of_promo_target_units",
+        "feature_end_of_promo_target_floor_units",
+        "feature_trust_floor_units_dynamic",
+        "target_end_stock_floor_units",
+        "feature_end_of_promo_target_days_cover",
+        "feature_high_base_demand_end_cover_flag",
+        "feature_month_end_inventory_efficiency_target",
+        "feature_days_cover_vs_billing_cycle_target",
+        "feature_units_needed_for_high_demand_cover",
+        "feature_trust_floor_breach_risk_score",
+        "feature_end_shape_success_target_flag",
+        "feature_excess_month_end_capital_drag",
+        "feature_cashflow_efficiency_score",
+        "actual_end_stock_units",
+        "ending_soh_units",
+        "post_promo_soh_units",
+        "high_demand_14d_cover_flag",
+        "feature_no_promo_history_flag",
+        "feature_month_end_cash_runoff_pressure_flag",
+        "feature_units_needed_for_trust_floor",
+        "feature_units_above_trust_target",
+        "units_above_trust_target",
+        "feature_capital_tied_above_trust_target",
+        "capital_tied_above_trust_target",
+        "feature_risk_adjusted_value_of_speculative_units",
+        "effective_cost_per_unit",
+        "promo_unit_cost",
+        "unit_cost",
+        "cost_per_unit",
+        "promo_gm_unit",
+        "unit_gross_profit",
+        "gross_profit_per_unit",
+        "actual_gross_profit_promo_dollars",
+        "gross_profit_promo_dollars",
+        "publish_eligibility_reason",
+        "review_reason",
+        "primary_review_reason",
     )
 
     def _write_test_set_predictions(
@@ -1315,24 +1444,55 @@ class PromotionModelTrainer:
         split,
         units_model: Pipeline,
     ) -> str | None:
+        """Persist honest test-set predictions with governed backtest context.
+
+        The output keeps the model prediction grain and adds only existing
+        dataset columns needed by downstream diagnostics. Missing optional
+        context is not invented here; the backtest scorecard remains fail-loud
+        if a governed input is absent from the training dataset.
+        """
+
         test_mask = split.test_mask
         if int(test_mask.sum()) == 0:
             return None
         test_features = model_input.loc[test_mask]
-        predicted_units = units_model.predict(test_features)
+        raw_predicted_units = pd.Series(
+            units_model.predict(test_features),
+            index=test_features.index,
+            dtype="float64",
+        ).clip(lower=0.0)
         # Floor at zero — negative unit predictions are not commercially meaningful.
         test_dataset = dataset.loc[test_mask]
-        predicted_units = apply_allocation_aware_units_cap(
+        calibrated_predicted_units = apply_allocation_aware_units_cap(
             test_dataset,
-            pd.Series(predicted_units, index=test_features.index).clip(lower=0.0),
+            raw_predicted_units,
         )
+        diagnostics = build_live_order_decision_diagnostics(
+            test_dataset,
+            raw_predicted_units=raw_predicted_units,
+            predicted_units=calibrated_predicted_units,
+        )
+        policy_adjustments = build_order_policy_adjustments(
+            test_dataset,
+            raw_predicted_units=raw_predicted_units,
+            calibrated_predicted_units=calibrated_predicted_units,
+            diagnostics_frame=diagnostics,
+        )
+        policy_adjusted_predicted_units = pd.to_numeric(
+            policy_adjustments["adjusted_order_cap_units"],
+            errors="coerce",
+        ).fillna(calibrated_predicted_units).clip(lower=0.0)
         passthrough = [
             column_name
             for column_name in self._BACKTEST_PASSTHROUGH_COLUMNS
             if column_name in test_dataset.columns
         ]
         out = test_dataset.loc[:, passthrough].copy()
-        out["predicted_units_total_promo"] = predicted_units.values
+        out["raw_predicted_units_total_promo"] = raw_predicted_units.values
+        out["calibrated_predicted_units_total_promo"] = calibrated_predicted_units.values
+        out["policy_adjusted_predicted_units_total_promo"] = policy_adjusted_predicted_units.values
+        out["policy_adjustment_reason"] = policy_adjustments["policy_adjustment_reason"].values
+        out["predicted_units_total_promo"] = policy_adjusted_predicted_units.values
         # Make sure the canonical actual column is present even if only `actual_units_sold`
         # exists on this dataset variant.
         if "actual_units_sold_promo" not in out.columns and "actual_units_sold" in out.columns:

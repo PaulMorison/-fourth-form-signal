@@ -13,6 +13,9 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.append(str(REPO_ROOT / "src"))
 
 from models.promotions.trainer import PromotionModelTrainer  # noqa: E402
+from models.promotions.preprocessing import (  # noqa: E402
+    GOVERNED_CRITICAL_MODEL_USE_FEATURE_COLUMNS,
+)
 from runtime.promotions.config import PromotionArtifactPaths  # noqa: E402
 from runtime.promotions.export_promotions_model_inputs import _build_filters  # noqa: E402
 from runtime.promotions.scoring_service import PromotionModelScorer  # noqa: E402
@@ -473,6 +476,9 @@ class TrainingScoringAuditArtifactsTests(unittest.TestCase):
             self.assertTrue(Path(audit.metadata_json_path).exists())
             self.assertTrue(Path(audit.feature_lineage_csv_path).exists())
             self.assertTrue(Path(audit.feature_lineage_json_path).exists())
+            self.assertTrue(Path(audit.feature_dataset_coverage_audit_csv_path).exists())
+            self.assertTrue(Path(audit.model_use_feature_coverage_summary_csv_path).exists())
+            self.assertTrue(Path(audit.model_use_feature_coverage_summary_json_path).exists())
             self.assertTrue(Path(audit.contract_validation_json_path).exists())
             self.assertTrue(Path(audit.feature_quality_audit_csv_path).exists())
             self.assertTrue(Path(audit.feature_quality_audit_json_path).exists())
@@ -517,6 +523,18 @@ class TrainingScoringAuditArtifactsTests(unittest.TestCase):
             self.assertEqual(
                 metadata["model_input_quality_summary_txt_path"],
                 audit.model_input_quality_summary_txt_path,
+            )
+            self.assertEqual(
+                metadata["feature_dataset_coverage_audit_csv_path"],
+                audit.feature_dataset_coverage_audit_csv_path,
+            )
+            self.assertEqual(
+                metadata["model_use_feature_coverage_summary_csv_path"],
+                audit.model_use_feature_coverage_summary_csv_path,
+            )
+            self.assertEqual(
+                metadata["model_use_feature_coverage_summary_json_path"],
+                audit.model_use_feature_coverage_summary_json_path,
             )
 
             # Feature lineage detects targets-not-leaking and engineered-not-passed
@@ -565,6 +583,105 @@ class TrainingScoringAuditArtifactsTests(unittest.TestCase):
             self.assertIn("PROMOTIONS MODEL INPUT QUALITY AUDIT", quality_summary_text)
             self.assertIn("stage: training", quality_summary_text)
 
+            coverage_audit = pd.read_csv(audit.feature_dataset_coverage_audit_csv_path)
+            self.assertEqual(
+                list(coverage_audit.columns),
+                [
+                    "feature_name",
+                    "module_name",
+                    "registry_registered_flag",
+                    "present_in_training_ready_flag",
+                    "present_in_scoring_ready_flag",
+                    "present_in_model_use_flag",
+                    "review_only_flag",
+                    "recommended_action",
+                    "rationale",
+                ],
+            )
+            coverage_by_feature = coverage_audit.set_index("feature_name")
+            critical_model_use_features = set(GOVERNED_CRITICAL_MODEL_USE_FEATURE_COLUMNS)
+            missing_critical = critical_model_use_features.difference(coverage_by_feature.index)
+            self.assertEqual(missing_critical, set())
+            for feature_name in critical_model_use_features:
+                row = coverage_by_feature.loc[feature_name]
+                self.assertTrue(row["registry_registered_flag"], feature_name)
+                self.assertTrue(row["present_in_training_ready_flag"], feature_name)
+                self.assertTrue(row["present_in_model_use_flag"], feature_name)
+                self.assertFalse(row["review_only_flag"], feature_name)
+                self.assertEqual(row["recommended_action"], "keep_model_use")
+            pca_row = coverage_by_feature.loc["feature_pca_structure_residual_score"]
+            self.assertFalse(pca_row["present_in_training_ready_flag"])
+            self.assertFalse(pca_row["present_in_model_use_flag"])
+            self.assertTrue(pca_row["review_only_flag"])
+            self.assertEqual(pca_row["recommended_action"], "keep_review_only")
+
+            family_summary = pd.read_csv(audit.model_use_feature_coverage_summary_csv_path)
+            family_summary_by_name = family_summary.set_index("feature_family")
+            for family_name in (
+                "basket_equilibrium",
+                "basket_structure_dependency",
+                "micro_market_equilibrium",
+                "sparse_demand_noise",
+                "allocation_discipline",
+                "same_discount_promo_history",
+                "probability",
+                "target_stock_shape",
+                "pca",
+                "situational_awareness",
+                "kalman_state",
+                "distribution_shape_distance",
+                "fragility_opportunity",
+                "dag_dependency_support",
+                "fragility_opportunity_shape",
+            ):
+                self.assertIn(family_name, family_summary_by_name.index)
+            self.assertEqual(
+                family_summary_by_name.loc["basket_structure_dependency", "family_status"],
+                "model_use_covered",
+            )
+            self.assertEqual(
+                family_summary_by_name.loc["basket_equilibrium", "family_status"],
+                "observed_partial",
+            )
+            self.assertEqual(
+                family_summary_by_name.loc["micro_market_equilibrium", "family_status"],
+                "observed_partial",
+            )
+            self.assertEqual(
+                family_summary_by_name.loc["sparse_demand_noise", "family_status"],
+                "model_use_covered",
+            )
+            self.assertEqual(
+                family_summary_by_name.loc["allocation_discipline", "family_status"],
+                "missing_from_model_use",
+            )
+            self.assertGreater(
+                int(family_summary_by_name.loc["allocation_discipline", "missing_model_use_feature_count"]),
+                0,
+            )
+            self.assertEqual(
+                family_summary_by_name.loc["pca", "family_status"],
+                "review_only_excluded_from_ready_dataset",
+            )
+            self.assertEqual(
+                family_summary_by_name.loc["kalman_state", "family_status"],
+                "review_only_excluded_from_ready_dataset",
+            )
+            self.assertEqual(
+                family_summary_by_name.loc["distribution_shape_distance", "family_status"],
+                "review_only_excluded_from_ready_dataset",
+            )
+            self.assertEqual(
+                family_summary_by_name.loc["fragility_opportunity", "family_status"],
+                "review_only_excluded_from_ready_dataset",
+            )
+            family_payload = json.loads(
+                Path(audit.model_use_feature_coverage_summary_json_path).read_text(encoding="utf-8")
+            )
+            self.assertTrue(family_payload["diagnostics_only"])
+            self.assertEqual(family_payload["review_only_features_in_model_use"], [])
+            self.assertGreater(len(family_payload["missing_model_use_feature_names"]), 0)
+
             # Now run scoring and confirm scoring-side audit artifacts.
             future_base_frame = build_future_promotions_base_frame()
             PromotionModelScorer().score(
@@ -589,6 +706,9 @@ class TrainingScoringAuditArtifactsTests(unittest.TestCase):
                     scoring_inspection_root
                     / "feature_lineage_audit_scoring.csv"
                 ).exists()
+            )
+            self.assertTrue(
+                (scoring_inspection_root / "feature_dataset_coverage_audit.csv").exists()
             )
             self.assertTrue(
                 (

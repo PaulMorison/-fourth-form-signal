@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Any, Mapping, Protocol, Sequence
 from uuid import uuid4
 
-from platform.validation.contract_schema_validator import ContractSchemaValidator
+from ff_platform.validation.contract_schema_validator import ContractSchemaValidator
 
 
 class AuditEventStoreError(ValueError):

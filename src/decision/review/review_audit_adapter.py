@@ -9,8 +9,8 @@ Canon ownership:
 
 from typing import TYPE_CHECKING, Any
 
-from platform.audit.audit_event_store import AuditEventStore
-from platform.validation.contract_schema_validator import ContractSchemaValidator
+from ff_platform.audit.audit_event_store import AuditEventStore
+from ff_platform.validation.contract_schema_validator import ContractSchemaValidator
 
 if TYPE_CHECKING:
     from decision.review.review_trigger_service import ReviewTriggerDecision, ReviewTriggerRequest

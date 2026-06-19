@@ -1289,15 +1289,14 @@ class PromotionOperationalCycleTests(unittest.TestCase):
             self.assertGreater(audit_summary["rows_scored"], 0)
             self.assertFalse(store_download.empty)
             self.assertEqual(len(store_download.columns), len(set(store_download.columns)))
-            # Stage 11/12 store-facing CSV redesign: action-critical columns must lead.
-            self.assertIn("recommended_order_units", store_download.columns)
-            self.assertIn("projected_promotional_units", store_download.columns)
-            self.assertIn("lead_up_demand_units", store_download.columns)
-            self.assertIn("model_reason_summary", store_download.columns)
-            self.assertIn("capital_at_risk_adjusted_dollars", store_download.columns)
-            self.assertIn("retail_risk_reward_ratio", store_download.columns)
-            self.assertIn("model_confidence_percent", store_download.columns)
+            # Stage 11/12 store-facing CSV redesign: simplified operator sheet only.
+            self.assertIn("operator_decision", store_download.columns)
+            self.assertIn("operator_action", store_download.columns)
+            self.assertIn("order_units", store_download.columns)
+            self.assertIn("reason_short", store_download.columns)
+            self.assertIn("expected_promo_demand", store_download.columns)
             self.assertIn("discount_percent", store_download.columns)
+            self.assertNotIn("recommended_order_units", store_download.columns)
             self.assertIn("predicted_units_first_day", inspection_review_packet.columns)
             self.assertTrue(pd.api.types.is_numeric_dtype(inspection_review_packet["predicted_units_first_day"]))
             self.assertIn("master", set(store_prediction_manifest_csv["file_type"]))
@@ -1473,6 +1472,76 @@ class PromotionOperationalCycleTests(unittest.TestCase):
             self.assertIn("### Top Operator Actions", brief_content)
             self.assertIn("### Top Model Owner Actions", brief_content)
             self.assertIn("### Action Queue Preview", brief_content)
+
+    def test_operational_cycle_fails_loud_on_publish_reconciliation_mismatch(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_paths = PromotionArtifactPaths(
+                root=Path(temp_dir) / "promotions_artifacts",
+                local_inspection_root=Path(temp_dir) / "local_inspection",
+            )
+            settings = PromotionPipelineSettings.for_runtime_date(
+                sql=PromotionMssqlSettings(
+                    server="test-server",
+                    database="test-database",
+                    schema="dbo",
+                    promotion_advice_table="dbo.PromotionAdvice",
+                    pwlogd_table="dbo.PwlogD",
+                ),
+                runtime_date=datetime(2024, 9, 1, tzinfo=UTC).date(),
+                artifacts=artifact_paths,
+            )
+            completed_extraction = _persist_extraction(
+                artifact_paths=artifact_paths,
+                run_id="operational-reconciliation-fail",
+                selection_mode="completed",
+                frame=build_completed_promotions_base_frame(),
+                as_of_date=settings.as_of_date.isoformat(),
+            )
+            future_extraction = _persist_extraction(
+                artifact_paths=artifact_paths,
+                run_id="operational-reconciliation-fail-score",
+                selection_mode="future",
+                frame=build_future_promotions_base_frame(),
+                as_of_date=settings.as_of_date.isoformat(),
+            )
+
+            with patch(
+                "runtime.promotions.run_promotions_operational_cycle._run_completed_preflight_probe",
+                return_value=_build_preflight_result(
+                    artifact_paths=artifact_paths,
+                    run_id="operational-reconciliation-fail",
+                    as_of_date=settings.as_of_date.isoformat(),
+                ),
+            ), patch(
+                "runtime.promotions.run_promotions_operational_cycle._extract_promotions_base_artifact",
+                side_effect=[completed_extraction, future_extraction],
+            ), patch.object(
+                StorePredictionPublisher,
+                "publish",
+                new=_build_publish_without_zero_fail(
+                    artifact_paths=artifact_paths,
+                    original_publish=StorePredictionPublisher.publish,
+                ),
+            ), patch(
+                "runtime.promotions.run_promotions_operational_cycle.build_publish_reconciliation_summary",
+                side_effect=ValueError("Reconciliation FAILED: synthetic mismatch"),
+            ):
+                with self.assertRaisesRegex(ValueError, "synthetic mismatch"):
+                    run_operational_cycle(
+                        settings=settings,
+                        run_id="operational-reconciliation-fail",
+                        score_run_id="operational-reconciliation-fail-score",
+                        decision_surface_run_id="operational-reconciliation-fail-decision-surface",
+                        minimum_cohort_sample_size=1,
+                        similarity_threshold=0.50,
+                        archetype_confidence_floor=0.0,
+                        row_model_confidence_floor=0.0,
+                    )
+
+            operator_log = artifact_paths.operator_log_path("operational-reconciliation-fail").read_text(
+                encoding="utf-8"
+            )
+            self.assertIn("reconciliation_error: Reconciliation FAILED: synthetic mismatch", operator_log)
 
     def test_zero_future_scored_rows_complete_as_governed_noop_before_decision_surface(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

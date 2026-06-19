@@ -64,6 +64,11 @@ from models.promotions.promotion_demand_backtest import (
     compute_backtest_rows,
     compute_backtest_summary,
 )
+from models.promotions.promotion_execution_scorecard import (
+    PromotionExecutionScorecardError,
+    empty_promotion_execution_scorecard_artifacts,
+    write_promotion_execution_scorecard_artifacts,
+)
 from runtime.promotions.promotion_demand_backtest_calibration import (
     assign_calibration_actions,
     classify_segment_harm,
@@ -122,12 +127,17 @@ class PromotionBacktestArtifactPaths:
     rows_csv_path: str
     rows_parquet_path: str
     summary_json_path: str
+    summary_csv_path: str
     by_segment_csv_path: str
     watchlist_csv_path: str
     brief_md_path: str
     manifest_json_path: str
     calibration_summary_json_path: str
     calibration_brief_md_path: str
+    execution_scorecard_csv_path: str
+    execution_scorecard_summary_json_path: str
+    trust_floor_shape_policy_audit_csv_path: str
+    trust_floor_shape_policy_audit_json_path: str
     skip_reason: str | None = None
     skip_class: str | None = None
     row_count_evaluated: int = 0
@@ -443,12 +453,20 @@ def _empty_skip_paths(
     rows_csv_path = output_root / "promotion_demand_backtest.csv"
     rows_parquet_path = output_root / "promotion_demand_backtest.parquet"
     summary_json_path = output_root / "promotion_demand_backtest_summary.json"
+    summary_csv_path = output_root / "promotion_demand_backtest_summary.csv"
     by_segment_csv_path = output_root / "promotion_demand_backtest_by_segment.csv"
     watchlist_csv_path = output_root / "promotion_demand_backtest_watchlist.csv"
     brief_md_path = output_root / "promotion_demand_backtest_brief.md"
     manifest_json_path = output_root / "promotion_demand_backtest_manifest.json"
     calibration_summary_json_path = output_root / "promotion_demand_backtest_calibration_summary.json"
     calibration_brief_md_path = output_root / "promotion_demand_backtest_calibration_brief.md"
+    scorecard_paths = empty_promotion_execution_scorecard_artifacts(
+        output_root=output_root,
+        run_id=run_id,
+        as_of_date=as_of_date,
+        skip_reason=skip_reason,
+        skip_class=skip_class,
+    )
 
     empty_rows = pd.DataFrame(
         columns=[
@@ -504,12 +522,28 @@ def _empty_skip_paths(
         "median_absolute_percentage_error": 0.0,
         "overforecast_rate": 0.0,
         "underforecast_rate": 0.0,
+        "floor_breach_rate": 0.0,
+        "target_hit_rate": 0.0,
+        "end_shape_success_rate": 0.0,
+        "zero_oos_rate": 0.0,
+        "zero_oos_success_rate": 0.0,
+        "high_demand_14d_success_rate": 0.0,
+        "total_capital_above_trust_target": 0.0,
+        "total_speculative_capital_drag_dollars": 0.0,
+        "total_speculative_units_sold": 0.0,
+        "total_missed_trust_units": 0.0,
+        "total_missed_upside_units": 0.0,
+        "gp_per_capital_committed": 0.0,
+        "gp_per_speculative_capital": 0.0,
+        "sell_through_on_accepted_capital": 0.0,
+        "period_absolute_error_units_per_day_mean": 0.0,
         "skip_reason": skip_reason,
         "skip_class": skip_class,
     }
     summary_json_path.write_text(
         json.dumps(summary_payload, indent=2, sort_keys=True, default=str), encoding="utf-8"
     )
+    pd.DataFrame([summary_payload]).to_csv(summary_csv_path, index=False)
     brief_md_path.write_text(
         _build_brief(
             summary=summary_payload,
@@ -531,11 +565,16 @@ def _empty_skip_paths(
         "rows_csv_path": str(rows_csv_path),
         "rows_parquet_path": str(rows_parquet_path),
         "summary_json_path": str(summary_json_path),
+        "summary_csv_path": str(summary_csv_path),
         "by_segment_csv_path": str(by_segment_csv_path),
         "watchlist_csv_path": str(watchlist_csv_path),
         "brief_md_path": str(brief_md_path),
         "calibration_summary_json_path": str(calibration_summary_json_path),
         "calibration_brief_md_path": str(calibration_brief_md_path),
+        "execution_scorecard_csv_path": scorecard_paths["scorecard_csv_path"],
+        "execution_scorecard_summary_json_path": scorecard_paths["scorecard_summary_json_path"],
+        "trust_floor_shape_policy_audit_csv_path": scorecard_paths["policy_audit_csv_path"],
+        "trust_floor_shape_policy_audit_json_path": scorecard_paths["policy_audit_json_path"],
         "row_count_evaluated": 0,
         "watchlist_segment_count": 0,
         "skip_reason": skip_reason,
@@ -584,12 +623,17 @@ def _empty_skip_paths(
         rows_csv_path=str(rows_csv_path),
         rows_parquet_path=str(rows_parquet_path),
         summary_json_path=str(summary_json_path),
+        summary_csv_path=str(summary_csv_path),
         by_segment_csv_path=str(by_segment_csv_path),
         watchlist_csv_path=str(watchlist_csv_path),
         brief_md_path=str(brief_md_path),
         manifest_json_path=str(manifest_json_path),
         calibration_summary_json_path=str(calibration_summary_json_path),
         calibration_brief_md_path=str(calibration_brief_md_path),
+        execution_scorecard_csv_path=scorecard_paths["scorecard_csv_path"],
+        execution_scorecard_summary_json_path=scorecard_paths["scorecard_summary_json_path"],
+        trust_floor_shape_policy_audit_csv_path=scorecard_paths["policy_audit_csv_path"],
+        trust_floor_shape_policy_audit_json_path=scorecard_paths["policy_audit_json_path"],
         skip_reason=skip_reason,
         skip_class=skip_class,
     )
@@ -676,6 +720,21 @@ def write_completed_promotion_demand_backtest(
         "median_absolute_percentage_error": summary_core["median_absolute_pct_error"],
         "overforecast_rate": summary_core["overforecast_rate"],
         "underforecast_rate": summary_core["underforecast_rate"],
+        "floor_breach_rate": summary_core["floor_breach_rate"],
+        "target_hit_rate": summary_core["target_hit_rate"],
+        "end_shape_success_rate": summary_core["end_shape_success_rate"],
+        "zero_oos_rate": summary_core["zero_oos_rate"],
+        "zero_oos_success_rate": summary_core["zero_oos_success_rate"],
+        "high_demand_14d_success_rate": summary_core["high_demand_14d_success_rate"],
+        "total_capital_above_trust_target": summary_core["total_capital_above_trust_target"],
+        "total_speculative_capital_drag_dollars": summary_core["total_speculative_capital_drag_dollars"],
+        "total_speculative_units_sold": summary_core["total_speculative_units_sold"],
+        "total_missed_trust_units": summary_core["total_missed_trust_units"],
+        "total_missed_upside_units": summary_core["total_missed_upside_units"],
+        "gp_per_capital_committed": summary_core["gp_per_capital_committed"],
+        "gp_per_speculative_capital": summary_core["gp_per_speculative_capital"],
+        "sell_through_on_accepted_capital": summary_core["sell_through_on_accepted_capital"],
+        "period_absolute_error_units_per_day_mean": summary_core["period_absolute_error_units_per_day_mean"],
         "skip_reason": None,
         "skip_class": None,
     }
@@ -717,6 +776,16 @@ def write_completed_promotion_demand_backtest(
         skip_reason=None,
         skip_class=None,
     )
+    try:
+        scorecard_paths = write_promotion_execution_scorecard_artifacts(
+            backtest_rows=backtest_rows,
+            source_frame=enriched,
+            output_root=output_root,
+            run_id=run_id,
+            as_of_date=as_of_date,
+        )
+    except PromotionExecutionScorecardError as exc:
+        raise PromotionBacktestOrchestratorError(str(exc)) from exc
 
     brief_text = _build_brief(
         summary=summary,
@@ -732,6 +801,7 @@ def write_completed_promotion_demand_backtest(
     rows_csv_path = output_root / "promotion_demand_backtest.csv"
     rows_parquet_path = output_root / "promotion_demand_backtest.parquet"
     summary_json_path = output_root / "promotion_demand_backtest_summary.json"
+    summary_csv_path = output_root / "promotion_demand_backtest_summary.csv"
     by_segment_csv_path = output_root / "promotion_demand_backtest_by_segment.csv"
     watchlist_csv_path = output_root / "promotion_demand_backtest_watchlist.csv"
     brief_md_path = output_root / "promotion_demand_backtest_brief.md"
@@ -744,6 +814,7 @@ def write_completed_promotion_demand_backtest(
     summary_json_path.write_text(
         json.dumps(summary, indent=2, sort_keys=True, default=str), encoding="utf-8"
     )
+    pd.DataFrame([summary]).to_csv(summary_csv_path, index=False)
     segment_table_enriched.to_csv(by_segment_csv_path, index=False)
     watchlist_ranked.to_csv(watchlist_csv_path, index=False)
     brief_md_path.write_text(brief_text, encoding="utf-8")
@@ -762,11 +833,16 @@ def write_completed_promotion_demand_backtest(
         "rows_csv_path": str(rows_csv_path),
         "rows_parquet_path": str(rows_parquet_path),
         "summary_json_path": str(summary_json_path),
+        "summary_csv_path": str(summary_csv_path),
         "by_segment_csv_path": str(by_segment_csv_path),
         "watchlist_csv_path": str(watchlist_csv_path),
         "brief_md_path": str(brief_md_path),
         "calibration_summary_json_path": str(calibration_summary_json_path),
         "calibration_brief_md_path": str(calibration_brief_md_path),
+        "execution_scorecard_csv_path": scorecard_paths["scorecard_csv_path"],
+        "execution_scorecard_summary_json_path": scorecard_paths["scorecard_summary_json_path"],
+        "trust_floor_shape_policy_audit_csv_path": scorecard_paths["policy_audit_csv_path"],
+        "trust_floor_shape_policy_audit_json_path": scorecard_paths["policy_audit_json_path"],
         "row_count_evaluated": int(summary["comparable_rows"]),
         "watchlist_segment_count": int(len(watchlist_ranked.index)),
         "within_10pct_rate": summary["within_10pct_rate"],
@@ -790,12 +866,17 @@ def write_completed_promotion_demand_backtest(
         rows_csv_path=str(rows_csv_path),
         rows_parquet_path=str(rows_parquet_path),
         summary_json_path=str(summary_json_path),
+        summary_csv_path=str(summary_csv_path),
         by_segment_csv_path=str(by_segment_csv_path),
         watchlist_csv_path=str(watchlist_csv_path),
         brief_md_path=str(brief_md_path),
         manifest_json_path=str(manifest_json_path),
         calibration_summary_json_path=str(calibration_summary_json_path),
         calibration_brief_md_path=str(calibration_brief_md_path),
+        execution_scorecard_csv_path=scorecard_paths["scorecard_csv_path"],
+        execution_scorecard_summary_json_path=scorecard_paths["scorecard_summary_json_path"],
+        trust_floor_shape_policy_audit_csv_path=scorecard_paths["policy_audit_csv_path"],
+        trust_floor_shape_policy_audit_json_path=scorecard_paths["policy_audit_json_path"],
         row_count_evaluated=int(summary["comparable_rows"]),
         within_10pct_rate=float(summary["within_10pct_rate"]),
         within_20pct_rate=float(summary["within_20pct_rate"]),

@@ -27,6 +27,7 @@ RULE_NAMES = (
     "falling_base_launch_conflict_review",
     "weak_same_discount_and_uplift_cap",
     "weak_elasticity_uplift_restraint",
+    "inventory_sufficient_low_value_history_review",
     "stock_gap_high_review_cap",
 )
 

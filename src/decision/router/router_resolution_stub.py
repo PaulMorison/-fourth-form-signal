@@ -10,7 +10,7 @@ Canon ownership:
 
 from pathlib import Path
 
-from platform.validation.contract_schema_validator import ContractSchemaValidator
+from ff_platform.validation.contract_schema_validator import ContractSchemaValidator
 
 from .conflict_classifier import ConflictClassifier
 from .router_audit_adapter import RouterAuditAdapter

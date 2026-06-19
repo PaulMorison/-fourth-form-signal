@@ -167,6 +167,65 @@ class PromotionPreprocessingTests(unittest.TestCase):
             schema.quality_report.summary_payload["review_only_basket_columns_removed"],
         )
 
+    def test_prepare_model_input_excludes_downstream_basket_equilibrium_from_default_units_head(self) -> None:
+        frame = pd.DataFrame(
+            {
+                "promotion_start_date_date": ["2024-07-16", "2024-07-23"],
+                "promotion_name": ["Week 29", "Week 30"],
+                "promo_type": ["Catalogue", "Catalogue"],
+                "customer_offer": ["Half Price", "2 for 1"],
+                "sku_description": ["Widget", "Widget Plus"],
+                "department": ["Skincare", "Skincare"],
+                "category": ["Moisturiser", "Serum"],
+                "feature_basket_anchor_sku_score": [0.82, 0.27],
+                "feature_anchor_centrality_score": [0.77, 0.19],
+                "feature_basket_equilibrium_score": [0.61, 0.22],
+            }
+        )
+
+        model_input, schema = prepare_model_input_frame(frame)
+
+        self.assertIn("feature_basket_anchor_sku_score", model_input.columns)
+        self.assertNotIn("feature_anchor_centrality_score", model_input.columns)
+        self.assertNotIn("feature_basket_equilibrium_score", model_input.columns)
+        self.assertIn("feature_basket_anchor_sku_score", schema.feature_columns)
+        self.assertNotIn("feature_anchor_centrality_score", schema.feature_columns)
+        self.assertNotIn("feature_basket_equilibrium_score", schema.feature_columns)
+
+    def test_prepare_model_input_defaults_to_slim_units_head_core(self) -> None:
+        frame = pd.DataFrame(
+            {
+                "promotion_start_date_date": ["2024-07-16", "2024-07-23"],
+                "promotion_name": ["Week 29", "Week 30"],
+                "promo_type": ["Catalogue", "Catalogue"],
+                "customer_offer": ["Half Price", "2 for 1"],
+                "sku_description": ["Widget", "Widget Plus"],
+                "department": ["Skincare", "Skincare"],
+                "category": ["Moisturiser", "Serum"],
+                "feature_basket_anchor_sku_score": [0.82, 0.27],
+                "feature_sparse_demand_noise_regime_score": [0.61, 0.33],
+                "feature_probability_expected_units_consensus": [6.4, 2.7],
+                "feature_historical_promo_events_same_discount": [8.0, 3.0],
+                "feature_historical_units_same_discount_avg": [5.8, 2.1],
+                "feature_micro_market_clearing_pressure": [0.44, 0.18],
+                "feature_end_of_promo_target_floor_units": [2.0, 1.0],
+                "feature_uplift_allocation_discipline_score": [0.71, 0.29],
+            }
+        )
+
+        model_input, schema = prepare_model_input_frame(frame)
+
+        self.assertIn("feature_basket_anchor_sku_score", model_input.columns)
+        self.assertIn("feature_sparse_demand_noise_regime_score", model_input.columns)
+        self.assertIn("feature_probability_expected_units_consensus", model_input.columns)
+        self.assertIn("feature_historical_promo_events_same_discount", model_input.columns)
+        self.assertIn("feature_historical_units_same_discount_avg", model_input.columns)
+        self.assertNotIn("feature_micro_market_clearing_pressure", model_input.columns)
+        self.assertNotIn("feature_end_of_promo_target_floor_units", model_input.columns)
+        self.assertNotIn("feature_uplift_allocation_discipline_score", model_input.columns)
+        self.assertIn("feature_basket_anchor_sku_score", schema.feature_columns)
+        self.assertNotIn("feature_micro_market_clearing_pressure", schema.feature_columns)
+
     def test_trainer_fits_with_string_identifier_columns_present(self) -> None:
         completed_base_frame = build_completed_promotions_base_frame()
         completed_base_frame["promotional_sku_id_key"] = completed_base_frame[

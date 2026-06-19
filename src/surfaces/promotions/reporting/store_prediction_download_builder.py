@@ -82,6 +82,12 @@ _FORECAST_BLOCKING_UNRESOLVED_FLAT_CLASSES = frozenset(
 )
 
 ACTION_ORDER = ("ORDER", "REVIEW", "HOLD", "DO_NOT_ORDER")
+PUBLISH_ELIGIBILITY_REASON_EXCLUDED_LEGITIMATE_DO_NOT_ORDER_LOW_INCREMENTAL_VALUE = (
+    "excluded_legitimate_do_not_order_low_incremental_value"
+)
+PUBLISH_ELIGIBILITY_REASON_EXCLUDED_LEGITIMATE_HOLD_INVENTORY_SUFFICIENT = (
+    "excluded_legitimate_hold_inventory_sufficient"
+)
 
 # Commercial governance constants for the operator-facing CSV.
 # - Pre-promo store-ordering demand is bounded to the next 56 days. This
@@ -121,83 +127,76 @@ ORDER_EVIDENCE_SPARSE_CLASSES = (
     "cold_start",
 )
 
-# Store-facing OUTPUT contract: the exact columns written to the
-# per-promotion store CSV, in the exact reading order required for a
-# store manager to act commercially. The first 25 columns are the
-# action block: identity, classification, what to buy, why, with what
-# confidence, and at what risk. The remaining columns are ordered so
-# row-level evidence appears before the promotion-level trust block.
-#
-# Column names align with the canonical risk module
-# `models.promotions.risk_adjusted_economics`:
-#   - model_confidence_percent
-#   - capital_at_risk_adjusted_dollars
-#   - retail_risk_reward_ratio
-# This eliminates the prior naming drift between the store CSV and the
-# risk module (which used `confidence_percent` / `capital_at_risk_dollars`
-# / `risk_reward_ratio` locally). One canonical commercial vocabulary.
-STORE_FACING_ROW_LEVEL_EVIDENCE_COLUMNS = (
-    "historical_promo_events_same_discount",
-    "historical_units_same_discount_avg",
-    "historical_promo_events_same_or_better_discount",
-    "historical_units_same_or_better_discount_avg",
-    "historical_promo_response_summary",
-    "discount_response_summary",
-)
+# Store-facing OUTPUT contract: a simplified operator-facing decision sheet.
+# The visible CSV exposes one governed decision hierarchy plus the minimum
+# stock context needed to act. Internal order states, shadow-policy details,
+# and rich diagnostics stay available only in audit or inspection siblings.
+STORE_FACING_ROW_LEVEL_EVIDENCE_COLUMNS: tuple[str, ...] = ()
 
-STORE_FACING_PROMOTION_LEVEL_DIAGNOSTIC_COLUMNS = (
-    "forecast_trust_band",
-    "forecast_trust_summary",
-    "promotion_backtest_comparable_event_count",
-    "promotion_backtest_within_10pct_flag",
-    "promotion_backtest_mean_absolute_pct_error",
-    "promotion_backtest_bias_class",
-)
+STORE_FACING_PROMOTION_LEVEL_DIAGNOSTIC_COLUMNS: tuple[str, ...] = ()
 
-STORE_FACING_OUTPUT_COLUMNS = (
-    # ---- Action block: exact operator scan order --------------------
+STORE_FACING_VISIBLE_IDENTITY_COLUMNS = (
     "priority_rank",
     "priority_band",
     "sku_number",
     "sku_description",
-    "recommended_action",
-    "execution_readiness_status",
-    "primary_review_reason",
-    "recommended_order_units",
-    "discount_percent",
-    "projected_promotional_units",
-    "current_soh_units",
-    "lead_up_demand_units",
-    "projected_on_hand_at_promo_start",
-    "minimum_launch_stock_units",
-    "target_stock_day_one_units",
+)
+
+STORE_FACING_SIMPLIFIED_OPERATOR_COLUMNS = (
+    "operator_decision",
+    "operator_action",
+    "order_units",
+    "reason_short",
+    "risk_flag",
+    "review_flag",
+    "audit_notes",
+)
+
+STORE_FACING_RETAINED_CONTEXT_COLUMNS = (
+    "current_soh",
+    "on_order_at_advice_time",
+    "expected_units_before_promo_start",
+    "projected_SOH_at_promo_start",
+    "target_SOH_at_promo_start",
+    "floor_units_required",
+    "expected_promo_demand",
+    "available_to_sell_before_floor",
     "projected_stock_gap_units",
-    "stockout_probability_percent",
-    "model_confidence_percent",
-    "capital_at_risk_adjusted_dollars",
-    "retail_risk_reward_ratio",
-    "prediction_date",
-    "promotion_start_date",
-    "days_to_promo_start",
-    "order_timing_summary",
-    "model_reason_summary",
-    # ---- Support block: row-level evidence / risk / quality ---------
-    "promotion_name",
-    "promotion_end_date",
-    "expected_units_first_7_days",
-    "expected_units_total_promo",
-    *STORE_FACING_ROW_LEVEL_EVIDENCE_COLUMNS,
-    "stockout_risk_reason",
-    "days_of_cover_to_promo_start",
-    "days_of_cover_first_7_days",
-    "projected_launch_cover_units",
-    "stockout_risk_band",
-    "overstock_risk_band",
-    "estimated_leftover_units",
-    "estimated_leftover_cost_dollars",
-    "data_quality_flag",
-    # ---- Promotion-level trust diagnostics --------------------------
-    *STORE_FACING_PROMOTION_LEVEL_DIAGNOSTIC_COLUMNS,
+    "discount_percent",
+)
+
+STORE_FACING_SHADOW_POLICY_COLUMNS = (
+    "shadow_policy_name",
+    "shadow_policy_version",
+    "shadow_policy_candidate_flag",
+    "shadow_policy_segment",
+    "shadow_policy_order_units",
+    "shadow_policy_capital_at_risk",
+    "shadow_policy_expected_reason",
+    "shadow_policy_guardrail_status",
+    "shadow_policy_blocker_reason",
+    "shadow_policy_should_publish_flag",
+    "shadow_policy_should_affect_final_order_flag",
+)
+
+STORE_FACING_INTERNAL_ORDER_STATE_COLUMNS = (
+    "raw_model_order_units",
+    "provisional_review_order_units",
+    "final_store_order_units",
+    "recommended_order_units",
+    "raw_model_order_value",
+    "provisional_review_order_value",
+    "final_store_order_value",
+    "recommended_order_value",
+    "low_soh_policy_final_order_units",
+    "low_soh_policy_shadow_order_units",
+    "shadow_policy_order_units",
+)
+
+STORE_FACING_OUTPUT_COLUMNS = (
+    *STORE_FACING_VISIBLE_IDENTITY_COLUMNS,
+    *STORE_FACING_SIMPLIFIED_OPERATOR_COLUMNS,
+    *STORE_FACING_RETAINED_CONTEXT_COLUMNS,
 )
 
 # Full intermediate schema retained for internal consumers (manager summary,
@@ -211,9 +210,57 @@ STORE_FACING_SCHEMA_COLUMNS = (
     "priority_band",
     "sku_number",
     "sku_description",
+    "operator_decision",
+    "operator_action",
+    "order_units",
+    "reason_short",
+    "risk_flag",
+    "review_flag",
+    "audit_notes",
+    "store_action_label",
+    "store_action_label_v2",
+    "store_action_reason",
+    "store_action",
+    "operator_status",
     "recommended_action",
     "execution_readiness_status",
+    "demand_evidence_label",
+    "availability_risk_label",
+    "capital_drag_label",
     "primary_review_reason",
+    "blocker_reason",
+    "human_review_required_flag",
+    "low_nonzero_value_relief_delta",
+    "raw_model_order_units",
+    "provisional_review_order_units",
+    "final_store_order_units",
+    "raw_model_order_value",
+    "provisional_review_order_value",
+    "final_store_order_value",
+    "low_soh_policy_version",
+    "low_soh_policy_candidate_flag",
+    "low_soh_policy_production_eligible_flag",
+    "low_soh_policy_final_order_units",
+    "low_soh_policy_shadow_order_units",
+    "low_soh_policy_capital_at_risk",
+    "low_soh_policy_reason",
+    "low_soh_policy_guardrail_status",
+    "low_soh_policy_blocker_reason",
+    "low_soh_policy_decision_source",
+    "shadow_policy_name",
+    "shadow_policy_version",
+    "shadow_policy_candidate_flag",
+    "shadow_policy_segment",
+    "shadow_policy_order_units",
+    "shadow_policy_capital_at_risk",
+    "shadow_policy_expected_reason",
+    "shadow_policy_guardrail_status",
+    "shadow_policy_blocker_reason",
+    "shadow_policy_should_publish_flag",
+    "shadow_policy_should_affect_final_order_flag",
+    "order_reconciliation_status",
+    "order_reconciliation_reason",
+    "decision_reason",
     "recommended_order_units",
     "model_confidence_percent",
     "capital_at_risk_adjusted_dollars",
@@ -222,6 +269,11 @@ STORE_FACING_SCHEMA_COLUMNS = (
     "stockout_probability_percent",
     "projected_on_hand_at_promo_start",
     "minimum_launch_stock_units",
+    "floor_units_required",
+    "current_soh",
+    "promo_allocated_units",
+    "expected_promo_demand",
+    "available_to_sell_before_floor",
     "target_stock_day_one_units",
     "projected_stock_gap_units",
     "days_to_promo_start",
@@ -229,6 +281,9 @@ STORE_FACING_SCHEMA_COLUMNS = (
     "lead_up_demand_units",
     "expected_units_before_promo_start",
     "expected_units_first_7_days",
+    "promotion_period_days",
+    "expected_units_per_period",
+    "expected_units_per_day",
     "projected_promotional_units",
     "expected_units_total_promo",
     "order_timing_summary",
@@ -236,6 +291,7 @@ STORE_FACING_SCHEMA_COLUMNS = (
     "model_reason_summary",
     # Identity
     "store_number",
+    "promotion_id",
     "promotion_name",
     "promotion_start_date",
     "promotion_end_date",
@@ -274,12 +330,43 @@ STORE_FACING_SCHEMA_COLUMNS = (
     "overstock_risk_band",
     "estimated_leftover_units",
     "estimated_leftover_cost_dollars",
+    "target_end_stock_units",
+    "target_end_days_cover",
+    "cashflow_runoff_status",
+    "trust_floor_status",
+    "units_needed_for_trust_floor",
+    "units_needed_for_high_demand_cover",
+    "units_above_trust_target",
+    "capital_tied_above_trust_target",
+    "expected_gp_on_trust_floor_units",
+    "expected_gp_on_speculative_units",
+    "risk_adjusted_value_of_speculative_units",
+    "speculative_capital_above_floor_units",
+    "speculative_capital_above_floor_value",
+    # User-facing aliases / enriched operator fields
+    "SOH_at_advice_time",
+    "on_order_at_advice_time",
+    "projected_SOH_at_promo_start",
+    "target_SOH_at_promo_start",
+    "recommended_order_value",
+    "weeks_of_cover_entering_promo",
+    "end_of_promo_residual_risk",
+    "SKU_MAE",
+    "SKU_MSE",
+    "SKU_bias",
     # Validation flags
     "data_quality_flag",
 )
 
 STORE_FACING_INTEGER_COLUMNS = (
     "priority_rank",
+    "order_units",
+    "raw_model_order_units",
+    "provisional_review_order_units",
+    "final_store_order_units",
+    "low_soh_policy_candidate_flag",
+    "low_soh_policy_production_eligible_flag",
+    "low_soh_policy_final_order_units",
     "recommended_order_units",
     "target_stock_day_one_units",
     "minimum_safe_stock_day_one_units",
@@ -287,6 +374,11 @@ STORE_FACING_INTEGER_COLUMNS = (
     "projected_on_hand_at_promo_start",
     "projected_stock_gap_units",
     "days_to_promo_start",
+    "floor_units_required",
+    "current_soh",
+    "promo_allocated_units",
+    "expected_promo_demand",
+    "available_to_sell_before_floor",
     "expected_units_before_promo_start",
     "expected_units_first_7_days",
     "expected_units_total_promo",
@@ -298,6 +390,7 @@ STORE_FACING_INTEGER_COLUMNS = (
     "buy_now_flag",
     "watch_flag",
     "do_not_buy_flag",
+    "human_review_required_flag",
     "current_soh_units",
     "on_order_units",
     "effective_available_units",
@@ -310,8 +403,17 @@ STORE_FACING_INTEGER_COLUMNS = (
 )
 
 STORE_FACING_CURRENCY_COLUMNS = (
+    "raw_model_order_value",
+    "provisional_review_order_value",
+    "final_store_order_value",
+    "recommended_order_value",
     "estimated_leftover_cost_dollars",
     "capital_at_risk_adjusted_dollars",
+    "speculative_capital_above_floor_value",
+    "capital_tied_above_trust_target",
+    "expected_gp_on_trust_floor_units",
+    "expected_gp_on_speculative_units",
+    "risk_adjusted_value_of_speculative_units",
 )
 
 STORE_FACING_RISK_BANDS = ("LOW", "MEDIUM", "HIGH")
@@ -324,7 +426,113 @@ STORE_FACING_DATA_QUALITY_FLAGS = (
     "REVIEW_DISCOUNT_MISSING",
     "REVIEW_DISCOUNT_CONFLICT",
 )
+_DISCOUNT_REVIEW_REASON_BY_FLAG = {
+    "REVIEW_DISCOUNT_MISSING": "review_discount_missing",
+    "REVIEW_DISCOUNT_CONFLICT": "review_discount_conflict",
+}
+_DISCOUNT_REVIEW_DECISION_REASON_BY_FLAG = {
+    "REVIEW_DISCOUNT_MISSING": "Review required: governed discount mapping is missing while price fields imply a discount.",
+    "REVIEW_DISCOUNT_CONFLICT": "Review required: governed discount conflicts with price-derived discount.",
+}
+DISCOUNT_REPAIR_TOLERANCE_PCT_POINTS = 1.0
+DISCOUNT_REVIEW_REASON_HARD_MISSING_PRICES = "HARD_DATA_FAILURE_MISSING_PRICE_FIELDS"
+DISCOUNT_REVIEW_REASON_HARD_INVALID_NORMAL = "HARD_DATA_FAILURE_INVALID_NORMAL_PRICE"
+DISCOUNT_REVIEW_REASON_HARD_INVALID_PROMO = "HARD_DATA_FAILURE_INVALID_PROMO_PRICE"
+DISCOUNT_REVIEW_REASON_REPAIRABLE_PRICE_TRUTH = "REPAIRABLE_PRICE_TRUTH"
+DISCOUNT_REVIEW_REASON_ROUNDING_TOLERANCE = "ROUNDING_TOLERANCE_REPAIR"
+DISCOUNT_REVIEW_REASON_MAPPING_CONFLICT = "MAPPING_SOURCE_CONFLICT"
+DISCOUNT_REVIEW_REASON_NO_DISCOUNT_VALID = "NO_DISCOUNT_BUT_PROMO_VALID"
+DISCOUNT_REVIEW_REASON_NO_ISSUE = "NO_DISCOUNT_REVIEW_ISSUE"
 STORE_FACING_PRIORITY_BANDS = ("BUY_NOW", "REVIEW", "WATCH", "HOLD", "DO_NOT_BUY")
+STORE_ACTION_LABELS = (
+    "BUY",
+    "PROTECT_AVAILABILITY",
+    "HOLD_STOCK",
+    "HOLD_STOCK_FLOOR_SAFE",
+    "LOW_SOH_NO_AUTO_BUY",
+    "LOW_SOH_PROTECT_AVAILABILITY",
+    "LOW_SOH_BORDERLINE_REVIEW",
+    "REDUCE_HOLDING",
+    "NO_DEMAND",
+    "NEVER_SOLD_IN_PROMO",
+    "NO_PRIOR_PROMO_EVIDENCE",
+    "NO_PRIOR_PROMO_EVIDENCE_LOW_RISK",
+    "NO_PRIOR_PROMO_EVIDENCE_LOW_SOH_REVIEW",
+    "NO_PRIOR_PROMO_EVIDENCE_BASELINE_DEMAND",
+    "BORDERLINE_OOS_REVIEW",
+    "DATA_QUALITY_REVIEW",
+)
+EXECUTABLE_STORE_ACTION_LABELS = frozenset({"BUY", "PROTECT_AVAILABILITY"})
+PROVISIONAL_REVIEW_STORE_ACTION_LABELS = frozenset(
+    {"BORDERLINE_OOS_REVIEW", "DATA_QUALITY_REVIEW"}
+)
+NON_EXECUTABLE_STORE_ACTION_LABELS = frozenset(
+    {
+        "HOLD_STOCK",
+        "HOLD_STOCK_FLOOR_SAFE",
+        "LOW_SOH_NO_AUTO_BUY",
+        "LOW_SOH_PROTECT_AVAILABILITY",
+        "LOW_SOH_BORDERLINE_REVIEW",
+        "REDUCE_HOLDING",
+        "NO_DEMAND",
+        "NEVER_SOLD_IN_PROMO",
+        "NO_PRIOR_PROMO_EVIDENCE",
+        "NO_PRIOR_PROMO_EVIDENCE_LOW_RISK",
+        "NO_PRIOR_PROMO_EVIDENCE_LOW_SOH_REVIEW",
+        "NO_PRIOR_PROMO_EVIDENCE_BASELINE_DEMAND",
+        *PROVISIONAL_REVIEW_STORE_ACTION_LABELS,
+    }
+)
+MIN_EXECUTABLE_RETAIL_RISK_REWARD_RATIO = 1.0
+LOW_SOH_POLICY_VERSION = "low_soh_protection_v1_20260611"
+LOW_SOH_POLICY_MAX_AUTO_ORDER_UNITS = 3
+LOW_SOH_POLICY_MAX_PACK_SIZE_AUTO_ORDER = 3
+LOW_SOH_POLICY_MAX_UNIT_COST_AUTO_ORDER = 60.0
+LOW_SOH_POLICY_VALIDATED_SEGMENT_MISSED_SALES_RISK_RATE = 0.5239
+LOW_SOH_POLICY_VALIDATED_SEGMENT_SOURCE = "validated_low_soh_actual_outcome_shadow_20260611"
+SHADOW_POLICY_NAME_SEGMENTED_PL_PROVED_ORDER_1 = "SEGMENTED_PL_PROVED_ORDER_1"
+SHADOW_POLICY_VERSION_SEGMENTED_PL_PROVED_ORDER_1 = "SEGMENTED_PL_PROVED_ORDER_1_V1_SHADOW"
+SEGMENTED_PL_PROVED_SHADOW_MIN_PROMO_ALLOCATED_UNITS = 6
+SHADOW_POLICY_SEGMENT_PL_PROVED_DEMAND_BUT_OVERBOUGHT = "PL_PROVED_DEMAND_BUT_OVERBOUGHT"
+SHADOW_POLICY_GUARDRAIL_PASS = "PASS_SHADOW_ONLY"
+SHADOW_POLICY_GUARDRAIL_BLOCKED = "BLOCKED"
+LOW_SOH_POLICY_ELIGIBLE_LABELS = frozenset(
+    {
+        "HOLD_STOCK",
+        "HOLD_STOCK_FLOOR_SAFE",
+        "LOW_SOH_NO_AUTO_BUY",
+        "LOW_SOH_PROTECT_AVAILABILITY",
+        "LOW_SOH_BORDERLINE_REVIEW",
+        "NO_DEMAND",
+        "NEVER_SOLD_IN_PROMO",
+        "NO_PRIOR_PROMO_EVIDENCE",
+        "NO_PRIOR_PROMO_EVIDENCE_LOW_RISK",
+        "NO_PRIOR_PROMO_EVIDENCE_LOW_SOH_REVIEW",
+        "NO_PRIOR_PROMO_EVIDENCE_BASELINE_DEMAND",
+        "BORDERLINE_OOS_REVIEW",
+    }
+)
+ORDER_RECONCILIATION_STATUS_EXECUTABLE_BUY = "EXECUTABLE_BUY"
+ORDER_RECONCILIATION_STATUS_EXECUTABLE_PROTECT = "EXECUTABLE_PROTECT_AVAILABILITY"
+ORDER_RECONCILIATION_STATUS_CAPPED_TO_AVAILABILITY_NEED = "CAPPED_TO_AVAILABILITY_NEED"
+ORDER_RECONCILIATION_STATUS_PROVISIONAL_REVIEW_ONLY = "PROVISIONAL_REVIEW_ONLY"
+ORDER_RECONCILIATION_STATUS_SUPPRESSED_BY_LABEL_GOVERNANCE = "SUPPRESSED_BY_LABEL_GOVERNANCE"
+SUPPRESSION_RISK_SAFE_STOCK_COVERS_DEMAND = "SAFE_SUPPRESSION_STOCK_COVERS_DEMAND"
+SUPPRESSION_RISK_SAFE_NO_DEMAND = "SAFE_SUPPRESSION_NO_DEMAND"
+SUPPRESSION_RISK_SAFE_CAPITAL_DRAG = "SAFE_SUPPRESSION_CAPITAL_DRAG"
+SUPPRESSION_RISK_UNSAFE_FLOOR = "UNSAFE_SUPPRESSION_FLOOR_RISK"
+SUPPRESSION_RISK_UNSAFE_ONLINE_AVAILABILITY = "UNSAFE_SUPPRESSION_ONLINE_AVAILABILITY_RISK"
+SUPPRESSION_RISK_BORDERLINE_REVIEW = "BORDERLINE_SUPPRESSION_REVIEW"
+SUPPRESSION_RISK_NOT_APPLICABLE = "NOT_APPLICABLE"
+DYNAMIC_DEMAND_EVIDENCE_LABELS = frozenset({
+    "CREDIBLE_PROMO_DEMAND",
+    "LOW_NONZERO_DEMAND",
+    "SPARSE_HISTORY",
+})
+WEAK_DEMAND_EVIDENCE_LABELS = frozenset({"NO_DEMAND", "NEVER_SOLD_IN_PROMO"})
+HIGH_AVAILABILITY_RISK_LABELS = frozenset(
+    {"ZERO_SOH_RISK", "BELOW_2_UNIT_FLOOR_RISK", "FLOOR_PROTECTION_NEEDED"}
+)
 STORE_FACING_BUY_NOW_LEAD_DAYS = 21
 STORE_FACING_ORDER_TIMING_SUMMARIES = {
     "BUY_NOW": "Buy now for day-one cover",
@@ -348,7 +556,23 @@ COMMERCIAL_SCHEMA_COLUMNS = (
     "predicted_units_until_promo_start",
     "predicted_units_first_7_days_of_promo",
     "predicted_units_total_promo",
+    "promotion_period_days",
+    "expected_units_per_period",
+    "expected_units_per_day",
     "base_units_target",
+    "target_end_stock_units",
+    "target_end_days_cover",
+    "cashflow_runoff_status",
+    "trust_floor_status",
+    "units_needed_for_trust_floor",
+    "units_needed_for_high_demand_cover",
+    "units_above_trust_target",
+    "capital_tied_above_trust_target",
+    "expected_gp_on_trust_floor_units",
+    "expected_gp_on_speculative_units",
+    "risk_adjusted_value_of_speculative_units",
+    "speculative_capital_above_floor_units",
+    "speculative_capital_above_floor_value",
     "promo_start_target_soh_units",
     "suggested_order_units",
     "expected_leftover_units_end_of_promo",
@@ -375,6 +599,7 @@ COMMERCIAL_SCHEMA_COLUMNS = (
     "operational_note",
     "final_decision_score",
     "final_confidence_score",
+    "low_nonzero_value_relief_delta",
     "discount_percent",
     "normal_price",
     "promo_price",
@@ -465,6 +690,131 @@ class _CommercialSanitizationResult:
     unresolved_duplicate_rows: pd.DataFrame
 
 
+def _prepare_feature_inspection_source_frame(
+    frame: pd.DataFrame | None,
+) -> pd.DataFrame | None:
+    """Normalize the raw decision-surface frame for feature-inspection joins.
+
+    Purpose:
+        Preserve upstream ``feature_*`` and diagnostic columns for the
+        per-promotion feature-inspection sibling without widening the governed
+        commercial master CSV.
+
+    Inputs:
+        frame: optional raw decision-surface frame passed into Stage 11.
+
+    Outputs:
+        A copy of ``frame`` with stable join keys for store, promotion header,
+        and SKU, or ``None`` when no source frame is available.
+
+    Important assumptions:
+        Promotion header identity must be derived with the same governed logic
+        used elsewhere in the download builder.
+
+    Failure behaviour:
+        Returns ``None`` when ``frame`` is absent or empty.
+    """
+
+    if frame is None or frame.empty:
+        return None
+    source = frame.copy()
+    source["store_number"] = _raw_series(source, ("store_number",)).astype(str)
+    source["promotion_header_key"] = _build_promotion_header_key_series(
+        promotion_id=_raw_series(source, ("promotion_id", "promotional_sku_id", "promotional_sku_id_key")),
+        promotion_name=_text_series(source, ("promotion_name",)),
+        promotion_start_date=_date_series(source, ("promotion_start_date_date", "promotion_start_date")),
+        promotion_end_date=_date_series(source, ("promotional_end_date_date", "promotional_end_date")),
+        promo_type=_text_series(source, ("promo_type",)),
+    )
+    source["sku_number"] = _raw_series(source, ("sku_number",)).astype(str)
+    if "promotion_row_key" in source.columns:
+        source["promotion_row_key"] = _raw_series(source, ("promotion_row_key",)).astype(str)
+    return source
+
+
+def _resolve_feature_inspection_row_key_frame(
+    frame: pd.DataFrame,
+) -> pd.DataFrame:
+    """Resolve one preferred raw promotion row key per surviving commercial row.
+
+    Purpose:
+        Preserve row-identity attribution for feature-inspection artifacts when
+        the governed commercial frame has already collapsed duplicate
+        store/promotion/SKU rows to a single surviving row.
+
+    Inputs:
+        frame: raw decision-surface rows for one store/promotion group.
+
+    Outputs:
+        One row per store/SKU pair with the preferred ``promotion_row_key``.
+
+    Important assumptions:
+        Preference order uses the same governing intuition as duplicate-row
+        resolution: strongest confidence and decision score win first.
+
+    Failure behaviour:
+        Returns an empty frame when ``promotion_row_key`` is unavailable.
+    """
+
+    if frame.empty or "promotion_row_key" not in frame.columns:
+        return pd.DataFrame(columns=["store_number", "sku_number", "promotion_row_key"])
+    rank_columns = [
+        column_name
+        for column_name in (
+            "final_confidence_score",
+            "final_decision_score",
+            "suggested_order_units",
+            "predicted_units_total_promo",
+            "predicted_units_sold",
+        )
+        if column_name in frame.columns
+    ]
+    resolved = frame.loc[:, ["store_number", "sku_number", "promotion_row_key", *rank_columns]].copy()
+    resolved["store_number"] = resolved["store_number"].astype(str)
+    resolved["sku_number"] = resolved["sku_number"].astype(str)
+    resolved["promotion_row_key"] = resolved["promotion_row_key"].astype(str)
+    for rank_column in rank_columns:
+        resolved[rank_column] = pd.to_numeric(resolved[rank_column], errors="coerce").fillna(-1e12)
+    if rank_columns:
+        resolved = resolved.sort_values(
+            by=["store_number", "sku_number", *rank_columns],
+            ascending=[True, True, *([False] * len(rank_columns))],
+            kind="mergesort",
+        )
+    return resolved.drop_duplicates(subset=["store_number", "sku_number"], keep="first")
+
+
+def _merge_feature_inspection_on_store_sku(
+    *,
+    store_facing_group: pd.DataFrame,
+    inspection_source_group: pd.DataFrame,
+    upstream_feature_columns: list[str],
+) -> pd.DataFrame:
+    """Fallback merge for feature inspection when row identity is unavailable.
+
+    Purpose:
+        Join upstream inspection fields on the surviving store/SKU grain only
+        when a stable raw ``promotion_row_key`` cannot be resolved.
+    """
+
+    merge_base = store_facing_group.copy()
+    merge_base["_feature_join_store"] = merge_base["store_number"].astype(str)
+    merge_base["_feature_join_sku"] = merge_base["sku_number"].astype(str)
+    upstream_subset = inspection_source_group.loc[:, ["store_number", "sku_number", *upstream_feature_columns]].copy()
+    upstream_subset["_feature_join_store"] = upstream_subset["store_number"].astype(str)
+    upstream_subset["_feature_join_sku"] = upstream_subset["sku_number"].astype(str)
+    upstream_subset = upstream_subset.drop(columns=["store_number", "sku_number"]).drop_duplicates(
+        subset=["_feature_join_store", "_feature_join_sku"],
+        keep="last",
+    )
+    return merge_base.merge(
+        upstream_subset,
+        on=["_feature_join_store", "_feature_join_sku"],
+        how="left",
+        sort=False,
+    ).drop(columns=["_feature_join_store", "_feature_join_sku"])
+
+
 class PromotionStorePredictionDownloadBuilder:
     """Write a store-friendly promotions prediction download to the NAS prediction root."""
 
@@ -476,9 +826,11 @@ class PromotionStorePredictionDownloadBuilder:
         decision_surface_frame: pd.DataFrame,
         artifact_paths: PromotionArtifactPaths,
         completed_backtest_summary_path: str | None = None,
+        completed_backtest_rows_path: str | None = None,
     ) -> PromotionStorePredictionDownloadArtifacts:
         """Build, validate, and publish Stage 11 store-facing download artifacts."""
         completed_backtest_summary = _read_completed_backtest_summary(completed_backtest_summary_path)
+        sku_backtest_summary = _build_sku_backtest_summary(_read_completed_backtest_rows(completed_backtest_rows_path))
         download_frame = self._build_download_frame(
             run_id=run_id,
             as_of_date=as_of_date,
@@ -546,6 +898,7 @@ class PromotionStorePredictionDownloadBuilder:
             generated_file_rows=generated_file_rows,
             forecast_per_row_diagnostics=forecast_per_row_diagnostics,
             completed_backtest_summary=completed_backtest_summary,
+            sku_backtest_summary=sku_backtest_summary,
         )
         per_store_promotion_paths = self._write_per_store_promotion_csvs(
             run_id=run_id,
@@ -553,9 +906,158 @@ class PromotionStorePredictionDownloadBuilder:
             frame=download_frame,
             artifact_paths=artifact_paths,
             generated_file_rows=generated_file_rows,
+            feature_inspection_source_frame=decision_surface_frame,
             forecast_per_row_diagnostics=forecast_per_row_diagnostics,
             completed_backtest_summary=completed_backtest_summary,
+            sku_backtest_summary=sku_backtest_summary,
         )
+        store_facing_projection_frame = self._store_facing_projection(
+            download_frame,
+            forecast_per_row_diagnostics=forecast_per_row_diagnostics,
+            as_of_date=as_of_date,
+            completed_backtest_summary=completed_backtest_summary,
+            sku_backtest_summary=sku_backtest_summary,
+        )
+        store_facing_output_frame = _project_store_facing_output_columns(store_facing_projection_frame)
+        label_distribution_path = artifact_paths.store_prediction_diagnostics_root(run_id) / "store_action_label_distribution.csv"
+        label_distribution_path.parent.mkdir(parents=True, exist_ok=True)
+        label_distribution_frame = _build_store_action_label_distribution_frame(store_facing_projection_frame)
+        label_distribution_frame.to_csv(label_distribution_path, index=False)
+        generated_file_rows.append(
+            _build_file_manifest_row(
+                run_id=run_id,
+                as_of_date=as_of_date,
+                file_type="store_action_label_distribution",
+                file_path=str(label_distribution_path),
+                frame=label_distribution_frame,
+            )
+        )
+        diagnostics_paths["store_action_label_distribution_csv_path"] = str(label_distribution_path)
+        cleanup_issues_path = artifact_paths.store_prediction_diagnostics_root(run_id) / "store_facing_contract_cleanup_issues.csv"
+        cleanup_summary_path = artifact_paths.store_prediction_diagnostics_root(run_id) / "store_facing_contract_cleanup_summary.csv"
+        cleanup_issue_frame = _build_store_facing_contract_cleanup_issues_frame(
+            operator_output_frame=store_facing_output_frame,
+        )
+        cleanup_summary_frame = _build_store_facing_contract_cleanup_summary_frame(
+            issue_frame=cleanup_issue_frame,
+            total_row_count=int(len(store_facing_output_frame.index)),
+        )
+        cleanup_issue_frame.to_csv(cleanup_issues_path, index=False)
+        cleanup_summary_frame.to_csv(cleanup_summary_path, index=False)
+        generated_file_rows.append(
+            _build_file_manifest_row(
+                run_id=run_id,
+                as_of_date=as_of_date,
+                file_type="store_facing_contract_cleanup_issues",
+                file_path=str(cleanup_issues_path),
+                frame=cleanup_issue_frame,
+            )
+        )
+        generated_file_rows.append(
+            _build_file_manifest_row(
+                run_id=run_id,
+                as_of_date=as_of_date,
+                file_type="store_facing_contract_cleanup_summary",
+                file_path=str(cleanup_summary_path),
+                frame=cleanup_summary_frame,
+            )
+        )
+        diagnostics_paths["store_facing_contract_cleanup_issues_csv_path"] = str(cleanup_issues_path)
+        diagnostics_paths["store_facing_contract_cleanup_summary_csv_path"] = str(cleanup_summary_path)
+        order_reconciliation_diagnostic_path = artifact_paths.store_prediction_diagnostics_root(run_id) / "store_order_reconciliation_diagnostic.csv"
+        order_reconciliation_summary_path = artifact_paths.store_prediction_diagnostics_root(run_id) / "store_order_reconciliation_summary.csv"
+        order_reconciliation_diagnostic = _build_store_order_reconciliation_diagnostic_frame(
+            store_facing_frame=store_facing_projection_frame,
+        )
+        order_reconciliation_summary = _build_store_order_reconciliation_summary_frame(
+            store_facing_frame=store_facing_projection_frame,
+        )
+        order_reconciliation_diagnostic.to_csv(order_reconciliation_diagnostic_path, index=False)
+        order_reconciliation_summary.to_csv(order_reconciliation_summary_path, index=False)
+        generated_file_rows.append(
+            _build_file_manifest_row(
+                run_id=run_id,
+                as_of_date=as_of_date,
+                file_type="store_order_reconciliation_diagnostic",
+                file_path=str(order_reconciliation_diagnostic_path),
+                frame=order_reconciliation_diagnostic,
+            )
+        )
+        generated_file_rows.append(
+            _build_file_manifest_row(
+                run_id=run_id,
+                as_of_date=as_of_date,
+                file_type="store_order_reconciliation_summary",
+                file_path=str(order_reconciliation_summary_path),
+                frame=order_reconciliation_summary,
+            )
+        )
+        diagnostics_paths["store_order_reconciliation_diagnostic_csv_path"] = str(order_reconciliation_diagnostic_path)
+        diagnostics_paths["store_order_reconciliation_summary_csv_path"] = str(order_reconciliation_summary_path)
+        suppressed_order_risk_audit_path = artifact_paths.store_prediction_diagnostics_root(run_id) / "store_suppressed_order_risk_audit.csv"
+        suppressed_order_risk_summary_path = artifact_paths.store_prediction_diagnostics_root(run_id) / "store_suppressed_order_risk_summary.csv"
+        suppressed_order_risk_audit = _build_store_suppressed_order_risk_audit_frame(
+            store_facing_frame=store_facing_projection_frame,
+        )
+        suppressed_order_risk_summary = _build_store_suppressed_order_risk_summary_frame(
+            store_facing_frame=store_facing_projection_frame,
+            audit_frame=suppressed_order_risk_audit,
+        )
+        suppressed_order_risk_audit.to_csv(suppressed_order_risk_audit_path, index=False)
+        suppressed_order_risk_summary.to_csv(suppressed_order_risk_summary_path, index=False)
+        generated_file_rows.append(
+            _build_file_manifest_row(
+                run_id=run_id,
+                as_of_date=as_of_date,
+                file_type="store_suppressed_order_risk_audit",
+                file_path=str(suppressed_order_risk_audit_path),
+                frame=suppressed_order_risk_audit,
+            )
+        )
+        generated_file_rows.append(
+            _build_file_manifest_row(
+                run_id=run_id,
+                as_of_date=as_of_date,
+                file_type="store_suppressed_order_risk_summary",
+                file_path=str(suppressed_order_risk_summary_path),
+                frame=suppressed_order_risk_summary,
+            )
+        )
+        diagnostics_paths["store_suppressed_order_risk_audit_csv_path"] = str(suppressed_order_risk_audit_path)
+        diagnostics_paths["store_suppressed_order_risk_summary_csv_path"] = str(suppressed_order_risk_summary_path)
+        _validate_store_suppressed_order_risk_audit(suppressed_order_risk_audit)
+        data_quality_breakdown_path = artifact_paths.store_prediction_diagnostics_root(run_id) / "store_data_quality_review_breakdown.csv"
+        data_quality_reason_distribution_path = artifact_paths.store_prediction_diagnostics_root(run_id) / "store_data_quality_review_reason_distribution.csv"
+        data_quality_breakdown = _build_store_data_quality_review_breakdown_frame(
+            commercial_frame=download_frame,
+            store_facing_frame=store_facing_projection_frame,
+        )
+        data_quality_reason_distribution = _build_store_data_quality_review_reason_distribution_frame(
+            breakdown_frame=data_quality_breakdown,
+            total_row_count=int(len(store_facing_projection_frame.index)),
+        )
+        data_quality_breakdown.to_csv(data_quality_breakdown_path, index=False)
+        data_quality_reason_distribution.to_csv(data_quality_reason_distribution_path, index=False)
+        generated_file_rows.append(
+            _build_file_manifest_row(
+                run_id=run_id,
+                as_of_date=as_of_date,
+                file_type="store_data_quality_review_breakdown",
+                file_path=str(data_quality_breakdown_path),
+                frame=data_quality_breakdown,
+            )
+        )
+        generated_file_rows.append(
+            _build_file_manifest_row(
+                run_id=run_id,
+                as_of_date=as_of_date,
+                file_type="store_data_quality_review_reason_distribution",
+                file_path=str(data_quality_reason_distribution_path),
+                frame=data_quality_reason_distribution,
+            )
+        )
+        diagnostics_paths["store_data_quality_review_breakdown_csv_path"] = str(data_quality_breakdown_path)
+        diagnostics_paths["store_data_quality_review_reason_distribution_csv_path"] = str(data_quality_reason_distribution_path)
         diagnostics_csv_path, diagnostics_json_path, reconciliation_csv_path = self._write_grouping_reconciliation_outputs(
             run_id=run_id,
             as_of_date=as_of_date,
@@ -859,30 +1361,221 @@ class PromotionStorePredictionDownloadBuilder:
             policy_adjustments["review_override_flag"],
             errors="coerce",
         ).fillna(0.0).ge(1.0)
+        policy_review_reason = policy_adjustments["review_override_reason"].fillna("").astype(str).str.strip()
+        discount_review_flag = _discount_mapping_review_flag(frame).fillna("").astype(str).str.strip().str.upper()
+        decision_outputs = _apply_discount_review_hold_to_decision_outputs(
+            decision_outputs=decision_outputs,
+            discount_review_flag=discount_review_flag,
+        )
+        pre_policy_action_upper = decision_outputs["decision_recommendation"].astype(str).str.strip().str.upper()
+        projected_on_hand_at_promo_start = (
+            pd.to_numeric(calc_frame["current_soh_units"], errors="coerce").fillna(0.0)
+            + pd.to_numeric(calc_frame["qty_on_order_units"], errors="coerce").fillna(0.0)
+            - pd.to_numeric(calc_frame["predicted_until_start"], errors="coerce").fillna(0.0)
+        ).clip(lower=0.0)
+        predicted_total_units = pd.to_numeric(calc_frame["predicted_total"], errors="coerce").fillna(0.0).clip(lower=0.0)
+        promo_start_target_units = pd.to_numeric(calc_frame["promo_start_target"], errors="coerce").fillna(0.0).clip(lower=0.0)
+        demand_evidence_class_lower = (
+            decision_outputs["demand_evidence_class"].fillna("").astype(str).str.strip().str.lower()
+        )
+        de_minimis_policy_demand_mask = predicted_total_units.le(1.0) & demand_evidence_class_lower.isin(
+            {
+                DEMAND_EVIDENCE_CLASS_LOW_NONZERO,
+                DEMAND_EVIDENCE_CLASS_TRUE_ZERO,
+            }
+        )
+        inventory_covers_expected_demand_mask = projected_on_hand_at_promo_start.ge(predicted_total_units)
+        inventory_covers_launch_target_mask = projected_on_hand_at_promo_start.ge(promo_start_target_units)
+        non_discount_policy_order_mask = (
+            policy_review_mask
+            & pre_policy_action_upper.eq("ORDER")
+            & ~discount_review_flag.str.startswith("REVIEW_DISCOUNT")
+        )
+        stock_gap_policy_do_not_order_mask = (
+            non_discount_policy_order_mask
+            & policy_review_reason.eq("policy_stock_gap_high")
+            & de_minimis_policy_demand_mask
+            & inventory_covers_expected_demand_mask
+        )
+        sparse_policy_hold_mask = (
+            non_discount_policy_order_mask
+            & policy_review_reason.eq("policy_sparse_history_multi_driver")
+            & de_minimis_policy_demand_mask
+            & inventory_covers_launch_target_mask
+        )
+        sparse_policy_do_not_order_mask = (
+            non_discount_policy_order_mask
+            & policy_review_reason.eq("policy_sparse_history_multi_driver")
+            & de_minimis_policy_demand_mask
+            & inventory_covers_expected_demand_mask
+            & ~inventory_covers_launch_target_mask
+        )
+        inventory_low_value_hold_mask = (
+            non_discount_policy_order_mask
+            & policy_review_reason.eq("policy_inventory_sufficient_low_value_history")
+            & inventory_covers_launch_target_mask
+        )
+        inventory_low_value_do_not_order_mask = (
+            non_discount_policy_order_mask
+            & policy_review_reason.eq("policy_inventory_sufficient_low_value_history")
+            & inventory_covers_expected_demand_mask
+            & ~inventory_covers_launch_target_mask
+        )
         decision_outputs["decision_recommendation"] = decision_outputs["decision_recommendation"].where(
-            ~policy_review_mask,
+            ~stock_gap_policy_do_not_order_mask,
+            "DO_NOT_ORDER",
+        )
+        decision_outputs["decision_reason"] = decision_outputs["decision_reason"].where(
+            ~stock_gap_policy_do_not_order_mask,
+            "Do not order: governed stock-gap policy plus de minimis expected demand does not justify a fresh buy.",
+        )
+        decision_outputs["client_reason"] = decision_outputs["client_reason"].where(
+            ~stock_gap_policy_do_not_order_mask,
+            "Promotional demand is too weak to justify a fresh order; use existing stock only.",
+        )
+        decision_outputs["operational_note"] = decision_outputs["operational_note"].where(
+            ~stock_gap_policy_do_not_order_mask,
+            "Action now: do not place a fresh order for this SKU unless local sell-through materially exceeds this weak-demand posture.",
+        )
+        decision_outputs["publish_eligibility_reason"] = decision_outputs["publish_eligibility_reason"].where(
+            ~stock_gap_policy_do_not_order_mask,
+            PUBLISH_ELIGIBILITY_REASON_EXCLUDED_LEGITIMATE_DO_NOT_ORDER_LOW_INCREMENTAL_VALUE,
+        )
+        decision_outputs["review_reason"] = decision_outputs["review_reason"].where(
+            ~stock_gap_policy_do_not_order_mask,
+            "",
+        )
+        decision_outputs["decision_recommendation"] = decision_outputs["decision_recommendation"].where(
+            ~sparse_policy_hold_mask,
+            "HOLD",
+        )
+        decision_outputs["decision_reason"] = decision_outputs["decision_reason"].where(
+            ~sparse_policy_hold_mask,
+            "Hold: sparse-history policy blocks auto-buy and projected stock already covers the launch target.",
+        )
+        decision_outputs["client_reason"] = decision_outputs["client_reason"].where(
+            ~sparse_policy_hold_mask,
+            "Evidence is too weak to justify buying more stock, and current inventory already covers likely launch needs.",
+        )
+        decision_outputs["operational_note"] = decision_outputs["operational_note"].where(
+            ~sparse_policy_hold_mask,
+            "Action now: hold current stock and monitor early promo sell-through before considering any reorder.",
+        )
+        decision_outputs["publish_eligibility_reason"] = decision_outputs["publish_eligibility_reason"].where(
+            ~sparse_policy_hold_mask,
+            PUBLISH_ELIGIBILITY_REASON_EXCLUDED_LEGITIMATE_HOLD_INVENTORY_SUFFICIENT,
+        )
+        decision_outputs["review_reason"] = decision_outputs["review_reason"].where(
+            ~sparse_policy_hold_mask,
+            "",
+        )
+        decision_outputs["decision_recommendation"] = decision_outputs["decision_recommendation"].where(
+            ~sparse_policy_do_not_order_mask,
+            "DO_NOT_ORDER",
+        )
+        decision_outputs["decision_reason"] = decision_outputs["decision_reason"].where(
+            ~sparse_policy_do_not_order_mask,
+            "Do not order: sparse-history policy blocks auto-buy and current stock already covers likely promotional demand.",
+        )
+        decision_outputs["client_reason"] = decision_outputs["client_reason"].where(
+            ~sparse_policy_do_not_order_mask,
+            "Evidence is too weak to justify a fresh buy; use existing stock first.",
+        )
+        decision_outputs["operational_note"] = decision_outputs["operational_note"].where(
+            ~sparse_policy_do_not_order_mask,
+            "Action now: do not place a fresh order unless local sell-through materially outperforms this weak-demand posture.",
+        )
+        decision_outputs["publish_eligibility_reason"] = decision_outputs["publish_eligibility_reason"].where(
+            ~sparse_policy_do_not_order_mask,
+            PUBLISH_ELIGIBILITY_REASON_EXCLUDED_LEGITIMATE_DO_NOT_ORDER_LOW_INCREMENTAL_VALUE,
+        )
+        decision_outputs["review_reason"] = decision_outputs["review_reason"].where(
+            ~sparse_policy_do_not_order_mask,
+            "",
+        )
+        decision_outputs["decision_recommendation"] = decision_outputs["decision_recommendation"].where(
+            ~inventory_low_value_hold_mask,
+            "HOLD",
+        )
+        decision_outputs["decision_reason"] = decision_outputs["decision_reason"].where(
+            ~inventory_low_value_hold_mask,
+            "Hold: existing stock already covers likely launch demand, and comparable promo history plus low incremental value do not justify a fresh buy.",
+        )
+        decision_outputs["client_reason"] = decision_outputs["client_reason"].where(
+            ~inventory_low_value_hold_mask,
+            "Current inventory already covers the likely launch need, so hold stock and avoid buying more until early sell-through proves stronger demand.",
+        )
+        decision_outputs["operational_note"] = decision_outputs["operational_note"].where(
+            ~inventory_low_value_hold_mask,
+            "Action now: hold current stock and monitor early promo sell-through before considering any reorder.",
+        )
+        decision_outputs["publish_eligibility_reason"] = decision_outputs["publish_eligibility_reason"].where(
+            ~inventory_low_value_hold_mask,
+            PUBLISH_ELIGIBILITY_REASON_EXCLUDED_LEGITIMATE_HOLD_INVENTORY_SUFFICIENT,
+        )
+        decision_outputs["review_reason"] = decision_outputs["review_reason"].where(
+            ~inventory_low_value_hold_mask,
+            "",
+        )
+        decision_outputs["decision_recommendation"] = decision_outputs["decision_recommendation"].where(
+            ~inventory_low_value_do_not_order_mask,
+            "DO_NOT_ORDER",
+        )
+        decision_outputs["decision_reason"] = decision_outputs["decision_reason"].where(
+            ~inventory_low_value_do_not_order_mask,
+            "Do not order: existing stock already covers likely promotional demand, and comparable promo history plus low incremental value do not justify tying up fresh capital.",
+        )
+        decision_outputs["client_reason"] = decision_outputs["client_reason"].where(
+            ~inventory_low_value_do_not_order_mask,
+            "Use existing stock first; the expected return is too weak to justify buying more for this promotion.",
+        )
+        decision_outputs["operational_note"] = decision_outputs["operational_note"].where(
+            ~inventory_low_value_do_not_order_mask,
+            "Action now: do not place a fresh order unless local sell-through materially outperforms this weak-demand posture.",
+        )
+        decision_outputs["publish_eligibility_reason"] = decision_outputs["publish_eligibility_reason"].where(
+            ~inventory_low_value_do_not_order_mask,
+            PUBLISH_ELIGIBILITY_REASON_EXCLUDED_LEGITIMATE_DO_NOT_ORDER_LOW_INCREMENTAL_VALUE,
+        )
+        decision_outputs["review_reason"] = decision_outputs["review_reason"].where(
+            ~inventory_low_value_do_not_order_mask,
+            "",
+        )
+        # Preserve governed non-buy outcomes after the policy cap has already
+        # removed the buy edge. Policy review overlays should still apply to
+        # existing REVIEW rows, but they must not reopen safe HOLD/DO_NOT_ORDER
+        # outcomes as manual review work.
+        policy_review_override_mask = (
+            policy_review_mask
+            & ~decision_outputs["decision_recommendation"].astype(str).str.strip().str.upper().isin({
+                "HOLD",
+                "DO_NOT_ORDER",
+            })
+        )
+        decision_outputs["decision_recommendation"] = decision_outputs["decision_recommendation"].where(
+            ~policy_review_override_mask,
             "REVIEW",
         )
         decision_outputs["decision_reason"] = decision_outputs["decision_reason"].where(
-            ~policy_review_mask,
+            ~policy_review_override_mask,
             "Policy review override: " + policy_adjustments["review_override_reason"].astype(str),
         )
         decision_outputs["client_reason"] = decision_outputs["client_reason"].where(
-            ~policy_review_mask,
+            ~policy_review_override_mask,
             "Governed policy forced review in a worst evidence bucket before auto-order release.",
         )
         decision_outputs["operational_note"] = decision_outputs["operational_note"].where(
-            ~policy_review_mask,
+            ~policy_review_override_mask,
             "Action now: hold auto-order and inspect the governed policy reason before releasing stock.",
         )
         decision_outputs["review_reason"] = decision_outputs["review_reason"].where(
-            ~policy_review_mask,
+            ~policy_review_override_mask,
             policy_adjustments["review_override_reason"].astype(str),
         )
         review_escalation_reason_code = pd.Series("not_review", index=frame.index, dtype="object")
         review_mask = decision_outputs["decision_recommendation"].astype(str).eq("REVIEW")
         review_escalation_reason_code = review_escalation_reason_code.where(
-            ~(review_mask & policy_review_mask),
+            ~(review_mask & policy_review_override_mask),
             policy_adjustments["review_override_reason"].astype(str),
         )
         review_escalation_reason_code = review_escalation_reason_code.where(
@@ -920,7 +1613,7 @@ class PromotionStorePredictionDownloadBuilder:
             ~(review_mask & ~policy_review_mask & review_escalation_reason_code.eq("not_review")),
             "review_not_from_order_diagnostics",
         )
-        review_escalation_due_to_policy_flag = (review_mask & policy_review_mask).astype(float)
+        review_escalation_due_to_policy_flag = (review_mask & policy_review_override_mask).astype(float)
         review_escalation_due_to_evidence_conflict_flag = (
             review_mask
             & ~policy_review_mask
@@ -952,25 +1645,69 @@ class PromotionStorePredictionDownloadBuilder:
             frame,
             ("discount_percent", "feature_discount_depth_pct", "promo_discount_percent"),
         ).fillna(0.0)
-        normal_price_series = _first_positive_numeric_series(
+        discount_truth_components = _resolve_discount_truth_components(frame)
+        normal_price_series = discount_truth_components["price_normal"].fillna(0.0)
+        promo_price_series = discount_truth_components["price_promo"].fillna(0.0)
+        feature_period_days = _optional_numeric_series(frame, "feature_promo_period_days")
+        promotion_period_days = pd.to_numeric(
+            feature_period_days.where(feature_period_days.notna(), inputs["promo_window_days"]),
+            errors="coerce",
+        ).replace(0.0, pd.NA).fillna(inputs["promo_window_days"]).fillna(1.0)
+        expected_units_per_period = pd.to_numeric(
+            forecast_outputs["predicted_units_total_promo"], errors="coerce"
+        ).fillna(0.0).clip(lower=0.0)
+        expected_units_per_day = (
+            expected_units_per_period.divide(promotion_period_days.where(promotion_period_days.gt(0.0), 1.0))
+            .fillna(0.0)
+            .round(4)
+        )
+        target_end_stock_units = _optional_numeric_series(frame, "feature_end_of_promo_target_units")
+        target_end_stock_units = target_end_stock_units.where(
+            target_end_stock_units.notna(),
+            forecast_outputs["base_units_target"],
+        ).fillna(0.0).clip(lower=0.0)
+        target_end_days_cover = _numeric_series(
             frame,
-            (
-                "normal_price",
-                "regular_price",
-                "regular_price_ex_gst_effective",
-                "regular_price_ex_gst",
-                "norm_retail_inc_gst",
-            ),
-        ).fillna(0.0)
-        promo_price_series = _first_positive_numeric_series(
+            ("feature_end_of_promo_target_days_cover",),
+        ).fillna(0.0).clip(lower=0.0)
+        estimated_end_stock_units = (
+            projected_on_hand_at_promo_start
+            + pd.to_numeric(suggested_order_units_series, errors="coerce").fillna(0.0)
+            - expected_units_per_period
+        ).clip(lower=0.0)
+        month_end_cash_flag = _numeric_series(
             frame,
-            (
-                "promo_price",
-                "promo_price_ex_gst",
-                "promo_retail_inc_gst",
-                "promotional_price",
-            ),
-        ).fillna(0.0)
+            ("feature_month_end_cash_runoff_pressure_flag",),
+        ).fillna(0.0).clip(lower=0.0, upper=1.0)
+        cashflow_runoff_status = pd.Series("standard_cashflow", index=frame.index, dtype="object")
+        cashflow_runoff_status = cashflow_runoff_status.where(
+            month_end_cash_flag.lt(1.0),
+            "month_end_runoff_max_7d_cover",
+        )
+        trust_floor_status = pd.Series("trust_floor_met", index=frame.index, dtype="object")
+        trust_floor_status = trust_floor_status.where(
+            estimated_end_stock_units.ge(target_end_stock_units),
+            "below_target_end_stock",
+        )
+        speculative_capital_units = _optional_numeric_series(
+            frame,
+            "feature_expected_leftover_above_trust_floor_units",
+        )
+        fallback_speculative_units = (estimated_end_stock_units - target_end_stock_units).clip(lower=0.0)
+        speculative_capital_units = speculative_capital_units.where(
+            speculative_capital_units.notna(),
+            fallback_speculative_units,
+        ).clip(lower=0.0)
+        units_needed_for_trust_floor = _optional_numeric_series(frame, "feature_units_needed_for_trust_floor")
+        units_needed_for_high_demand_cover = _optional_numeric_series(frame, "feature_units_needed_for_high_demand_cover")
+        units_above_trust_target = _optional_numeric_series(frame, "feature_units_above_trust_target")
+        capital_tied_above_trust_target = _optional_numeric_series(frame, "feature_capital_tied_above_trust_target")
+        expected_gp_on_trust_floor_units = _optional_numeric_series(frame, "feature_expected_gp_on_trust_floor_units")
+        expected_gp_on_speculative_units = _optional_numeric_series(frame, "feature_expected_gp_on_speculative_units")
+        risk_adjusted_value_of_speculative_units = _optional_numeric_series(
+            frame,
+            "feature_risk_adjusted_value_of_speculative_units",
+        )
         download_frame = pd.DataFrame(
             {
                 "store_number": inputs["store_number"],
@@ -986,7 +1723,23 @@ class PromotionStorePredictionDownloadBuilder:
                 "predicted_units_until_promo_start": forecast_outputs["predicted_units_until_promo_start"],
                 "predicted_units_first_7_days_of_promo": forecast_outputs["predicted_units_first_7_days_of_promo"],
                 "predicted_units_total_promo": forecast_outputs["predicted_units_total_promo"],
+                "promotion_period_days": promotion_period_days.round(0).astype("int64"),
+                "expected_units_per_period": expected_units_per_period.round(0).astype("int64"),
+                "expected_units_per_day": expected_units_per_day.astype(float),
                 "base_units_target": forecast_outputs["base_units_target"],
+                "target_end_stock_units": target_end_stock_units.round(4).astype(float),
+                "target_end_days_cover": target_end_days_cover.round(4).astype(float),
+                "cashflow_runoff_status": cashflow_runoff_status,
+                "trust_floor_status": trust_floor_status,
+                "units_needed_for_trust_floor": units_needed_for_trust_floor.round(4).astype(float),
+                "units_needed_for_high_demand_cover": units_needed_for_high_demand_cover.round(4).astype(float),
+                "units_above_trust_target": units_above_trust_target.round(4).astype(float),
+                "capital_tied_above_trust_target": capital_tied_above_trust_target.round(2).astype(float),
+                "expected_gp_on_trust_floor_units": expected_gp_on_trust_floor_units.round(2).astype(float),
+                "expected_gp_on_speculative_units": expected_gp_on_speculative_units.round(2).astype(float),
+                "risk_adjusted_value_of_speculative_units": risk_adjusted_value_of_speculative_units.round(2).astype(float),
+                "speculative_capital_above_floor_units": speculative_capital_units.round(4).astype(float),
+                "speculative_capital_above_floor_value": (speculative_capital_units * inputs["unit_cost"]).round(2).astype(float),
                 "promo_start_target_soh_units": forecast_outputs["promo_start_target_soh_units"],
                 "suggested_order_units": suggested_order_units_series,
                 "expected_leftover_units_end_of_promo": expected_leftover_series,
@@ -1013,6 +1766,15 @@ class PromotionStorePredictionDownloadBuilder:
                 "operational_note": decision_outputs["operational_note"],
                 "final_decision_score": inputs["final_decision_score"].round(4),
                 "final_confidence_score": inputs["final_confidence_score"].round(4),
+                "low_nonzero_value_relief_delta": _optional_first_numeric_series(
+                    frame,
+                    (
+                        "low_nonzero_value_relief_delta",
+                        "low_nonzero_specialist_value_signal",
+                        "specialist_shadow_expected_incremental_value_delta",
+                        "expected_incremental_value_dollars_delta",
+                    ),
+                ).fillna(0.0).round(2).astype(float),
                 "discount_percent": source_discount_percent,
                 "normal_price": normal_price_series,
                 "promo_price": promo_price_series,
@@ -2368,6 +3130,7 @@ class PromotionStorePredictionDownloadBuilder:
         generated_file_rows: list[dict[str, object]],
         forecast_per_row_diagnostics: pd.DataFrame | None = None,
         completed_backtest_summary: dict[str, object] | None = None,
+        sku_backtest_summary: pd.DataFrame | None = None,
     ) -> list[str]:
         paths: list[str] = []
         for store_number, group in frame.groupby("store_number", dropna=False, sort=False):
@@ -2377,6 +3140,7 @@ class PromotionStorePredictionDownloadBuilder:
                 forecast_per_row_diagnostics=forecast_per_row_diagnostics,
                 as_of_date=as_of_date,
                 completed_backtest_summary=completed_backtest_summary,
+                sku_backtest_summary=sku_backtest_summary,
             )
             store_output_frame = _project_store_facing_output_columns(store_facing_group)
             path = artifact_paths.store_prediction_store_csv_path(
@@ -2407,10 +3171,43 @@ class PromotionStorePredictionDownloadBuilder:
         frame: pd.DataFrame,
         artifact_paths: PromotionArtifactPaths,
         generated_file_rows: list[dict[str, object]],
+        feature_inspection_source_frame: pd.DataFrame | None = None,
         forecast_per_row_diagnostics: pd.DataFrame | None = None,
         completed_backtest_summary: dict[str, object] | None = None,
+        sku_backtest_summary: pd.DataFrame | None = None,
     ) -> list[str]:
+        """Write per-promotion store artifacts and their inspection siblings.
+
+        Purpose:
+            Materialize the store-facing per-promotion CSV, manager summary, and
+            feature-inspection sibling for each store/promotion group.
+
+        Inputs:
+            run_id: execution identifier.
+            as_of_date: governed run date.
+            frame: sorted governed commercial frame used for Stage 11 outputs.
+            artifact_paths: artifact path resolver.
+            generated_file_rows: mutable manifest accumulator.
+            feature_inspection_source_frame: optional raw decision-surface frame
+                retained only for inspection-side feature joins.
+            forecast_per_row_diagnostics: optional row diagnostics.
+            completed_backtest_summary: optional completed-promo summary payload.
+            sku_backtest_summary: optional per-SKU backtest summary frame.
+
+        Outputs:
+            The ordered list of written per-promotion CSV paths.
+
+        Important assumptions:
+            The feature-inspection sibling may include more upstream columns than
+            the governed master CSV, but store-facing commercial outputs must not
+            widen.
+
+        Side effects:
+            Writes CSV artifacts and appends manifest rows.
+        """
+
         paths: list[str] = []
+        prepared_feature_source = _prepare_feature_inspection_source_frame(feature_inspection_source_frame)
         grouped = list(frame.groupby(["store_number", "promotion_header_key"], dropna=False, sort=False))
         base_paths: list[str] = []
         for (store_number, _), group in grouped:
@@ -2440,6 +3237,7 @@ class PromotionStorePredictionDownloadBuilder:
                 forecast_per_row_diagnostics=forecast_per_row_diagnostics,
                 as_of_date=as_of_date,
                 completed_backtest_summary=completed_backtest_summary,
+                sku_backtest_summary=sku_backtest_summary,
             )
             store_output_frame = _project_store_facing_output_columns(store_facing_group)
             store_output_frame.to_csv(path, index=False)
@@ -2451,6 +3249,29 @@ class PromotionStorePredictionDownloadBuilder:
                     file_type="store_promotion",
                     file_path=str(path),
                     frame=store_output_frame,
+                    store_number=store_number,
+                    promotion_header_key=promotion_header_key,
+                )
+            )
+            audit_path = artifact_paths.store_prediction_store_promotion_artifact_path(
+                run_id=run_id,
+                store_number=str(store_number),
+                promotion_start_date=_first_value(group["promotion_start_date"]),
+                promotion_name=_first_value(group["promotion_name"]),
+                artifact_name="operator_audit",
+                extension="csv",
+                collision_key=collision_key,
+            )
+            audit_frame = _project_store_facing_audit_columns(store_facing_group)
+            audit_path.parent.mkdir(parents=True, exist_ok=True)
+            audit_frame.to_csv(audit_path, index=False)
+            generated_file_rows.append(
+                _build_file_manifest_row(
+                    run_id=run_id,
+                    as_of_date=as_of_date,
+                    file_type="store_promotion_operator_audit",
+                    file_path=str(audit_path),
+                    frame=audit_frame,
                     store_number=store_number,
                     promotion_header_key=promotion_header_key,
                 )
@@ -2488,7 +3309,7 @@ class PromotionStorePredictionDownloadBuilder:
             # Feature-inspection sibling: full intermediate store-facing
             # frame (all sort/diagnostic/priority fields) joined with the
             # upstream model `feature_*` and raw decision-score columns
-            # from the commercial frame for the same rows. Analysts use
+            # from the original decision surface for the same rows. Analysts use
             # this file to audit why an SKU received its action; store
             # operators ignore it.
             feature_inspection_path = artifact_paths.store_prediction_store_promotion_artifact_path(
@@ -2500,9 +3321,15 @@ class PromotionStorePredictionDownloadBuilder:
                 extension="csv",
                 collision_key=collision_key,
             )
+            inspection_source_group = group
+            if prepared_feature_source is not None:
+                inspection_source_group = prepared_feature_source.loc[
+                    prepared_feature_source["store_number"].astype(str).eq(str(store_number))
+                    & prepared_feature_source["promotion_header_key"].astype(str).eq(str(promotion_header_key))
+                ].copy()
             upstream_feature_columns = [
                 column
-                for column in group.columns
+                for column in inspection_source_group.columns
                 if column.startswith("feature_")
                 or column
                 in (
@@ -2524,16 +3351,60 @@ class PromotionStorePredictionDownloadBuilder:
                     "expected_leftover_units_end_of_promo",
                 )
             ]
-            upstream_subset = (
-                group.loc[:, upstream_feature_columns]
-                .reset_index(drop=True)
-                if upstream_feature_columns
-                else pd.DataFrame(index=range(len(store_facing_group.index)))
-            )
-            feature_inspection_frame = pd.concat(
-                [store_facing_group.reset_index(drop=True), upstream_subset],
-                axis=1,
-            )
+            if prepared_feature_source is not None and upstream_feature_columns:
+                resolved_row_keys = _resolve_feature_inspection_row_key_frame(inspection_source_group)
+                if not resolved_row_keys.empty:
+                    merge_base = store_facing_group.copy()
+                    merge_base["_feature_join_store"] = merge_base["store_number"].astype(str)
+                    merge_base["_feature_join_sku"] = merge_base["sku_number"].astype(str)
+                    resolved_row_keys = resolved_row_keys.copy()
+                    resolved_row_keys["_feature_join_store"] = resolved_row_keys["store_number"].astype(str)
+                    resolved_row_keys["_feature_join_sku"] = resolved_row_keys["sku_number"].astype(str)
+                    merge_base = merge_base.merge(
+                        resolved_row_keys.loc[:, ["_feature_join_store", "_feature_join_sku", "promotion_row_key"]],
+                        on=["_feature_join_store", "_feature_join_sku"],
+                        how="left",
+                        sort=False,
+                    )
+                    if merge_base["promotion_row_key"].notna().all():
+                        merge_base["promotion_row_key"] = merge_base["promotion_row_key"].astype(str)
+                        row_key_upstream_columns = [
+                            column_name
+                            for column_name in upstream_feature_columns
+                            if column_name != "promotion_row_key"
+                        ]
+                        upstream_subset = inspection_source_group.loc[:, ["promotion_row_key", *row_key_upstream_columns]].copy()
+                        upstream_subset["promotion_row_key"] = upstream_subset["promotion_row_key"].astype(str)
+                        upstream_subset = upstream_subset.drop_duplicates(subset=["promotion_row_key"], keep="last")
+                        feature_inspection_frame = merge_base.merge(
+                            upstream_subset,
+                            on=["promotion_row_key"],
+                            how="left",
+                            sort=False,
+                        ).drop(columns=["_feature_join_store", "_feature_join_sku"])
+                    else:
+                        feature_inspection_frame = _merge_feature_inspection_on_store_sku(
+                            store_facing_group=store_facing_group,
+                            inspection_source_group=inspection_source_group,
+                            upstream_feature_columns=upstream_feature_columns,
+                        )
+                else:
+                    feature_inspection_frame = _merge_feature_inspection_on_store_sku(
+                        store_facing_group=store_facing_group,
+                        inspection_source_group=inspection_source_group,
+                        upstream_feature_columns=upstream_feature_columns,
+                    )
+            else:
+                upstream_subset = (
+                    inspection_source_group.loc[:, upstream_feature_columns]
+                    .reset_index(drop=True)
+                    if upstream_feature_columns
+                    else pd.DataFrame(index=range(len(store_facing_group.index)))
+                )
+                feature_inspection_frame = pd.concat(
+                    [store_facing_group.reset_index(drop=True), upstream_subset],
+                    axis=1,
+                )
             # Drop duplicate columns that may appear in both frames
             feature_inspection_frame = feature_inspection_frame.loc[
                 :, ~feature_inspection_frame.columns.duplicated()
@@ -2560,12 +3431,14 @@ class PromotionStorePredictionDownloadBuilder:
         forecast_per_row_diagnostics: pd.DataFrame | None = None,
         as_of_date: str | None = None,
         completed_backtest_summary: dict[str, object] | None = None,
+        sku_backtest_summary: pd.DataFrame | None = None,
     ) -> pd.DataFrame:
         return _build_store_facing_frame(
             commercial_frame=frame,
             forecast_per_row_diagnostics=forecast_per_row_diagnostics,
             as_of_date=as_of_date,
             completed_backtest_summary=completed_backtest_summary,
+            sku_backtest_summary=sku_backtest_summary,
         )
 
     def _promotion_group_diagnostic_summary(self, frame: pd.DataFrame) -> pd.DataFrame:
@@ -3156,7 +4029,13 @@ class PromotionStorePredictionDownloadBuilder:
         if extreme_cover_mask.any():
             failures.append("Commercial contradiction detected: ORDER with extreme stock cover and no promo-start gap justification.")
 
-        if bool(forecast_health.get("collapsed_prediction_flag", False)):
+        # Cohort-level collapse only blocks publication when there are unresolved per-promotion flat
+        # issues. When unresolved_flat_promotion_count == 0, every flat promotion was resolved by the
+        # anti-collapse repair or classified as true-zero and excluded from the actionable set, so the
+        # cohort-modal-share spike is explained by integerization floor (fractional positives → 1 unit)
+        # rather than a genuine degenerate forecast. The per-promotion unresolved check below is the
+        # authoritative guard in that case.
+        if bool(forecast_health.get("collapsed_prediction_flag", False)) and int(forecast_health.get("unresolved_flat_promotion_count", 0)) > 0:
             failures.append("Forecast collapse detected: modal prediction share exceeds threshold.")
         if (
             int(forecast_health.get("actionable_row_count", 0)) >= FORECAST_COLLAPSE_MIN_ROWS
@@ -4091,6 +4970,22 @@ def _numeric_series(frame: pd.DataFrame, column_names: tuple[str, ...]) -> pd.Se
     return pd.Series(0.0, index=frame.index, dtype="float64")
 
 
+def _optional_numeric_series(frame: pd.DataFrame, column_name: str) -> pd.Series:
+    if column_name in frame.columns:
+        return pd.to_numeric(frame[column_name], errors="coerce")
+    return pd.Series(pd.NA, index=frame.index, dtype="Float64")
+
+
+def _optional_first_numeric_series(frame: pd.DataFrame, column_names: tuple[str, ...]) -> pd.Series:
+    resolved = pd.Series(pd.NA, index=frame.index, dtype="Float64")
+    for column_name in column_names:
+        if column_name not in frame.columns:
+            continue
+        candidate = pd.to_numeric(frame[column_name], errors="coerce")
+        resolved = resolved.where(resolved.notna(), candidate)
+    return resolved
+
+
 def _first_positive_numeric_series(frame: pd.DataFrame, column_names: tuple[str, ...]) -> pd.Series:
     resolved = pd.Series(np.nan, index=frame.index, dtype="float64")
     for column_name in column_names:
@@ -4145,6 +5040,158 @@ def _resolve_discount_components(frame: pd.DataFrame) -> dict[str, pd.Series]:
         "derived_discount": derived_discount.fillna(0.0).clip(lower=0.0, upper=1.0),
         "resolved_discount": resolved_discount.fillna(0.0).clip(lower=0.0, upper=1.0),
     }
+
+
+def _resolve_discount_truth_components(frame: pd.DataFrame) -> dict[str, pd.Series]:
+    raw_discount = _resolve_discount_components(frame)["raw_discount"]
+    normal_inc = _first_positive_numeric_series(
+        frame,
+        (
+            "normal_price",
+            "regular_price",
+            "norm_retail_inc_gst",
+        ),
+    )
+    promo_inc = _first_positive_numeric_series(
+        frame,
+        (
+            "promo_retail_inc_gst",
+            "promotional_price",
+        ),
+    )
+    normal_ex = _first_positive_numeric_series(
+        frame,
+        (
+            "regular_price_ex_gst_effective",
+            "regular_price_ex_gst",
+        ),
+    )
+    promo_ex = _first_positive_numeric_series(
+        frame,
+        (
+            "promo_price",
+            "promo_price_ex_gst",
+        ),
+    )
+    legacy_normal = _first_positive_numeric_series(
+        frame,
+        (
+            "normal_price",
+            "regular_price",
+        ),
+    )
+    legacy_promo = _first_positive_numeric_series(
+        frame,
+        (
+            "promo_price",
+            "promotional_price",
+        ),
+    )
+
+    inc_pair_available = normal_inc.gt(0.0) & promo_inc.gt(0.0)
+    ex_pair_available = normal_ex.gt(0.0) & promo_ex.gt(0.0)
+    legacy_pair_available = (~inc_pair_available) & (~ex_pair_available) & legacy_normal.gt(0.0) & legacy_promo.gt(0.0)
+    price_normal = normal_inc.where(
+        inc_pair_available,
+        normal_ex.where(ex_pair_available, legacy_normal.where(legacy_pair_available)),
+    )
+    price_promo = promo_inc.where(
+        inc_pair_available,
+        promo_ex.where(ex_pair_available, legacy_promo.where(legacy_pair_available)),
+    )
+    price_basis = pd.Series("missing", index=frame.index, dtype="object")
+    price_basis = price_basis.where(~inc_pair_available, "inc_gst")
+    price_basis = price_basis.where(~(~inc_pair_available & ex_pair_available), "ex_gst")
+    price_basis = price_basis.where(~legacy_pair_available, "legacy")
+    derived_discount = ((price_normal - price_promo) / price_normal.where(price_normal > 0.0)).clip(
+        lower=0.0,
+        upper=1.0,
+    )
+    repaired_discount = raw_discount.where(raw_discount.gt(0.0), derived_discount)
+    return {
+        "raw_discount": raw_discount.fillna(0.0).clip(lower=0.0, upper=1.0),
+        "price_normal": price_normal.fillna(0.0).clip(lower=0.0),
+        "price_promo": price_promo.fillna(0.0).clip(lower=0.0),
+        "price_basis": price_basis,
+        "derived_discount": derived_discount.fillna(0.0).clip(lower=0.0, upper=1.0),
+        "repaired_discount": repaired_discount.fillna(0.0).clip(lower=0.0, upper=1.0),
+    }
+
+
+def _build_discount_review_diagnostic_frame(frame: pd.DataFrame) -> pd.DataFrame:
+    components = _resolve_discount_truth_components(frame)
+    mapped_discount_pct = (components["raw_discount"] * 100.0).round(4)
+    derived_discount_pct = (components["derived_discount"] * 100.0).round(4)
+    repaired_discount_pct = (components["repaired_discount"] * 100.0).round(4)
+    discount_abs_diff = (components["raw_discount"] - components["derived_discount"]).abs() * 100.0
+    tolerance = pd.Series(DISCOUNT_REPAIR_TOLERANCE_PCT_POINTS, index=frame.index, dtype="float64")
+
+    raw_missing_or_zero = components["raw_discount"].le(0.0)
+    valid_normal = components["price_normal"].gt(0.0)
+    valid_promo = components["price_promo"].gt(0.0)
+    valid_prices = valid_normal & valid_promo
+    derived_discount_present = components["derived_discount"].ge(0.005)
+    rounding_conflict = (
+        components["raw_discount"].gt(0.0)
+        & derived_discount_present
+        & discount_abs_diff.gt(0.0)
+        & discount_abs_diff.le(DISCOUNT_REPAIR_TOLERANCE_PCT_POINTS)
+    )
+    material_conflict = (
+        components["raw_discount"].gt(0.0)
+        & derived_discount_present
+        & discount_abs_diff.gt(DISCOUNT_REPAIR_TOLERANCE_PCT_POINTS)
+    )
+    no_discount_valid = valid_prices & components["derived_discount"].lt(0.005)
+    repairable_price_truth = raw_missing_or_zero & valid_prices & derived_discount_present
+
+    reason_code = pd.Series(DISCOUNT_REVIEW_REASON_NO_ISSUE, index=frame.index, dtype="object")
+    reason_code = reason_code.where(~(raw_missing_or_zero & ~valid_normal & ~valid_promo), DISCOUNT_REVIEW_REASON_HARD_MISSING_PRICES)
+    reason_code = reason_code.where(~(raw_missing_or_zero & ~valid_normal & valid_promo), DISCOUNT_REVIEW_REASON_HARD_INVALID_NORMAL)
+    reason_code = reason_code.where(~(raw_missing_or_zero & valid_normal & ~valid_promo), DISCOUNT_REVIEW_REASON_HARD_INVALID_PROMO)
+    reason_code = reason_code.where(~repairable_price_truth, DISCOUNT_REVIEW_REASON_REPAIRABLE_PRICE_TRUTH)
+    reason_code = reason_code.where(~rounding_conflict, DISCOUNT_REVIEW_REASON_ROUNDING_TOLERANCE)
+    reason_code = reason_code.where(~material_conflict, DISCOUNT_REVIEW_REASON_MAPPING_CONFLICT)
+    reason_code = reason_code.where(~(no_discount_valid & reason_code.eq(DISCOUNT_REVIEW_REASON_NO_ISSUE)), DISCOUNT_REVIEW_REASON_NO_DISCOUNT_VALID)
+
+    can_repair = reason_code.isin(
+        {
+            DISCOUNT_REVIEW_REASON_REPAIRABLE_PRICE_TRUTH,
+            DISCOUNT_REVIEW_REASON_ROUNDING_TOLERANCE,
+            DISCOUNT_REVIEW_REASON_NO_DISCOUNT_VALID,
+        }
+    )
+    repair_method = pd.Series("", index=frame.index, dtype="object")
+    repair_method = repair_method.where(~reason_code.eq(DISCOUNT_REVIEW_REASON_REPAIRABLE_PRICE_TRUTH), "derive_discount_from_price_truth")
+    repair_method = repair_method.where(~reason_code.eq(DISCOUNT_REVIEW_REASON_ROUNDING_TOLERANCE), "accept_price_truth_within_rounding_tolerance")
+    repair_method = repair_method.where(~reason_code.eq(DISCOUNT_REVIEW_REASON_NO_DISCOUNT_VALID), "accept_no_discount_from_valid_price_truth")
+
+    reason_detail = pd.Series("", index=frame.index, dtype="object")
+    reason_detail = reason_detail.where(~reason_code.eq(DISCOUNT_REVIEW_REASON_HARD_MISSING_PRICES), "Mapped discount is missing and neither normal nor promo price is available for governed repair.")
+    reason_detail = reason_detail.where(~reason_code.eq(DISCOUNT_REVIEW_REASON_HARD_INVALID_NORMAL), "Mapped discount is missing and the normal price is absent or non-positive, so price truth cannot be derived.")
+    reason_detail = reason_detail.where(~reason_code.eq(DISCOUNT_REVIEW_REASON_HARD_INVALID_PROMO), "Mapped discount is missing and the promo price is absent or non-positive, so price truth cannot be derived.")
+    reason_detail = reason_detail.where(~reason_code.eq(DISCOUNT_REVIEW_REASON_REPAIRABLE_PRICE_TRUTH), "Mapped discount is missing or zero, but valid price truth yields a governed repairable discount.")
+    reason_detail = reason_detail.where(~reason_code.eq(DISCOUNT_REVIEW_REASON_ROUNDING_TOLERANCE), "Mapped discount and price-derived discount differ only within governed rounding tolerance.")
+    reason_detail = reason_detail.where(~reason_code.eq(DISCOUNT_REVIEW_REASON_MAPPING_CONFLICT), "Mapped discount materially conflicts with price-derived discount from the same price basis.")
+    reason_detail = reason_detail.where(~reason_code.eq(DISCOUNT_REVIEW_REASON_NO_DISCOUNT_VALID), "Price truth shows no effective discount even though the promotion row is otherwise valid.")
+
+    return pd.DataFrame(
+        {
+            "discount_data_quality_reason_code": reason_code,
+            "discount_data_quality_reason_detail": reason_detail,
+            "mapped_discount_pct": mapped_discount_pct.astype(float),
+            "price_derived_discount_pct": derived_discount_pct.astype(float),
+            "discount_abs_diff": discount_abs_diff.round(4).astype(float),
+            "discount_tolerance_used": tolerance.astype(float),
+            "can_repair_discount_flag": can_repair.astype(int),
+            "repaired_discount_pct": repaired_discount_pct.astype(float),
+            "repair_method": repair_method,
+            "price_normal": components["price_normal"].round(4).astype(float),
+            "price_promo": components["price_promo"].round(4).astype(float),
+            "price_basis": components["price_basis"],
+        },
+        index=frame.index,
+    )
 
 
 def _resolve_discount_percent_series(frame: pd.DataFrame) -> pd.Series:
@@ -4322,6 +5369,13 @@ def _build_commercial_message_bundle(
     else:
         effectiveness = "balanced"
 
+    de_minimis_inventory_covered = (
+        start_gap_units > 0
+        and predicted_total > 0
+        and predicted_total <= LOW_NONZERO_DEMAND_MAX_UNITS
+        and expected_soh_at_promo_start >= predicted_total
+    )
+
     if inventory_missing:
         return _CommercialMessageBundle(
             promotion_effectiveness_signal=effectiveness,
@@ -4356,6 +5410,44 @@ def _build_commercial_message_bundle(
                 "Action now: hold auto-buy, verify shelf movement and promo intent, then set quantity manually if justified."
             ),
             coherence_rule="review_unresolved_forecast_collapse",
+            contradiction_escalation_flag=0,
+        )
+
+    if de_minimis_inventory_covered and (upstream_avoid or elevated_leftover_risk):
+        return _CommercialMessageBundle(
+            promotion_effectiveness_signal=effectiveness,
+            action_code="DO_NOT_ORDER",
+            decision_reason=(
+                "Do not order: projected promo-start stock "
+                f"{expected_soh_at_promo_start} already covers the full expected promo demand of {predicted_total} units, "
+                f"and a fresh buy would still leave {expected_leftover} leftover units."
+            ),
+            client_reason=(
+                "Weak promotional demand is already covered by existing stock; do not tie up more cash in this SKU."
+            ),
+            operational_note=(
+                "Action now: keep stock lean and only revisit this row if early promo sell-through materially exceeds the current weak-demand outlook."
+            ),
+            coherence_rule="do_not_order_low_incremental_value_inventory_covered",
+            contradiction_escalation_flag=0,
+        )
+
+    if de_minimis_inventory_covered and (low_confidence or confidence_missing):
+        return _CommercialMessageBundle(
+            promotion_effectiveness_signal=effectiveness,
+            action_code="HOLD",
+            decision_reason=(
+                "Hold: projected promo-start stock "
+                f"{expected_soh_at_promo_start} already covers the full expected promo demand of {predicted_total} units, "
+                f"but confidence {confidence_value:.4f} is below release threshold for a fresh buy."
+            ),
+            client_reason=(
+                "Demand is weak and existing stock already covers likely promo demand; monitor before buying more."
+            ),
+            operational_note=(
+                "Action now: hold current inventory and only revisit quantity if early promo movement materially exceeds this low-demand expectation."
+            ),
+            coherence_rule="hold_inventory_covers_expected_low_confidence",
             contradiction_escalation_flag=0,
         )
 
@@ -4602,6 +5694,8 @@ def _derive_row_level_commercial_decisions(
             stockout_risk_flag=stockout_risk_flag,
             overstock_risk_flag=overstock_risk_flag,
         )
+        publish_eligibility_reason = demand_classification.publish_eligibility_reason
+        review_reason = demand_classification.review_reason
         action_code = message_bundle.action_code
         decision_reason = message_bundle.decision_reason
         client_reason = message_bundle.client_reason
@@ -4670,6 +5764,19 @@ def _derive_row_level_commercial_decisions(
                 "Action now: verify whether launch stock is supported by local same-SKU evidence before releasing this order."
             )
 
+        if (
+            action_code == "DO_NOT_ORDER"
+            and message_bundle.coherence_rule == "do_not_order_low_incremental_value_inventory_covered"
+        ):
+            publish_eligibility_reason = PUBLISH_ELIGIBILITY_REASON_EXCLUDED_LEGITIMATE_DO_NOT_ORDER_LOW_INCREMENTAL_VALUE
+            review_reason = ""
+        elif (
+            action_code == "HOLD"
+            and message_bundle.coherence_rule == "hold_inventory_covers_expected_low_confidence"
+        ):
+            publish_eligibility_reason = PUBLISH_ELIGIBILITY_REASON_EXCLUDED_LEGITIMATE_HOLD_INVENTORY_SUFFICIENT
+            review_reason = ""
+
         estimated_cash_risk_band = _cash_risk_band(expected_leftover * float(row.unit_cost or 0.0))
         demand_confidence_band = _confidence_band(confidence_value)
         execution_attention_flag = _execution_attention_flag(
@@ -4737,8 +5844,8 @@ def _derive_row_level_commercial_decisions(
         demand_evidence_class_values.append(demand_classification.demand_evidence_class)
         cold_start_flag_values.append(int(demand_classification.cold_start_flag))
         insufficient_history_flag_values.append(int(demand_classification.insufficient_history_flag))
-        publish_eligibility_reason_values.append(demand_classification.publish_eligibility_reason)
-        review_reason_values.append(demand_classification.review_reason)
+        publish_eligibility_reason_values.append(publish_eligibility_reason)
+        review_reason_values.append(review_reason)
 
     return {
         "suggested_order_units": pd.Series(suggested_order_units, index=output_index, dtype="int64"),
@@ -4784,6 +5891,52 @@ def _derive_row_level_commercial_decisions(
         "true_zero_demand_retained_flag": pd.Series(true_zero_demand_retained_values, index=output_index, dtype="int64"),
         "likely_inventory_drag_flag": pd.Series(likely_inventory_drag_values, index=output_index, dtype="int64"),
     }
+
+
+def _apply_discount_review_hold_to_decision_outputs(
+    *,
+    decision_outputs: dict[str, pd.Series],
+    discount_review_flag: pd.Series,
+) -> dict[str, pd.Series]:
+    """Fail closed when governed discount evidence requires review.
+
+    Only rows already headed to ORDER are demoted. Safe non-buy outcomes remain
+    untouched, and the helper uses explicit discount-review flags rather than
+    quantity or forecast magnitude as an action proxy.
+    """
+
+    adjusted_outputs = dict(decision_outputs)
+    action_upper = adjusted_outputs["decision_recommendation"].astype(str).str.strip().str.upper()
+    review_flag = discount_review_flag.reindex(action_upper.index).fillna("").astype(str).str.strip().str.upper()
+    discount_review_order_mask = action_upper.eq("ORDER") & review_flag.isin(_DISCOUNT_REVIEW_REASON_BY_FLAG)
+    if not bool(discount_review_order_mask.any()):
+        return adjusted_outputs
+
+    review_reason = review_flag.map(_DISCOUNT_REVIEW_REASON_BY_FLAG).fillna("")
+    decision_reason = review_flag.map(_DISCOUNT_REVIEW_DECISION_REASON_BY_FLAG).fillna(
+        "Review required: governed discount evidence requires manual review before order release."
+    )
+    adjusted_outputs["decision_recommendation"] = adjusted_outputs["decision_recommendation"].where(
+        ~discount_review_order_mask,
+        "REVIEW",
+    )
+    adjusted_outputs["decision_reason"] = adjusted_outputs["decision_reason"].where(
+        ~discount_review_order_mask,
+        decision_reason,
+    )
+    adjusted_outputs["client_reason"] = adjusted_outputs["client_reason"].where(
+        ~discount_review_order_mask,
+        "Governed discount evidence requires manager review before any auto-order release.",
+    )
+    adjusted_outputs["operational_note"] = adjusted_outputs["operational_note"].where(
+        ~discount_review_order_mask,
+        "Action now: hold auto-order and resolve the governed discount evidence before releasing stock.",
+    )
+    adjusted_outputs["review_reason"] = adjusted_outputs["review_reason"].where(
+        ~discount_review_order_mask,
+        review_reason,
+    )
+    return adjusted_outputs
 
 
 def _sanitize_filename_component(value: str, *, fallback: str, max_length: int = 64) -> str:
@@ -5477,6 +6630,190 @@ def _build_store_promotion_manager_summary_frame(
             store_facing_frame["expected_units_first_7_days"], errors="coerce"
         ).fillna(0).sum()
     )
+    promotion_period_days = int(
+        pd.to_numeric(
+            store_facing_frame.get(
+                "promotion_period_days",
+                pd.Series(0, index=store_facing_frame.index),
+            ),
+            errors="coerce",
+        ).fillna(0).max()
+    )
+    total_expected_units_per_period = int(
+        pd.to_numeric(
+            store_facing_frame.get(
+                "expected_units_per_period",
+                pd.Series(0, index=store_facing_frame.index),
+            ),
+            errors="coerce",
+        ).fillna(0).sum()
+    )
+    average_expected_units_per_day = float(
+        round(
+            float(
+                pd.to_numeric(
+                    store_facing_frame.get(
+                        "expected_units_per_day",
+                        pd.Series(0.0, index=store_facing_frame.index),
+                    ),
+                    errors="coerce",
+                ).fillna(0.0).mean()
+            ),
+            4,
+        )
+    )
+    total_target_end_stock_units = float(
+        round(
+            float(
+                pd.to_numeric(
+                    store_facing_frame.get(
+                        "target_end_stock_units",
+                        pd.Series(0.0, index=store_facing_frame.index),
+                    ),
+                    errors="coerce",
+                ).fillna(0.0).sum()
+            ),
+            4,
+        )
+    )
+    total_units_needed_for_trust_floor = float(
+        round(
+            float(
+                pd.to_numeric(
+                    store_facing_frame.get(
+                        "units_needed_for_trust_floor",
+                        pd.Series(0.0, index=store_facing_frame.index),
+                    ),
+                    errors="coerce",
+                ).fillna(0.0).sum()
+            ),
+            4,
+        )
+    )
+    total_units_needed_for_high_demand_cover = float(
+        round(
+            float(
+                pd.to_numeric(
+                    store_facing_frame.get(
+                        "units_needed_for_high_demand_cover",
+                        pd.Series(0.0, index=store_facing_frame.index),
+                    ),
+                    errors="coerce",
+                ).fillna(0.0).sum()
+            ),
+            4,
+        )
+    )
+    total_units_above_trust_target = float(
+        round(
+            float(
+                pd.to_numeric(
+                    store_facing_frame.get(
+                        "units_above_trust_target",
+                        pd.Series(0.0, index=store_facing_frame.index),
+                    ),
+                    errors="coerce",
+                ).fillna(0.0).sum()
+            ),
+            4,
+        )
+    )
+    total_capital_tied_above_trust_target = float(
+        round(
+            float(
+                pd.to_numeric(
+                    store_facing_frame.get(
+                        "capital_tied_above_trust_target",
+                        pd.Series(0.0, index=store_facing_frame.index),
+                    ),
+                    errors="coerce",
+                ).fillna(0.0).sum()
+            ),
+            2,
+        )
+    )
+    total_expected_gp_on_trust_floor_units = float(
+        round(
+            float(
+                pd.to_numeric(
+                    store_facing_frame.get(
+                        "expected_gp_on_trust_floor_units",
+                        pd.Series(0.0, index=store_facing_frame.index),
+                    ),
+                    errors="coerce",
+                ).fillna(0.0).sum()
+            ),
+            2,
+        )
+    )
+    total_expected_gp_on_speculative_units = float(
+        round(
+            float(
+                pd.to_numeric(
+                    store_facing_frame.get(
+                        "expected_gp_on_speculative_units",
+                        pd.Series(0.0, index=store_facing_frame.index),
+                    ),
+                    errors="coerce",
+                ).fillna(0.0).sum()
+            ),
+            2,
+        )
+    )
+    total_risk_adjusted_value_of_speculative_units = float(
+        round(
+            float(
+                pd.to_numeric(
+                    store_facing_frame.get(
+                        "risk_adjusted_value_of_speculative_units",
+                        pd.Series(0.0, index=store_facing_frame.index),
+                    ),
+                    errors="coerce",
+                ).fillna(0.0).sum()
+            ),
+            2,
+        )
+    )
+    total_speculative_capital_above_floor_units = float(
+        round(
+            float(
+                pd.to_numeric(
+                    store_facing_frame.get(
+                        "speculative_capital_above_floor_units",
+                        pd.Series(0.0, index=store_facing_frame.index),
+                    ),
+                    errors="coerce",
+                ).fillna(0.0).sum()
+            ),
+            4,
+        )
+    )
+    total_speculative_capital_above_floor_value = float(
+        round(
+            float(
+                pd.to_numeric(
+                    store_facing_frame.get(
+                        "speculative_capital_above_floor_value",
+                        pd.Series(0.0, index=store_facing_frame.index),
+                    ),
+                    errors="coerce",
+                ).fillna(0.0).sum()
+            ),
+            2,
+        )
+    )
+    cashflow_runoff_status = _dominant_text_value(
+        store_facing_frame.get(
+            "cashflow_runoff_status",
+            pd.Series("", index=store_facing_frame.index),
+        )
+    )
+    trust_floor_status = _dominant_text_value(
+        store_facing_frame.get(
+            "trust_floor_status",
+            pd.Series("", index=store_facing_frame.index),
+        )
+    )
     total_projected_promo_units = total_expected_units_total_promo
 
     # Promo-level discount descriptor: median of non-zero discount_percent
@@ -5589,6 +6926,21 @@ def _build_store_promotion_manager_summary_frame(
                 "total_recommended_order_units": total_recommended_units,
                 "total_projected_pre_promo_sales_units": total_projected_pre_promo_sales_units,
                 "total_projected_first_7_days_units": total_projected_first_7_days_units,
+                "promotion_period_days": promotion_period_days,
+                "total_expected_units_per_period": total_expected_units_per_period,
+                "average_expected_units_per_day": average_expected_units_per_day,
+                "total_target_end_stock_units": total_target_end_stock_units,
+                "total_units_needed_for_trust_floor": total_units_needed_for_trust_floor,
+                "total_units_needed_for_high_demand_cover": total_units_needed_for_high_demand_cover,
+                "total_units_above_trust_target": total_units_above_trust_target,
+                "total_capital_tied_above_trust_target": total_capital_tied_above_trust_target,
+                "total_expected_gp_on_trust_floor_units": total_expected_gp_on_trust_floor_units,
+                "total_expected_gp_on_speculative_units": total_expected_gp_on_speculative_units,
+                "total_risk_adjusted_value_of_speculative_units": total_risk_adjusted_value_of_speculative_units,
+                "cashflow_runoff_status": cashflow_runoff_status,
+                "trust_floor_status": trust_floor_status,
+                "total_speculative_capital_above_floor_units": total_speculative_capital_above_floor_units,
+                "total_speculative_capital_above_floor_value": total_speculative_capital_above_floor_value,
                 "total_projected_promo_units": total_projected_promo_units,
                 "total_expected_units_total_promo": total_expected_units_total_promo,
                 "total_estimated_leftover_cost_dollars": round(total_capital_at_risk, 2),
@@ -5615,6 +6967,14 @@ def _build_store_promotion_manager_summary_frame(
     )
 
 
+def _dominant_text_value(series: pd.Series) -> str:
+    cleaned = series.astype(str).str.strip()
+    cleaned = cleaned[(cleaned != "") & (cleaned.str.lower() != "nan")]
+    if cleaned.empty:
+        return ""
+    return str(cleaned.value_counts().idxmax())
+
+
 def _read_completed_backtest_summary(path: str | None) -> dict[str, object] | None:
     if not path:
         return None
@@ -5629,6 +6989,24 @@ def _read_completed_backtest_summary(path: str | None) -> dict[str, object] | No
             f"completed-promotion demand backtest summary must be a JSON object: {summary_path}"
         )
     return payload
+
+
+def _read_completed_backtest_rows(path: str | None) -> pd.DataFrame | None:
+    if not path:
+        return None
+    rows_path = Path(path)
+    if not rows_path.exists():
+        raise PromotionStoreDownloadCommercialValidationError(
+            f"completed-promotion demand backtest rows not found: {rows_path}"
+        )
+    suffix = rows_path.suffix.lower()
+    if suffix == ".parquet":
+        return pd.read_parquet(rows_path)
+    if suffix == ".csv":
+        return pd.read_csv(rows_path)
+    raise PromotionStoreDownloadCommercialValidationError(
+        f"completed-promotion demand backtest rows must be csv or parquet: {rows_path}"
+    )
 
 
 def _summary_float(summary: dict[str, object] | None, *keys: str, default: float = 0.0) -> float:
@@ -5659,6 +7037,50 @@ def _classify_backtest_bias(*, comparable_count: int, over_rate: float, under_ra
     if under_rate >= over_rate + 0.10:
         return "UNDERFORECASTING"
     return "BALANCED"
+
+
+def _build_sku_backtest_summary(rows: pd.DataFrame | None) -> pd.DataFrame | None:
+    if rows is None or rows.empty or "sku_number" not in rows.columns:
+        return None
+
+    working = rows.copy()
+    working["sku_number"] = working["sku_number"].astype(str).str.strip()
+    working = working.loc[
+        ~working["sku_number"].str.lower().isin({"", "nan", "none", "<na>"})
+    ].copy()
+    if working.empty:
+        return None
+
+    predicted = pd.to_numeric(working.get("predicted_units_total_promo"), errors="coerce").fillna(0.0)
+    actual = pd.to_numeric(working.get("actual_units_sold_promo"), errors="coerce").fillna(0.0)
+    working["signed_error_units"] = predicted - actual
+    working["absolute_error_units"] = pd.to_numeric(
+        working.get("absolute_error_units"), errors="coerce"
+    ).fillna(working["signed_error_units"].abs())
+    working["squared_error_units"] = working["signed_error_units"].pow(2)
+
+    summary = (
+        working.groupby("sku_number", dropna=False, sort=False)
+        .agg(
+            SKU_MAE=("absolute_error_units", "mean"),
+            SKU_MSE=("squared_error_units", "mean"),
+            comparable_row_count=("sku_number", "size"),
+            over_rate=("signed_error_units", lambda values: float((values > 0).mean())),
+            under_rate=("signed_error_units", lambda values: float((values < 0).mean())),
+        )
+        .reset_index()
+    )
+    summary["SKU_MAE"] = summary["SKU_MAE"].round(2)
+    summary["SKU_MSE"] = summary["SKU_MSE"].round(2)
+    summary["SKU_bias"] = [
+        _classify_backtest_bias(
+            comparable_count=int(row.comparable_row_count),
+            over_rate=float(row.over_rate),
+            under_rate=float(row.under_rate),
+        )
+        for row in summary.itertuples(index=False)
+    ]
+    return summary.loc[:, ["sku_number", "SKU_MAE", "SKU_MSE", "SKU_bias"]].copy()
 
 
 def _build_backtest_trust_frame(
@@ -5872,38 +7294,1829 @@ def _project_store_facing_output_columns(frame: pd.DataFrame) -> pd.DataFrame:
             raise PromotionStoreDownloadCommercialValidationError(
                 f"store-facing operator output missing required column: {column}"
             )
-    return frame.loc[:, list(STORE_FACING_OUTPUT_COLUMNS)].copy()
+    projected = frame.loc[:, list(STORE_FACING_OUTPUT_COLUMNS)].copy()
+    _validate_store_facing_clean_operator_output(projected)
+    return projected
+
+
+def _project_store_facing_audit_columns(frame: pd.DataFrame) -> pd.DataFrame:
+    for column in STORE_FACING_SCHEMA_COLUMNS:
+        if column not in frame.columns:
+            raise PromotionStoreDownloadCommercialValidationError(
+                f"store-facing audit output missing required column: {column}"
+            )
+    return frame.loc[:, list(STORE_FACING_SCHEMA_COLUMNS)].copy()
 
 
 def _validate_store_facing_output_contract_definition() -> None:
     output_columns = list(STORE_FACING_OUTPUT_COLUMNS)
-    row_level_indexes = [
-        output_columns.index(column) for column in STORE_FACING_ROW_LEVEL_EVIDENCE_COLUMNS
-    ]
-    promotion_level_indexes = [
-        output_columns.index(column)
-        for column in STORE_FACING_PROMOTION_LEVEL_DIAGNOSTIC_COLUMNS
-    ]
-    if max(row_level_indexes) >= min(promotion_level_indexes):
+    if len(output_columns) != len(set(output_columns)):
         raise PromotionStoreDownloadCommercialValidationError(
-            "STORE_FACING_OUTPUT_COLUMNS must place row-level evidence before promotion-level trust diagnostics"
+            "STORE_FACING_OUTPUT_COLUMNS must not contain duplicate columns"
         )
 
-    promotion_block = output_columns[
-        min(promotion_level_indexes) : max(promotion_level_indexes) + 1
-    ]
-    if promotion_block != list(STORE_FACING_PROMOTION_LEVEL_DIAGNOSTIC_COLUMNS):
-        raise PromotionStoreDownloadCommercialValidationError(
-            "STORE_FACING_OUTPUT_COLUMNS must keep promotion-level trust diagnostics in one contiguous block"
+
+def _normalize_store_facing_contract_token(value: object) -> str:
+    return re.sub(r"\s+", "_", str(value).strip().casefold())
+
+
+def _store_facing_safe_text(value: object) -> str:
+    try:
+        if pd.isna(value):
+            return ""
+    except TypeError:
+        pass
+    return str(value).strip()
+
+
+def _store_facing_text_implies_order(value: object) -> bool:
+    token = _normalize_store_facing_contract_token(value)
+    if not token:
+        return False
+    if any(blocked in token for blocked in ("do_not", "no_order", "no_auto_buy", "suppressed")):
+        return False
+    return any(keyword in token for keyword in ("buy", "order", "allocate", "recommended"))
+
+
+def _store_facing_label_contains_low_soh_or_floor_risk(*values: object) -> bool:
+    for value in values:
+        token = _normalize_store_facing_contract_token(value)
+        if not token:
+            continue
+        if token in {"floor_protected", "hold_stock_floor_safe"}:
+            continue
+        if "low_soh" in token:
+            return True
+        if token in {"floor_protection_needed", "zero_soh_risk"}:
+            return True
+        if "availability" in token:
+            return True
+        if token.startswith("below_") and "risk" in token:
+            return True
+    return False
+
+
+def _is_clean_review_action(row: pd.Series) -> bool:
+    recommended_action_token = _normalize_store_facing_contract_token(row.get("recommended_action", ""))
+    store_action_token = _normalize_store_facing_contract_token(row.get("store_action", ""))
+    operator_status_token = _normalize_store_facing_contract_token(row.get("operator_status", ""))
+    action_token = _normalize_store_facing_contract_token(row.get("store_action_label", ""))
+    reason_token = _normalize_store_facing_contract_token(row.get("order_reconciliation_reason", ""))
+    primary_review_reason = _store_facing_safe_text(row.get("primary_review_reason", ""))
+    review_reason = _store_facing_safe_text(row.get("review_reason", ""))
+    human_review_required = pd.to_numeric(
+        pd.Series([row.get("human_review_required_flag", 0.0)]),
+        errors="coerce",
+    ).fillna(0.0).iloc[0]
+    if recommended_action_token in {"review", "review_required"}:
+        return True
+    if store_action_token == "review" or operator_status_token == "review":
+        return True
+    if primary_review_reason or review_reason:
+        return True
+    if float(human_review_required) >= 1.0:
+        return True
+    if recommended_action_token or store_action_token or operator_status_token:
+        return False
+    return "review" in action_token or "review" in reason_token
+
+
+def _neutral_reason_short_for_decision(operator_decision: str, review_flag: int) -> str:
+    decision = str(operator_decision).strip().upper()
+    if review_flag >= 1:
+        return "Manager review is required before action."
+    neutral_reason_by_decision = {
+        "BUY": "Expected demand exceeds protected stock coverage.",
+        "PROTECT_AVAILABILITY": "Availability risk justifies a controlled stock top-up.",
+        "HOLD_STOCK": "Current stock is expected to cover this promotion.",
+        "HOLD_STOCK_FLOOR_SAFE": "Current stock covers expected demand while preserving the availability floor.",
+        "LOW_SOH_NO_AUTO_BUY": "Projected stock is low, but demand evidence remains weak.",
+        "LOW_SOH_PROTECT_AVAILABILITY": "Projected stock is low and availability risk should be monitored closely.",
+        "LOW_SOH_BORDERLINE_REVIEW": "Projected stock is low and missed-sales risk needs a manual check.",
+        "REDUCE_HOLDING": "Current holding is high relative to expected demand.",
+        "NO_DEMAND": "Demand evidence does not justify extra stock.",
+        "NEVER_SOLD_IN_PROMO": "Reliable promotion sell-through evidence is not available.",
+        "NO_PRIOR_PROMO_EVIDENCE": "Prior promotion evidence is insufficient to support extra stock.",
+        "NO_PRIOR_PROMO_EVIDENCE_LOW_RISK": "Prior promotion evidence is limited and stock risk is low.",
+        "NO_PRIOR_PROMO_EVIDENCE_LOW_SOH_REVIEW": "Prior promotion evidence is limited and stock risk needs review.",
+        "NO_PRIOR_PROMO_EVIDENCE_BASELINE_DEMAND": "Baseline demand exists, but promotion evidence is still limited.",
+        "BORDERLINE_OOS_REVIEW": "Borderline stock risk needs a manual check.",
+        "DATA_QUALITY_REVIEW": "Input quality issues need manual review.",
+    }
+    return neutral_reason_by_decision.get(decision, "Current governed evidence does not support a stronger action.")
+
+
+def _derive_clean_operator_decision(row: pd.Series) -> str:
+    for column in ("store_action_label_v2", "store_action_label"):
+        value = _store_facing_safe_text(row.get(column, ""))
+        if value:
+            return value
+    store_action = _store_facing_safe_text(row.get("store_action", "")).upper().replace(" ", "_")
+    return store_action or "HOLD_STOCK"
+
+
+def _derive_clean_operator_action(row: pd.Series) -> str:
+    recommended_action_token = _normalize_store_facing_contract_token(row.get("recommended_action", ""))
+    store_action_token = _normalize_store_facing_contract_token(row.get("store_action", ""))
+    operator_status_token = _normalize_store_facing_contract_token(row.get("operator_status", ""))
+    order_units = pd.to_numeric(
+        pd.Series([row.get("recommended_order_units", 0.0)]),
+        errors="coerce",
+    ).fillna(0.0).iloc[0]
+    if _is_clean_review_action(row):
+        return "REVIEW"
+    if recommended_action_token == "order" or store_action_token == "buy" or operator_status_token == "ready":
+        if float(order_units) > 0.0:
+            return "BUY"
+        return "DO_NOT_BUY"
+    if recommended_action_token in {"hold", "hold_monitor"} or store_action_token == "hold" or operator_status_token == "monitor":
+        return "MONITOR"
+    if (
+        recommended_action_token in {"do_not_order", "do_not_order_low_value"}
+        or store_action_token == "do_not_buy"
+        or operator_status_token in {"no_buy", "no_order"}
+    ):
+        return "DO_NOT_BUY"
+    if float(order_units) > 0.0:
+        return "BUY"
+    expected_demand = pd.to_numeric(
+        pd.Series([row.get("expected_promo_demand", 0.0)]),
+        errors="coerce",
+    ).fillna(0.0).iloc[0]
+    if _store_facing_label_contains_low_soh_or_floor_risk(
+        row.get("store_action_label", ""),
+        row.get("availability_risk_label", ""),
+    ) and float(expected_demand) > 0.0:
+        return "MONITOR"
+    return "DO_NOT_BUY"
+
+
+def _derive_clean_reason_short(row: pd.Series, *, operator_decision: str, review_flag: int) -> str:
+    primary_review_reason = _store_facing_safe_text(row.get("primary_review_reason", ""))
+    review_reason_text = _store_facing_safe_text(row.get("review_reason", ""))
+    decision_reason = _store_facing_safe_text(row.get("decision_reason", ""))
+    model_reason_summary = _store_facing_safe_text(row.get("model_reason_summary", ""))
+    order_reconciliation_reason = _store_facing_safe_text(row.get("order_reconciliation_reason", ""))
+
+    reason = ""
+    if review_flag >= 1:
+        if primary_review_reason and (" " in primary_review_reason or "_" not in primary_review_reason):
+            reason = primary_review_reason
+        elif review_reason_text and (" " in review_reason_text or "_" not in review_reason_text):
+            reason = review_reason_text
+        elif decision_reason:
+            reason = decision_reason
+        elif model_reason_summary:
+            reason = model_reason_summary
+        else:
+            reason = order_reconciliation_reason
+    else:
+        reason = order_reconciliation_reason or model_reason_summary or decision_reason
+    if reason:
+        reason = reason.split(". ", 1)[0].strip()
+        if not reason.endswith("."):
+            reason += "."
+    order_units = pd.to_numeric(
+        pd.Series([row.get("recommended_order_units", 0.0)]),
+        errors="coerce",
+    ).fillna(0.0).iloc[0]
+    if float(order_units) <= 0.0 and _store_facing_text_implies_order(reason):
+        return _neutral_reason_short_for_decision(operator_decision, review_flag)
+    if reason:
+        return reason
+    return _neutral_reason_short_for_decision(operator_decision, review_flag)
+
+
+def _derive_clean_risk_flag(row: pd.Series) -> str:
+    availability = _store_facing_safe_text(row.get("availability_risk_label", ""))
+    capital = _store_facing_safe_text(row.get("capital_drag_label", ""))
+    demand = _store_facing_safe_text(row.get("demand_evidence_label", ""))
+    residual = _store_facing_safe_text(row.get("end_of_promo_residual_risk", ""))
+    if _store_facing_label_contains_low_soh_or_floor_risk(availability, row.get("store_action_label", "")):
+        return availability or "LOW_SOH_OR_FLOOR_RISK"
+    if capital and capital != "CAPITAL_DRAG_LOW":
+        return capital
+    if demand in {"NO_DEMAND", "NEVER_SOLD_IN_PROMO", "SPARSE_HISTORY", "LOW_NONZERO_DEMAND"}:
+        return demand
+    if residual and residual.upper() not in {"", "LOW"}:
+        return residual
+    return availability or capital or demand or residual
+
+
+def _derive_clean_review_flag(row: pd.Series, *, operator_action: str) -> int:
+    if _is_clean_review_action(row):
+        return 1
+    if operator_action == "REVIEW":
+        return 1
+    return 0
+
+
+def _derive_clean_audit_notes(row: pd.Series) -> str:
+    parts: list[str] = []
+    review_reason = _store_facing_safe_text(row.get("primary_review_reason", ""))
+    blocker_reason = _store_facing_safe_text(row.get("blocker_reason", ""))
+    if review_reason:
+        parts.append(f"review={review_reason}")
+    if blocker_reason:
+        parts.append(f"blocker={blocker_reason}")
+    raw_units = pd.to_numeric(pd.Series([row.get("raw_model_order_units", 0.0)]), errors="coerce").fillna(0.0).iloc[0]
+    provisional_units = pd.to_numeric(pd.Series([row.get("provisional_review_order_units", 0.0)]), errors="coerce").fillna(0.0).iloc[0]
+    final_units = pd.to_numeric(pd.Series([row.get("final_store_order_units", 0.0)]), errors="coerce").fillna(0.0).iloc[0]
+    confidence_pct = pd.to_numeric(pd.Series([row.get("model_confidence_percent", 0.0)]), errors="coerce").fillna(0.0).iloc[0]
+    capital_risk = pd.to_numeric(pd.Series([row.get("capital_at_risk_adjusted_dollars", 0.0)]), errors="coerce").fillna(0.0).iloc[0]
+    risk_reward = pd.to_numeric(pd.Series([row.get("retail_risk_reward_ratio", 0.0)]), errors="coerce").fillna(0.0).iloc[0]
+    parts.extend(
+        (
+            f"demand={_store_facing_safe_text(row.get('demand_evidence_label', ''))}",
+            f"availability={_store_facing_safe_text(row.get('availability_risk_label', ''))}",
+            f"capital={_store_facing_safe_text(row.get('capital_drag_label', ''))}",
+            f"raw_units={int(round(float(raw_units)))}",
+            f"provisional_units={int(round(float(provisional_units)))}",
+            f"final_units={int(round(float(final_units)))}",
+            f"confidence_pct={int(round(float(confidence_pct)))}",
+            f"capital_risk=${float(capital_risk):.2f}",
+            f"risk_reward={float(risk_reward):.2f}",
+            f"sku_mae={_store_facing_safe_text(row.get('SKU_MAE', ''))}",
+            f"sku_mse={_store_facing_safe_text(row.get('SKU_MSE', ''))}",
+            f"sku_bias={_store_facing_safe_text(row.get('SKU_bias', ''))}",
         )
+    )
+    return "; ".join(
+        part
+        for part in parts
+        if not part.endswith("=")
+        and part not in {"sku_mae=", "sku_mse=", "sku_bias="}
+    )
+
+
+def _build_store_facing_clean_operator_fields(store_frame: pd.DataFrame) -> pd.DataFrame:
+    operator_decision = store_frame.apply(_derive_clean_operator_decision, axis=1)
+    operator_action = store_frame.apply(_derive_clean_operator_action, axis=1)
+    review_flag = pd.Series(
+        [
+            _derive_clean_review_flag(row, operator_action=action)
+            for (_, row), action in zip(store_frame.iterrows(), operator_action.tolist(), strict=False)
+        ],
+        index=store_frame.index,
+        dtype="int64",
+    )
+    order_units = pd.to_numeric(
+        store_frame["recommended_order_units"],
+        errors="coerce",
+    ).fillna(0.0).clip(lower=0.0).round(0).astype("int64")
+    reason_short = pd.Series(
+        [
+            _derive_clean_reason_short(row, operator_decision=decision, review_flag=flag)
+            for (_, row), decision, flag in zip(
+                store_frame.iterrows(),
+                operator_decision.tolist(),
+                review_flag.tolist(),
+                strict=False,
+            )
+        ],
+        index=store_frame.index,
+        dtype="object",
+    )
+    risk_flag = store_frame.apply(_derive_clean_risk_flag, axis=1)
+    audit_notes = store_frame.apply(_derive_clean_audit_notes, axis=1)
+    return pd.DataFrame(
+        {
+            "operator_decision": operator_decision.astype(str),
+            "operator_action": operator_action.astype(str),
+            "order_units": order_units,
+            "reason_short": reason_short.astype(str),
+            "risk_flag": risk_flag.astype(str),
+            "review_flag": review_flag,
+            "audit_notes": audit_notes.astype(str),
+        },
+        index=store_frame.index,
+    )
+
+
+def _validate_store_facing_clean_operator_output(frame: pd.DataFrame) -> None:
+    failures: list[str] = []
+    visible_shadow_columns = [column for column in STORE_FACING_SHADOW_POLICY_COLUMNS if column in frame.columns]
+    if visible_shadow_columns:
+        failures.append(
+            "shadow policy fields must stay audit-only in the operator report: "
+            + ", ".join(visible_shadow_columns)
+        )
+    visible_internal_columns = [column for column in STORE_FACING_INTERNAL_ORDER_STATE_COLUMNS if column in frame.columns]
+    if visible_internal_columns:
+        failures.append(
+            "internal order-state fields must stay audit-only in the operator report: "
+            + ", ".join(visible_internal_columns)
+        )
+    if not failures:
+        order_units = pd.to_numeric(frame["order_units"], errors="coerce").fillna(0.0).clip(lower=0.0)
+        operator_action = frame["operator_action"].astype(str).str.strip().str.upper()
+        review_flag = pd.to_numeric(frame["review_flag"], errors="coerce").fillna(0.0)
+        reason_short = frame["reason_short"].astype(str).str.strip()
+        operator_decision = frame["operator_decision"].astype(str).str.strip().str.upper()
+        expected_demand = pd.to_numeric(frame["expected_promo_demand"], errors="coerce").fillna(0.0).clip(lower=0.0)
+        invalid_action_count = int((~operator_action.isin({"BUY", "REVIEW", "MONITOR", "DO_NOT_BUY"})).sum())
+        if invalid_action_count > 0:
+            failures.append(
+                f"operator_action must be one of BUY, REVIEW, MONITOR, DO_NOT_BUY (rows={invalid_action_count})"
+            )
+        buy_zero_count = int((order_units.le(0.0) & operator_action.eq("BUY")).sum())
+        if buy_zero_count > 0:
+            failures.append(
+                f"zero-order rows cannot present BUY in operator_action (rows={buy_zero_count})"
+            )
+        order_text_zero_count = int((order_units.le(0.0) & reason_short.map(_store_facing_text_implies_order)).sum())
+        if order_text_zero_count > 0:
+            failures.append(
+                f"zero-order rows cannot present BUY or ORDER language in reason_short (rows={order_text_zero_count})"
+            )
+        low_soh_tension = (
+            order_units.le(0.0)
+            & expected_demand.gt(LOW_NONZERO_DEMAND_MAX_UNITS)
+            & (
+                operator_decision.str.contains("LOW_SOH", regex=False)
+                | frame["risk_flag"].astype(str).map(
+                    lambda value: _store_facing_label_contains_low_soh_or_floor_risk(value)
+                )
+            )
+        )
+        explicit_low_evidence_no_buy = (
+            operator_decision.str.startswith("NO_PRIOR_PROMO_EVIDENCE")
+            | operator_decision.eq("LOW_SOH_NO_AUTO_BUY")
+            | operator_decision.eq("NO_DEMAND")
+        )
+        low_soh_allowed_actions = operator_action.isin({"REVIEW", "MONITOR"}) | (
+            operator_action.eq("DO_NOT_BUY") & explicit_low_evidence_no_buy
+        )
+        low_soh_bad_action_count = int((low_soh_tension & ~low_soh_allowed_actions).sum())
+        if low_soh_bad_action_count > 0:
+            failures.append(
+                "low-SOH or floor-risk rows with material demand tension must surface REVIEW or MONITOR, "
+                "or an explicit low-evidence DO_NOT_BUY decision "
+                f"(rows={low_soh_bad_action_count})"
+            )
+        invalid_review_flag_count = int((~review_flag.isin({0.0, 1.0})).sum())
+        if invalid_review_flag_count > 0:
+            failures.append(
+                f"review_flag must be a governed 0/1 indicator (rows={invalid_review_flag_count})"
+            )
+        blank_reason_count = int(reason_short.eq("").sum())
+        if blank_reason_count > 0:
+            failures.append(
+                f"reason_short must be populated on every visible operator row (rows={blank_reason_count})"
+            )
+    if failures:
+        raise PromotionStoreDownloadCommercialValidationError("; ".join(failures))
+
+
+def _build_store_facing_contract_cleanup_issues_frame(
+    *,
+    operator_output_frame: pd.DataFrame,
+) -> pd.DataFrame:
+    issue_rows: list[dict[str, object]] = []
+
+    def add_issue(
+        *,
+        issue_type: str,
+        row: pd.Series | None,
+        proposed_field: str,
+        cleanup_fix: str,
+        severity: str,
+        detail: str,
+        fix_priority: int,
+    ) -> None:
+        issue_rows.append(
+            {
+                "issue_type": issue_type,
+                "sku_number": "" if row is None else str(row["sku_number"]),
+                "sku_description": "SCHEMA_LEVEL" if row is None else str(row["sku_description"]),
+                "proposed_field": proposed_field,
+                "cleanup_fix": cleanup_fix,
+                "severity": severity,
+                "detail": detail,
+                "fix_priority": fix_priority,
+            }
+        )
+
+    for _, row in operator_output_frame.iterrows():
+        order_units = pd.to_numeric(pd.Series([row["order_units"]]), errors="coerce").fillna(0.0).iloc[0]
+        if float(order_units) <= 0.0 and (
+            str(row["operator_action"]).strip().upper() == "BUY" or _store_facing_text_implies_order(row["reason_short"])
+        ):
+            add_issue(
+                issue_type="BUY_OR_ORDER_TEXT_WITH_ZERO_ORDER_UNITS",
+                row=row,
+                proposed_field="operator_action",
+                cleanup_fix="Zero-order rows must not present BUY or ORDER language in visible action or reason fields.",
+                severity="HIGH",
+                detail=(
+                    f"operator_decision={row['operator_decision']}; operator_action={row['operator_action']}; "
+                    f"order_units={row['order_units']}; reason_short={row['reason_short']}"
+                ),
+                fix_priority=1,
+            )
+
+    for shadow_column in STORE_FACING_SHADOW_POLICY_COLUMNS:
+        if shadow_column in operator_output_frame.columns:
+            add_issue(
+                issue_type="SHADOW_FIELDS_VISIBLE_IN_OPERATOR_REPORT",
+                row=None,
+                proposed_field="audit_only_shadow_fields",
+                cleanup_fix="Move shadow-policy internals to audit-only artifacts.",
+                severity="HIGH",
+                detail=shadow_column,
+                fix_priority=4,
+            )
+
+    for internal_column in STORE_FACING_INTERNAL_ORDER_STATE_COLUMNS:
+        if internal_column in operator_output_frame.columns:
+            add_issue(
+                issue_type="MULTIPLE_ACTION_COLUMNS_CONFLICT",
+                row=None,
+                proposed_field="order_units",
+                cleanup_fix="Keep one visible order_units field and move raw or provisional quantity states to audit-only outputs.",
+                severity="HIGH",
+                detail=internal_column,
+                fix_priority=2,
+            )
+
+    if not issue_rows:
+        return pd.DataFrame(
+            columns=[
+                "issue_type",
+                "sku_number",
+                "sku_description",
+                "proposed_field",
+                "cleanup_fix",
+                "severity",
+                "detail",
+                "fix_priority",
+            ]
+        )
+    return pd.DataFrame(issue_rows).sort_values(
+        by=["fix_priority", "issue_type", "sku_number"],
+        ascending=[True, True, True],
+        kind="stable",
+    ).reset_index(drop=True)
+
+
+def _build_store_facing_contract_cleanup_summary_frame(
+    *,
+    issue_frame: pd.DataFrame,
+    total_row_count: int,
+) -> pd.DataFrame:
+    if issue_frame.empty:
+        return pd.DataFrame(
+            [
+                {
+                    "issue_type": "TOTAL_STORE_FACING_CLEANUP_ISSUES",
+                    "issue_count": 0,
+                    "severity": "SUMMARY",
+                    "proposed_field": "",
+                    "cleanup_fix": "",
+                    "fix_priority": 0,
+                    "sample_skus": "",
+                    "total_row_count": int(total_row_count),
+                }
+            ]
+        )
+    grouped = (
+        issue_frame.groupby(
+            ["issue_type", "severity", "proposed_field", "cleanup_fix", "fix_priority"],
+            dropna=False,
+        )
+        .agg(
+            issue_count=("issue_type", "size"),
+            sample_skus=(
+                "sku_number",
+                lambda values: ", ".join(
+                    list(
+                        dict.fromkeys(
+                            [
+                                value
+                                for value in pd.Series(values).astype(str)
+                                if value.strip() and value.strip().upper() != "SCHEMA_LEVEL"
+                            ]
+                        )
+                    )[:5]
+                ),
+            ),
+        )
+        .reset_index()
+        .sort_values(
+            by=["fix_priority", "issue_count", "issue_type"],
+            ascending=[True, False, True],
+            kind="stable",
+        )
+    )
+    grouped["total_row_count"] = int(total_row_count)
+    total_row = pd.DataFrame(
+        [
+            {
+                "issue_type": "TOTAL_STORE_FACING_CLEANUP_ISSUES",
+                "issue_count": int(len(issue_frame.index)),
+                "severity": "SUMMARY",
+                "proposed_field": "",
+                "cleanup_fix": "",
+                "fix_priority": 0,
+                "sample_skus": "",
+                "total_row_count": int(total_row_count),
+            }
+        ]
+    )
+    return pd.concat([total_row, grouped], ignore_index=True)
 
 
 def _compose_execution_readiness_status(action: pd.Series) -> pd.Series:
     action_upper = action.astype(str).str.strip().str.upper()
     readiness = pd.Series("BLOCKED", index=action.index, dtype="object")
-    readiness = readiness.where(~action_upper.eq("ORDER"), "READY")
-    readiness = readiness.where(~action_upper.eq("REVIEW"), "REVIEW_REQUIRED")
+    readiness = readiness.where(~action_upper.eq("ORDER"), "READY_TO_ORDER")
+    readiness = readiness.where(~action_upper.isin({"REVIEW", "REVIEW_REQUIRED"}), "REVIEW_REQUIRED")
+    readiness = readiness.where(~action_upper.isin({"HOLD", "HOLD_MONITOR"}), "MONITOR")
+    readiness = readiness.where(
+        ~action_upper.isin({"DO_NOT_ORDER", "DO_NOT_ORDER_LOW_VALUE"}),
+        "NO_ORDER",
+    )
     return readiness
+
+
+def _compose_store_facing_action_label(
+    *,
+    action: pd.Series,
+    publish_eligibility_reason: pd.Series | None = None,
+) -> pd.Series:
+    action_upper = action.astype(str).str.strip().str.upper()
+    publish_reason = pd.Series("", index=action.index, dtype="object")
+    if publish_eligibility_reason is not None:
+        publish_reason = publish_eligibility_reason.reindex(action.index).fillna("").astype(str).str.strip()
+
+    display_action = action_upper.copy()
+    display_action = display_action.where(~action_upper.eq("REVIEW"), "REVIEW_REQUIRED")
+    display_action = display_action.where(~action_upper.eq("HOLD"), "HOLD_MONITOR")
+    low_value_non_buy = action_upper.eq("DO_NOT_ORDER") & publish_reason.eq(
+        PUBLISH_ELIGIBILITY_REASON_EXCLUDED_LEGITIMATE_DO_NOT_ORDER_LOW_INCREMENTAL_VALUE
+    )
+    display_action = display_action.where(~low_value_non_buy, "DO_NOT_ORDER_LOW_VALUE")
+    return display_action
+
+
+def _compose_store_user_action_label(action: pd.Series) -> pd.Series:
+    action_upper = action.astype(str).str.strip().str.upper()
+    display_action = pd.Series("REVIEW", index=action.index, dtype="object")
+    display_action = display_action.where(~action_upper.eq("ORDER"), "BUY")
+    display_action = display_action.where(~action_upper.isin({"HOLD", "HOLD_MONITOR"}), "HOLD")
+    display_action = display_action.where(
+        ~action_upper.isin({"DO_NOT_ORDER", "DO_NOT_ORDER_LOW_VALUE"}),
+        "DO NOT BUY",
+    )
+    display_action = display_action.where(~action_upper.isin({"REVIEW", "REVIEW_REQUIRED"}), "REVIEW")
+    return display_action
+
+
+def _compose_store_user_status_label(status: pd.Series) -> pd.Series:
+    status_upper = status.astype(str).str.strip().str.upper()
+    display_status = pd.Series("REVIEW", index=status.index, dtype="object")
+    display_status = display_status.where(~status_upper.eq("READY_TO_ORDER"), "READY")
+    display_status = display_status.where(~status_upper.eq("MONITOR"), "MONITOR")
+    display_status = display_status.where(~status_upper.eq("NO_ORDER"), "NO BUY")
+    display_status = display_status.where(~status_upper.eq("REVIEW_REQUIRED"), "REVIEW")
+    return display_status
+
+
+def _build_store_action_label_frame(
+    *,
+    store_frame: pd.DataFrame,
+    display_action: pd.Series,
+    data_quality_flag: pd.Series,
+    discount_reason_code: pd.Series | None = None,
+    publish_eligibility_reason: pd.Series,
+    review_reason: pd.Series,
+) -> pd.DataFrame:
+    index = store_frame.index
+    display_upper = display_action.astype(str).str.strip().str.upper()
+    quality_upper = data_quality_flag.astype(str).str.strip().str.upper()
+    discount_reason = (
+        discount_reason_code.reindex(index).fillna("").astype(str).str.strip()
+        if discount_reason_code is not None
+        else pd.Series("", index=index, dtype="object")
+    )
+    publish_reason = publish_eligibility_reason.reindex(index).fillna("").astype(str).str.strip()
+    review_reason_text = review_reason.reindex(index).fillna("").astype(str).str.strip()
+    demand_class = store_frame["demand_evidence_class"].fillna("").astype(str).str.strip().str.lower()
+    confidence = pd.to_numeric(store_frame["model_confidence_percent"], errors="coerce").fillna(0.0).divide(100.0)
+    current_soh = pd.to_numeric(store_frame["current_soh"], errors="coerce").fillna(0.0)
+    projected_soh = pd.to_numeric(store_frame["projected_on_hand_at_promo_start"], errors="coerce").fillna(current_soh)
+    expected_demand = pd.to_numeric(store_frame["expected_promo_demand"], errors="coerce").fillna(0.0).clip(lower=0.0)
+    available_to_sell_before_floor = pd.to_numeric(
+        store_frame["available_to_sell_before_floor"], errors="coerce"
+    ).fillna(0.0).clip(lower=0.0)
+    recommended_units = pd.to_numeric(store_frame["recommended_order_units"], errors="coerce").fillna(0.0).clip(lower=0.0)
+    leftover_units = pd.to_numeric(store_frame["estimated_leftover_units"], errors="coerce").fillna(0.0).clip(lower=0.0)
+    capital_at_risk = pd.to_numeric(store_frame["capital_at_risk_adjusted_dollars"], errors="coerce").fillna(0.0).clip(lower=0.0)
+    expected_gp = pd.to_numeric(store_frame["expected_gp_on_speculative_units"], errors="coerce").fillna(0.0)
+    value_relief_delta = pd.to_numeric(store_frame["low_nonzero_value_relief_delta"], errors="coerce").fillna(0.0)
+    same_discount_events = pd.to_numeric(store_frame["historical_promo_events_same_discount"], errors="coerce").fillna(0.0)
+    better_discount_events = pd.to_numeric(store_frame["historical_promo_events_same_or_better_discount"], errors="coerce").fillna(0.0)
+    same_discount_units = pd.to_numeric(store_frame["historical_units_same_discount_avg"], errors="coerce").fillna(0.0)
+    better_discount_units = pd.to_numeric(store_frame["historical_units_same_or_better_discount_avg"], errors="coerce").fillna(0.0)
+
+    no_promo_history = same_discount_events.add(better_discount_events).le(0.0)
+    zero_sales_promo_history = same_discount_events.add(better_discount_events).gt(0.0) & same_discount_units.add(better_discount_units).le(0.0)
+    floor_units = pd.Series(MIN_LAUNCH_STOCK_UNITS, index=index, dtype="float64")
+    if "floor_units_required" in store_frame.columns:
+        floor_units = pd.to_numeric(store_frame["floor_units_required"], errors="coerce").fillna(MIN_LAUNCH_STOCK_UNITS).clip(lower=0.0)
+    floor_protected = expected_demand.le(available_to_sell_before_floor) | projected_soh.sub(expected_demand).ge(floor_units)
+    low_projected_soh = projected_soh.le(1.0)
+    baseline_demand_present = current_soh.gt(0.0) | expected_demand.gt(0.0) | same_discount_units.add(better_discount_units).gt(0.0)
+    credible_demand = expected_demand.gt(0.0) & ~demand_class.isin(
+        {
+            "true_zero_demand",
+            "no_evidence_skip",
+            "evidence_supported_zero",
+            "artificial_collapse",
+        }
+    )
+    weak_or_no_demand = (
+        expected_demand.le(1.0)
+        | demand_class.isin({"true_zero_demand", "no_evidence_skip", "evidence_supported_zero"})
+        | (no_promo_history & expected_demand.le(2.0))
+        | zero_sales_promo_history
+    )
+    below_floor_now = current_soh.lt(MIN_LAUNCH_STOCK_UNITS)
+    projected_below_floor = projected_soh.lt(MIN_LAUNCH_STOCK_UNITS)
+    low_demand_covered = projected_soh.ge(MIN_LAUNCH_STOCK_UNITS) & expected_demand.le(
+        available_to_sell_before_floor
+    )
+    demand_exceeds_floor_buffer = expected_demand.gt(available_to_sell_before_floor)
+    floor_or_lost_sales_risk = credible_demand & (
+        below_floor_now
+        | projected_below_floor
+        | (~weak_or_no_demand & demand_exceeds_floor_buffer)
+    )
+    current_floor_protection_risk = credible_demand & below_floor_now & (
+        confidence.ge(0.75) | ~weak_or_no_demand
+    )
+    projected_floor_protection_risk = (
+        credible_demand
+        & projected_below_floor
+        & ~low_demand_covered
+        & ~weak_or_no_demand
+    )
+    protectable_floor_risk = current_floor_protection_risk | projected_floor_protection_risk | (
+        credible_demand & ~weak_or_no_demand & demand_exceeds_floor_buffer
+    )
+    blocking_discount_quality = discount_reason.isin(
+        {
+            DISCOUNT_REVIEW_REASON_HARD_MISSING_PRICES,
+            DISCOUNT_REVIEW_REASON_HARD_INVALID_NORMAL,
+            DISCOUNT_REVIEW_REASON_HARD_INVALID_PROMO,
+            DISCOUNT_REVIEW_REASON_MAPPING_CONFLICT,
+        }
+    )
+    data_quality_review = quality_upper.eq("COLLAPSED_FORECAST") | blocking_discount_quality
+    stock_gap_policy = review_reason_text.eq("policy_stock_gap_high") | publish_reason.eq("policy_stock_gap_high")
+    sparse_history_policy = review_reason_text.eq("policy_sparse_history_multi_driver") | publish_reason.eq("policy_sparse_history_multi_driver")
+    confidence_review = review_reason_text.eq("review_low_confidence") | publish_reason.eq("review_low_confidence")
+    leftover_review = review_reason_text.eq("review_high_leftover_risk") | publish_reason.eq("review_high_leftover_risk")
+    capital_drag_high = (
+        projected_soh.gt(MIN_LAUNCH_STOCK_UNITS)
+        & ~no_promo_history
+        & ~zero_sales_promo_history
+        & expected_demand.le(available_to_sell_before_floor.clip(lower=1.0))
+        & (
+            leftover_units.ge(2.0)
+            | capital_at_risk.gt(expected_gp.clip(lower=0.0).add(1.0))
+            | publish_reason.isin({"do_not_order", "do_not_order_low_incremental_value", "hold_inventory_sufficient"})
+        )
+    )
+    label = pd.Series("HOLD_STOCK", index=index, dtype="object")
+    label = label.where(~(weak_or_no_demand & ~below_floor_now & no_promo_history), "NEVER_SOLD_IN_PROMO")
+    label = label.where(~(weak_or_no_demand & ~below_floor_now & ~no_promo_history), "NO_DEMAND")
+    label = label.where(~(low_demand_covered & ~weak_or_no_demand), "HOLD_STOCK_FLOOR_SAFE")
+    label = label.where(~capital_drag_high, "REDUCE_HOLDING")
+    label = label.where(~(protectable_floor_risk & display_upper.eq("ORDER") & recommended_units.gt(0.0) & expected_demand.gt(2.0)), "BUY")
+    label = label.where(
+        ~(protectable_floor_risk & (below_floor_now | (projected_below_floor & ~low_demand_covered))),
+        "PROTECT_AVAILABILITY",
+    )
+    borderline_review = display_upper.isin({"REVIEW", "REVIEW_REQUIRED"}) & (
+        (floor_or_lost_sales_risk & ~below_floor_now & ~projected_below_floor)
+        | (value_relief_delta.gt(0.0) & stock_gap_policy)
+        | (credible_demand & confidence_review & current_soh.le(MIN_LAUNCH_STOCK_UNITS))
+    )
+    label = label.where(~borderline_review, "BORDERLINE_OOS_REVIEW")
+    label = label.where(~data_quality_review, "DATA_QUALITY_REVIEW")
+
+    label = label.where(~(label.eq("HOLD_STOCK") & floor_protected), "HOLD_STOCK_FLOOR_SAFE")
+    label = label.where(~(label.eq("HOLD_STOCK") & low_projected_soh & weak_or_no_demand), "LOW_SOH_NO_AUTO_BUY")
+    label = label.where(~(label.eq("HOLD_STOCK") & low_projected_soh), "LOW_SOH_BORDERLINE_REVIEW")
+    label = label.where(~(label.eq("NO_DEMAND") & low_projected_soh), "LOW_SOH_NO_AUTO_BUY")
+    label = label.where(~(label.eq("NEVER_SOLD_IN_PROMO") & low_projected_soh), "NO_PRIOR_PROMO_EVIDENCE_LOW_SOH_REVIEW")
+    label = label.where(~(label.eq("NEVER_SOLD_IN_PROMO") & baseline_demand_present), "NO_PRIOR_PROMO_EVIDENCE_BASELINE_DEMAND")
+    label = label.where(~label.eq("NEVER_SOLD_IN_PROMO"), "NO_PRIOR_PROMO_EVIDENCE_LOW_RISK")
+    label_v2 = label.copy()
+
+    demand_label = pd.Series("CREDIBLE_PROMO_DEMAND", index=index, dtype="object")
+    demand_label = demand_label.where(~demand_class.eq("low_nonzero_demand"), "LOW_NONZERO_DEMAND")
+    demand_label = demand_label.where(~demand_class.isin({"cold_start", "insufficient_history", "sparse_history"}), "SPARSE_HISTORY")
+    demand_label = demand_label.where(~weak_or_no_demand, "NO_DEMAND")
+    demand_label = demand_label.where(~(no_promo_history | zero_sales_promo_history), "NEVER_SOLD_IN_PROMO")
+
+    availability_label = pd.Series("FLOOR_PROTECTED", index=index, dtype="object")
+    availability_label = availability_label.where(~(credible_demand & demand_exceeds_floor_buffer), "FLOOR_PROTECTION_NEEDED")
+    availability_label = availability_label.where(~(current_soh.gt(0.0) & below_floor_now), "BELOW_2_UNIT_FLOOR_RISK")
+    availability_label = availability_label.where(~current_soh.le(0.0), "ZERO_SOH_RISK")
+
+    capital_label = pd.Series("CAPITAL_DRAG_LOW", index=index, dtype="object")
+    capital_label = capital_label.where(~(projected_soh.gt(MIN_LAUNCH_STOCK_UNITS) & weak_or_no_demand), "CAPITAL_DRAG_WATCH")
+    capital_label = capital_label.where(~capital_drag_high, "CAPITAL_DRAG_HIGH")
+
+    blocker = pd.Series("", index=index, dtype="object")
+    blocker = blocker.where(~(blocking_discount_quality & blocker.eq("")), discount_reason)
+    blocker = blocker.where(~stock_gap_policy, "policy_stock_gap_high")
+    blocker = blocker.where(~(sparse_history_policy & blocker.eq("")), "policy_sparse_history_multi_driver")
+    blocker = blocker.where(~(leftover_review & blocker.eq("")), "review_high_leftover_risk")
+    blocker = blocker.where(~(confidence_review & blocker.eq("")), "review_low_confidence")
+    blocker = blocker.where(~(data_quality_review & blocker.eq("")), quality_upper)
+    blocker = blocker.where(~(value_relief_delta.gt(0.0) & blocker.eq("")), "low_nonzero_value_relief_visible")
+
+    reason = pd.Series("Hold stock. Current stock is expected to cover this promotion while preserving the 2-unit availability floor.", index=index, dtype="object")
+    reason = reason.where(~label.eq("BUY"), "Buy controlled quantity. Expected demand exceeds available stock after protecting the 2-unit floor.")
+    reason = reason.where(~label.eq("PROTECT_AVAILABILITY"), "Buy controlled quantity. SOH is below the 2-unit floor and credible demand could create lost sales or online unavailability.")
+    reason = reason.where(~label.eq("HOLD_STOCK_FLOOR_SAFE"), "Do not buy. Projected stock covers expected promotion demand while preserving the 2-unit availability floor.")
+    reason = reason.where(~label.eq("LOW_SOH_NO_AUTO_BUY"), "Do not auto-order. Projected SOH is low, but demand evidence is weak, so the system is not allocating extra capital automatically.")
+    reason = reason.where(~label.eq("LOW_SOH_PROTECT_AVAILABILITY"), "Diagnostics only. Low projected SOH and credible demand may justify a tightly capped availability-protection order.")
+    reason = reason.where(~label.eq("LOW_SOH_BORDERLINE_REVIEW"), "Review only. Projected SOH is low and missed-sales risk is plausible, but guardrails are not strong enough for automatic order.")
+    reason = reason.where(~label.eq("REDUCE_HOLDING"), "Do not buy. Current holding is high relative to expected demand and creates capital drag.")
+    reason = reason.where(~label.eq("NO_DEMAND"), "Do not buy. Demand evidence does not justify additional capital.")
+    reason = reason.where(~label.eq("NEVER_SOLD_IN_PROMO"), "Do not buy by default. There is no reliable evidence this SKU sells in promotions.")
+    reason = reason.where(~label.eq("NO_PRIOR_PROMO_EVIDENCE_LOW_RISK"), "Do not buy by default. There is no prior promotion evidence and projected stock risk is low.")
+    reason = reason.where(~label.eq("NO_PRIOR_PROMO_EVIDENCE_LOW_SOH_REVIEW"), "Review only. There is no prior promotion evidence, but low projected SOH could still create missed-sales risk.")
+    reason = reason.where(~label.eq("NO_PRIOR_PROMO_EVIDENCE_BASELINE_DEMAND"), "Review only. Prior promotion evidence is missing, but baseline demand means the SKU should not be treated as true no-demand.")
+    reason = reason.where(~label.eq("BORDERLINE_OOS_REVIEW"), "Review only. SKU is near the buy boundary and may fall below the 2-unit availability floor or has value relief blocked by policy.")
+    reason = reason.where(~label.eq("DATA_QUALITY_REVIEW"), "Review only. Required inputs are missing, inconsistent, or materially suspect.")
+    reason = reason.where(
+        ~label.eq("HOLD_STOCK"),
+        "Do not buy. Current SOH is expected to cover this promotion and protects the online availability floor.",
+    )
+
+    return pd.DataFrame(
+        {
+            "store_action_label": label,
+            "store_action_label_v2": label_v2,
+            "store_action_reason": reason,
+            "demand_evidence_label": demand_label,
+            "availability_risk_label": availability_label,
+            "capital_drag_label": capital_label,
+            "blocker_reason": blocker,
+            "human_review_required_flag": label.isin({"BORDERLINE_OOS_REVIEW", "DATA_QUALITY_REVIEW"}).astype(int),
+        },
+        index=index,
+    )
+
+
+def _build_segmented_pl_proved_shadow_policy(
+    *,
+    label_value: str,
+    projected_soh_value: float,
+    floor_value: float,
+    expected_value: float,
+    available_value: float,
+    availability_label_value: str,
+    demand_label_value: str,
+    capital_label_value: str,
+    blocker_value: str,
+    promo_allocated_value: float,
+    unit_cost_value: float,
+    pack_size_value: float,
+    avg_daily_value: float,
+    estimated_leftover_value: float,
+    data_quality_value: str,
+) -> dict[str, object]:
+    label_upper = str(label_value or "").strip().upper()
+    availability_upper = str(availability_label_value or "").strip().upper()
+    demand_upper = str(demand_label_value or "").strip().upper()
+    capital_upper = str(capital_label_value or "").strip().upper()
+    blocker_text = str(blocker_value or "").strip()
+    data_quality_upper = str(data_quality_value or "").strip().upper()
+
+    projected_soh_numeric = max(float(projected_soh_value or 0.0), 0.0)
+    floor_numeric = max(float(floor_value or 0.0), 0.0)
+    expected_numeric = max(float(expected_value or 0.0), 0.0)
+    available_numeric = max(float(available_value or 0.0), 0.0)
+    promo_allocated_numeric = max(float(promo_allocated_value or 0.0), 0.0)
+    unit_cost_numeric = max(float(unit_cost_value or 0.0), 0.0)
+    pack_size_numeric = max(float(pack_size_value or 0.0), 1.0)
+    avg_daily_numeric = max(float(avg_daily_value or 0.0), 0.0)
+    estimated_leftover_numeric = max(float(estimated_leftover_value or 0.0), 0.0)
+
+    low_soh_risk_present = (
+        availability_upper in HIGH_AVAILABILITY_RISK_LABELS
+        or projected_soh_numeric <= max(floor_numeric, 2.0)
+    )
+    current_ff_executable_zero = label_upper in NON_EXECUTABLE_STORE_ACTION_LABELS
+    availability_gap_present = (
+        expected_numeric > available_numeric
+        or projected_soh_numeric < max(floor_numeric, 2.0)
+    )
+    pl_allocation_signal_present = promo_allocated_numeric > 0.0
+    pl_shadow_strength_sufficient = (
+        promo_allocated_numeric >= SEGMENTED_PL_PROVED_SHADOW_MIN_PROMO_ALLOCATED_UNITS
+    )
+    pack_guardrail_pass = pack_size_numeric <= LOW_SOH_POLICY_MAX_PACK_SIZE_AUTO_ORDER
+    cost_guardrail_pass = unit_cost_numeric <= LOW_SOH_POLICY_MAX_UNIT_COST_AUTO_ORDER
+    capital_drag_guardrail_pass = capital_upper != "CAPITAL_DRAG_HIGH"
+    target_excess_guardrail_pass = estimated_leftover_numeric <= max(expected_numeric, floor_numeric)
+    forecast_guardrail_pass = data_quality_upper not in {"COLLAPSED_FORECAST", "REVIEW_FORECAST"}
+    hard_data_guardrail_pass = not blocker_text.startswith("HARD_DATA_FAILURE")
+    demand_present = demand_upper in DYNAMIC_DEMAND_EVIDENCE_LABELS
+    demand_shadow_fallback_present = (
+        pl_shadow_strength_sufficient
+        and expected_numeric > 0.0
+        and low_soh_risk_present
+        and availability_gap_present
+        and pack_guardrail_pass
+        and cost_guardrail_pass
+        and capital_drag_guardrail_pass
+        and target_excess_guardrail_pass
+        and forecast_guardrail_pass
+        and hard_data_guardrail_pass
+    )
+    demand_proxy_satisfied = demand_present or demand_shadow_fallback_present
+    baseline_demand_present = expected_numeric >= 1.0 or avg_daily_numeric > 0.0
+    eligible_label = label_upper in LOW_SOH_POLICY_ELIGIBLE_LABELS
+
+    candidate_flag = int(
+        low_soh_risk_present
+        and current_ff_executable_zero
+        and availability_gap_present
+        and pl_shadow_strength_sufficient
+        and demand_proxy_satisfied
+        and baseline_demand_present
+        and eligible_label
+    )
+
+    blockers: list[str] = []
+    if not low_soh_risk_present:
+        blockers.append("NO_LOW_SOH_RISK")
+    if not current_ff_executable_zero:
+        blockers.append("FF_ALREADY_EXECUTABLE")
+    if not availability_gap_present:
+        blockers.append("NO_AVAILABILITY_GAP")
+    if not pl_allocation_signal_present:
+        blockers.append("NO_PL_ALLOCATION_SIGNAL")
+    elif not pl_shadow_strength_sufficient:
+        blockers.append("PL_ALLOCATION_BELOW_SHADOW_STRENGTH_THRESHOLD")
+    if not demand_proxy_satisfied:
+        blockers.append("NO_PROVEN_DEMAND_SIGNAL")
+    if not baseline_demand_present:
+        blockers.append("NO_EXPECTED_OR_BASELINE_DEMAND")
+    if not eligible_label:
+        blockers.append("LABEL_NOT_SHADOW_ELIGIBLE")
+    if not pack_guardrail_pass:
+        blockers.append("PACK_MOQ_UNECONOMIC")
+    if not cost_guardrail_pass:
+        blockers.append("HIGH_COST_LOW_CONFIDENCE")
+    if not capital_drag_guardrail_pass:
+        blockers.append("CAPITAL_DRAG_HIGH")
+    if not forecast_guardrail_pass:
+        blockers.append("FORECAST_REVIEW_REQUIRED")
+    if not hard_data_guardrail_pass:
+        blockers.append("HARD_DATA_FAILURE")
+    if not target_excess_guardrail_pass:
+        blockers.append("ENDING_STOCK_EXCESS_PROXY")
+
+    shadow_pass = candidate_flag == 1 and len(blockers) == 0
+    shadow_order_units = 1 if shadow_pass else 0
+    shadow_capital_at_risk = round(shadow_order_units * unit_cost_numeric, 2)
+    if demand_present:
+        shadow_reason = (
+            "Segmented PL-proved shadow policy would place a governed 1-unit shadow order because PL allocation meets the shadow strength threshold, demand is evidenced, and availability risk is present while Stage 11 remains non-executable."
+        )
+    else:
+        shadow_reason = (
+            "Segmented PL-proved shadow policy would place a governed 1-unit shadow order because promo_allocated_units meets the shadow strength threshold, expected promo demand is above zero, and guarded shadow-only demand fallback is satisfied while Stage 11 remains non-executable."
+        )
+    shadow_blocker_reason = "" if shadow_pass else ";".join(dict.fromkeys(blockers))
+
+    return {
+        "shadow_policy_name": SHADOW_POLICY_NAME_SEGMENTED_PL_PROVED_ORDER_1,
+        "shadow_policy_version": SHADOW_POLICY_VERSION_SEGMENTED_PL_PROVED_ORDER_1,
+        "shadow_policy_candidate_flag": candidate_flag,
+        "shadow_policy_segment": SHADOW_POLICY_SEGMENT_PL_PROVED_DEMAND_BUT_OVERBOUGHT if candidate_flag == 1 else "",
+        "shadow_policy_order_units": shadow_order_units,
+        "shadow_policy_capital_at_risk": shadow_capital_at_risk,
+        "shadow_policy_expected_reason": shadow_reason if candidate_flag == 1 else "",
+        "shadow_policy_guardrail_status": SHADOW_POLICY_GUARDRAIL_PASS if shadow_pass else SHADOW_POLICY_GUARDRAIL_BLOCKED,
+        "shadow_policy_blocker_reason": shadow_blocker_reason,
+        "shadow_policy_should_publish_flag": 0,
+        "shadow_policy_should_affect_final_order_flag": 0,
+    }
+
+
+def _build_store_order_reconciliation_frame(
+    *,
+    store_frame: pd.DataFrame,
+) -> pd.DataFrame:
+    index = store_frame.index
+    label = store_frame["store_action_label"].fillna("").astype(str).str.strip().str.upper()
+    if "raw_model_order_units" in store_frame.columns:
+        raw_units_source = store_frame["raw_model_order_units"]
+    else:
+        raw_units_source = store_frame["recommended_order_units"]
+    raw_units = pd.to_numeric(raw_units_source, errors="coerce").fillna(0.0).clip(lower=0.0)
+    raw_value = pd.to_numeric(
+        store_frame.get(
+            "raw_model_order_value",
+            pd.Series(0.0, index=index, dtype="float64"),
+        ),
+        errors="coerce",
+    ).fillna(0.0).clip(lower=0.0)
+    if "projected_SOH_at_promo_start" in store_frame.columns:
+        projected_soh_source = store_frame["projected_SOH_at_promo_start"]
+    else:
+        projected_soh_source = store_frame["projected_on_hand_at_promo_start"]
+    projected_soh = pd.to_numeric(projected_soh_source, errors="coerce").fillna(0.0).clip(lower=0.0)
+    floor_units = pd.to_numeric(store_frame["floor_units_required"], errors="coerce").fillna(
+        MIN_LAUNCH_STOCK_UNITS
+    )
+    expected_demand = pd.to_numeric(store_frame["expected_promo_demand"], errors="coerce").fillna(0.0).clip(lower=0.0)
+    available_to_sell_before_floor = pd.to_numeric(
+        store_frame["available_to_sell_before_floor"], errors="coerce"
+    ).fillna(0.0).clip(lower=0.0)
+    projected_stock_gap_units = pd.to_numeric(
+        store_frame["projected_stock_gap_units"], errors="coerce"
+    ).fillna(0.0).clip(lower=0.0)
+    risk_reward_ratio = pd.to_numeric(
+        store_frame["retail_risk_reward_ratio"], errors="coerce"
+    ).fillna(0.0)
+    availability_risk_label = store_frame["availability_risk_label"].fillna("").astype(str).str.strip().str.upper()
+    demand_evidence_label = store_frame["demand_evidence_label"].fillna("").astype(str).str.strip().str.upper()
+    capital_drag_label = store_frame["capital_drag_label"].fillna("").astype(str).str.strip().str.upper()
+    blocker_reason = store_frame["blocker_reason"].fillna("").astype(str).str.strip()
+    unit_cost = raw_value.divide(raw_units.where(raw_units.gt(0.0))).replace([np.inf, -np.inf], np.nan).fillna(0.0)
+    pack_size = pd.to_numeric(
+        store_frame.get("pack_size", pd.Series(1.0, index=index, dtype="float64")),
+        errors="coerce",
+    ).fillna(1.0).clip(lower=1.0)
+    avg_daily_units = pd.to_numeric(
+        store_frame.get(
+            "expected_units_per_day",
+            store_frame.get("avg_daily_units", pd.Series(0.0, index=index, dtype="float64")),
+        ),
+        errors="coerce",
+    ).fillna(0.0).clip(lower=0.0)
+    expected_gp = pd.to_numeric(
+        store_frame.get("expected_gp_on_speculative_units", pd.Series(0.0, index=index, dtype="float64")),
+        errors="coerce",
+    ).fillna(0.0)
+    promo_allocated_units = pd.to_numeric(
+        store_frame.get("promo_allocated_units", pd.Series(0.0, index=index, dtype="float64")),
+        errors="coerce",
+    ).fillna(0.0).clip(lower=0.0)
+    estimated_leftover_units = pd.to_numeric(
+        store_frame.get("estimated_leftover_units", pd.Series(0.0, index=index, dtype="float64")),
+        errors="coerce",
+    ).fillna(0.0).clip(lower=0.0)
+    data_quality_flag = store_frame.get("data_quality_flag", pd.Series("", index=index, dtype="object")).fillna("").astype(str).str.strip().str.upper()
+
+    provisional_units: list[int] = []
+    final_units: list[int] = []
+    provisional_values: list[float] = []
+    final_values: list[float] = []
+    low_soh_policy_versions: list[str] = []
+    low_soh_candidate_flags: list[int] = []
+    low_soh_production_eligible_flags: list[int] = []
+    low_soh_final_order_units: list[int] = []
+    low_soh_capital_at_risk_values: list[float] = []
+    low_soh_policy_reasons: list[str] = []
+    low_soh_guardrail_statuses: list[str] = []
+    low_soh_blocker_reasons: list[str] = []
+    low_soh_decision_sources: list[str] = []
+    shadow_policy_names: list[str] = []
+    shadow_policy_versions: list[str] = []
+    shadow_policy_candidate_flags: list[int] = []
+    shadow_policy_segments: list[str] = []
+    shadow_policy_order_units_values: list[int] = []
+    shadow_policy_capital_at_risk_values: list[float] = []
+    shadow_policy_expected_reasons: list[str] = []
+    shadow_policy_guardrail_statuses: list[str] = []
+    shadow_policy_blocker_reasons: list[str] = []
+    shadow_policy_should_publish_flags: list[int] = []
+    shadow_policy_should_affect_final_order_flags: list[int] = []
+    statuses: list[str] = []
+    reasons: list[str] = []
+
+    def _floor_protected(
+        *,
+        projected_soh_value: float,
+        expected_demand_value: float,
+        available_value: float,
+        floor_value: float,
+    ) -> bool:
+        projected_soh_numeric = max(float(projected_soh_value or 0.0), 0.0)
+        expected_demand_numeric = max(float(expected_demand_value or 0.0), 0.0)
+        available_numeric = max(float(available_value or 0.0), 0.0)
+        floor_numeric = max(float(floor_value or 0.0), 0.0)
+        return (
+            expected_demand_numeric <= available_numeric
+            or (projected_soh_numeric - expected_demand_numeric) >= floor_numeric
+        )
+
+    def _weak_demand_no_auto_order_reason(
+        *,
+        projected_soh_int: int,
+        floor_units_int: int,
+    ) -> str:
+        if projected_soh_int < floor_units_int:
+            return (
+                f"Do not auto-order. Projected SOH is below the {floor_units_int}-unit floor, but demand evidence is weak, "
+                "so the system is not allocating extra capital automatically."
+            )
+        return (
+            f"Do not auto-order. Projected SOH could fall below the {floor_units_int}-unit floor if demand materialises, "
+            "but demand evidence is weak, so the system is not allocating extra capital automatically."
+        )
+
+    def _low_soh_policy_order_units(
+        *,
+        projected_soh_value: float,
+        floor_value: float,
+        expected_value: float,
+        available_value: float,
+        raw_units_value: float,
+    ) -> int:
+        floor_gap_units = max(float(floor_value or 0.0) - float(projected_soh_value or 0.0), 0.0)
+        demand_gap_units = max(float(expected_value or 0.0) - float(available_value or 0.0), 0.0)
+        controlled_need_units = max(
+            floor_gap_units,
+            min(demand_gap_units, float(LOW_SOH_POLICY_MAX_AUTO_ORDER_UNITS)),
+        )
+        capped_units = min(math.ceil(controlled_need_units), LOW_SOH_POLICY_MAX_AUTO_ORDER_UNITS)
+        if float(expected_value or 0.0) <= 1.0 and float(projected_soh_value or 0.0) > 0.0:
+            capped_units = min(capped_units, 1)
+        if float(expected_value or 0.0) <= 2.0 and float(projected_soh_value or 0.0) > 0.0:
+            capped_units = min(capped_units, 2)
+        if float(raw_units_value or 0.0) > 0.0:
+            capped_units = min(capped_units, int(max(round(float(raw_units_value or 0.0)), 0)))
+        return int(max(capped_units, 0))
+
+    for label_value, raw_units_value, projected_soh_value, floor_value, expected_value, available_value, gap_value, ratio_value, availability_value, demand_value, capital_value, blocker_value, unit_cost_value, pack_size_value, avg_daily_value, expected_gp_value, promo_allocated_value, estimated_leftover_value, data_quality_value in zip(
+        label.tolist(),
+        raw_units.tolist(),
+        projected_soh.tolist(),
+        floor_units.tolist(),
+        expected_demand.tolist(),
+        available_to_sell_before_floor.tolist(),
+        projected_stock_gap_units.tolist(),
+        risk_reward_ratio.tolist(),
+        availability_risk_label.tolist(),
+        demand_evidence_label.tolist(),
+        capital_drag_label.tolist(),
+        blocker_reason.tolist(),
+        unit_cost.tolist(),
+        pack_size.tolist(),
+        avg_daily_units.tolist(),
+        expected_gp.tolist(),
+        promo_allocated_units.tolist(),
+        estimated_leftover_units.tolist(),
+        data_quality_flag.tolist(),
+        strict=False,
+    ):
+        raw_units_int = int(max(round(float(raw_units_value or 0.0)), 0))
+        projected_soh_int = int(max(round(float(projected_soh_value or 0.0)), 0))
+        floor_units_int = int(max(round(float(floor_value or 0.0)), 0))
+        expected_demand_int = int(max(round(float(expected_value or 0.0)), 0))
+        gap_int = int(max(round(float(gap_value or 0.0)), 0))
+        floor_protected = _floor_protected(
+            projected_soh_value=float(projected_soh_value or 0.0),
+            expected_demand_value=float(expected_value or 0.0),
+            available_value=float(available_value or 0.0),
+            floor_value=float(floor_value or 0.0),
+        )
+        availability_need_units = int(
+            max(
+                round(
+                    max(
+                        (float(floor_value or 0.0) + float(expected_value or 0.0))
+                        - float(projected_soh_value or 0.0),
+                        0.0,
+                    )
+                ),
+                0,
+            )
+        )
+        provisional_units_int = 0
+        final_units_int = raw_units_int
+        status_value = ORDER_RECONCILIATION_STATUS_EXECUTABLE_BUY
+        reason_value = (
+            f"Order now. Projected SOH at promotion start is {projected_soh_int}, expected demand is {expected_demand_int}, "
+            f"and the SKU is {gap_int} unit(s) short of target after protecting the {floor_units_int}-unit floor."
+        )
+        availability_risk_present = availability_value in {
+            "ZERO_SOH_RISK",
+            "BELOW_2_UNIT_FLOOR_RISK",
+            "FLOOR_PROTECTION_NEEDED",
+        }
+        shadow_policy = _build_segmented_pl_proved_shadow_policy(
+            label_value=str(label_value or ""),
+            projected_soh_value=float(projected_soh_value or 0.0),
+            floor_value=float(floor_value or 0.0),
+            expected_value=float(expected_value or 0.0),
+            available_value=float(available_value or 0.0),
+            availability_label_value=str(availability_value or ""),
+            demand_label_value=str(demand_value or ""),
+            capital_label_value=str(capital_value or ""),
+            blocker_value=str(blocker_value or ""),
+            promo_allocated_value=float(promo_allocated_value or 0.0),
+            unit_cost_value=float(unit_cost_value or 0.0),
+            pack_size_value=float(pack_size_value or 0.0),
+            avg_daily_value=float(avg_daily_value or 0.0),
+            estimated_leftover_value=float(estimated_leftover_value or 0.0),
+            data_quality_value=str(data_quality_value or ""),
+        )
+        shadow_policy_units_int = int(shadow_policy["shadow_policy_order_units"])
+        shadow_low_soh_candidate = int(shadow_policy["shadow_policy_candidate_flag"]) == 1
+        shadow_low_soh_pass = shadow_policy_units_int > 0
+        low_soh_production_eligible = False
+        low_soh_guardrail_status = str(shadow_policy["shadow_policy_guardrail_status"])
+        low_soh_blocker_reason = str(shadow_policy["shadow_policy_blocker_reason"])
+        low_soh_policy_reason = (
+            f"Governed shadow-only low-SOH policy {LOW_SOH_POLICY_VERSION}: {shadow_policy['shadow_policy_expected_reason']}"
+            if shadow_low_soh_pass
+            else f"Low-SOH shadow policy not eligible: {low_soh_blocker_reason or 'guardrails_not_met'}."
+        )
+
+        if label_value in PROVISIONAL_REVIEW_STORE_ACTION_LABELS:
+            provisional_units_int = raw_units_int
+            final_units_int = 0
+            status_value = ORDER_RECONCILIATION_STATUS_PROVISIONAL_REVIEW_ONLY
+            if label_value == "DATA_QUALITY_REVIEW":
+                blocker_text = blocker_value or "Required price, forecast, or policy inputs are inconsistent"
+                reason_value = (
+                    "Do not auto-order. Data-quality conflict prevents a governed executable order. "
+                    f"Review manually if commercially important. Blocker: {blocker_text}."
+                )
+            else:
+                reason_value = (
+                    f"Review only. The SKU is close to a buy decision, projected SOH at promotion start is {projected_soh_int}, "
+                    f"and confidence is not high enough for automatic order while protecting the {floor_units_int}-unit floor."
+                )
+        elif label_value in NON_EXECUTABLE_STORE_ACTION_LABELS:
+            final_units_int = 0
+            status_value = ORDER_RECONCILIATION_STATUS_SUPPRESSED_BY_LABEL_GOVERNANCE
+            if label_value in {"HOLD_STOCK", "HOLD_STOCK_FLOOR_SAFE"}:
+                if floor_protected:
+                    reason_value = (
+                        f"Do not buy. Projected SOH at promotion start is {projected_soh_int}, expected demand is {expected_demand_int}, "
+                        f"and the {floor_units_int}-unit floor is protected."
+                    )
+                else:
+                    reason_value = _weak_demand_no_auto_order_reason(
+                        projected_soh_int=projected_soh_int,
+                        floor_units_int=floor_units_int,
+                    )
+            elif label_value == "REDUCE_HOLDING":
+                reason_value = (
+                    f"Do not buy. Projected SOH is {projected_soh_int} against expected demand of {expected_demand_int}, creating capital drag. "
+                    "Use the promotion to sell through existing stock."
+                )
+            elif label_value in {"NO_DEMAND", "LOW_SOH_NO_AUTO_BUY"}:
+                if floor_protected:
+                    reason_value = (
+                        f"Do not buy. Demand evidence is weak and projected SOH of {projected_soh_int} already protects the {floor_units_int}-unit availability floor."
+                    )
+                else:
+                    reason_value = _weak_demand_no_auto_order_reason(
+                        projected_soh_int=projected_soh_int,
+                        floor_units_int=floor_units_int,
+                    )
+            elif label_value in {"LOW_SOH_PROTECT_AVAILABILITY", "LOW_SOH_BORDERLINE_REVIEW"}:
+                provisional_units_int = raw_units_int
+                reason_value = (
+                    f"Review only. Projected SOH at promotion start is {projected_soh_int}, expected demand is {expected_demand_int}, "
+                    f"and low-SOH protection remains shadow-only until actual-outcome guardrails pass."
+                )
+            elif label_value in {
+                "NEVER_SOLD_IN_PROMO",
+                "NO_PRIOR_PROMO_EVIDENCE",
+                "NO_PRIOR_PROMO_EVIDENCE_LOW_RISK",
+                "NO_PRIOR_PROMO_EVIDENCE_LOW_SOH_REVIEW",
+                "NO_PRIOR_PROMO_EVIDENCE_BASELINE_DEMAND",
+            }:
+                if floor_protected:
+                    reason_value = (
+                        f"Do not buy. Prior promotion evidence is limited and projected SOH of {projected_soh_int} already protects the {floor_units_int}-unit floor."
+                    )
+                else:
+                    reason_value = _weak_demand_no_auto_order_reason(
+                        projected_soh_int=projected_soh_int,
+                        floor_units_int=floor_units_int,
+                    )
+        elif label_value == "PROTECT_AVAILABILITY":
+            final_units_int = min(raw_units_int, availability_need_units)
+            status_value = ORDER_RECONCILIATION_STATUS_EXECUTABLE_PROTECT
+            if final_units_int < raw_units_int:
+                status_value = ORDER_RECONCILIATION_STATUS_CAPPED_TO_AVAILABILITY_NEED
+            reason_value = (
+                f"Order controlled quantity. Projected SOH at promotion start is {projected_soh_int}, expected demand is {expected_demand_int}, "
+                f"and the executable order is capped to {final_units_int} unit(s) to protect the {floor_units_int}-unit floor without overbuying."
+            )
+            if final_units_int <= 0:
+                status_value = ORDER_RECONCILIATION_STATUS_SUPPRESSED_BY_LABEL_GOVERNANCE
+                if floor_protected:
+                    reason_value = (
+                        f"Do not buy. Projected SOH at promotion start is {projected_soh_int}, expected demand is {expected_demand_int}, "
+                        f"and the {floor_units_int}-unit floor is already protected."
+                    )
+                else:
+                    reason_value = _weak_demand_no_auto_order_reason(
+                        projected_soh_int=projected_soh_int,
+                        floor_units_int=floor_units_int,
+                    )
+        else:
+            final_units_int = raw_units_int
+            status_value = ORDER_RECONCILIATION_STATUS_EXECUTABLE_BUY
+            if not availability_risk_present and float(ratio_value or 0.0) < MIN_EXECUTABLE_RETAIL_RISK_REWARD_RATIO:
+                final_units_int = 0
+                status_value = ORDER_RECONCILIATION_STATUS_SUPPRESSED_BY_LABEL_GOVERNANCE
+                if floor_protected:
+                    reason_value = (
+                        f"Do not buy. Risk/reward is poor, projected SOH is {projected_soh_int}, and the {floor_units_int}-unit floor is already protected without a fresh order."
+                    )
+                else:
+                    reason_value = _weak_demand_no_auto_order_reason(
+                        projected_soh_int=projected_soh_int,
+                        floor_units_int=floor_units_int,
+                    )
+
+        if label_value == "REDUCE_HOLDING" and capital_value == "CAPITAL_DRAG_HIGH":
+            reason_value = (
+                f"Do not buy. Projected SOH is {projected_soh_int} against expected demand of {expected_demand_int}, creating capital drag. "
+                "Use the promotion to sell through existing stock."
+            )
+        if label_value == "NO_DEMAND" and demand_value == "NO_DEMAND":
+            if floor_protected:
+                reason_value = (
+                    f"Do not buy. Demand evidence does not justify fresh capital and projected SOH of {projected_soh_int} already protects the {floor_units_int}-unit floor."
+                )
+            else:
+                reason_value = _weak_demand_no_auto_order_reason(
+                    projected_soh_int=projected_soh_int,
+                    floor_units_int=floor_units_int,
+                )
+
+        if shadow_low_soh_pass and label_value in {"LOW_SOH_PROTECT_AVAILABILITY", "LOW_SOH_BORDERLINE_REVIEW"}:
+            provisional_units_int = max(provisional_units_int, raw_units_int)
+            final_units_int = 0
+            status_value = ORDER_RECONCILIATION_STATUS_PROVISIONAL_REVIEW_ONLY
+            reason_value = low_soh_policy_reason
+
+        provisional_units.append(provisional_units_int)
+        final_units.append(final_units_int)
+        provisional_values.append(round(provisional_units_int * float(unit_cost_value or 0.0), 2))
+        final_values.append(round(final_units_int * float(unit_cost_value or 0.0), 2))
+        low_soh_policy_versions.append(LOW_SOH_POLICY_VERSION)
+        low_soh_candidate_flags.append(int(shadow_low_soh_candidate))
+        low_soh_production_eligible_flags.append(int(low_soh_production_eligible))
+        low_soh_final_order_units.append(0)
+        low_soh_capital_at_risk_values.append(float(shadow_policy["shadow_policy_capital_at_risk"]))
+        low_soh_policy_reasons.append(low_soh_policy_reason)
+        low_soh_guardrail_statuses.append(low_soh_guardrail_status)
+        low_soh_blocker_reasons.append(low_soh_blocker_reason)
+        low_soh_decision_sources.append(LOW_SOH_POLICY_VALIDATED_SEGMENT_SOURCE if shadow_low_soh_candidate else "base_stage11_reconciliation")
+        shadow_policy_names.append(str(shadow_policy["shadow_policy_name"]))
+        shadow_policy_versions.append(str(shadow_policy["shadow_policy_version"]))
+        shadow_policy_candidate_flags.append(int(shadow_policy["shadow_policy_candidate_flag"]))
+        shadow_policy_segments.append(str(shadow_policy["shadow_policy_segment"]))
+        shadow_policy_order_units_values.append(int(shadow_policy["shadow_policy_order_units"]))
+        shadow_policy_capital_at_risk_values.append(float(shadow_policy["shadow_policy_capital_at_risk"]))
+        shadow_policy_expected_reasons.append(str(shadow_policy["shadow_policy_expected_reason"]))
+        shadow_policy_guardrail_statuses.append(str(shadow_policy["shadow_policy_guardrail_status"]))
+        shadow_policy_blocker_reasons.append(str(shadow_policy["shadow_policy_blocker_reason"]))
+        shadow_policy_should_publish_flags.append(int(shadow_policy["shadow_policy_should_publish_flag"]))
+        shadow_policy_should_affect_final_order_flags.append(int(shadow_policy["shadow_policy_should_affect_final_order_flag"]))
+        statuses.append(status_value)
+        reasons.append(reason_value)
+
+    return pd.DataFrame(
+        {
+            "provisional_review_order_units": pd.Series(provisional_units, index=index, dtype="int64"),
+            "final_store_order_units": pd.Series(final_units, index=index, dtype="int64"),
+            "provisional_review_order_value": pd.Series(provisional_values, index=index, dtype="float64"),
+            "final_store_order_value": pd.Series(final_values, index=index, dtype="float64"),
+            "low_soh_policy_version": pd.Series(low_soh_policy_versions, index=index, dtype="object"),
+            "low_soh_policy_candidate_flag": pd.Series(low_soh_candidate_flags, index=index, dtype="int64"),
+            "low_soh_policy_production_eligible_flag": pd.Series(low_soh_production_eligible_flags, index=index, dtype="int64"),
+            "low_soh_policy_final_order_units": pd.Series(low_soh_final_order_units, index=index, dtype="int64"),
+            "low_soh_policy_shadow_order_units": pd.Series(shadow_policy_order_units_values, index=index, dtype="int64"),
+            "low_soh_policy_capital_at_risk": pd.Series(low_soh_capital_at_risk_values, index=index, dtype="float64"),
+            "low_soh_policy_reason": pd.Series(low_soh_policy_reasons, index=index, dtype="object"),
+            "low_soh_policy_guardrail_status": pd.Series(low_soh_guardrail_statuses, index=index, dtype="object"),
+            "low_soh_policy_blocker_reason": pd.Series(low_soh_blocker_reasons, index=index, dtype="object"),
+            "low_soh_policy_decision_source": pd.Series(low_soh_decision_sources, index=index, dtype="object"),
+            "shadow_policy_name": pd.Series(shadow_policy_names, index=index, dtype="object"),
+            "shadow_policy_version": pd.Series(shadow_policy_versions, index=index, dtype="object"),
+            "shadow_policy_candidate_flag": pd.Series(shadow_policy_candidate_flags, index=index, dtype="int64"),
+            "shadow_policy_segment": pd.Series(shadow_policy_segments, index=index, dtype="object"),
+            "shadow_policy_order_units": pd.Series(shadow_policy_order_units_values, index=index, dtype="int64"),
+            "shadow_policy_capital_at_risk": pd.Series(shadow_policy_capital_at_risk_values, index=index, dtype="float64"),
+            "shadow_policy_expected_reason": pd.Series(shadow_policy_expected_reasons, index=index, dtype="object"),
+            "shadow_policy_guardrail_status": pd.Series(shadow_policy_guardrail_statuses, index=index, dtype="object"),
+            "shadow_policy_blocker_reason": pd.Series(shadow_policy_blocker_reasons, index=index, dtype="object"),
+            "shadow_policy_should_publish_flag": pd.Series(shadow_policy_should_publish_flags, index=index, dtype="int64"),
+            "shadow_policy_should_affect_final_order_flag": pd.Series(shadow_policy_should_affect_final_order_flags, index=index, dtype="int64"),
+            "order_reconciliation_status": pd.Series(statuses, index=index, dtype="object"),
+            "order_reconciliation_reason": pd.Series(reasons, index=index, dtype="object"),
+        },
+        index=index,
+    )
+
+
+def _build_store_order_reconciliation_diagnostic_frame(
+    *,
+    store_facing_frame: pd.DataFrame,
+) -> pd.DataFrame:
+    required_columns = [
+        "store_number",
+        "promotion_id",
+        "promotion_name",
+        "promotion_start_date",
+        "promotion_end_date",
+        "sku_number",
+        "sku_description",
+        "store_action_label",
+        "raw_model_order_units",
+        "provisional_review_order_units",
+        "final_store_order_units",
+        "low_soh_policy_version",
+        "low_soh_policy_candidate_flag",
+        "low_soh_policy_production_eligible_flag",
+        "low_soh_policy_final_order_units",
+        "low_soh_policy_shadow_order_units",
+        "low_soh_policy_capital_at_risk",
+        "low_soh_policy_reason",
+        "low_soh_policy_guardrail_status",
+        "low_soh_policy_blocker_reason",
+        "low_soh_policy_decision_source",
+        "shadow_policy_name",
+        "shadow_policy_version",
+        "shadow_policy_candidate_flag",
+        "shadow_policy_segment",
+        "shadow_policy_order_units",
+        "shadow_policy_capital_at_risk",
+        "shadow_policy_expected_reason",
+        "shadow_policy_guardrail_status",
+        "shadow_policy_blocker_reason",
+        "shadow_policy_should_publish_flag",
+        "shadow_policy_should_affect_final_order_flag",
+        "raw_model_order_value",
+        "final_store_order_value",
+        "promo_allocated_units",
+        "current_soh",
+        "projected_SOH_at_promo_start",
+        "floor_units_required",
+        "expected_promo_demand",
+        "available_to_sell_before_floor",
+        "projected_stock_gap_units",
+        "retail_risk_reward_ratio",
+        "capital_drag_label",
+        "availability_risk_label",
+        "demand_evidence_label",
+        "human_review_required_flag",
+        "order_reconciliation_status",
+        "order_reconciliation_reason",
+    ]
+    return store_facing_frame.loc[:, required_columns].copy()
+
+
+def _build_store_order_reconciliation_summary_frame(
+    *,
+    store_facing_frame: pd.DataFrame,
+) -> pd.DataFrame:
+    raw_units = pd.to_numeric(store_facing_frame["raw_model_order_units"], errors="coerce").fillna(0.0).clip(lower=0.0)
+    provisional_units = pd.to_numeric(store_facing_frame["provisional_review_order_units"], errors="coerce").fillna(0.0).clip(lower=0.0)
+    final_units = pd.to_numeric(store_facing_frame["final_store_order_units"], errors="coerce").fillna(0.0).clip(lower=0.0)
+    raw_value = pd.to_numeric(store_facing_frame["raw_model_order_value"], errors="coerce").fillna(0.0).clip(lower=0.0)
+    final_value = pd.to_numeric(store_facing_frame["final_store_order_value"], errors="coerce").fillna(0.0).clip(lower=0.0)
+    label = store_facing_frame["store_action_label"].fillna("").astype(str).str.strip().str.upper()
+    suppressed_mask = label.isin(NON_EXECUTABLE_STORE_ACTION_LABELS.difference(PROVISIONAL_REVIEW_STORE_ACTION_LABELS)) & raw_units.gt(0.0) & final_units.le(0.0)
+    contradiction_mask = label.isin(NON_EXECUTABLE_STORE_ACTION_LABELS) & final_units.gt(0.0)
+    return pd.DataFrame(
+        [
+            {
+                "total_rows": int(len(store_facing_frame.index)),
+                "rows_where_raw_order_positive": int(raw_units.gt(0.0).sum()),
+                "rows_where_final_order_positive": int(final_units.gt(0.0).sum()),
+                "rows_suppressed_by_label_governance": int(suppressed_mask.sum()),
+                "units_suppressed_by_label_governance": int(raw_units.loc[suppressed_mask].sum()),
+                "value_suppressed_by_label_governance": round(float(raw_value.loc[suppressed_mask].sum() - final_value.loc[suppressed_mask].sum()), 2),
+                "rows_sent_to_provisional_review": int(provisional_units.gt(0.0).sum()),
+                "provisional_review_units": int(provisional_units.sum()),
+                "final_buy_units": int(final_units.loc[label.eq("BUY")].sum()),
+                "final_protect_availability_units": int(final_units.loc[label.eq("PROTECT_AVAILABILITY")].sum()),
+                "final_order_value": round(float(final_value.sum()), 2),
+                "count_of_contradictions_after_reconciliation": int(contradiction_mask.sum()),
+            }
+        ]
+    )
+
+
+def _build_store_suppressed_order_risk_audit_frame(
+    *,
+    store_facing_frame: pd.DataFrame,
+) -> pd.DataFrame:
+    raw_units = pd.to_numeric(store_facing_frame["raw_model_order_units"], errors="coerce").fillna(0.0).clip(lower=0.0)
+    final_units = pd.to_numeric(store_facing_frame["final_store_order_units"], errors="coerce").fillna(0.0).clip(lower=0.0)
+    provisional_units = pd.to_numeric(store_facing_frame["provisional_review_order_units"], errors="coerce").fillna(0.0).clip(lower=0.0)
+    current_soh = pd.to_numeric(store_facing_frame["current_soh"], errors="coerce").fillna(0.0).clip(lower=0.0)
+    on_order = pd.to_numeric(store_facing_frame["on_order_at_advice_time"], errors="coerce").fillna(0.0).clip(lower=0.0)
+    expected_units_before = pd.to_numeric(store_facing_frame["expected_units_before_promo_start"], errors="coerce").fillna(0.0).clip(lower=0.0)
+    projected_soh = pd.to_numeric(store_facing_frame["projected_SOH_at_promo_start"], errors="coerce").fillna(0.0).clip(lower=0.0)
+    floor_units = pd.to_numeric(store_facing_frame["floor_units_required"], errors="coerce").fillna(MIN_LAUNCH_STOCK_UNITS)
+    expected_demand = pd.to_numeric(store_facing_frame["expected_promo_demand"], errors="coerce").fillna(0.0).clip(lower=0.0)
+    available_to_sell_before_floor = pd.to_numeric(store_facing_frame["available_to_sell_before_floor"], errors="coerce").fillna(0.0).clip(lower=0.0)
+    expected_gap = (expected_demand - available_to_sell_before_floor).clip(lower=0.0)
+    demand_label = store_facing_frame["demand_evidence_label"].fillna("").astype(str).str.strip().str.upper()
+    availability_label = store_facing_frame["availability_risk_label"].fillna("").astype(str).str.strip().str.upper()
+    capital_label = store_facing_frame["capital_drag_label"].fillna("").astype(str).str.strip().str.upper()
+    risk_reward_ratio = pd.to_numeric(store_facing_frame["retail_risk_reward_ratio"], errors="coerce").fillna(0.0)
+    expected_gp = pd.to_numeric(
+        store_facing_frame.get(
+            "expected_gp_on_speculative_units",
+            pd.Series(0.0, index=store_facing_frame.index),
+        ),
+        errors="coerce",
+    ).fillna(0.0)
+    capital_at_risk = pd.to_numeric(store_facing_frame["capital_at_risk_adjusted_dollars"], errors="coerce").fillna(0.0).clip(lower=0.0)
+    leftover_risk = store_facing_frame.get(
+        "end_of_promo_residual_risk",
+        pd.Series("", index=store_facing_frame.index, dtype="object"),
+    ).fillna("").astype(str).str.strip().str.upper()
+    suppression_reason = store_facing_frame["order_reconciliation_reason"].fillna("").astype(str).str.strip()
+    label = store_facing_frame["store_action_label"].fillna("").astype(str).str.strip().str.upper()
+
+    suppressed_mask = raw_units.gt(0.0) & final_units.le(0.0)
+    projected_below_floor = projected_soh.lt(floor_units)
+    credible_demand = demand_label.isin(DYNAMIC_DEMAND_EVIDENCE_LABELS)
+    weak_demand = demand_label.isin(WEAK_DEMAND_EVIDENCE_LABELS)
+    materially_above_demand = projected_soh.gt(expected_demand + floor_units)
+    capital_drag_safe = capital_label.eq("CAPITAL_DRAG_HIGH") | materially_above_demand
+    availability_risk_high = availability_label.isin(HIGH_AVAILABILITY_RISK_LABELS)
+    provisional_review = provisional_units.gt(0.0) | label.eq("BORDERLINE_OOS_REVIEW")
+
+    suppression_risk = pd.Series(SUPPRESSION_RISK_NOT_APPLICABLE, index=store_facing_frame.index, dtype="object")
+    suppression_risk = suppression_risk.where(~(suppressed_mask & provisional_review), SUPPRESSION_RISK_BORDERLINE_REVIEW)
+    suppression_risk = suppression_risk.where(
+        ~(suppressed_mask & projected_below_floor & credible_demand & ~provisional_review),
+        SUPPRESSION_RISK_UNSAFE_ONLINE_AVAILABILITY,
+    )
+    suppression_risk = suppression_risk.where(
+        ~(suppressed_mask & expected_gap.gt(0.0) & credible_demand & ~provisional_review),
+        SUPPRESSION_RISK_UNSAFE_FLOOR,
+    )
+    suppression_risk = suppression_risk.where(
+        ~(suppressed_mask & label.eq("REDUCE_HOLDING") & capital_drag_safe & suppression_risk.eq(SUPPRESSION_RISK_NOT_APPLICABLE)),
+        SUPPRESSION_RISK_SAFE_CAPITAL_DRAG,
+    )
+    suppression_risk = suppression_risk.where(
+        ~(suppressed_mask & label.isin({"NO_DEMAND", "NEVER_SOLD_IN_PROMO"}) & suppression_risk.eq(SUPPRESSION_RISK_NOT_APPLICABLE)),
+        SUPPRESSION_RISK_SAFE_NO_DEMAND,
+    )
+    suppression_risk = suppression_risk.where(
+        ~(suppressed_mask & expected_gap.le(0.0) & suppression_risk.eq(SUPPRESSION_RISK_NOT_APPLICABLE)),
+        SUPPRESSION_RISK_SAFE_STOCK_COVERS_DEMAND,
+    )
+    suppression_risk = suppression_risk.where(
+        ~(suppressed_mask & capital_drag_safe & suppression_risk.eq(SUPPRESSION_RISK_NOT_APPLICABLE)),
+        SUPPRESSION_RISK_SAFE_CAPITAL_DRAG,
+    )
+    suppression_risk = suppression_risk.where(
+        ~(suppressed_mask & weak_demand & suppression_risk.eq(SUPPRESSION_RISK_NOT_APPLICABLE)),
+        SUPPRESSION_RISK_SAFE_NO_DEMAND,
+    )
+
+    should_protect = (
+        suppressed_mask
+        & suppression_risk.eq(SUPPRESSION_RISK_UNSAFE_ONLINE_AVAILABILITY)
+        & risk_reward_ratio.ge(MIN_EXECUTABLE_RETAIL_RISK_REWARD_RATIO)
+    ).astype(int)
+    should_buy = (
+        suppressed_mask
+        & suppression_risk.eq(SUPPRESSION_RISK_UNSAFE_FLOOR)
+        & risk_reward_ratio.ge(MIN_EXECUTABLE_RETAIL_RISK_REWARD_RATIO)
+        & expected_gp.gt(0.0)
+    ).astype(int)
+    should_borderline = (
+        suppressed_mask
+        & (
+            suppression_risk.eq(SUPPRESSION_RISK_BORDERLINE_REVIEW)
+            | (
+                suppression_risk.isin(
+                    {
+                        SUPPRESSION_RISK_UNSAFE_FLOOR,
+                        SUPPRESSION_RISK_UNSAFE_ONLINE_AVAILABILITY,
+                    }
+                )
+                & ~should_protect.astype(bool)
+                & ~should_buy.astype(bool)
+            )
+        )
+    ).astype(int)
+
+    audit = pd.DataFrame(
+        {
+            "store_number": store_facing_frame["store_number"].astype(str),
+            "promotion_id": store_facing_frame["promotion_id"].astype(str),
+            "promotion_name": store_facing_frame["promotion_name"].astype(str),
+            "promotion_start_date": store_facing_frame["promotion_start_date"].astype(str),
+            "promotion_end_date": store_facing_frame["promotion_end_date"].astype(str),
+            "sku_number": store_facing_frame["sku_number"].astype(str),
+            "sku_description": store_facing_frame["sku_description"].astype(str),
+            "store_action_label": label,
+            "raw_model_order_units": raw_units.astype(int),
+            "final_store_order_units": final_units.astype(int),
+            "provisional_review_order_units": provisional_units.astype(int),
+            "current_soh": current_soh.astype(int),
+            "on_order_at_advice_time": on_order.astype(int),
+            "expected_units_before_promo_start": expected_units_before.astype(int),
+            "projected_SOH_at_promo_start": projected_soh.astype(int),
+            "floor_units_required": floor_units.astype(int),
+            "expected_promo_demand": expected_demand.astype(int),
+            "available_to_sell_before_floor": available_to_sell_before_floor.astype(int),
+            "expected_demand_above_floor_gap": expected_gap.astype(int),
+            "availability_risk_label": availability_label,
+            "capital_drag_label": capital_label,
+            "demand_evidence_label": demand_label,
+            "retail_risk_reward_ratio": risk_reward_ratio.astype(float),
+            "expected_gp": expected_gp.round(2).astype(float),
+            "capital_at_risk": capital_at_risk.round(2).astype(float),
+            "leftover_risk": leftover_risk,
+            "suppression_reason": suppression_reason,
+            "suppression_risk_label": suppression_risk,
+            "should_have_been_protect_availability_flag": should_protect,
+            "should_have_been_borderline_oos_review_flag": should_borderline,
+            "should_have_been_buy_flag": should_buy,
+        }
+    )
+    return audit.loc[suppressed_mask].reset_index(drop=True)
+
+
+def _build_store_suppressed_order_risk_summary_frame(
+    *,
+    store_facing_frame: pd.DataFrame,
+    audit_frame: pd.DataFrame,
+) -> pd.DataFrame:
+    raw_units = pd.to_numeric(store_facing_frame["raw_model_order_units"], errors="coerce").fillna(0.0).clip(lower=0.0)
+    final_units = pd.to_numeric(store_facing_frame["final_store_order_units"], errors="coerce").fillna(0.0).clip(lower=0.0)
+    suppressed_units = pd.to_numeric(audit_frame.get("raw_model_order_units", pd.Series(dtype="float64")), errors="coerce").fillna(0.0).clip(lower=0.0)
+    suppression_risk = audit_frame.get("suppression_risk_label", pd.Series(dtype="object")).astype(str)
+    safe_mask = suppression_risk.isin(
+        {
+            SUPPRESSION_RISK_SAFE_STOCK_COVERS_DEMAND,
+            SUPPRESSION_RISK_SAFE_NO_DEMAND,
+            SUPPRESSION_RISK_SAFE_CAPITAL_DRAG,
+        }
+    )
+    unsafe_mask = suppression_risk.isin(
+        {
+            SUPPRESSION_RISK_UNSAFE_FLOOR,
+            SUPPRESSION_RISK_UNSAFE_ONLINE_AVAILABILITY,
+        }
+    )
+    borderline_mask = suppression_risk.eq(SUPPRESSION_RISK_BORDERLINE_REVIEW)
+    denominator = float(len(audit_frame.index) or 1)
+    return pd.DataFrame(
+        [
+            {
+                "total_rows": int(len(store_facing_frame.index)),
+                "raw_positive_order_rows": int(raw_units.gt(0.0).sum()),
+                "final_positive_order_rows": int(final_units.gt(0.0).sum()),
+                "suppressed_raw_positive_rows": int(len(audit_frame.index)),
+                "suppressed_raw_positive_units": int(suppressed_units.sum()),
+                "safe_suppression_rows": int(safe_mask.sum()),
+                "safe_suppression_units": int(suppressed_units.loc[safe_mask].sum()),
+                "unsafe_suppression_rows": int(unsafe_mask.sum()),
+                "unsafe_suppression_units": int(suppressed_units.loc[unsafe_mask].sum()),
+                "borderline_suppression_rows": int(borderline_mask.sum()),
+                "borderline_suppression_units": int(suppressed_units.loc[borderline_mask].sum()),
+                "safe_suppression_pct": round(float(safe_mask.sum()) / denominator, 4),
+                "unsafe_suppression_pct": round(float(unsafe_mask.sum()) / denominator, 4),
+                "contradiction_count": int(
+                    (
+                        store_facing_frame["store_action_label"].fillna("").astype(str).str.strip().isin(
+                            ["NO_DEMAND", "HOLD_STOCK", "REDUCE_HOLDING", "NEVER_SOLD_IN_PROMO", "DATA_QUALITY_REVIEW"]
+                        )
+                        & final_units.gt(0.0)
+                    ).sum()
+                ),
+                "rows_where_expected_demand_exceeds_available_to_sell_before_floor": int(
+                    pd.to_numeric(audit_frame.get("expected_demand_above_floor_gap", pd.Series(dtype="float64")), errors="coerce").fillna(0.0).gt(0.0).sum()
+                ),
+                "rows_where_projected_soh_below_floor": int(
+                    (
+                        pd.to_numeric(audit_frame.get("projected_SOH_at_promo_start", pd.Series(dtype="float64")), errors="coerce").fillna(0.0)
+                        < pd.to_numeric(audit_frame.get("floor_units_required", pd.Series(dtype="float64")), errors="coerce").fillna(MIN_LAUNCH_STOCK_UNITS)
+                    ).sum()
+                ),
+                "rows_where_projected_soh_below_floor_and_final_order_zero": int(
+                    (
+                        pd.to_numeric(audit_frame.get("projected_SOH_at_promo_start", pd.Series(dtype="float64")), errors="coerce").fillna(0.0)
+                        < pd.to_numeric(audit_frame.get("floor_units_required", pd.Series(dtype="float64")), errors="coerce").fillna(MIN_LAUNCH_STOCK_UNITS)
+                    ).sum()
+                ),
+                "rows_where_availability_risk_high_and_final_order_zero": int(
+                    audit_frame.get("availability_risk_label", pd.Series(dtype="object")).astype(str).isin(HIGH_AVAILABILITY_RISK_LABELS).sum()
+                ),
+            }
+        ]
+    )
+
+
+def _validate_store_suppressed_order_risk_audit(audit_frame: pd.DataFrame) -> None:
+    if audit_frame.empty:
+        return
+    suppression_risk = audit_frame["suppression_risk_label"].astype(str)
+    unsafe_mask = suppression_risk.isin(
+        {
+            SUPPRESSION_RISK_UNSAFE_FLOOR,
+            SUPPRESSION_RISK_UNSAFE_ONLINE_AVAILABILITY,
+        }
+    )
+    if bool(unsafe_mask.any()):
+        sample_rows = audit_frame.loc[
+            unsafe_mask,
+            [
+                "store_number",
+                "promotion_id",
+                "sku_number",
+                "store_action_label",
+                "suppression_risk_label",
+                "expected_demand_above_floor_gap",
+                "projected_SOH_at_promo_start",
+                "floor_units_required",
+                "demand_evidence_label",
+            ],
+        ].head(10)
+        raise PromotionStoreDownloadCommercialValidationError(
+            "Unsafe suppressed executable orders remain after Stage 11 reconciliation; "
+            f"rows={int(unsafe_mask.sum())}; samples={sample_rows.to_dict(orient='records')}"
+        )
+
+
+def _build_store_action_label_distribution_frame(store_facing_frame: pd.DataFrame) -> pd.DataFrame:
+    counts = store_facing_frame.get(
+        "store_action_label",
+        pd.Series([], dtype="object"),
+    ).astype(str).value_counts(dropna=False).to_dict()
+    return pd.DataFrame(
+        [
+            {
+                "store_action_label": label,
+                "row_count": int(counts.get(label, 0)),
+            }
+            for label in STORE_ACTION_LABELS
+        ]
+    )
+
+
+def _build_store_data_quality_review_breakdown_frame(
+    *,
+    commercial_frame: pd.DataFrame,
+    store_facing_frame: pd.DataFrame,
+) -> pd.DataFrame:
+    diagnostics = _build_discount_review_diagnostic_frame(commercial_frame)
+    keys = ["store_number", "promotion_name", "promotion_start_date", "promotion_end_date", "sku_number", "product_description"]
+    commercial = commercial_frame.loc[:, [*keys, "promotion_header_key", "publish_eligibility_reason", "review_reason"]].copy()
+    for column_name in keys:
+        commercial[column_name] = commercial[column_name].astype(str)
+    commercial["promotion_id"] = commercial["promotion_header_key"].astype(str)
+    commercial = pd.concat([commercial.reset_index(drop=True), diagnostics.reset_index(drop=True)], axis=1)
+
+    store = store_facing_frame.copy().reset_index(drop=True)
+    join_keys = ["store_number", "promotion_name", "promotion_start_date", "promotion_end_date", "sku_number"]
+    for column_name in join_keys:
+        if column_name in store.columns:
+            store[column_name] = store[column_name].astype(str)
+    merged = commercial.merge(
+        store.loc[:, [
+            *join_keys,
+            "store_action_label",
+            "blocker_reason",
+            "low_nonzero_value_relief_delta",
+            "demand_evidence_label",
+            "availability_risk_label",
+            "capital_drag_label",
+            "human_review_required_flag",
+            "recommended_action",
+            "store_action_reason",
+        ]],
+        on=join_keys,
+        how="left",
+        sort=False,
+    )
+
+    repaired_label_frame = _build_store_action_label_frame(
+        store_frame=store,
+        display_action=store["recommended_action"],
+        data_quality_flag=pd.Series("OK", index=store.index, dtype="object"),
+        discount_reason_code=pd.Series(DISCOUNT_REVIEW_REASON_NO_ISSUE, index=store.index, dtype="object"),
+        publish_eligibility_reason=commercial_frame["publish_eligibility_reason"].reset_index(drop=True),
+        review_reason=commercial_frame["review_reason"].reset_index(drop=True),
+    )
+    merged["would_have_label_if_repaired"] = repaired_label_frame["store_action_label"].reindex(merged.index).fillna("")
+    merged["data_quality_reason_code"] = merged["discount_data_quality_reason_code"].astype(str)
+    merged["data_quality_reason_detail"] = merged["discount_data_quality_reason_detail"].astype(str)
+    review_rows = merged.loc[
+        merged["store_action_label"].astype(str).eq("DATA_QUALITY_REVIEW")
+        | merged["data_quality_reason_code"].astype(str).isin(
+            {
+                DISCOUNT_REVIEW_REASON_REPAIRABLE_PRICE_TRUTH,
+                DISCOUNT_REVIEW_REASON_ROUNDING_TOLERANCE,
+                DISCOUNT_REVIEW_REASON_MAPPING_CONFLICT,
+                DISCOUNT_REVIEW_REASON_HARD_MISSING_PRICES,
+                DISCOUNT_REVIEW_REASON_HARD_INVALID_NORMAL,
+                DISCOUNT_REVIEW_REASON_HARD_INVALID_PROMO,
+                DISCOUNT_REVIEW_REASON_NO_DISCOUNT_VALID,
+            }
+        )
+    ].copy()
+    review_rows.rename(
+        columns={
+            "product_description": "sku_description",
+            "mapped_discount_pct": "mapped_discount_pct",
+            "price_derived_discount_pct": "price_derived_discount_pct",
+            "price_normal": "price_normal",
+            "price_promo": "price_promo",
+            "discount_abs_diff": "discount_abs_diff",
+            "discount_tolerance_used": "discount_tolerance_used",
+            "can_repair_discount_flag": "can_repair_discount_flag",
+            "repaired_discount_pct": "repaired_discount_pct",
+            "repair_method": "repair_method",
+        },
+        inplace=True,
+    )
+    ordered_columns = [
+        "store_number",
+        "promotion_id",
+        "promotion_name",
+        "promotion_start_date",
+        "promotion_end_date",
+        "sku_number",
+        "sku_description",
+        "store_action_label",
+        "data_quality_reason_code",
+        "data_quality_reason_detail",
+        "price_normal",
+        "price_promo",
+        "mapped_discount_pct",
+        "price_derived_discount_pct",
+        "discount_abs_diff",
+        "discount_tolerance_used",
+        "can_repair_discount_flag",
+        "repaired_discount_pct",
+        "repair_method",
+        "would_have_label_if_repaired",
+    ]
+    return review_rows.loc[:, ordered_columns].sort_values(
+        by=["data_quality_reason_code", "store_number", "promotion_name", "sku_number"],
+        kind="mergesort",
+    ).reset_index(drop=True)
+
+
+def _build_store_data_quality_review_reason_distribution_frame(
+    *,
+    breakdown_frame: pd.DataFrame,
+    total_row_count: int,
+) -> pd.DataFrame:
+    if breakdown_frame.empty:
+        return pd.DataFrame(
+            columns=[
+                "data_quality_reason_code",
+                "row_count",
+                "pct_of_total_rows",
+                "pct_of_data_quality_review_rows",
+                "example_sku_count",
+            ]
+        )
+    grouped = (
+        breakdown_frame.groupby("data_quality_reason_code", dropna=False)
+        .agg(
+            row_count=("data_quality_reason_code", "size"),
+            example_sku_count=("sku_number", lambda values: int(pd.Series(values).astype(str).nunique(dropna=True))),
+        )
+        .reset_index()
+        .sort_values(by=["row_count", "data_quality_reason_code"], ascending=[False, True], kind="mergesort")
+    )
+    dq_rows = max(int(len(breakdown_frame.index)), 1)
+    grouped["pct_of_total_rows"] = grouped["row_count"].divide(max(total_row_count, 1)).mul(100.0).round(2)
+    grouped["pct_of_data_quality_review_rows"] = grouped["row_count"].divide(dq_rows).mul(100.0).round(2)
+    return grouped.loc[:, [
+        "data_quality_reason_code",
+        "row_count",
+        "pct_of_total_rows",
+        "pct_of_data_quality_review_rows",
+        "example_sku_count",
+    ]]
 
 
 def _compose_primary_review_reason(
@@ -5911,11 +9124,12 @@ def _compose_primary_review_reason(
     action: pd.Series,
     data_quality_flag: pd.Series,
     model_reason_summary: pd.Series,
+    review_reason: pd.Series | None = None,
 ) -> pd.Series:
     action_upper = action.astype(str).str.strip().str.upper()
     quality_upper = data_quality_flag.astype(str).str.strip().str.upper()
     reason = pd.Series("", index=action.index, dtype="object")
-    review_rows = action_upper.eq("REVIEW")
+    review_rows = action_upper.isin({"REVIEW", "REVIEW_REQUIRED"})
     reason = reason.where(
         ~(review_rows & quality_upper.eq("REVIEW_DISCOUNT_MISSING")),
         "Governed discount mapping is missing; price-derived discount requires review",
@@ -5927,6 +9141,22 @@ def _compose_primary_review_reason(
     reason = reason.where(~(review_rows & quality_upper.eq("INSUFFICIENT_HISTORY")), "Insufficient history for automatic ordering")
     reason = reason.where(~(review_rows & quality_upper.eq("COLLAPSED_FORECAST")), "Forecast collapsed to flat pattern")
     reason = reason.where(~(review_rows & quality_upper.eq("REVIEW_FORECAST")), "Forecast requires manager review")
+    if review_reason is not None:
+        explicit_reason = review_reason.reindex(action.index).fillna("").astype(str).str.strip()
+        explicit_reason = explicit_reason.where(
+            ~explicit_reason.isin(_DISCOUNT_REVIEW_REASON_BY_FLAG.values()),
+            explicit_reason.map(
+                {
+                    "review_discount_missing": "Governed discount mapping is missing; price-derived discount requires review",
+                    "review_discount_conflict": "Governed discount conflicts with price-derived discount",
+                }
+            ).fillna(explicit_reason),
+        )
+        discount_contract_reason = review_rows & quality_upper.isin({
+            "REVIEW_DISCOUNT_MISSING",
+            "REVIEW_DISCOUNT_CONFLICT",
+        })
+        reason = reason.where(~(review_rows & explicit_reason.ne("") & ~discount_contract_reason), explicit_reason)
     fallback = model_reason_summary.astype(str).str.strip()
     reason = reason.where(~(review_rows & reason.eq("")), fallback)
     reason = reason.where(~(review_rows & reason.eq("")), "Manager review required")
@@ -5944,6 +9174,23 @@ def _normalize_action_data_quality_consistency(
     review_quality_mask = quality_upper.str.startswith("REVIEW") | quality_upper.eq("COLLAPSED_FORECAST")
     action_upper = action_upper.where(~(action_upper.eq("ORDER") & review_quality_mask), "REVIEW")
     quality_upper = quality_upper.where(~(action_upper.eq("REVIEW") & quality_upper.eq("OK")), "REVIEW_FORECAST")
+
+    return action_upper, quality_upper
+
+
+def _normalize_action_review_hold_consistency(
+    *,
+    action: pd.Series,
+    data_quality_flag: pd.Series,
+    review_reason: pd.Series,
+) -> tuple[pd.Series, pd.Series]:
+    action_upper = action.astype(str).str.strip().str.upper()
+    quality_upper = data_quality_flag.astype(str).str.strip().str.upper()
+    review_reason_present = review_reason.fillna("").astype(str).str.strip().ne("")
+
+    review_hold_mask = action_upper.eq("ORDER") & review_reason_present
+    action_upper = action_upper.where(~review_hold_mask, "REVIEW")
+    quality_upper = quality_upper.where(~(review_hold_mask & quality_upper.eq("OK")), "REVIEW_FORECAST")
 
     return action_upper, quality_upper
 
@@ -5996,7 +9243,8 @@ def _validate_store_facing_operator_contract(frame: pd.DataFrame) -> None:
             f"(rows={legacy_discount_mapping_count})"
         )
 
-    review_ok_count = int((action.eq("REVIEW") & quality.eq("OK")).sum())
+    review_action_mask = action.isin({"REVIEW", "REVIEW_REQUIRED"})
+    review_ok_count = int((review_action_mask & quality.eq("OK")).sum())
     if review_ok_count > 0:
         failures.append(f"REVIEW rows cannot carry OK data_quality_flag (rows={review_ok_count})")
 
@@ -6008,6 +9256,29 @@ def _validate_store_facing_operator_contract(frame: pd.DataFrame) -> None:
             "ORDER rows cannot carry review/collapsed data_quality_flag "
             f"(rows={order_review_quality_count})"
         )
+
+    if "store_action_label" in frame.columns and "recommended_order_units" in frame.columns:
+        label = frame["store_action_label"].astype(str).str.strip().str.upper()
+        recommended_units = pd.to_numeric(frame["recommended_order_units"], errors="coerce").fillna(0.0).clip(lower=0.0)
+        final_units = pd.to_numeric(
+            frame.get("final_store_order_units", frame["recommended_order_units"]),
+            errors="coerce",
+        ).fillna(0.0).clip(lower=0.0)
+        recommended_final_mismatch_count = int(recommended_units.ne(final_units).sum())
+        if recommended_final_mismatch_count > 0:
+            failures.append(
+                "recommended_order_units must equal final_store_order_units after reconciliation "
+                f"(rows={recommended_final_mismatch_count})"
+            )
+
+        contradiction_count = int(
+            (label.isin(NON_EXECUTABLE_STORE_ACTION_LABELS) & final_units.gt(0.0)).sum()
+        )
+        if contradiction_count > 0:
+            failures.append(
+                "non-executable store_action_label rows cannot carry positive final executable units "
+                f"(rows={contradiction_count})"
+            )
 
     narrative = frame["historical_promo_response_summary"].astype(str)
     same_count = pd.to_numeric(frame["historical_promo_events_same_discount"], errors="coerce").fillna(0)
@@ -6114,7 +9385,7 @@ def _validate_store_facing_operator_contract(frame: pd.DataFrame) -> None:
         )
 
     review_reason = frame["primary_review_reason"].astype(str).str.strip()
-    missing_review_reason_count = int((action.eq("REVIEW") & review_reason.eq("")).sum())
+    missing_review_reason_count = int((review_action_mask & review_reason.eq("")).sum())
     if missing_review_reason_count > 0:
         failures.append(
             f"REVIEW rows require non-empty primary_review_reason (rows={missing_review_reason_count})"
@@ -6156,6 +9427,7 @@ def _build_store_facing_frame(
     forecast_per_row_diagnostics: pd.DataFrame | None,
     as_of_date: str | None,
     completed_backtest_summary: dict[str, object] | None = None,
+    sku_backtest_summary: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
     """Derive the operator-friendly Stage 11/12 store-facing CSV from the commercial frame."""
     frame = commercial_frame
@@ -6163,6 +9435,12 @@ def _build_store_facing_frame(
 
     # ---- Identity -------------------------------------------------------
     out["store_number"] = frame["store_number"].astype(str)
+    if "promotion_id" in frame.columns:
+        out["promotion_id"] = frame["promotion_id"].astype(str)
+    elif "promotion_header_key" in frame.columns:
+        out["promotion_id"] = frame["promotion_header_key"].astype(str)
+    else:
+        out["promotion_id"] = frame["promotion_name"].astype(str)
     out["promotion_name"] = frame["promotion_name"].astype(str)
     out["promotion_start_date"] = frame["promotion_start_date"].astype(str)
     out["promotion_end_date"] = frame["promotion_end_date"].astype(str)
@@ -6171,7 +9449,6 @@ def _build_store_facing_frame(
 
     # ---- Action ---------------------------------------------------------
     action = frame["decision_recommendation"].astype(str).str.upper()
-    out["recommended_action"] = action
     raw_recommended_units = pd.to_numeric(
         frame["suggested_order_units"], errors="coerce"
     ).fillna(0.0).clip(lower=0.0)
@@ -6180,6 +9457,7 @@ def _build_store_facing_frame(
     out["minimum_launch_stock_units"] = pd.Series(
         MIN_LAUNCH_STOCK_UNITS, index=frame.index, dtype="int64"
     )
+    out["floor_units_required"] = pd.Series(MIN_LAUNCH_STOCK_UNITS, index=frame.index, dtype="int64")
 
     # ---- Demand timing --------------------------------------------------
     # Compute lead days (unclamped) so the 56-day store-ordering horizon clamp
@@ -6224,23 +9502,56 @@ def _build_store_facing_frame(
     out["expected_units_before_promo_start"] = _store_int(bounded_expected_pre)
     out["expected_units_first_7_days"] = _store_int(frame["predicted_units_first_7_days_of_promo"])
     out["expected_units_total_promo"] = _store_int(frame["predicted_units_total_promo"])
+    out["expected_promo_demand"] = out["expected_units_total_promo"]
+    feature_period_days = _optional_numeric_series(frame, "feature_promo_period_days")
+    promotion_period_days = feature_period_days.replace(0.0, pd.NA)
+    source_period_days = _numeric_series(frame, ("live_promo_window_days", "promo_days")).replace(0.0, pd.NA)
+    derived_period_days = (
+        pd.to_datetime(frame["promotion_end_date"], errors="coerce")
+        - pd.to_datetime(frame["promotion_start_date"], errors="coerce")
+    ).dt.days.add(1).clip(lower=1)
+    promotion_period_days = promotion_period_days.where(
+        promotion_period_days.notna(),
+        source_period_days,
+    )
+    promotion_period_days = promotion_period_days.where(
+        promotion_period_days.notna(),
+        derived_period_days,
+    ).fillna(1.0)
+    expected_units_per_period = pd.to_numeric(
+        frame["predicted_units_total_promo"], errors="coerce"
+    ).fillna(0.0).clip(lower=0.0)
+    out["promotion_period_days"] = promotion_period_days.round(0).astype("int64")
+    out["expected_units_per_period"] = _store_int(expected_units_per_period)
+    out["expected_units_per_day"] = (
+        expected_units_per_period.divide(promotion_period_days.where(promotion_period_days.gt(0.0), 1.0))
+        .fillna(0.0)
+        .round(4)
+        .astype(float)
+    )
 
     # ---- Current stock position ----------------------------------------
     soh = pd.to_numeric(frame["current_soh_units"], errors="coerce").fillna(0.0)
     on_order = pd.to_numeric(frame["qty_on_order_units"], errors="coerce").fillna(0.0)
     target_day_one = pd.to_numeric(frame["promo_start_target_soh_units"], errors="coerce").fillna(0.0)
+    projected_on_hand = (soh + on_order - bounded_expected_pre).clip(lower=0.0)
     out["current_soh_units"] = _store_int(soh)
+    out["current_soh"] = out["current_soh_units"]
     out["on_order_units"] = _store_int(on_order)
+    out["available_to_sell_before_floor"] = _store_int((projected_on_hand - MIN_LAUNCH_STOCK_UNITS).clip(lower=0.0))
     effective = (soh + on_order - bounded_expected_pre).clip(lower=0.0)
     out["effective_available_units"] = _store_int(effective)
     out["gap_to_day_one_target_units"] = _store_int((target_day_one - effective).clip(lower=0.0))
 
     # Projected on-hand at promo start uses the bounded pre-promo expected
     # units so the value stays consistent with `expected_units_before_promo_start`.
-    projected_on_hand = (soh + on_order - bounded_expected_pre).clip(lower=0.0)
     out["projected_on_hand_at_promo_start"] = _store_int(projected_on_hand)
     projected_gap = (target_day_one - projected_on_hand).clip(lower=0.0)
     out["projected_stock_gap_units"] = _store_int(projected_gap)
+    unit_cost_series = _resolve_unit_cost_series(
+        commercial_frame=frame,
+        forecast_per_row_diagnostics=forecast_per_row_diagnostics,
+    )
 
     # ---- Risk-adjusted recommended_order_units --------------------------
     # Commercial principle: do not turn the raw upstream `suggested_order_units`
@@ -6305,7 +9616,12 @@ def _build_store_facing_frame(
     ).max(axis=1)
     # DO_NOT_ORDER stays zero regardless of upstream suggestion.
     floored_recommended = floored_recommended.where(~is_do_not_order, 0.0)
-    out["recommended_order_units"] = _store_int(floored_recommended)
+    out["raw_model_order_units"] = _store_int(floored_recommended)
+    out["recommended_order_units"] = out["raw_model_order_units"]
+    out["raw_model_order_value"] = (
+        pd.to_numeric(out["raw_model_order_units"], errors="coerce").fillna(0.0)
+        * unit_cost_series
+    ).round(2).astype(float)
 
     # ---- New commercial fields (lead_up_demand, projected_promotional_units,
     #      discount, model_confidence_percent) — exposed to the operator
@@ -6343,10 +9659,6 @@ def _build_store_facing_frame(
     historical_discount_frame = _resolve_historical_discount_frame(frame)
     for column in historical_discount_frame.columns:
         out[column] = historical_discount_frame[column]
-    out["discount_response_summary"] = _compose_discount_response_summary(
-        historical=historical_discount_frame,
-        recommended_units=out["recommended_order_units"],
-    )
     backtest_trust_frame = _build_backtest_trust_frame(
         frame=frame,
         summary=completed_backtest_summary,
@@ -6361,10 +9673,6 @@ def _build_store_facing_frame(
     leftover_units_raw = pd.to_numeric(
         frame["expected_leftover_units_end_of_promo"], errors="coerce"
     ).fillna(0.0).clip(lower=0.0)
-    unit_cost_series = _resolve_unit_cost_series(
-        commercial_frame=frame,
-        forecast_per_row_diagnostics=forecast_per_row_diagnostics,
-    )
     leftover_cost = (leftover_units_raw * unit_cost_series).round(2)
     out["stockout_risk_band"] = _stockout_risk_band(
         stockout_flag=stockout,
@@ -6377,6 +9685,83 @@ def _build_store_facing_frame(
     )
     out["estimated_leftover_units"] = _store_int(leftover_units_raw)
     out["estimated_leftover_cost_dollars"] = leftover_cost.astype(float)
+    out["end_of_promo_residual_risk"] = out["overstock_risk_band"].astype(str)
+    target_end_stock_units = _optional_numeric_series(frame, "feature_end_of_promo_target_units")
+    target_end_stock_units = target_end_stock_units.where(
+        target_end_stock_units.notna(),
+        _numeric_series(frame, ("base_units_target",)),
+    ).fillna(0.0).clip(lower=0.0)
+    target_end_days_cover = _numeric_series(
+        frame,
+        ("feature_end_of_promo_target_days_cover",),
+    ).clip(lower=0.0)
+    estimated_end_stock_units = (
+        projected_on_hand
+        + pd.to_numeric(out["recommended_order_units"], errors="coerce").fillna(0.0)
+        - expected_units_per_period
+    ).clip(lower=0.0)
+    month_end_cash_flag = _numeric_series(
+        frame,
+        ("feature_month_end_cash_runoff_pressure_flag",),
+    ).fillna(0.0).clip(lower=0.0, upper=1.0)
+    cashflow_runoff_status = pd.Series("standard_cashflow", index=frame.index, dtype="object")
+    cashflow_runoff_status = cashflow_runoff_status.where(
+        month_end_cash_flag.lt(1.0),
+        "month_end_runoff_max_7d_cover",
+    )
+    trust_floor_status = pd.Series("trust_floor_met", index=frame.index, dtype="object")
+    trust_floor_status = trust_floor_status.where(
+        estimated_end_stock_units.ge(target_end_stock_units),
+        "below_target_end_stock",
+    )
+    speculative_capital_units = _optional_numeric_series(
+        frame,
+        "feature_expected_leftover_above_trust_floor_units",
+    )
+    fallback_speculative_units = (estimated_end_stock_units - target_end_stock_units).clip(lower=0.0)
+    speculative_capital_units = speculative_capital_units.where(
+        speculative_capital_units.notna(),
+        fallback_speculative_units,
+    ).clip(lower=0.0)
+    out["target_end_stock_units"] = target_end_stock_units.round(4).astype(float)
+    out["target_end_days_cover"] = target_end_days_cover.round(4).astype(float)
+    out["cashflow_runoff_status"] = cashflow_runoff_status
+    out["trust_floor_status"] = trust_floor_status
+    out["units_needed_for_trust_floor"] = _optional_first_numeric_series(
+        frame,
+        ("feature_units_needed_for_trust_floor", "units_needed_for_trust_floor"),
+    ).round(4).astype(float)
+    out["units_needed_for_high_demand_cover"] = _optional_first_numeric_series(
+        frame,
+        ("feature_units_needed_for_high_demand_cover", "units_needed_for_high_demand_cover"),
+    ).round(4).astype(float)
+    out["units_above_trust_target"] = _optional_first_numeric_series(
+        frame,
+        ("feature_units_above_trust_target", "units_above_trust_target"),
+    ).round(4).astype(float)
+    out["capital_tied_above_trust_target"] = _optional_first_numeric_series(
+        frame,
+        ("feature_capital_tied_above_trust_target", "capital_tied_above_trust_target"),
+    ).round(2).astype(float)
+    out["expected_gp_on_trust_floor_units"] = _optional_first_numeric_series(
+        frame,
+        ("feature_expected_gp_on_trust_floor_units", "expected_gp_on_trust_floor_units"),
+    ).round(2).astype(float)
+    out["expected_gp_on_speculative_units"] = _optional_first_numeric_series(
+        frame,
+        ("feature_expected_gp_on_speculative_units", "expected_gp_on_speculative_units"),
+    ).round(2).astype(float)
+    out["risk_adjusted_value_of_speculative_units"] = _optional_first_numeric_series(
+        frame,
+        (
+            "feature_risk_adjusted_value_of_speculative_units",
+            "risk_adjusted_value_of_speculative_units",
+        ),
+    ).round(2).astype(float)
+    out["speculative_capital_above_floor_units"] = speculative_capital_units.round(4).astype(float)
+    out["speculative_capital_above_floor_value"] = (
+        speculative_capital_units * unit_cost_series
+    ).round(2).astype(float)
 
     # ---- Capital at risk (risk-adjusted) + risk/reward ratio ------------
     # exposure = recommended_order_units * unit_cost (cash put down) OR
@@ -6386,6 +9771,7 @@ def _build_store_facing_frame(
     recommended_units_float = pd.to_numeric(
         out["recommended_order_units"], errors="coerce"
     ).fillna(0.0).clip(lower=0.0)
+    out["recommended_order_value"] = (recommended_units_float * unit_cost_series).round(2).astype(float)
     order_exposure_dollars = (recommended_units_float * unit_cost_series).clip(lower=0.0)
     exposure_dollars = pd.concat(
         [order_exposure_dollars, leftover_cost.astype(float).clip(lower=0.0)], axis=1
@@ -6437,9 +9823,66 @@ def _build_store_facing_frame(
         action=action,
         data_quality_flag=out["data_quality_flag"],
     )
-    out["recommended_action"] = action
+    action, normalized_quality = _normalize_action_review_hold_consistency(
+        action=action,
+        data_quality_flag=normalized_quality,
+        review_reason=frame.get(
+            "review_reason",
+            pd.Series([""] * len(frame.index), index=frame.index),
+        ),
+    )
+    display_action = _compose_store_facing_action_label(
+        action=action,
+        publish_eligibility_reason=frame.get(
+            "publish_eligibility_reason",
+            pd.Series([""] * len(frame.index), index=frame.index),
+        ),
+    )
+    out["recommended_action"] = display_action
+    out["store_action"] = _compose_store_user_action_label(display_action)
     out["data_quality_flag"] = normalized_quality
-    out["review_flag"] = action.eq("REVIEW").astype(int)
+    out["review_flag"] = display_action.isin({"REVIEW", "REVIEW_REQUIRED"}).astype(int)
+    discount_review_diagnostics = _build_discount_review_diagnostic_frame(frame)
+    out["low_nonzero_value_relief_delta"] = _optional_first_numeric_series(
+        frame,
+        (
+            "low_nonzero_value_relief_delta",
+            "low_nonzero_specialist_value_signal",
+            "specialist_shadow_expected_incremental_value_delta",
+            "expected_incremental_value_dollars_delta",
+        ),
+    ).fillna(0.0).round(2).astype(float)
+    out["promo_allocated_units"] = _store_int(
+        _numeric_series(frame, ("promo_allocated_units", "pl_allocation_qty", "pl_allocated")).clip(lower=0.0)
+    )
+    store_label_frame = _build_store_action_label_frame(
+        store_frame=out,
+        display_action=display_action,
+        data_quality_flag=out["data_quality_flag"],
+        discount_reason_code=discount_review_diagnostics["discount_data_quality_reason_code"],
+        publish_eligibility_reason=frame.get(
+            "publish_eligibility_reason",
+            pd.Series([""] * len(frame.index), index=frame.index),
+        ),
+        review_reason=frame.get(
+            "review_reason",
+            pd.Series([""] * len(frame.index), index=frame.index),
+        ),
+    )
+    for column_name in store_label_frame.columns:
+        out[column_name] = store_label_frame[column_name]
+    order_reconciliation_frame = _build_store_order_reconciliation_frame(
+        store_frame=out,
+    )
+    for column_name in order_reconciliation_frame.columns:
+        out[column_name] = order_reconciliation_frame[column_name]
+    out["recommended_order_units"] = out["final_store_order_units"]
+    out["recommended_order_value"] = out["final_store_order_value"]
+    out["store_action_reason"] = out["order_reconciliation_reason"]
+    out["discount_response_summary"] = _compose_discount_response_summary(
+        historical=historical_discount_frame,
+        recommended_units=out["recommended_order_units"],
+    )
 
     # ---- Execution priority + timing -----------------------------------
     gap_units = pd.to_numeric(out["gap_to_day_one_target_units"], errors="coerce").fillna(0).astype(int)
@@ -6465,12 +9908,26 @@ def _build_store_facing_frame(
         demand_evidence_class=out["demand_evidence_class"],
         confidence_band=out["confidence_band"],
     )
-    out["execution_readiness_status"] = _compose_execution_readiness_status(action)
+    out["execution_readiness_status"] = _compose_execution_readiness_status(display_action)
+    out["operator_status"] = _compose_store_user_status_label(out["execution_readiness_status"])
     out["primary_review_reason"] = _compose_primary_review_reason(
-        action=action,
+        action=display_action,
         data_quality_flag=out["data_quality_flag"],
         model_reason_summary=out["model_reason_summary"],
+        review_reason=frame.get(
+            "review_reason",
+            pd.Series([""] * len(frame.index), index=frame.index),
+        ),
     )
+    raw_decision_reason = frame.get("decision_reason")
+    if raw_decision_reason is None:
+        out["decision_reason"] = out["model_reason_summary"]
+    else:
+        raw_decision_reason = raw_decision_reason.astype(str).str.strip()
+        out["decision_reason"] = raw_decision_reason.where(
+            raw_decision_reason.ne(""),
+            out["model_reason_summary"],
+        )
     priority_band, buy_now, watch, do_not_buy, days_until_action = _compute_priority_band_and_flags(
         action=action,
         gap_units=gap_units,
@@ -6490,6 +9947,31 @@ def _build_store_facing_frame(
         capital_at_risk=capital_at_risk,
         lead_days=lead_days,
     )
+
+    out["SOH_at_advice_time"] = out["current_soh_units"]
+    out["on_order_at_advice_time"] = out["on_order_units"]
+    out["projected_SOH_at_promo_start"] = out["projected_on_hand_at_promo_start"]
+    out["target_SOH_at_promo_start"] = out["target_stock_day_one_units"]
+    out["weeks_of_cover_entering_promo"] = (
+        pd.to_numeric(out["days_of_cover_to_promo_start"], errors="coerce").fillna(0.0) / 7.0
+    ).round(2)
+
+    sku_metric_map = None
+    if sku_backtest_summary is not None and not sku_backtest_summary.empty:
+        sku_metric_map = sku_backtest_summary.drop_duplicates(subset=["sku_number"]).set_index("sku_number")
+    sku_lookup = out["sku_number"].astype(str)
+    if sku_metric_map is None:
+        out["SKU_MAE"] = pd.Series([pd.NA] * len(out.index), index=out.index, dtype="Float64")
+        out["SKU_MSE"] = pd.Series([pd.NA] * len(out.index), index=out.index, dtype="Float64")
+        out["SKU_bias"] = pd.Series(["NO_COMPARABLE_EVENTS"] * len(out.index), index=out.index, dtype="object")
+    else:
+        out["SKU_MAE"] = pd.to_numeric(sku_lookup.map(sku_metric_map["SKU_MAE"]), errors="coerce").round(2)
+        out["SKU_MSE"] = pd.to_numeric(sku_lookup.map(sku_metric_map["SKU_MSE"]), errors="coerce").round(2)
+        out["SKU_bias"] = sku_lookup.map(sku_metric_map["SKU_bias"]).fillna("NO_COMPARABLE_EVENTS").astype(str)
+
+    clean_operator_fields = _build_store_facing_clean_operator_fields(out)
+    for column_name in clean_operator_fields.columns:
+        out[column_name] = clean_operator_fields[column_name]
 
     _validate_store_facing_operator_contract(out)
 

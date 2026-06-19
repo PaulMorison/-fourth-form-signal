@@ -37,6 +37,9 @@ def _row(
     live_promo_window_days: float = 7.0,
     pl_allocated: float | None = None,
     stock_basis_units: float | None = None,
+    effective_cost_per_unit: float | None = 2.0,
+    category: str | None = "GENERAL",
+    department: str | None = "HEALTH",
 ) -> dict[str, object]:
     return {
         "promotion_row_key": f"{store}|{sku}|{start.isoformat()}|{end.isoformat()}",
@@ -58,6 +61,9 @@ def _row(
         "live_promo_window_days": live_promo_window_days,
         "pl_allocated": pl_allocated,
         "stock_basis_units": stock_basis_units,
+        "effective_cost_per_unit": effective_cost_per_unit,
+        "category": category,
+        "department": department,
     }
 
 
@@ -253,10 +259,132 @@ class PriorPromoSameOrBetterDiscountTests(unittest.TestCase):
         self.assertTrue(pd.isna(row["feature_probability_demand_exceeds_allocation_same_or_better_discount"]))
         self.assertTrue(pd.isna(row["feature_probability_units_below_allocation_same_or_better_discount"]))
         self.assertTrue(pd.isna(row["feature_probability_stockout_vs_stock_basis_same_or_better_discount"]))
+        self.assertTrue(pd.isna(row["feature_historical_zero_sale_after_buy_rate"]))
+        self.assertTrue(pd.isna(row["feature_same_discount_success_rate_56d"]))
+        self.assertTrue(pd.isna(row["feature_historical_trapped_capital_rate"]))
+        self.assertTrue(pd.isna(row["feature_historical_sell_through_on_accepted_qty"]))
+        self.assertTrue(pd.isna(row["feature_historical_overforecast_bias"]))
+        self.assertTrue(pd.isna(row["feature_historical_allocation_efficiency_rate"]))
+        self.assertTrue(pd.isna(row["feature_historical_overallocation_above_floor_rate"]))
+        self.assertTrue(pd.isna(row["feature_historical_residual_above_floor_units_avg"]))
+        self.assertTrue(pd.isna(row["feature_historical_under_floor_missed_demand_rate"]))
+        self.assertTrue(pd.isna(row["feature_historical_under_floor_lost_units_avg"]))
+        self.assertEqual(row["feature_historical_comparable_promo_event_count"], 0.0)
         self.assertEqual(row["feature_promo_history_evidence_strength"], 0.0)
         self.assertEqual(row["feature_sparse_history_penalty"], 1.0)
         self.assertEqual(row["feature_order_evidence_quality_score"], 0.0)
         self.assertEqual(row["feature_overallocation_risk_score"], 0.5)
+
+    def test_capital_discipline_history_metrics_use_same_sku_comparables(self) -> None:
+        candidate_start = date(2024, 6, 1)
+        rows = [
+            _row(
+                store=1, sku=100, start=date(2024, 5, 1), end=date(2024, 5, 7),
+                discount_percent=20.0, actual_units_sold_promo=0.0,
+                pl_allocated=10.0, stock_basis_units=10.0, effective_cost_per_unit=3.0,
+                category="SKINCARE", department="BEAUTY",
+            ),
+            _row(
+                store=1, sku=100, start=date(2024, 5, 15), end=date(2024, 5, 21),
+                discount_percent=25.0, actual_units_sold_promo=8.0,
+                pl_allocated=10.0, stock_basis_units=10.0, effective_cost_per_unit=3.0,
+                category="SKINCARE", department="BEAUTY",
+            ),
+            _row(
+                store=1, sku=100, start=candidate_start, end=candidate_start + timedelta(days=6),
+                discount_percent=20.0,
+                category="SKINCARE", department="BEAUTY",
+            ),
+        ]
+
+        result = apply_ft_prior_promo_memory(pd.DataFrame(rows))
+        row = result.iloc[-1]
+
+        self.assertEqual(row["feature_historical_comparable_promo_event_count"], 2.0)
+        self.assertAlmostEqual(row["feature_historical_zero_sale_after_buy_rate"], 0.5)
+        self.assertAlmostEqual(row["feature_same_discount_success_rate_56d"], 0.5)
+        self.assertAlmostEqual(row["feature_historical_trapped_capital_rate"], 0.6)
+        self.assertAlmostEqual(row["feature_historical_sell_through_on_accepted_qty"], 0.4)
+        self.assertAlmostEqual(row["feature_historical_overforecast_bias"], 0.6)
+        self.assertAlmostEqual(row["feature_historical_allocation_efficiency_rate"], 0.4)
+        self.assertAlmostEqual(row["feature_historical_overallocation_above_floor_rate"], 0.5)
+        self.assertAlmostEqual(row["feature_historical_residual_above_floor_units_avg"], 4.0)
+        self.assertTrue(pd.isna(row["feature_historical_under_floor_missed_demand_rate"]))
+        self.assertTrue(pd.isna(row["feature_historical_under_floor_lost_units_avg"]))
+        self.assertEqual(row["feature_historical_memory_category_fallback_flag"], 0.0)
+        self.assertEqual(row["feature_historical_memory_department_fallback_flag"], 0.0)
+
+    def test_trust_floor_history_metrics_capture_under_floor_missed_demand(self) -> None:
+        candidate_start = date(2024, 6, 1)
+        rows = [
+            _row(
+                store=1, sku=100, start=date(2024, 5, 1), end=date(2024, 5, 7),
+                discount_percent=20.0, actual_units_sold_promo=3.0,
+                pl_allocated=1.0, stock_basis_units=1.0, effective_cost_per_unit=3.0,
+                category="SKINCARE", department="BEAUTY",
+            ),
+            _row(
+                store=1, sku=100, start=date(2024, 5, 15), end=date(2024, 5, 21),
+                discount_percent=25.0, actual_units_sold_promo=1.0,
+                pl_allocated=1.0, stock_basis_units=1.0, effective_cost_per_unit=3.0,
+                category="SKINCARE", department="BEAUTY",
+            ),
+            _row(
+                store=1, sku=100, start=candidate_start, end=candidate_start + timedelta(days=6),
+                discount_percent=20.0,
+                category="SKINCARE", department="BEAUTY",
+            ),
+        ]
+
+        result = apply_ft_prior_promo_memory(pd.DataFrame(rows))
+        row = result.iloc[-1]
+
+        self.assertAlmostEqual(row["feature_historical_allocation_efficiency_rate"], 1.0)
+        self.assertAlmostEqual(row["feature_historical_overallocation_above_floor_rate"], 0.0)
+        self.assertAlmostEqual(row["feature_historical_residual_above_floor_units_avg"], 0.0)
+        self.assertAlmostEqual(row["feature_historical_under_floor_missed_demand_rate"], 0.5)
+        self.assertAlmostEqual(row["feature_historical_under_floor_lost_units_avg"], 1.0)
+
+    def test_capital_discipline_history_falls_back_to_category_then_department(self) -> None:
+        candidate_start = date(2024, 6, 1)
+        rows = [
+            _row(
+                store=1, sku=200, start=date(2024, 5, 10), end=date(2024, 5, 16),
+                discount_percent=20.0, actual_units_sold_promo=5.0,
+                pl_allocated=10.0, stock_basis_units=10.0,
+                category="COLOUR", department="BEAUTY",
+            ),
+            _row(
+                store=1, sku=300, start=date(2024, 5, 12), end=date(2024, 5, 18),
+                discount_percent=20.0, actual_units_sold_promo=9.0,
+                pl_allocated=10.0, stock_basis_units=10.0,
+                category="FRAGRANCE", department="BEAUTY",
+            ),
+            _row(
+                store=1, sku=101, start=candidate_start, end=candidate_start + timedelta(days=6),
+                discount_percent=20.0,
+                category="COLOUR", department="BEAUTY",
+            ),
+            _row(
+                store=1, sku=102, start=candidate_start, end=candidate_start + timedelta(days=6),
+                discount_percent=20.0,
+                category="NAILS", department="BEAUTY",
+            ),
+        ]
+
+        result = apply_ft_prior_promo_memory(pd.DataFrame(rows))
+        category_row = result.iloc[-2]
+        department_row = result.iloc[-1]
+
+        self.assertEqual(category_row["feature_historical_comparable_promo_event_count"], 1.0)
+        self.assertEqual(category_row["feature_historical_memory_category_fallback_flag"], 1.0)
+        self.assertEqual(category_row["feature_historical_memory_department_fallback_flag"], 0.0)
+        self.assertAlmostEqual(category_row["feature_historical_sell_through_on_accepted_qty"], 0.5)
+
+        self.assertEqual(department_row["feature_historical_comparable_promo_event_count"], 2.0)
+        self.assertEqual(department_row["feature_historical_memory_category_fallback_flag"], 0.0)
+        self.assertEqual(department_row["feature_historical_memory_department_fallback_flag"], 1.0)
+        self.assertAlmostEqual(department_row["feature_historical_sell_through_on_accepted_qty"], 0.7)
 
 
 class CannibalisationScoreMonotonicityTests(unittest.TestCase):

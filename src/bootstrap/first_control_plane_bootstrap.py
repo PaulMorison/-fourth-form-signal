@@ -150,12 +150,12 @@ from decision.router import (
     RouterResolutionRequest,
     RouterService,
 )
-from platform.audit.audit_event_store import (
+from ff_platform.audit.audit_event_store import (
     AuditEventStore,
     InMemoryAuditEventRepository,
     JsonAuditEventTypeRegistry,
 )
-from platform.validation.contract_schema_validator import (
+from ff_platform.validation.contract_schema_validator import (
     ContractSchemaValidator,
     JsonContractSchemaRepository,
 )

@@ -12,7 +12,7 @@ import json
 from pathlib import Path
 from typing import Mapping, Protocol, Sequence
 
-from platform.validation.contract_schema_validator import ContractSchemaValidator
+from ff_platform.validation.contract_schema_validator import ContractSchemaValidator
 
 _REGISTRY_VALIDATION_CORRELATION_ID = "00000000-0000-0000-0000-000000000000"
 _VALID_ROUTE_STATUS = {"active", "deprecated"}

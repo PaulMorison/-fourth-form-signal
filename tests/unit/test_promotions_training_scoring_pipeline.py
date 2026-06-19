@@ -7,6 +7,8 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
+import pandas as pd
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.append(str(REPO_ROOT / "src"))
 
@@ -30,6 +32,110 @@ from tests.unit.promotions_test_data import (  # noqa: E402
 
 
 class PromotionTrainingScoringPipelineTests(unittest.TestCase):
+    def test_training_inference_schema_excludes_downstream_units_head_families_by_default(self) -> None:
+        completed_base_frame = build_completed_promotions_base_frame()
+        target_result = PromotionTargetEngineer().engineer(completed_base_frame)
+        feature_result = PromotionFeatureEngineer().engineer(target_result.frame)
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_paths = PromotionArtifactPaths(root=Path(temp_dir) / "promotions_artifacts")
+            dataset = PromotionDatasetAssembler().assemble_training_dataset(
+                run_id="promotions-train-run",
+                base_frame=completed_base_frame,
+                target_frame=target_result.frame,
+                feature_frame=feature_result.frame,
+                target_columns=target_result.target_columns,
+                feature_columns=feature_result.feature_columns,
+                artifact_paths=artifact_paths,
+            )
+            training_artifacts = PromotionModelTrainer().train(
+                run_id="promotions-train-run",
+                dataset=dataset.frame,
+                dataset_path=dataset.dataset_path,
+                artifact_paths=artifact_paths,
+            )
+
+            inference_schema = json.loads(
+                Path(training_artifacts.inference_schema_path).read_text(encoding="utf-8")
+            )
+            inference_feature_columns = set(inference_schema["feature_columns"])
+
+            self.assertIn("feature_basket_anchor_sku_score", inference_feature_columns)
+            self.assertIn("feature_sparse_demand_noise_regime_score", inference_feature_columns)
+            self.assertIn("feature_probability_expected_units_consensus", inference_feature_columns)
+            self.assertIn("feature_historical_promo_events_same_discount", inference_feature_columns)
+            self.assertIn("feature_historical_units_same_discount_avg", inference_feature_columns)
+            self.assertNotIn("feature_micro_market_clearing_pressure", inference_feature_columns)
+            self.assertNotIn("feature_end_of_promo_target_floor_units", inference_feature_columns)
+            self.assertNotIn("feature_uplift_allocation_discipline_score", inference_feature_columns)
+
+    def test_training_persists_policy_adjusted_test_set_predictions(self) -> None:
+        completed_base_frame = build_completed_promotions_base_frame()
+        target_result = PromotionTargetEngineer().engineer(completed_base_frame)
+        feature_result = PromotionFeatureEngineer().engineer(target_result.frame)
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_paths = PromotionArtifactPaths(root=Path(temp_dir) / "promotions_artifacts")
+            dataset = PromotionDatasetAssembler().assemble_training_dataset(
+                run_id="promotions-train-run",
+                base_frame=completed_base_frame,
+                target_frame=target_result.frame,
+                feature_frame=feature_result.frame,
+                target_columns=target_result.target_columns,
+                feature_columns=feature_result.feature_columns,
+                artifact_paths=artifact_paths,
+            )
+            training_artifacts = PromotionModelTrainer().train(
+                run_id="promotions-train-run",
+                dataset=dataset.frame,
+                dataset_path=dataset.dataset_path,
+                artifact_paths=artifact_paths,
+            )
+
+            self.assertIsNotNone(training_artifacts.test_set_predictions_path)
+            predictions = pd.read_parquet(training_artifacts.test_set_predictions_path)
+
+            for column_name in (
+                "raw_predicted_units_total_promo",
+                "calibrated_predicted_units_total_promo",
+                "policy_adjusted_predicted_units_total_promo",
+                "policy_adjustment_reason",
+                "predicted_units_total_promo",
+                "feature_historical_promo_events_same_discount",
+                "feature_historical_units_same_discount_avg",
+                "feature_basket_anchor_sku_score",
+                "feature_basket_drag_along_dependency_score",
+                "feature_anchor_centrality_score",
+                "feature_anchor_presence_support_score",
+                "feature_top_anchor_dependency_score",
+                "feature_anchor_absence_risk_score",
+                "feature_anchor_presence_dependency_score",
+                "feature_micro_market_clearing_pressure",
+                "feature_convexity_to_capital_score",
+                "feature_sparse_demand_noise_regime_score",
+                "feature_sparse_demand_stable_low_trust_flag",
+                "feature_promo_period_target_units",
+                "feature_day_one_target_stock_units",
+                "feature_end_of_promo_target_floor_units",
+                "feature_end_of_promo_target_days_cover",
+                "feature_no_promo_history_flag",
+                "feature_month_end_cash_runoff_pressure_flag",
+                "feature_cashflow_efficiency_score",
+                "promo_gm_unit",
+            ):
+                self.assertIn(column_name, predictions.columns)
+            self.assertTrue(
+                predictions["predicted_units_total_promo"].equals(
+                    predictions["policy_adjusted_predicted_units_total_promo"]
+                )
+            )
+            self.assertTrue(
+                (
+                    predictions["predicted_units_total_promo"]
+                    <= predictions["calibrated_predicted_units_total_promo"]
+                ).all()
+            )
+
     def test_training_and_scoring_flow_persists_outputs(self) -> None:
         completed_base_frame = build_completed_promotions_base_frame()
         target_result = PromotionTargetEngineer().engineer(completed_base_frame)

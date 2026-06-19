@@ -55,6 +55,29 @@ class BacktestRowFlagTests(unittest.TestCase):
         with self.assertRaises(PromotionBacktestContractError):
             compute_backtest_rows(frame)
 
+    def test_rows_include_commercial_trust_capital_and_period_metrics(self) -> None:
+        frame = _make_frame([10.0, 8.0], [8.0, 10.0])
+        frame["promotion_period_days"] = [5.0, 5.0]
+        frame["promo_allocated_units"] = [12.0, 10.0]
+        frame["target_end_stock_units"] = [2.0, 2.0]
+        frame["feature_end_of_promo_target_floor_units"] = [2.0, 2.0]
+        frame["actual_end_stock_units"] = [4.0, 0.0]
+        frame["feature_high_base_demand_end_cover_flag"] = [0.0, 1.0]
+        frame["effective_cost_per_unit"] = [2.0, 2.0]
+        frame["promo_gm_unit"] = [3.0, 3.0]
+
+        rows = compute_backtest_rows(frame)
+
+        self.assertEqual(rows["floor_breach_flag"].tolist(), [0, 1])
+        self.assertEqual(rows["zero_oos_flag"].tolist(), [0, 1])
+        self.assertEqual(rows["target_hit_flag"].tolist(), [1, 0])
+        self.assertEqual(rows["high_demand_14d_success_flag"].tolist(), [0, 0])
+        self.assertAlmostEqual(rows.loc[0, "period_absolute_error_units_per_day"], 0.4)
+        self.assertAlmostEqual(rows.loc[0, "speculative_capital_drag_dollars"], 4.0)
+        self.assertAlmostEqual(rows.loc[1, "missed_trust_units"], 2.0)
+        self.assertAlmostEqual(rows.loc[1, "missed_upside_units"], 2.0)
+        self.assertAlmostEqual(rows.loc[0, "sell_through_on_accepted_capital"], 8.0 / 12.0, places=4)
+
 
 class BacktestSummaryTests(unittest.TestCase):
     def test_summary_aggregates(self) -> None:
@@ -65,6 +88,29 @@ class BacktestSummaryTests(unittest.TestCase):
         self.assertEqual(summary["within_10pct_rate"], 0.5)  # first two within 10pct
         self.assertGreaterEqual(summary["mean_absolute_pct_error"], 0.0)
 
+    def test_summary_includes_commercial_metrics(self) -> None:
+        frame = _make_frame([10.0, 8.0], [8.0, 10.0])
+        frame["promotion_period_days"] = [5.0, 5.0]
+        frame["promo_allocated_units"] = [12.0, 10.0]
+        frame["target_end_stock_units"] = [2.0, 2.0]
+        frame["feature_end_of_promo_target_floor_units"] = [2.0, 2.0]
+        frame["actual_end_stock_units"] = [4.0, 0.0]
+        frame["feature_high_base_demand_end_cover_flag"] = [0.0, 1.0]
+        frame["effective_cost_per_unit"] = [2.0, 2.0]
+        frame["promo_gm_unit"] = [3.0, 3.0]
+
+        summary = compute_backtest_summary(compute_backtest_rows(frame))
+
+        self.assertEqual(summary["floor_breach_rate"], 0.5)
+        self.assertEqual(summary["target_hit_rate"], 0.5)
+        self.assertEqual(summary["zero_oos_rate"], 0.5)
+        self.assertEqual(summary["zero_oos_success_rate"], 0.5)
+        self.assertEqual(summary["high_demand_14d_success_rate"], 0.0)
+        self.assertAlmostEqual(summary["total_speculative_capital_drag_dollars"], 4.0)
+        self.assertAlmostEqual(summary["total_missed_trust_units"], 2.0)
+        self.assertAlmostEqual(summary["total_missed_upside_units"], 2.0)
+        self.assertAlmostEqual(summary["period_absolute_error_units_per_day_mean"], 0.4)
+
 
 class BacktestArtifactWriteTests(unittest.TestCase):
     def test_writes_csv_and_summary_json(self) -> None:
@@ -73,8 +119,11 @@ class BacktestArtifactWriteTests(unittest.TestCase):
             paths = write_backtest_artifacts(frame=frame, output_root=Path(temp_dir))
             self.assertTrue(Path(paths.rows_csv_path).exists())
             self.assertTrue(Path(paths.summary_json_path).exists())
+            self.assertTrue(Path(paths.summary_csv_path).exists())
             payload = json.loads(Path(paths.summary_json_path).read_text(encoding="utf-8"))
             self.assertEqual(payload["completed_promotions_evaluated"], 2)
+            summary_frame = pd.read_csv(paths.summary_csv_path)
+            self.assertIn("floor_breach_rate", summary_frame.columns)
 
 
 if __name__ == "__main__":

@@ -81,6 +81,12 @@ def _make_test_set_predictions(
             predicted = actual * 1.6  # large overforecast
         else:
             predicted = actual * 1.02  # close
+        high_demand_flag = 1 if i % 9 == 0 else 0
+        month_end_flag = 1 if i % 10 == 0 else 0
+        no_history_flag = 1 if i % 13 == 0 else 0
+        target_floor_units = 1.0 if no_history_flag else 2.0
+        target_end_stock_units = 14.0 if high_demand_flag else 7.0 if month_end_flag else target_floor_units
+        actual_end_stock_units = 0.0 if i % 17 == 0 else target_end_stock_units
         rows.append(
             {
                 "promotion_row_key": f"key_{i}",
@@ -93,6 +99,19 @@ def _make_test_set_predictions(
                 "actual_units_sold_promo": actual,
                 "actual_sales_ex_gst_promo": actual * 10.0,  # $10/unit price proxy
                 "predicted_units_total_promo": predicted,
+                "promo_allocated_units": actual + actual_end_stock_units,
+                "feature_day_one_target_stock_units": actual + target_end_stock_units,
+                "target_end_stock_units": target_end_stock_units,
+                "feature_end_of_promo_target_floor_units": target_floor_units,
+                "actual_end_stock_units": actual_end_stock_units,
+                "feature_high_base_demand_end_cover_flag": high_demand_flag,
+                "feature_no_promo_history_flag": no_history_flag,
+                "feature_month_end_cash_runoff_pressure_flag": month_end_flag,
+                "feature_end_of_promo_target_days_cover": 14.0 if high_demand_flag else 7.0 if month_end_flag else 2.0,
+                "feature_historical_promo_events_same_discount": 0 if no_history_flag else i % 4,
+                "effective_cost_per_unit": 2.0,
+                "promo_gm_unit": 3.0,
+                "publish_eligibility_reason": "review_only" if i % 3 == 0 else "publish",
                 "feature_intermittent_demand_flag": 1 if i < intermittent_yes_block else 0,
                 "feature_sparse_repeat_purchase_flag": 0,
                 "feature_prior_promo_14d_flag": 1 if i % 4 == 0 else 0,
@@ -180,8 +199,8 @@ class EndToEndOrchestratorTests(unittest.TestCase):
             as_of_date="2025-01-15",
         )
 
-    def test_end_to_end_writes_nine_artifacts(self) -> None:
-        # Category 10 — all 9 governed artifacts (7 legacy + 2 calibration) on disk.
+    def test_end_to_end_writes_summary_csv_artifact(self) -> None:
+        # Category 10 — governed artifacts include JSON+CSV summaries plus calibration.
         frame = _make_test_set_predictions(n=40, overforecast_block=15)
         with tempfile.TemporaryDirectory() as workdir:
             paths = self._run(frame, Path(workdir))
@@ -189,14 +208,44 @@ class EndToEndOrchestratorTests(unittest.TestCase):
                 paths.rows_csv_path,
                 paths.rows_parquet_path,
                 paths.summary_json_path,
+                paths.summary_csv_path,
                 paths.by_segment_csv_path,
                 paths.watchlist_csv_path,
                 paths.brief_md_path,
                 paths.manifest_json_path,
                 paths.calibration_summary_json_path,
                 paths.calibration_brief_md_path,
+                paths.execution_scorecard_csv_path,
+                paths.execution_scorecard_summary_json_path,
+                paths.trust_floor_shape_policy_audit_csv_path,
+                paths.trust_floor_shape_policy_audit_json_path,
             ):
                 self.assertTrue(Path(path_str).exists(), f"missing artifact: {path_str}")
+            summary_csv = pd.read_csv(paths.summary_csv_path)
+            self.assertIn("floor_breach_rate", summary_csv.columns)
+            self.assertIn("period_absolute_error_units_per_day_mean", summary_csv.columns)
+            scorecard_payload = json.loads(Path(paths.execution_scorecard_summary_json_path).read_text())
+            self.assertTrue(scorecard_payload["diagnostics_only"])
+            self.assertIn("trust_floor_breach_count", scorecard_payload)
+            self.assertIn("recommended_order_units_success_rate", scorecard_payload)
+            self.assertIn("target_soh_at_promo_start_success_rate", scorecard_payload)
+            self.assertIn("stockout_avoidance_success_rate", scorecard_payload)
+            self.assertIn("capital_drag_dollars", scorecard_payload)
+            self.assertIn("missed_upside_units", scorecard_payload)
+            self.assertIn("effective_sharpe_like_gp_per_drag_mean", scorecard_payload)
+            self.assertIn("gp_per_capital_committed_mean", scorecard_payload)
+            scorecard_rows = pd.read_csv(paths.execution_scorecard_csv_path)
+            self.assertIn("target_start_stock_units", scorecard_rows.columns)
+            self.assertIn("recommended_order_units_success_flag", scorecard_rows.columns)
+            self.assertIn("target_soh_at_promo_start_success_flag", scorecard_rows.columns)
+            self.assertIn("stockout_avoidance_success_flag", scorecard_rows.columns)
+            self.assertIn("capital_drag_dollars", scorecard_rows.columns)
+            self.assertIn("missed_upside_units", scorecard_rows.columns)
+            policy_audit = pd.read_csv(paths.trust_floor_shape_policy_audit_csv_path)
+            self.assertIn("trust_floor_shape_policy_class", policy_audit.columns)
+            self.assertIn("capital_drag_dollars", policy_audit.columns)
+            self.assertIn("missed_upside_units", policy_audit.columns)
+            self.assertIn("target_soh_at_promo_start_success_flag", policy_audit.columns)
             self.assertEqual(paths.row_count_evaluated, 40)
             # Category 8 — paths returned populate the typed handle for the cycle.
             self.assertIsInstance(paths, PromotionBacktestArtifactPaths)
@@ -210,6 +259,12 @@ class EndToEndOrchestratorTests(unittest.TestCase):
             self.assertEqual(payload["comparison_grain"], "promotion_row_key")
             self.assertEqual(payload["row_count_evaluated"], 40)
             self.assertEqual(payload["rows_csv_path"], paths.rows_csv_path)
+            self.assertEqual(payload["summary_csv_path"], paths.summary_csv_path)
+            self.assertEqual(payload["execution_scorecard_csv_path"], paths.execution_scorecard_csv_path)
+            self.assertEqual(
+                payload["trust_floor_shape_policy_audit_csv_path"],
+                paths.trust_floor_shape_policy_audit_csv_path,
+            )
             self.assertIsNone(payload["skip_reason"])
             self.assertIsNone(payload["skip_class"])
 
@@ -247,10 +302,13 @@ class EndToEndOrchestratorTests(unittest.TestCase):
             self.assertEqual(paths.row_count_evaluated, 0)
             self.assertTrue(Path(paths.brief_md_path).exists())
             self.assertTrue(Path(paths.summary_json_path).exists())
+            self.assertTrue(Path(paths.summary_csv_path).exists())
             self.assertTrue(Path(paths.manifest_json_path).exists())
             summary_payload = json.loads(Path(paths.summary_json_path).read_text())
             self.assertEqual(summary_payload["skip_class"], "empty_test_set")
             self.assertEqual(summary_payload["comparable_rows"], 0)
+            summary_csv = pd.read_csv(paths.summary_csv_path)
+            self.assertIn("zero_oos_success_rate", summary_csv.columns)
 
     def test_skip_path_when_predictions_artifact_missing(self) -> None:
         with tempfile.TemporaryDirectory() as workdir:
@@ -264,10 +322,15 @@ class EndToEndOrchestratorTests(unittest.TestCase):
             for path_str in (
                 paths.rows_csv_path,
                 paths.summary_json_path,
+                paths.summary_csv_path,
                 paths.by_segment_csv_path,
                 paths.watchlist_csv_path,
                 paths.brief_md_path,
                 paths.manifest_json_path,
+                paths.execution_scorecard_csv_path,
+                paths.execution_scorecard_summary_json_path,
+                paths.trust_floor_shape_policy_audit_csv_path,
+                paths.trust_floor_shape_policy_audit_json_path,
             ):
                 self.assertTrue(Path(path_str).exists())
 

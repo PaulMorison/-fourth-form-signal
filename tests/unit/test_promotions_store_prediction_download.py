@@ -26,15 +26,23 @@ from surfaces.promotions.reporting.store_prediction_download_builder import (  #
     STORE_FACING_OUTPUT_COLUMNS,
     STORE_FACING_SCHEMA_COLUMNS,
     _build_backtest_trust_frame,
+    _build_store_order_reconciliation_frame,
+    _build_store_order_reconciliation_summary_frame,
+    _build_store_suppressed_order_risk_audit_frame,
+    _build_store_suppressed_order_risk_summary_frame,
+    _build_store_facing_frame,
     _compose_execution_readiness_status,
     _compose_historical_response_summary,
+    _validate_store_facing_clean_operator_output,
     _validate_store_facing_operator_contract,
+    _validate_store_suppressed_order_risk_audit,
 )
 
 
 def _decision_surface_frame() -> pd.DataFrame:
     return pd.DataFrame(
         {
+            "promotion_row_key": ["row-1", "row-2"],
             "store_number": [1, 2],
             "promotion_name": ["Half Price", "Clearance"],
             "promo_type": ["discount", "clearance"],
@@ -105,6 +113,81 @@ def _minimal_store_facing_validation_frame(**overrides: object) -> pd.DataFrame:
     return pd.DataFrame(base)
 
 
+def _minimal_order_reconciliation_input_frame(**overrides: object) -> pd.DataFrame:
+    base = {
+        "store_action_label": ["NO_DEMAND"],
+        "raw_model_order_units": [5],
+        "raw_model_order_value": [50.0],
+        "projected_SOH_at_promo_start": [3],
+        "floor_units_required": [2],
+        "expected_promo_demand": [1],
+        "available_to_sell_before_floor": [1],
+        "projected_stock_gap_units": [0],
+        "retail_risk_reward_ratio": [0.5],
+        "availability_risk_label": ["FLOOR_PROTECTED"],
+        "demand_evidence_label": ["NO_DEMAND"],
+        "capital_drag_label": ["CAPITAL_DRAG_LOW"],
+        "blocker_reason": [""],
+    }
+    base.update(overrides)
+    return pd.DataFrame(base)
+
+
+def _minimal_suppressed_order_risk_frame(**overrides: object) -> pd.DataFrame:
+    reconciliation_keys = {
+        "store_action_label",
+        "raw_model_order_units",
+        "raw_model_order_value",
+        "projected_SOH_at_promo_start",
+        "floor_units_required",
+        "expected_promo_demand",
+        "available_to_sell_before_floor",
+        "projected_stock_gap_units",
+        "retail_risk_reward_ratio",
+        "availability_risk_label",
+        "demand_evidence_label",
+        "capital_drag_label",
+        "blocker_reason",
+    }
+    reconciliation_overrides = {
+        key: value for key, value in overrides.items() if key in reconciliation_keys
+    }
+    reconciliation_input = _minimal_order_reconciliation_input_frame(**reconciliation_overrides)
+    reconciliation_frame = _build_store_order_reconciliation_frame(
+        store_frame=reconciliation_input,
+    )
+    frame = pd.DataFrame(
+        {
+            "store_number": ["1"],
+            "promotion_id": ["PROMO_TEST"],
+            "promotion_name": ["Test Promo"],
+            "promotion_start_date": ["2024-09-01"],
+            "promotion_end_date": ["2024-09-07"],
+            "sku_number": ["1001"],
+            "sku_description": ["Skin Serum"],
+            "current_soh": [3],
+            "on_order_at_advice_time": [0],
+            "expected_units_before_promo_start": [0],
+            "expected_gp_on_speculative_units": [12.0],
+            "capital_at_risk_adjusted_dollars": [4.0],
+            "end_of_promo_residual_risk": ["LOW"],
+        }
+    )
+    for source in (reconciliation_input, reconciliation_frame):
+        for column_name in source.columns:
+            frame[column_name] = source[column_name].values
+    for key, value in overrides.items():
+        frame[key] = value
+    return frame
+
+
+def _single_store_promotion_sibling_frame(store_csv: Path, suffix: str) -> pd.DataFrame:
+    matches = sorted(store_csv.parent.glob(f"*_{suffix}.csv"))
+    if len(matches) != 1:
+        raise AssertionError(f"Expected exactly one {suffix} sibling for {store_csv}, found {len(matches)}")
+    return pd.read_csv(matches[0])
+
+
 class PromotionStorePredictionDownloadTests(unittest.TestCase):
     def test_store_download_builder_writes_csv_execution_pack(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -134,7 +217,26 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
             self.assertEqual(manifest_payload["manifest_csv_path"], artifacts.manifest_csv_path)
             self.assertEqual(
                 set(manifest_csv["file_type"]),
-                {"master", "store_predictions", "store_promotion", "store_promotion_manager_summary", "store_promotion_feature_inspection", "reconciliation", "manifest_csv", "manifest_json"},
+                {
+                    "master",
+                    "store_predictions",
+                    "store_promotion",
+                    "store_promotion_operator_audit",
+                    "store_promotion_manager_summary",
+                    "store_promotion_feature_inspection",
+                    "store_action_label_distribution",
+                    "store_facing_contract_cleanup_issues",
+                    "store_facing_contract_cleanup_summary",
+                    "store_order_reconciliation_diagnostic",
+                    "store_order_reconciliation_summary",
+                    "store_suppressed_order_risk_audit",
+                    "store_suppressed_order_risk_summary",
+                    "store_data_quality_review_breakdown",
+                    "store_data_quality_review_reason_distribution",
+                    "reconciliation",
+                    "manifest_csv",
+                    "manifest_json",
+                },
             )
             self.assertTrue((output_frame["suggested_order_units"] >= 0).all())
             self.assertTrue(pd.api.types.is_numeric_dtype(output_frame["predicted_units_total_promo"]))
@@ -151,6 +253,25 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
                 "brand_name",
             ):
                 self.assertNotIn(forbidden, output_frame.columns)
+            for period_aware_column in (
+                "promotion_period_days",
+                "expected_units_per_period",
+                "expected_units_per_day",
+                "target_end_stock_units",
+                "target_end_days_cover",
+                "cashflow_runoff_status",
+                "trust_floor_status",
+                "units_needed_for_trust_floor",
+                "units_needed_for_high_demand_cover",
+                "units_above_trust_target",
+                "capital_tied_above_trust_target",
+                "expected_gp_on_trust_floor_units",
+                "expected_gp_on_speculative_units",
+                "risk_adjusted_value_of_speculative_units",
+                "speculative_capital_above_floor_units",
+                "speculative_capital_above_floor_value",
+            ):
+                self.assertIn(period_aware_column, output_frame.columns)
 
     def test_policy_measurement_artifacts_do_not_widen_store_facing_csv(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -167,6 +288,178 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
             output_frame = pd.read_csv(artifacts.master_csv_path)
 
         self.assertEqual(list(output_frame.columns), list(COMMERCIAL_SCHEMA_COLUMNS))
+
+    def test_feature_inspection_surfaces_pca_context_without_changing_store_action(self) -> None:
+        baseline_frame = _decision_surface_frame().copy()
+        enriched_frame = baseline_frame.copy()
+        enriched_frame["feature_pca_structure_residual_score"] = [1.0, pd.NA]
+        enriched_frame["feature_pca_structure_fit_score"] = [0.0, pd.NA]
+        enriched_frame["feature_pca_structure_outlier_flag"] = [1.0, pd.NA]
+        enriched_frame["feature_pca_allocation_residual_score"] = [1.0, pd.NA]
+        enriched_frame["feature_pca_allocation_outlier_flag"] = [1.0, pd.NA]
+        enriched_frame["feature_trust_floor_pressure_state"] = ["trust_floor_clear", pd.NA]
+        enriched_frame["feature_speculative_capital_pressure_state"] = ["speculative_capital_watch", pd.NA]
+        enriched_frame["feature_replenishment_confidence_state"] = ["replenishment_supported", pd.NA]
+        enriched_frame["feature_promotion_context_quality_state"] = ["context_evidence_supported", pd.NA]
+        enriched_frame["feature_capital_deployment_posture"] = ["monitor_capital_pressure", pd.NA]
+        enriched_frame["feature_context_reason_summary"] = [
+            "trust_floor=trust_floor_clear;capital=speculative_capital_watch",
+            pd.NA,
+        ]
+        enriched_frame["feature_anchor_centrality_score"] = [0.82, 0.14]
+        enriched_frame["feature_drag_along_probability"] = [0.11, 0.73]
+        enriched_frame["feature_basket_equilibrium_score"] = [0.76, 0.28]
+        enriched_frame["feature_substitution_pressure_score"] = [0.22, 0.61]
+        enriched_frame["feature_sparse_random_purchase_score"] = [0.08, 0.74]
+        enriched_frame["feature_basket_history_evidence_promo_count"] = [5.0, 1.0]
+        enriched_frame["feature_companion_cluster_support_score"] = [0.71, 0.19]
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_paths = PromotionArtifactPaths(
+                root=Path(temp_dir) / "promotions_artifacts",
+                local_inspection_root=Path(temp_dir) / "local_inspection",
+            )
+            baseline_artifacts = PromotionStorePredictionDownloadBuilder().write_report(
+                run_id="store-download-pca-baseline",
+                as_of_date="2024-09-01",
+                decision_surface_frame=baseline_frame,
+                artifact_paths=artifact_paths,
+            )
+            enriched_artifacts = PromotionStorePredictionDownloadBuilder().write_report(
+                run_id="store-download-pca-enriched",
+                as_of_date="2024-09-01",
+                decision_surface_frame=enriched_frame,
+                artifact_paths=artifact_paths,
+            )
+            baseline_output = pd.read_csv(baseline_artifacts.master_csv_path)
+            enriched_output = pd.read_csv(enriched_artifacts.master_csv_path)
+            manifest_frame = pd.read_csv(enriched_artifacts.manifest_csv_path)
+            feature_inspection_paths = manifest_frame.loc[
+                manifest_frame["file_type"].astype(str).eq("store_promotion_feature_inspection"),
+                "file_path",
+            ].astype(str)
+            inspection_frame = pd.concat(
+                [pd.read_csv(path) for path in feature_inspection_paths],
+                ignore_index=True,
+            )
+
+        self.assertEqual(
+            baseline_output["decision_recommendation"].tolist(),
+            enriched_output["decision_recommendation"].tolist(),
+        )
+        self.assertIn("feature_pca_structure_residual_score", inspection_frame.columns)
+        self.assertIn("feature_pca_structure_fit_score", inspection_frame.columns)
+        self.assertIn("feature_pca_structure_outlier_flag", inspection_frame.columns)
+        self.assertIn("feature_pca_allocation_residual_score", inspection_frame.columns)
+        self.assertIn("feature_pca_allocation_outlier_flag", inspection_frame.columns)
+        self.assertIn("feature_trust_floor_pressure_state", inspection_frame.columns)
+        self.assertIn("feature_speculative_capital_pressure_state", inspection_frame.columns)
+        self.assertIn("feature_replenishment_confidence_state", inspection_frame.columns)
+        self.assertIn("feature_promotion_context_quality_state", inspection_frame.columns)
+        self.assertIn("feature_capital_deployment_posture", inspection_frame.columns)
+        self.assertIn("feature_context_reason_summary", inspection_frame.columns)
+        self.assertIn("feature_anchor_centrality_score", inspection_frame.columns)
+        self.assertIn("feature_drag_along_probability", inspection_frame.columns)
+        self.assertIn("feature_basket_equilibrium_score", inspection_frame.columns)
+        self.assertIn("feature_substitution_pressure_score", inspection_frame.columns)
+        self.assertIn("feature_sparse_random_purchase_score", inspection_frame.columns)
+        self.assertIn("feature_basket_history_evidence_promo_count", inspection_frame.columns)
+        self.assertIn("feature_companion_cluster_support_score", inspection_frame.columns)
+        flagged_row = inspection_frame.loc[inspection_frame["store_number"].astype(str).eq("1")].iloc[0]
+        self.assertEqual(flagged_row["feature_pca_structure_outlier_flag"], 1.0)
+        self.assertEqual(flagged_row["feature_trust_floor_pressure_state"], "trust_floor_clear")
+        self.assertEqual(flagged_row["feature_speculative_capital_pressure_state"], "speculative_capital_watch")
+        self.assertEqual(flagged_row["feature_replenishment_confidence_state"], "replenishment_supported")
+        self.assertEqual(flagged_row["feature_promotion_context_quality_state"], "context_evidence_supported")
+        self.assertEqual(flagged_row["feature_capital_deployment_posture"], "monitor_capital_pressure")
+        self.assertEqual(flagged_row["feature_basket_equilibrium_score"], 0.76)
+        self.assertIn("capital=speculative_capital_watch", flagged_row["feature_context_reason_summary"])
+        self.assertTrue(
+            pd.isna(
+                inspection_frame.loc[
+                    inspection_frame["store_number"].astype(str).eq("2"),
+                    "feature_pca_structure_residual_score",
+                ].iloc[0]
+            )
+        )
+
+    def test_feature_inspection_uses_promotion_row_key_before_broad_join_keys(self) -> None:
+        duplicate_frame = pd.DataFrame(
+            {
+                "promotion_row_key": ["row-a", "row-b"],
+                "store_number": [1, 1],
+                "promotion_name": ["Half Price", "Half Price"],
+                "promo_type": ["discount", "discount"],
+                "promotion_start_date_date": ["2024-09-01", "2024-09-01"],
+                "promotional_end_date_date": ["2024-09-07", "2024-09-07"],
+                "sku_number": [1001, 1001],
+                "barcode": ["931000000001", "931000000001"],
+                "sku_description": ["Skin Serum", "Skin Serum"],
+                "department_number": [21, 21],
+                "department": ["Beauty", "Beauty"],
+                "inferred_supplier_number": [10, 10],
+                "supplier_name": ["Supplier A", "Supplier A"],
+                "current_soh": [1.0, 1.0],
+                "qty_on_order": [0.0, 0.0],
+                "pl_allocation_qty": [2.0, 2.0],
+                "bar_units": [1.0, 1.0],
+                "live_promo_window_days": [7.0, 7.0],
+                "predicted_units_sold": [7.0, 7.0],
+                "predicted_units_first_day": [1.0, 1.0],
+                "predicted_sales_ex_gst": [105.0, 105.0],
+                "predicted_sell_through_pct": [0.70, 0.70],
+                "final_decision_score": [0.95, 0.10],
+                "decision_recommendation": ["strong_go", "strong_go"],
+                "decision_recommendation_reason": [
+                    "Healthy margin and aligned cohort evidence.",
+                    "Healthy margin and aligned cohort evidence.",
+                ],
+                "final_confidence_score": [0.96, 0.12],
+                "row_cohort_disagreement_score": [0.12, 0.12],
+                "margin_risk_penalty": [0.10, 0.10],
+                "leftover_risk_penalty": [0.12, 0.12],
+                "stockout_risk_penalty": [0.22, 0.22],
+                "discount_percent": [0.20, 0.20],
+                "regular_price": [10.0, 10.0],
+                "promo_price": [8.0, 8.0],
+                "feature_historical_promo_events_same_discount": [2.0, 2.0],
+                "feature_historical_promo_events_same_or_better_discount": [3.0, 3.0],
+                "feature_historical_units_same_discount_avg": [6.0, 6.0],
+                "feature_historical_units_same_or_better_discount_avg": [7.0, 7.0],
+                "feature_pca_structure_residual_score": [1.0, 0.0],
+                "feature_pca_structure_fit_score": [0.0, 1.0],
+                "feature_pca_structure_outlier_flag": [1.0, 0.0],
+                "feature_pca_allocation_residual_score": [1.0, 0.0],
+                "feature_pca_allocation_outlier_flag": [1.0, 0.0],
+            }
+        )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_paths = PromotionArtifactPaths(
+                root=Path(temp_dir) / "promotions_artifacts",
+                local_inspection_root=Path(temp_dir) / "local_inspection",
+            )
+            artifacts = PromotionStorePredictionDownloadBuilder().write_report(
+                run_id="store-download-pca-duplicate-row-key",
+                as_of_date="2024-09-01",
+                decision_surface_frame=duplicate_frame,
+                artifact_paths=artifact_paths,
+            )
+            manifest_frame = pd.read_csv(artifacts.manifest_csv_path)
+            feature_inspection_paths = manifest_frame.loc[
+                manifest_frame["file_type"].astype(str).eq("store_promotion_feature_inspection"),
+                "file_path",
+            ].astype(str)
+            inspection_frame = pd.concat(
+                [pd.read_csv(path) for path in feature_inspection_paths],
+                ignore_index=True,
+            )
+
+        self.assertEqual(len(inspection_frame.index), 1)
+        keyed = inspection_frame.set_index("promotion_row_key")
+        self.assertEqual(keyed.loc["row-a", "feature_pca_structure_outlier_flag"], 1.0)
+        self.assertEqual(keyed.loc["row-a", "feature_pca_structure_fit_score"], 0.0)
+        self.assertNotIn("row-b", keyed.index)
 
     def test_policy_replay_measurement_artifacts_do_not_widen_store_facing_csv(self) -> None:
         decision_surface_frame = _decision_surface_frame().copy()
@@ -361,7 +654,8 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
                 self.assertTrue(Path(path).exists())
                 frame = pd.read_csv(path)
                 self.assertNotIn("store_number", frame.columns)
-                self.assertEqual(frame["promotion_name"].nunique(dropna=False), 1)
+                self.assertEqual(list(frame.columns), list(STORE_FACING_OUTPUT_COLUMNS))
+                self.assertEqual(len(frame.index), 1)
 
     def test_store_download_builder_disambiguates_store_prediction_filename_collisions(self) -> None:
         frame = pd.concat(
@@ -459,13 +753,8 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
                 if "/promotions/priceline/1/prediction/" in path
             ]
             merged = pd.concat(promotion_group_rows, ignore_index=True)
-            subset = merged[
-                (merged["promotion_name"] == "Half Price")
-                & (merged["promotion_start_date"] == "2024-09-01")
-                & (merged["promotion_end_date"] == "2024-09-07")
-            ]
-            self.assertEqual(int(subset["sku_number"].nunique(dropna=True)), 3)
-            self.assertEqual(int(len(subset.index)), 3)
+            self.assertEqual(int(merged["sku_number"].nunique(dropna=True)), 3)
+            self.assertEqual(int(len(merged.index)), 3)
 
     def test_store_download_builder_per_store_file_includes_multiple_promotions(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -490,7 +779,17 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
 
             store_one_path = [path for path in artifacts.per_store_csv_paths if "/promotions/priceline/1/prediction/" in path][0]
             store_one_frame = pd.read_csv(store_one_path)
-            self.assertGreaterEqual(int(store_one_frame["promotion_name"].nunique(dropna=True)), 2)
+            self.assertEqual(int(len(store_one_frame.index)), 2)
+            self.assertEqual(
+                len(
+                    [
+                        path
+                        for path in artifacts.per_store_promotion_csv_paths
+                        if "/promotions/priceline/1/prediction/" in path
+                    ]
+                ),
+                2,
+            )
 
     def test_store_download_builder_populates_action_and_reason_fields(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -1358,8 +1657,54 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
                 "leftover_risk_penalty": [0.1] * n,
                 "stockout_risk_penalty": [0.1] * n,
                 "promo_effective_cost": [10.0] * n,
+                "discount_percent": [20.0] * n,
+                "regular_price": [10.0] * n,
+                "promo_price": [8.0] * n,
             }
         )
+
+    def _baseline_policy_override_frame(self, *, predicted_units_sold: list[float]) -> pd.DataFrame:
+        row_count = len(predicted_units_sold)
+        frame = self._make_promo_frame(
+            row_count=row_count,
+            predicted_units_sold=predicted_units_sold,
+            required_implied_units=predicted_units_sold,
+            demand_reference_units=predicted_units_sold,
+            baseline_expected_units=predicted_units_sold,
+        )
+        frame["decision_recommendation"] = ["strong_go"] * row_count
+        frame["raw_predicted_units_sold"] = predicted_units_sold
+        frame["calibrated_predicted_units_sold"] = predicted_units_sold
+        frame["current_soh"] = [0.0] * row_count
+        frame["qty_on_order"] = [0.0] * row_count
+        frame["feature_same_discount_prior_event_count"] = [5.0] * row_count
+        frame["feature_same_discount_history_available_flag"] = [1.0] * row_count
+        frame["feature_discount_evidence_strength_score"] = [0.85] * row_count
+        frame["feature_discount_elasticity_confidence_score"] = [0.85] * row_count
+        frame["feature_discount_response_event_count"] = [5.0] * row_count
+        frame["feature_discount_response_direction_consistent_flag"] = [1.0] * row_count
+        frame["feature_discount_elasticity_abs"] = [0.30] * row_count
+        frame["feature_uplift_confidence_score"] = [0.80] * row_count
+        frame["feature_uplift_demand_support_flag"] = [1.0] * row_count
+        frame["feature_non_promo_recent_acceleration_score"] = [0.08] * row_count
+        frame["feature_non_promo_base_trend_30d_vs_56d"] = [0.06] * row_count
+        frame["feature_non_promo_base_trend_30d_vs_84d"] = [0.05] * row_count
+        frame["feature_non_promo_base_demand_growing_flag"] = [1.0] * row_count
+        frame["feature_non_promo_history_available_flag"] = [1.0] * row_count
+        frame["feature_non_promo_low_history_flag"] = [0.0] * row_count
+        frame["feature_sparse_history_penalty"] = [0.10] * row_count
+        frame["feature_total_window_pressure_vs_launch_support_conflict_score"] = [0.10] * row_count
+        frame["feature_allocation_vs_supported_total_gap_units"] = [30.0] * row_count
+        frame["feature_allocation_risk_over_uplift_score"] = [0.90] * row_count
+        frame["feature_expected_baseline_units_promo_window"] = [20.0] * row_count
+        frame["feature_expected_baseline_units_first_7_days"] = [10.0] * row_count
+        frame["feature_expected_incremental_uplift_units_same_discount"] = [20.0] * row_count
+        frame["feature_expected_incremental_uplift_units_first_7_days"] = [10.0] * row_count
+        frame["feature_expected_total_units_from_baseline_plus_uplift"] = [40.0] * row_count
+        frame["effective_cost_per_unit"] = [2.0] * row_count
+        frame["stock_basis_units"] = [60.0] * row_count
+        frame["feature_probability_model_use_flag"] = [1.0] * row_count
+        return frame
 
     def _commercial_validation_frame(
         self,
@@ -1378,6 +1723,12 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
         promo_start_targets = [base_units[pos] + first7[pos] for pos in range(row_count)]
         suggested_units = [promo_start_targets[pos] if totals[pos] > 0 else 0 for pos in range(row_count)]
         expected_leftover = [max(suggested_units[pos] - totals[pos], 0) for pos in range(row_count)]
+        period_days = [7] * row_count
+        expected_units_per_day = [round(float(totals[pos]) / float(period_days[pos]), 4) for pos in range(row_count)]
+        speculative_capital_units = [max(expected_leftover[pos] - base_units[pos], 0) for pos in range(row_count)]
+        units_needed_for_trust_floor = [max(totals[pos] + base_units[pos], 0) for pos in range(row_count)]
+        units_above_trust_target = speculative_capital_units
+        capital_tied_above_trust_target = [float(units * 10) for units in units_above_trust_target]
         frame = pd.DataFrame(
             {
                 "store_number": ["1"] * row_count,
@@ -1393,7 +1744,26 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
                 "predicted_units_until_promo_start": [0] * row_count,
                 "predicted_units_first_7_days_of_promo": first7,
                 "predicted_units_total_promo": totals,
+                "promotion_period_days": period_days,
+                "expected_units_per_period": totals,
+                "expected_units_per_day": expected_units_per_day,
                 "base_units_target": base_units,
+                "target_end_stock_units": base_units,
+                "target_end_days_cover": period_days,
+                "cashflow_runoff_status": ["standard_cashflow"] * row_count,
+                "trust_floor_status": [
+                    "trust_floor_met" if expected_leftover[pos] >= base_units[pos] else "below_target_end_stock"
+                    for pos in range(row_count)
+                ],
+                "units_needed_for_trust_floor": units_needed_for_trust_floor,
+                "units_needed_for_high_demand_cover": [0] * row_count,
+                "units_above_trust_target": units_above_trust_target,
+                "capital_tied_above_trust_target": capital_tied_above_trust_target,
+                "expected_gp_on_trust_floor_units": [0.0] * row_count,
+                "expected_gp_on_speculative_units": [0.0] * row_count,
+                "risk_adjusted_value_of_speculative_units": [-value for value in capital_tied_above_trust_target],
+                "speculative_capital_above_floor_units": speculative_capital_units,
+                "speculative_capital_above_floor_value": [float(units * 10) for units in speculative_capital_units],
                 "promo_start_target_soh_units": promo_start_targets,
                 "suggested_order_units": suggested_units,
                 "expected_leftover_units_end_of_promo": expected_leftover,
@@ -1420,6 +1790,7 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
                 "operational_note": ["Action now: validation row."] * row_count,
                 "final_decision_score": [0.9] * row_count,
                 "final_confidence_score": [0.9] * row_count,
+                "low_nonzero_value_relief_delta": [0.0] * row_count,
                 "discount_percent": [0.20] * row_count,
                 "normal_price": [10.0] * row_count,
                 "promo_price": [8.0] * row_count,
@@ -1973,7 +2344,23 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
                 "predicted_units_until_promo_start": [0] * 60,
                 "predicted_units_first_7_days_of_promo": [0] * 60,
                 "predicted_units_total_promo": [1] * 60,
+                "promotion_period_days": [7] * 60,
+                "expected_units_per_period": [1] * 60,
+                "expected_units_per_day": [round(1.0 / 7.0, 4)] * 60,
                 "base_units_target": [2] * 60,
+                "target_end_stock_units": [2] * 60,
+                "target_end_days_cover": [7] * 60,
+                "cashflow_runoff_status": ["standard_cashflow"] * 60,
+                "trust_floor_status": ["below_target_end_stock"] * 60,
+                "units_needed_for_trust_floor": [3] * 60,
+                "units_needed_for_high_demand_cover": [0] * 60,
+                "units_above_trust_target": [0] * 60,
+                "capital_tied_above_trust_target": [0.0] * 60,
+                "expected_gp_on_trust_floor_units": [0.0] * 60,
+                "expected_gp_on_speculative_units": [0.0] * 60,
+                "risk_adjusted_value_of_speculative_units": [0.0] * 60,
+                "speculative_capital_above_floor_units": [0] * 60,
+                "speculative_capital_above_floor_value": [0.0] * 60,
                 "promo_start_target_soh_units": [2] * 60,
                 "suggested_order_units": [2] * 60,
                 "expected_leftover_units_end_of_promo": [1] * 60,
@@ -2000,6 +2387,7 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
                 "operational_note": ["Action now: validate first-7 window."] * 60,
                 "final_decision_score": [0.9] * 60,
                 "final_confidence_score": [0.9] * 60,
+                "low_nonzero_value_relief_delta": [0.0] * 60,
                 "discount_percent": [0.20] * 60,
                 "normal_price": [10.0] * 60,
                 "promo_price": [8.0] * 60,
@@ -2190,31 +2578,59 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
             self.assertIn("artificial_collapse_rows_csv_path", diag_keys)
 
     def test_unrecoverable_forecast_collapse_raises_validation_error(self) -> None:
-        """When ALL sources are flat at the same non-zero value, validator must raise."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            artifact_paths = PromotionArtifactPaths(
-                root=Path(temp_dir) / "promotions_artifacts",
-                local_inspection_root=Path(temp_dir) / "local_inspection",
-            )
-            n = 60
-            # All sources flat at the same non-zero integer value — unrecoverable
-            flat_value = 8.0
-            frame = self._make_promo_frame(
-                row_count=n,
-                required_implied_units=[flat_value] * n,
-                demand_reference_units=[flat_value] * n,
-                baseline_expected_units=[flat_value] * n,
-                predicted_units_sold=[flat_value] * n,
-                avg_daily_units=[1.0] * n,   # history = 1.0 * 14 = 14.0 for all rows (also flat)
-                bar_units=[1.0] * n,
-            )
-            with self.assertRaises(PromotionStoreDownloadCommercialValidationError):
-                PromotionStorePredictionDownloadBuilder().write_report(
-                    run_id="test-unrecoverable-collapse",
-                    as_of_date="2024-09-01",
-                    decision_surface_frame=frame,
-                    artifact_paths=artifact_paths,
-                )
+        """Unresolved per-promotion flat collapse (unresolved_flat_promotion_count > 0) must raise.
+
+        Under the patched logic, collapsed_prediction_flag alone does NOT raise when
+        unresolved_flat_promotion_count == 0 — an integerization-floor spike at 1 unit is a
+        legitimate outcome, not a degenerate forecast.  This test verifies that a genuine
+        unresolved collapse — where predicted_units_total_promo is implausibly flat within a
+        promotion and no repair could resolve it — still blocks publication via the
+        unresolved_flat_promotion_count guard in _validate_commercial_contract.
+        """
+        builder = PromotionStorePredictionDownloadBuilder()
+        n = 60
+        flat_value = 8
+        frame = self._commercial_validation_frame(
+            row_count=n,
+            promo_key="PROMO-UNRESOLVED-COLLAPSE",
+            total_units=[flat_value] * n,
+            first7_units=[flat_value // 2] * n,
+        )
+        # Inject a forecast_health dict that represents a genuine unresolved per-promotion
+        # flat collapse.  unresolved_flat_promotion_count > 0 is the authoritative guard.
+        forecast_health: dict[str, object] = {
+            "row_count": n,
+            "unique_prediction_count": 1,
+            "modal_prediction_value": float(flat_value),
+            "modal_prediction_share": 1.0,
+            "zero_first_7_day_share": 0.0,
+            "prediction_std": 0.0,
+            "collapsed_prediction_flag": True,
+            "flat_promotion_count": 1,
+            "flat_promotions": [{"promotion_header_key": "PROMO-UNRESOLVED-COLLAPSE", "row_count": n}],
+            "actionable_row_count": n,
+            "actionable_modal_prediction_share": 1.0,
+            "actionable_zero_first_7_day_share": 0.0,
+            "unresolved_collapse_row_count": n,
+            "unresolved_collapse_share": 1.0,
+            "unresolved_classification_counts": {"FORECAST_ZERO_DEMAND_ROUNDING": n},
+            "unresolved_actionable_promotion_count": 1,
+            "mixed_unresolved_promotion_count": 0,
+            "unresolved_promotion_count": 1,
+            "unresolved_flat_promotion_count": 1,
+            "unresolved_flat_promotions": [
+                {
+                    "promotion_header_key": "PROMO-UNRESOLVED-COLLAPSE",
+                    "row_count": n,
+                    "modal_prediction_value": float(flat_value),
+                    "modal_prediction_share": 1.0,
+                }
+            ],
+            "cohort_flat_only_promotion_count": 0,
+            "cohort_flat_only_promotions": [],
+        }
+        with self.assertRaises(PromotionStoreDownloadCommercialValidationError):
+            builder._validate_commercial_contract(frame, forecast_health=forecast_health)
 
     def test_low_nonzero_demand_is_not_zeroed_early(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -2354,107 +2770,93 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
             )
             # The first columns are the action-critical block.
             self.assertEqual(
-                list(store_promo_frame.columns[:25]),
+                list(store_promo_frame.columns),
                 [
                     "priority_rank",
                     "priority_band",
                     "sku_number",
                     "sku_description",
-                    "recommended_action",
-                    "execution_readiness_status",
-                    "primary_review_reason",
-                    "recommended_order_units",
-                    "discount_percent",
-                    "projected_promotional_units",
-                    "current_soh_units",
-                    "lead_up_demand_units",
-                    "projected_on_hand_at_promo_start",
-                    "minimum_launch_stock_units",
-                    "target_stock_day_one_units",
+                    "operator_decision",
+                    "operator_action",
+                    "order_units",
+                    "reason_short",
+                    "risk_flag",
+                    "review_flag",
+                    "audit_notes",
+                    "current_soh",
+                    "on_order_at_advice_time",
+                    "expected_units_before_promo_start",
+                    "projected_SOH_at_promo_start",
+                    "target_SOH_at_promo_start",
+                    "floor_units_required",
+                    "expected_promo_demand",
+                    "available_to_sell_before_floor",
                     "projected_stock_gap_units",
-                    "stockout_probability_percent",
-                    "model_confidence_percent",
-                    "capital_at_risk_adjusted_dollars",
-                    "retail_risk_reward_ratio",
-                    "prediction_date",
-                    "promotion_start_date",
-                    "days_to_promo_start",
-                    "order_timing_summary",
-                    "model_reason_summary",
+                    "discount_percent",
                 ],
-            )
-            self.assertEqual(
-                list(store_promo_frame.columns[-6:]),
-                [
-                    "forecast_trust_band",
-                    "forecast_trust_summary",
-                    "promotion_backtest_comparable_event_count",
-                    "promotion_backtest_within_10pct_flag",
-                    "promotion_backtest_mean_absolute_pct_error",
-                    "promotion_backtest_bias_class",
-                ],
-            )
-            self.assertLess(
-                max(
-                    store_promo_frame.columns.get_loc(column)
-                    for column in (
-                        "historical_promo_events_same_discount",
-                        "historical_units_same_discount_avg",
-                        "historical_promo_events_same_or_better_discount",
-                        "historical_units_same_or_better_discount_avg",
-                        "historical_promo_response_summary",
-                        "discount_response_summary",
-                    )
-                ),
-                min(
-                    store_promo_frame.columns.get_loc(column)
-                    for column in (
-                        "forecast_trust_band",
-                        "forecast_trust_summary",
-                        "promotion_backtest_comparable_event_count",
-                        "promotion_backtest_within_10pct_flag",
-                        "promotion_backtest_mean_absolute_pct_error",
-                        "promotion_backtest_bias_class",
-                    )
-                ),
             )
             for required_action_column in (
-                "recommended_action",
-                "recommended_order_units",
-                "projected_on_hand_at_promo_start",
-                "minimum_launch_stock_units",
-                "target_stock_day_one_units",
-                "projected_stock_gap_units",
-                "days_to_promo_start",
-                "prediction_date",
-                "lead_up_demand_units",
-                "projected_promotional_units",
-                "model_reason_summary",
-                "discount_percent",
-                "model_confidence_percent",
-                "capital_at_risk_adjusted_dollars",
-                "retail_risk_reward_ratio",
-                "data_quality_flag",
                 "priority_rank",
                 "priority_band",
-                "execution_readiness_status",
-                "primary_review_reason",
-                "stockout_probability_percent",
-                "forecast_trust_summary",
-                "forecast_trust_band",
-                "discount_response_summary",
-                "historical_units_same_discount_avg",
-                "historical_units_same_or_better_discount_avg",
-                "promotion_backtest_mean_absolute_pct_error",
-                "stockout_risk_reason",
-                "days_of_cover_to_promo_start",
-                "days_of_cover_first_7_days",
-                "projected_launch_cover_units",
-                "expected_units_first_7_days",
-                "expected_units_total_promo",
+                "operator_decision",
+                "operator_action",
+                "order_units",
+                "reason_short",
+                "risk_flag",
+                "review_flag",
+                "audit_notes",
+                "on_order_at_advice_time",
+                "expected_units_before_promo_start",
+                "projected_SOH_at_promo_start",
+                "target_SOH_at_promo_start",
+                "floor_units_required",
+                "current_soh",
+                "expected_promo_demand",
+                "available_to_sell_before_floor",
+                "projected_stock_gap_units",
+                "discount_percent",
             ):
                 self.assertIn(required_action_column, store_promo_frame.columns)
             for removed_column in (
+                "store_action_label",
+                "store_action_label_v2",
+                "store_action_reason",
+                "store_action",
+                "operator_status",
+                "demand_evidence_label",
+                "availability_risk_label",
+                "capital_drag_label",
+                "SOH_at_advice_time",
+                "lead_up_demand_units",
+                "expected_units_total_promo",
+                "projected_promotional_units",
+                "recommended_order_units",
+                "recommended_order_value",
+                "model_reason_summary",
+                "model_confidence_percent",
+                "capital_at_risk_adjusted_dollars",
+                "retail_risk_reward_ratio",
+                "SKU_MAE",
+                "SKU_MSE",
+                "SKU_bias",
+                "weeks_of_cover_entering_promo",
+                "end_of_promo_residual_risk",
+                "primary_review_reason",
+                "blocker_reason",
+                "human_review_required_flag",
+                "low_nonzero_value_relief_delta",
+                "shadow_policy_name",
+                "shadow_policy_version",
+                "shadow_policy_candidate_flag",
+                "shadow_policy_segment",
+                "shadow_policy_order_units",
+                "shadow_policy_capital_at_risk",
+                "shadow_policy_expected_reason",
+                "shadow_policy_guardrail_status",
+                "shadow_policy_blocker_reason",
+                "shadow_policy_should_publish_flag",
+                "shadow_policy_should_affect_final_order_flag",
+                "decision_reason",
                 # Internal sort/diagnostic flags not in operator OUTPUT
                 "buy_now_flag",
                 "watch_flag",
@@ -2466,7 +2868,6 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
                 "days_until_action",
                 "minimum_safe_stock_day_one_units",
                 # Old internal forecast names
-                "expected_units_before_promo_start",
                 "predicted_units_first_7_days_of_promo",
                 "predicted_units_total_promo",
                 "promo_start_target_soh_units",
@@ -2485,7 +2886,6 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
                 "qty_on_order",
                 "qty_on_order_units",
                 "on_order_qty",
-                "current_soh",
                 "promo_type",
                 "promotion_type",
                 "promo_price",
@@ -2497,12 +2897,10 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
                 "product_description",
                 "promo_allocated_units",
                 # Diagnostic-only flags
-                "review_flag",
                 "zero_forecast_reason_code",
                 "zero_forecast_is_evidence_supported",
                 "client_reason",
                 "operational_note",
-                "decision_reason",
                 "decision_recommendation",
                 "forecast_quality_flag",
                 "demand_confidence_band",
@@ -2517,6 +2915,40 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
                 "store_number",
                 "confidence_band",
                 "demand_evidence_class",
+                "current_soh_units",
+                "projected_on_hand_at_promo_start",
+                "target_stock_day_one_units",
+                "minimum_launch_stock_units",
+                "promotion_name",
+                "promotion_start_date",
+                "promotion_end_date",
+                "prediction_date",
+                "days_to_promo_start",
+                "historical_promo_events_same_discount",
+                "historical_units_same_discount_avg",
+                "historical_promo_events_same_or_better_discount",
+                "historical_units_same_or_better_discount_avg",
+                "stockout_risk_reason",
+                "days_of_cover_to_promo_start",
+                "days_of_cover_first_7_days",
+                "projected_launch_cover_units",
+                "recommended_action",
+                "execution_readiness_status",
+                "data_quality_flag",
+                "order_timing_summary",
+                "stockout_probability_percent",
+                "forecast_trust_summary",
+                "forecast_trust_band",
+                "discount_response_summary",
+                "promotion_backtest_comparable_event_count",
+                "promotion_backtest_within_10pct_flag",
+                "promotion_backtest_mean_absolute_pct_error",
+                "promotion_backtest_bias_class",
+                "expected_units_first_7_days",
+                "stockout_risk_band",
+                "overstock_risk_band",
+                "estimated_leftover_units",
+                "estimated_leftover_cost_dollars",
             ):
                 self.assertNotIn(removed_column, store_promo_frame.columns)
 
@@ -2537,21 +2969,15 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
                 ignore_index=True,
             )
             self.assertTrue(
-                store_promo_frame["model_reason_summary"].astype(str).str.strip().ne("").all(),
-                "model_reason_summary must be populated for every row",
+                store_promo_frame["reason_short"].astype(str).str.strip().ne("").all(),
+                "reason_short must be populated for every row",
             )
-            allowed_prefixes = (
-                "Order recommended",
-                "Manager review needed",
-                "Hold current position",
-                "Do not order",
-                "Action",
-            )
-            for value in store_promo_frame["model_reason_summary"].astype(str).tolist():
+            for value in store_promo_frame["reason_short"].astype(str).tolist():
                 self.assertTrue(
-                    value.startswith(allowed_prefixes),
-                    f"model_reason_summary must use a plain-English prefix, got: {value!r}",
+                    value.endswith("."),
+                    f"reason_short must be a plain-English sentence, got: {value!r}",
                 )
+                self.assertNotIn(";", value, "reason_short should stay short enough for store-facing display")
 
     def test_store_facing_csv_units_are_integers_and_currency_two_dp(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -2567,17 +2993,18 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
             )
             store_promo_frame = pd.read_csv(artifacts.per_store_promotion_csv_paths[0])
             integer_columns = [
-                "recommended_order_units",
-                "target_stock_day_one_units",
-                "lead_up_demand_units",
-                "projected_promotional_units",
-                "projected_on_hand_at_promo_start",
+                "priority_rank",
+                "order_units",
+                "review_flag",
+                "current_soh",
+                "on_order_at_advice_time",
+                "target_SOH_at_promo_start",
+                "expected_units_before_promo_start",
+                "projected_SOH_at_promo_start",
                 "projected_stock_gap_units",
-                "minimum_launch_stock_units",
-                "days_to_promo_start",
-                "model_confidence_percent",
-                "current_soh_units",
-                "estimated_leftover_units",
+                "floor_units_required",
+                "expected_promo_demand",
+                "available_to_sell_before_floor",
             ]
             for column in integer_columns:
                 with self.subTest(column=column):
@@ -2587,15 +3014,43 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
                         (values == values.round(0)).all(),
                         f"{column} must be integer-safe",
                     )
-            for currency_column in (
-                "estimated_leftover_cost_dollars",
-                "capital_at_risk_adjusted_dollars",
-            ):
-                values = pd.to_numeric(store_promo_frame[currency_column], errors="coerce").fillna(0.0)
-                self.assertTrue(
-                    (values == values.round(2)).all(),
-                    f"{currency_column} must round to 2 decimal places",
+            self.assertTrue(
+                set(pd.to_numeric(store_promo_frame["review_flag"], errors="coerce").fillna(0).astype(int)).issubset({0, 1})
+            )
+
+    def test_store_facing_csv_joins_sku_backtest_metrics(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_paths = PromotionArtifactPaths(
+                root=Path(temp_dir) / "promotions_artifacts",
+                local_inspection_root=Path(temp_dir) / "local_inspection",
+            )
+            backtest_rows_path = Path(temp_dir) / "sku_backtest_rows.csv"
+            pd.DataFrame(
+                {
+                    "sku_number": [1001, 1001, 1002],
+                    "predicted_units_total_promo": [10.0, 4.0, 8.0],
+                    "actual_units_sold_promo": [8.0, 6.0, 8.0],
+                    "absolute_error_units": [2.0, 2.0, 0.0],
+                }
+            ).to_csv(backtest_rows_path, index=False)
+
+            artifacts = PromotionStorePredictionDownloadBuilder().write_report(
+                run_id="test-store-facing-sku-backtest-metrics",
+                as_of_date="2024-09-01",
+                decision_surface_frame=_decision_surface_frame(),
+                artifact_paths=artifact_paths,
+                completed_backtest_rows_path=str(backtest_rows_path),
+            )
+            audit_frames = []
+            for path in artifacts.per_store_promotion_csv_paths:
+                audit_frames.append(
+                    _single_store_promotion_sibling_frame(Path(path), "operator-audit")
                 )
+            store_promo_frame = pd.concat(audit_frames, ignore_index=True).sort_values("sku_number").reset_index(drop=True)
+
+        self.assertEqual(store_promo_frame["SKU_MAE"].tolist(), [2.0, 0.0])
+        self.assertEqual(store_promo_frame["SKU_MSE"].tolist(), [4.0, 0.0])
+        self.assertEqual(store_promo_frame["SKU_bias"].tolist(), ["BALANCED", "BALANCED"])
 
     def test_store_facing_csv_risk_bands_are_constrained(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -2610,18 +3065,9 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
                 artifact_paths=artifact_paths,
             )
             store_promo_frame = pd.read_csv(artifacts.per_store_promotion_csv_paths[0])
-            allowed_risk = {"LOW", "MEDIUM", "HIGH"}
-            allowed_quality = {
-                "OK",
-                "REVIEW_FORECAST",
-                "INSUFFICIENT_HISTORY",
-                "COLLAPSED_FORECAST",
-                "REVIEW_DISCOUNT_MISSING",
-                "REVIEW_DISCOUNT_CONFLICT",
-            }
-            self.assertTrue(set(store_promo_frame["stockout_risk_band"].astype(str)).issubset(allowed_risk))
-            self.assertTrue(set(store_promo_frame["overstock_risk_band"].astype(str)).issubset(allowed_risk))
-            self.assertTrue(set(store_promo_frame["data_quality_flag"].astype(str)).issubset(allowed_quality))
+            allowed_actions = {"BUY", "REVIEW", "MONITOR", "DO_NOT_BUY"}
+            self.assertTrue(set(store_promo_frame["operator_action"].astype(str)).issubset(allowed_actions))
+            self.assertTrue(store_promo_frame["risk_flag"].astype(str).str.strip().ne("").all())
 
     def test_store_facing_csv_priority_band_and_flags_are_consistent(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -2636,20 +3082,10 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
                 artifact_paths=artifact_paths,
             )
             store_promo_frame = pd.read_csv(artifacts.per_store_promotion_csv_paths[0])
-            allowed_timing_summaries = {
-                "Buy now for day-one cover",
-                "Manager review needed before action",
-                "Watch until closer to promo",
-                "Hold, stock already covers launch",
-                "Do not buy, weak/no promo response evidence",
-            }
+            allowed_priority_bands = {"BUY_NOW", "REVIEW", "WATCH", "HOLD", "DO_NOT_BUY"}
             self.assertTrue(
-                set(store_promo_frame["order_timing_summary"].astype(str)).issubset(allowed_timing_summaries)
+                set(store_promo_frame["priority_band"].astype(str)).issubset(allowed_priority_bands)
             )
-            # priority_band / buy_now_flag / watch_flag / do_not_buy_flag are
-            # internal sort/diagnostic fields and intentionally not in the
-            # operator OUTPUT contract; their consistency is exercised via the
-            # internal builder tests.
 
     def test_store_facing_csv_is_sorted_by_priority_rank(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -2664,21 +3100,8 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
                 artifact_paths=artifact_paths,
             )
             store_promo_frame = pd.read_csv(artifacts.per_store_promotion_csv_paths[0])
-            # priority_rank is intentionally not in the operator OUTPUT
-            # contract. Sort stability is verified by ordering on the
-            # canonical timing-summary band, which IS in the contract.
-            timing_order = {
-                "Buy now for day-one cover": 0,
-                "Manager review needed before action": 1,
-                "Watch until closer to promo": 2,
-                "Hold, stock already covers launch": 3,
-                "Do not buy, weak/no promo response evidence": 4,
-            }
-            timing_indices = [
-                timing_order[str(s)]
-                for s in store_promo_frame["order_timing_summary"].tolist()
-            ]
-            self.assertEqual(timing_indices, sorted(timing_indices))
+            priority_ranks = pd.to_numeric(store_promo_frame["priority_rank"], errors="coerce").tolist()
+            self.assertEqual(priority_ranks, sorted(priority_ranks))
 
     def test_per_promotion_feature_inspection_csv_is_emitted_alongside_store_csv(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -2697,6 +3120,22 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
             self.assertEqual(len(siblings), 1)
             inspection_frame = pd.read_csv(siblings[0])
             self.assertGreater(len(inspection_frame.index), 0)
+            audit_frame = _single_store_promotion_sibling_frame(store_csv, "operator-audit")
+            self.assertGreater(len(audit_frame.index), 0)
+            for column in (
+                "shadow_policy_name",
+                "shadow_policy_version",
+                "shadow_policy_candidate_flag",
+                "shadow_policy_segment",
+                "shadow_policy_order_units",
+                "raw_model_order_units",
+                "provisional_review_order_units",
+                "final_store_order_units",
+                "recommended_order_units",
+                "primary_review_reason",
+                "blocker_reason",
+            ):
+                self.assertIn(column, audit_frame.columns)
             # Inspection file must surface internal sort/diagnostic fields
             # (intentionally NOT in the operator OUTPUT contract) plus
             # upstream model decision-score columns.
@@ -2709,6 +3148,22 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
                 "final_decision_score",
                 "final_confidence_score",
                 "demand_evidence_class",
+                "promotion_period_days",
+                "expected_units_per_period",
+                "expected_units_per_day",
+                "target_end_stock_units",
+                "target_end_days_cover",
+                "cashflow_runoff_status",
+                "trust_floor_status",
+                "units_needed_for_trust_floor",
+                "units_needed_for_high_demand_cover",
+                "units_above_trust_target",
+                "capital_tied_above_trust_target",
+                "expected_gp_on_trust_floor_units",
+                "expected_gp_on_speculative_units",
+                "risk_adjusted_value_of_speculative_units",
+                "speculative_capital_above_floor_units",
+                "speculative_capital_above_floor_value",
             ):
                 self.assertIn(column, inspection_frame.columns)
 
@@ -2759,7 +3214,7 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
             self.assertEqual(
                 int(summary_frame.iloc[0]["total_recommended_order_units"]),
                 int(
-                    pd.to_numeric(store_promo_frame["recommended_order_units"], errors="coerce")
+                    pd.to_numeric(store_promo_frame["order_units"], errors="coerce")
                     .fillna(0)
                     .sum()
                 ),
@@ -2835,6 +3290,631 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
             f"operational note must not be appended verbatim: {summaries[4]!r}",
         )
 
+    def test_store_facing_review_reason_blocks_ready_buy_now_order(self) -> None:
+        frame = self._commercial_validation_frame(
+            row_count=1,
+            promo_key="review-hold-promo",
+            total_units=20,
+            first7_units=10,
+        )
+        frame.loc[0, "decision_recommendation"] = "ORDER"
+        frame.loc[0, "suggested_order_units"] = 12
+        frame.loc[0, "review_reason"] = "manual_review_required"
+
+        store_facing_frame = _build_store_facing_frame(
+            commercial_frame=frame,
+            forecast_per_row_diagnostics=None,
+            as_of_date="2024-08-25",
+        )
+
+        row = store_facing_frame.iloc[0]
+        self.assertEqual(row["recommended_action"], "REVIEW_REQUIRED")
+        self.assertEqual(row["execution_readiness_status"], "REVIEW_REQUIRED")
+        self.assertEqual(row["priority_band"], "REVIEW")
+        self.assertEqual(int(row["buy_now_flag"]), 0)
+        self.assertIn("manual_review_required", str(row["primary_review_reason"]))
+
+    def test_policy_review_override_preserves_hold_when_stock_already_covers_launch(self) -> None:
+        frame = self._make_promo_frame(
+            row_count=3,
+            predicted_units_sold=[0.8, 0.8, 0.8],
+            required_implied_units=[0.8, 0.8, 0.8],
+            demand_reference_units=[0.8, 0.8, 0.8],
+            baseline_expected_units=[0.8, 0.8, 0.8],
+        )
+        frame["decision_recommendation"] = ["strong_go", "strong_go", "avoid"]
+        frame["raw_predicted_units_sold"] = [0.8, 0.8, 0.8]
+        frame["calibrated_predicted_units_sold"] = [0.8, 0.8, 0.8]
+        frame["current_soh"] = [5.0, 0.0, 5.0]
+        frame["qty_on_order"] = [0.0, 0.0, 0.0]
+        frame["feature_same_discount_prior_event_count"] = [5.0, 5.0, 5.0]
+        frame["feature_same_discount_history_available_flag"] = [1.0, 1.0, 1.0]
+        frame["feature_discount_evidence_strength_score"] = [0.85, 0.85, 0.85]
+        frame["feature_discount_elasticity_confidence_score"] = [0.85, 0.85, 0.85]
+        frame["feature_discount_response_event_count"] = [5.0, 5.0, 5.0]
+        frame["feature_discount_response_direction_consistent_flag"] = [1.0, 1.0, 1.0]
+        frame["feature_discount_elasticity_abs"] = [0.30, 0.30, 0.30]
+        frame["feature_uplift_confidence_score"] = [0.80, 0.80, 0.80]
+        frame["feature_uplift_demand_support_flag"] = [1.0, 1.0, 1.0]
+        frame["feature_non_promo_recent_acceleration_score"] = [0.08, 0.08, 0.08]
+        frame["feature_non_promo_base_trend_30d_vs_56d"] = [0.06, 0.06, 0.06]
+        frame["feature_non_promo_base_trend_30d_vs_84d"] = [0.05, 0.05, 0.05]
+        frame["feature_non_promo_base_demand_growing_flag"] = [1.0, 1.0, 1.0]
+        frame["feature_non_promo_history_available_flag"] = [1.0, 1.0, 1.0]
+        frame["feature_non_promo_low_history_flag"] = [0.0, 0.0, 0.0]
+        frame["feature_sparse_history_penalty"] = [0.10, 0.10, 0.10]
+        frame["feature_total_window_pressure_vs_launch_support_conflict_score"] = [0.10, 0.10, 0.10]
+        frame["feature_allocation_vs_supported_total_gap_units"] = [30.0, 30.0, 30.0]
+        frame["feature_allocation_risk_over_uplift_score"] = [0.90, 0.90, 0.90]
+        frame["feature_expected_baseline_units_promo_window"] = [20.0, 20.0, 20.0]
+        frame["feature_expected_baseline_units_first_7_days"] = [10.0, 10.0, 10.0]
+        frame["feature_expected_incremental_uplift_units_same_discount"] = [20.0, 20.0, 20.0]
+        frame["feature_expected_incremental_uplift_units_first_7_days"] = [10.0, 10.0, 10.0]
+        frame["feature_expected_total_units_from_baseline_plus_uplift"] = [40.0, 40.0, 40.0]
+        frame["effective_cost_per_unit"] = [2.0, 2.0, 2.0]
+        frame["stock_basis_units"] = [60.0, 60.0, 60.0]
+        frame["feature_probability_model_use_flag"] = [1.0, 1.0, 1.0]
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_paths = PromotionArtifactPaths(
+                root=Path(temp_dir) / "promotions_artifacts",
+                local_inspection_root=Path(temp_dir) / "local_inspection",
+            )
+            artifacts = PromotionStorePredictionDownloadBuilder().write_report(
+                run_id="test-policy-hold-preservation",
+                as_of_date="2024-09-01",
+                decision_surface_frame=frame,
+                artifact_paths=artifact_paths,
+            )
+            store_promo_frame = pd.read_csv(artifacts.per_store_promotion_csv_paths[0]).sort_values(
+                "sku_number"
+            ).reset_index(drop=True)
+            diagnostics_df = pd.read_csv(
+                artifact_paths.store_prediction_diagnostics_root("test-policy-hold-preservation")
+                / "forecast_source_per_row.csv"
+            ).sort_values("sku_number").reset_index(drop=True)
+
+        self.assertTrue(
+            diagnostics_df["policy_adjustment_reason"].astype(str).eq("stock_gap_high_review_cap").all()
+        )
+        self.assertEqual(str(store_promo_frame.loc[0, "operator_action"]), "MONITOR")
+        self.assertEqual(int(store_promo_frame.loc[0, "review_flag"]), 0)
+        self.assertEqual(str(store_promo_frame.loc[1, "operator_action"]), "REVIEW")
+        self.assertEqual(int(store_promo_frame.loc[1, "review_flag"]), 1)
+        self.assertIn("review=policy_stock_gap_high", str(store_promo_frame.loc[1, "audit_notes"]))
+        self.assertEqual(str(store_promo_frame.loc[2, "operator_action"]), "DO_NOT_BUY")
+        self.assertEqual(int(store_promo_frame.loc[2, "review_flag"]), 0)
+
+    def test_policy_stock_gap_high_low_incremental_demand_becomes_do_not_order(self) -> None:
+        frame = self._baseline_policy_override_frame(predicted_units_sold=[0.8])
+        frame["current_soh"] = [2.0]
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_paths = PromotionArtifactPaths(
+                root=Path(temp_dir) / "promotions_artifacts",
+                local_inspection_root=Path(temp_dir) / "local_inspection",
+            )
+            artifacts = PromotionStorePredictionDownloadBuilder().write_report(
+                run_id="test-policy-stock-gap-do-not-order",
+                as_of_date="2024-09-01",
+                decision_surface_frame=frame,
+                artifact_paths=artifact_paths,
+            )
+            store_promo_frame = pd.read_csv(artifacts.per_store_promotion_csv_paths[0]).reset_index(drop=True)
+            master_frame = pd.read_csv(artifacts.master_csv_path).reset_index(drop=True)
+
+        self.assertEqual(str(store_promo_frame.loc[0, "operator_action"]), "DO_NOT_BUY")
+        self.assertEqual(int(store_promo_frame.loc[0, "review_flag"]), 0)
+        self.assertEqual(str(master_frame.loc[0, "decision_recommendation"]), "DO_NOT_ORDER")
+        self.assertEqual(
+            str(master_frame.loc[0, "publish_eligibility_reason"]),
+            "excluded_legitimate_do_not_order_low_incremental_value",
+        )
+        self.assertEqual(master_frame["review_reason"].fillna("").iloc[0], "")
+
+    def test_sparse_history_policy_rows_become_hold_or_do_not_order_when_inventory_is_sufficient(self) -> None:
+        frame = self._baseline_policy_override_frame(predicted_units_sold=[0.8, 0.8])
+        frame["current_soh"] = [5.0, 2.0]
+        frame["feature_same_discount_prior_event_count"] = [0.0, 0.0]
+        frame["feature_same_discount_history_available_flag"] = [0.0, 0.0]
+        frame["feature_discount_evidence_strength_score"] = [0.20, 0.20]
+        frame["feature_discount_elasticity_confidence_score"] = [0.10, 0.10]
+        frame["feature_discount_response_event_count"] = [0.0, 0.0]
+        frame["feature_discount_response_direction_consistent_flag"] = [0.0, 0.0]
+        frame["feature_discount_elasticity_abs"] = [0.05, 0.05]
+        frame["feature_uplift_confidence_score"] = [0.10, 0.10]
+        frame["feature_uplift_demand_support_flag"] = [0.0, 0.0]
+        frame["feature_launch_stock_support_score"] = [0.60, 0.60]
+        frame["feature_non_promo_base_demand_growing_flag"] = [0.0, 0.0]
+        frame["feature_non_promo_low_history_flag"] = [1.0, 1.0]
+        frame["feature_sparse_history_penalty"] = [0.90, 0.90]
+        frame["feature_total_window_pressure_vs_launch_support_conflict_score"] = [0.40, 0.40]
+        frame["feature_allocation_vs_supported_total_gap_units"] = [35.0, 35.0]
+        frame["feature_allocation_risk_over_uplift_score"] = [0.90, 0.90]
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_paths = PromotionArtifactPaths(
+                root=Path(temp_dir) / "promotions_artifacts",
+                local_inspection_root=Path(temp_dir) / "local_inspection",
+            )
+            artifacts = PromotionStorePredictionDownloadBuilder().write_report(
+                run_id="test-policy-sparse-non-buy",
+                as_of_date="2024-09-01",
+                decision_surface_frame=frame,
+                artifact_paths=artifact_paths,
+            )
+            store_promo_frame = pd.read_csv(artifacts.per_store_promotion_csv_paths[0]).sort_values("sku_number").reset_index(drop=True)
+            master_frame = pd.read_csv(artifacts.master_csv_path).sort_values("sku_number").reset_index(drop=True)
+
+        self.assertEqual(str(store_promo_frame.loc[0, "operator_action"]), "MONITOR")
+        self.assertEqual(str(store_promo_frame.loc[1, "operator_action"]), "DO_NOT_BUY")
+        self.assertEqual(master_frame["review_reason"].fillna("").iloc[0], "")
+        self.assertEqual(
+            str(master_frame.loc[1, "publish_eligibility_reason"]),
+            "excluded_legitimate_do_not_order_low_incremental_value",
+        )
+
+    def test_sparse_history_true_uncertainty_stays_review(self) -> None:
+        frame = self._baseline_policy_override_frame(predicted_units_sold=[0.8])
+        frame["current_soh"] = [0.0]
+        frame["feature_same_discount_prior_event_count"] = [0.0]
+        frame["feature_same_discount_history_available_flag"] = [0.0]
+        frame["feature_discount_evidence_strength_score"] = [0.20]
+        frame["feature_discount_elasticity_confidence_score"] = [0.10]
+        frame["feature_discount_response_event_count"] = [0.0]
+        frame["feature_discount_response_direction_consistent_flag"] = [0.0]
+        frame["feature_discount_elasticity_abs"] = [0.05]
+        frame["feature_uplift_confidence_score"] = [0.10]
+        frame["feature_uplift_demand_support_flag"] = [0.0]
+        frame["feature_non_promo_base_demand_growing_flag"] = [0.0]
+        frame["feature_non_promo_low_history_flag"] = [1.0]
+        frame["feature_sparse_history_penalty"] = [0.90]
+        frame["feature_total_window_pressure_vs_launch_support_conflict_score"] = [0.70]
+        frame["feature_allocation_vs_supported_total_gap_units"] = [35.0]
+        frame["feature_allocation_risk_over_uplift_score"] = [0.90]
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_paths = PromotionArtifactPaths(
+                root=Path(temp_dir) / "promotions_artifacts",
+                local_inspection_root=Path(temp_dir) / "local_inspection",
+            )
+            artifacts = PromotionStorePredictionDownloadBuilder().write_report(
+                run_id="test-policy-sparse-review",
+                as_of_date="2024-09-01",
+                decision_surface_frame=frame,
+                artifact_paths=artifact_paths,
+            )
+            store_promo_frame = pd.read_csv(artifacts.per_store_promotion_csv_paths[0]).reset_index(drop=True)
+
+        self.assertEqual(str(store_promo_frame.loc[0, "operator_action"]), "REVIEW")
+        self.assertEqual(int(store_promo_frame.loc[0, "review_flag"]), 1)
+        self.assertIn("review=policy_sparse_history_multi_driver", str(store_promo_frame.loc[0, "audit_notes"]))
+
+    def test_inventory_sufficient_low_value_history_rows_become_hold_or_do_not_buy(self) -> None:
+        frame = self._baseline_policy_override_frame(predicted_units_sold=[6.0, 6.0, 6.0])
+        frame["current_soh"] = [13.0, 10.0, 0.0]
+        frame["feature_inventory_sufficiency_flag"] = [1.0, 1.0, 1.0]
+        frame["feature_weak_promo_low_value_flag"] = [1.0, 1.0, 1.0]
+        frame["feature_speculative_above_trust_floor_risk_flag"] = [1.0, 1.0, 1.0]
+        frame["feature_expected_leftover_above_trust_floor_units"] = [6.0, 4.0, 4.0]
+        frame["feature_expected_bill_cycle_capital_drag_ratio"] = [0.35, 0.30, 0.30]
+        frame["feature_trust_floor_missed_demand_risk_score"] = [0.0, 0.0, 0.0]
+        frame["feature_pre_promo_cover_ratio"] = [1.1, 1.6, 0.0]
+        frame["feature_capital_at_risk_per_expected_unit"] = [3.2, 3.2, 3.2]
+        frame["feature_gross_profit_per_incremental_unit_expected"] = [0.8, 0.8, 0.8]
+        frame["feature_expected_baseline_units_promo_window"] = [2.0, 2.0, 2.0]
+        frame["feature_expected_incremental_uplift_units_same_discount"] = [1.0, 1.0, 1.0]
+        frame["feature_expected_total_units_from_baseline_plus_uplift"] = [3.0, 3.0, 3.0]
+        frame["feature_historical_allocation_efficiency_rate"] = [0.4, 0.4, 0.4]
+        frame["feature_historical_overallocation_above_floor_rate"] = [0.7, 0.7, 0.7]
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_paths = PromotionArtifactPaths(
+                root=Path(temp_dir) / "promotions_artifacts",
+                local_inspection_root=Path(temp_dir) / "local_inspection",
+            )
+            artifacts = PromotionStorePredictionDownloadBuilder().write_report(
+                run_id="test-policy-inventory-low-value-non-buy",
+                as_of_date="2024-09-01",
+                decision_surface_frame=frame,
+                artifact_paths=artifact_paths,
+            )
+            store_promo_frame = pd.read_csv(artifacts.per_store_promotion_csv_paths[0]).sort_values("sku_number").reset_index(drop=True)
+            master_frame = pd.read_csv(artifacts.master_csv_path).sort_values("sku_number").reset_index(drop=True)
+            diagnostics_df = pd.read_csv(
+                artifact_paths.store_prediction_diagnostics_root("test-policy-inventory-low-value-non-buy")
+                / "forecast_source_per_row.csv"
+            ).sort_values("sku_number").reset_index(drop=True)
+
+        self.assertTrue(
+            diagnostics_df["policy_adjustment_reason"].astype(str).eq("inventory_sufficient_low_value_history_review").all()
+        )
+        self.assertEqual(str(store_promo_frame.loc[0, "operator_action"]), "DO_NOT_BUY")
+        self.assertEqual(str(store_promo_frame.loc[1, "operator_action"]), "DO_NOT_BUY")
+        self.assertEqual(str(store_promo_frame.loc[2, "operator_action"]), "REVIEW")
+        self.assertEqual(int(store_promo_frame.loc[0, "review_flag"]), 0)
+        self.assertEqual(int(store_promo_frame.loc[1, "review_flag"]), 0)
+        self.assertEqual(int(store_promo_frame.loc[2, "review_flag"]), 1)
+        self.assertIn(
+            "review=policy_inventory_sufficient_low_value_history",
+            str(store_promo_frame.loc[2, "audit_notes"]),
+        )
+        self.assertEqual(str(master_frame.loc[1, "decision_recommendation"]), "DO_NOT_ORDER")
+        self.assertEqual(master_frame["review_reason"].fillna("").iloc[1], "")
+
+    def test_low_confidence_de_minimis_inventory_cover_becomes_hold(self) -> None:
+        frame = self._baseline_policy_override_frame(predicted_units_sold=[1.0])
+        frame["current_soh"] = [2.0]
+        frame["qty_on_order"] = [0.0]
+        frame["final_confidence_score"] = [0.40]
+        frame["leftover_risk_penalty"] = [0.10]
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_paths = PromotionArtifactPaths(
+                root=Path(temp_dir) / "promotions_artifacts",
+                local_inspection_root=Path(temp_dir) / "local_inspection",
+            )
+            artifacts = PromotionStorePredictionDownloadBuilder().write_report(
+                run_id="test-low-confidence-inventory-cover-hold",
+                as_of_date="2024-09-01",
+                decision_surface_frame=frame,
+                artifact_paths=artifact_paths,
+            )
+            store_promo_frame = pd.read_csv(artifacts.per_store_promotion_csv_paths[0]).reset_index(drop=True)
+            master_frame = pd.read_csv(artifacts.master_csv_path).reset_index(drop=True)
+
+        self.assertEqual(str(store_promo_frame.loc[0, "operator_action"]), "MONITOR")
+        self.assertEqual(int(store_promo_frame.loc[0, "review_flag"]), 0)
+        self.assertEqual(str(master_frame.loc[0, "decision_recommendation"]), "HOLD")
+        self.assertEqual(
+            str(master_frame.loc[0, "publish_eligibility_reason"]),
+            "excluded_legitimate_hold_inventory_sufficient",
+        )
+        self.assertEqual(master_frame["review_reason"].fillna("").iloc[0], "")
+
+    def test_low_confidence_de_minimis_without_inventory_cover_stays_review(self) -> None:
+        frame = self._baseline_policy_override_frame(predicted_units_sold=[1.0])
+        frame["current_soh"] = [0.0]
+        frame["qty_on_order"] = [0.0]
+        frame["final_confidence_score"] = [0.40]
+        frame["leftover_risk_penalty"] = [0.10]
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_paths = PromotionArtifactPaths(
+                root=Path(temp_dir) / "promotions_artifacts",
+                local_inspection_root=Path(temp_dir) / "local_inspection",
+            )
+            artifacts = PromotionStorePredictionDownloadBuilder().write_report(
+                run_id="test-low-confidence-without-cover-review",
+                as_of_date="2024-09-01",
+                decision_surface_frame=frame,
+                artifact_paths=artifact_paths,
+            )
+            store_promo_frame = pd.read_csv(artifacts.per_store_promotion_csv_paths[0]).reset_index(drop=True)
+            master_frame = pd.read_csv(artifacts.master_csv_path).reset_index(drop=True)
+
+        self.assertEqual(str(store_promo_frame.loc[0, "operator_action"]), "REVIEW")
+        self.assertEqual(int(store_promo_frame.loc[0, "review_flag"]), 1)
+        self.assertEqual(str(master_frame.loc[0, "decision_recommendation"]), "REVIEW")
+
+    def test_high_leftover_risk_de_minimis_inventory_cover_becomes_do_not_order(self) -> None:
+        frame = self._baseline_policy_override_frame(predicted_units_sold=[1.0])
+        frame["current_soh"] = [2.0]
+        frame["qty_on_order"] = [0.0]
+        frame["final_confidence_score"] = [0.80]
+        frame["leftover_risk_penalty"] = [0.90]
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_paths = PromotionArtifactPaths(
+                root=Path(temp_dir) / "promotions_artifacts",
+                local_inspection_root=Path(temp_dir) / "local_inspection",
+            )
+            artifacts = PromotionStorePredictionDownloadBuilder().write_report(
+                run_id="test-leftover-risk-inventory-cover-do-not-order",
+                as_of_date="2024-09-01",
+                decision_surface_frame=frame,
+                artifact_paths=artifact_paths,
+            )
+            store_promo_frame = pd.read_csv(artifacts.per_store_promotion_csv_paths[0]).reset_index(drop=True)
+            master_frame = pd.read_csv(artifacts.master_csv_path).reset_index(drop=True)
+
+        self.assertEqual(str(store_promo_frame.loc[0, "operator_action"]), "DO_NOT_BUY")
+        self.assertEqual(int(store_promo_frame.loc[0, "review_flag"]), 0)
+        self.assertEqual(str(master_frame.loc[0, "decision_recommendation"]), "DO_NOT_ORDER")
+        self.assertEqual(
+            str(master_frame.loc[0, "publish_eligibility_reason"]),
+            "excluded_legitimate_do_not_order_low_incremental_value",
+        )
+        self.assertEqual(master_frame["review_reason"].fillna("").iloc[0], "")
+
+    def test_store_action_label_holds_or_no_demands_low_demand_at_two_soh(self) -> None:
+        frame = self._baseline_policy_override_frame(predicted_units_sold=[1.0])
+        frame["current_soh"] = [2.0]
+        frame["qty_on_order"] = [0.0]
+        frame["feature_same_discount_prior_event_count"] = [1.0]
+        frame["feature_same_discount_history_available_flag"] = [1.0]
+        frame["feature_historical_promo_events_same_discount"] = [1.0]
+        frame["feature_historical_units_same_discount_avg"] = [0.2]
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_paths = PromotionArtifactPaths(
+                root=Path(temp_dir) / "promotions_artifacts",
+                local_inspection_root=Path(temp_dir) / "local_inspection",
+            )
+            artifacts = PromotionStorePredictionDownloadBuilder().write_report(
+                run_id="test-label-two-soh-low-demand",
+                as_of_date="2024-09-01",
+                decision_surface_frame=frame,
+                artifact_paths=artifact_paths,
+            )
+            store_promo_frame = pd.read_csv(artifacts.per_store_promotion_csv_paths[0]).reset_index(drop=True)
+
+        self.assertIn(str(store_promo_frame.loc[0, "operator_decision"]), {"HOLD_STOCK_FLOOR_SAFE", "LOW_SOH_NO_AUTO_BUY", "NO_DEMAND"})
+        self.assertNotIn(str(store_promo_frame.loc[0, "operator_decision"]), {"BUY", "BORDERLINE_OOS_REVIEW", "DATA_QUALITY_REVIEW"})
+        self.assertEqual(int(store_promo_frame.loc[0, "floor_units_required"]), 2)
+        self.assertEqual(int(store_promo_frame.loc[0, "available_to_sell_before_floor"]), 0)
+
+    def test_zero_projected_soh_cannot_be_hold_stock_floor_safe(self) -> None:
+        frame = self._baseline_policy_override_frame(predicted_units_sold=[0.5])
+        frame["current_soh"] = [0.0]
+        frame["qty_on_order"] = [0.0]
+        frame["feature_same_discount_prior_event_count"] = [0.0]
+        frame["feature_same_discount_history_available_flag"] = [0.0]
+        frame["feature_historical_promo_events_same_discount"] = [0.0]
+        frame["feature_historical_promo_events_same_or_better_discount"] = [0.0]
+        frame["feature_historical_units_same_discount_avg"] = [0.0]
+        frame["feature_historical_units_same_or_better_discount_avg"] = [0.0]
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_paths = PromotionArtifactPaths(
+                root=Path(temp_dir) / "promotions_artifacts",
+                local_inspection_root=Path(temp_dir) / "local_inspection",
+            )
+            artifacts = PromotionStorePredictionDownloadBuilder().write_report(
+                run_id="test-zero-projected-soh-not-floor-safe",
+                as_of_date="2024-09-01",
+                decision_surface_frame=frame,
+                artifact_paths=artifact_paths,
+            )
+            store_promo_frame = pd.read_csv(artifacts.per_store_promotion_csv_paths[0]).reset_index(drop=True)
+
+        self.assertEqual(int(store_promo_frame.loc[0, "projected_SOH_at_promo_start"]), 0)
+        self.assertNotEqual(str(store_promo_frame.loc[0, "operator_decision"]), "HOLD_STOCK_FLOOR_SAFE")
+
+    def test_low_soh_weak_demand_no_auto_buy_reason_does_not_claim_floor_protected(self) -> None:
+        frame = _minimal_order_reconciliation_input_frame(
+            store_action_label=["LOW_SOH_NO_AUTO_BUY"],
+            raw_model_order_units=[2],
+            raw_model_order_value=[20.0],
+            projected_SOH_at_promo_start=[0],
+            floor_units_required=[2],
+            expected_promo_demand=[1],
+            available_to_sell_before_floor=[0],
+            demand_evidence_label=["NO_DEMAND"],
+        )
+
+        reconciled = _build_store_order_reconciliation_frame(store_frame=frame)
+
+        self.assertEqual(str(frame.loc[0, "store_action_label"]), "LOW_SOH_NO_AUTO_BUY")
+        self.assertEqual(int(reconciled.loc[0, "final_store_order_units"]), 0)
+        reason = str(reconciled.loc[0, "order_reconciliation_reason"])
+        self.assertIn("Do not auto-order", reason)
+        self.assertNotIn("floor is protected", reason)
+
+    def test_store_action_label_reduces_holding_for_excess_stock_low_demand(self) -> None:
+        frame = self._baseline_policy_override_frame(predicted_units_sold=[1.0])
+        frame["current_soh"] = [10.0]
+        frame["qty_on_order"] = [0.0]
+        frame["leftover_risk_penalty"] = [0.95]
+        frame["feature_historical_promo_events_same_discount"] = [2.0]
+        frame["feature_historical_units_same_discount_avg"] = [0.5]
+        frame["feature_historical_promo_events_same_or_better_discount"] = [2.0]
+        frame["feature_historical_units_same_or_better_discount_avg"] = [0.5]
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_paths = PromotionArtifactPaths(
+                root=Path(temp_dir) / "promotions_artifacts",
+                local_inspection_root=Path(temp_dir) / "local_inspection",
+            )
+            artifacts = PromotionStorePredictionDownloadBuilder().write_report(
+                run_id="test-label-reduce-holding",
+                as_of_date="2024-09-01",
+                decision_surface_frame=frame,
+                artifact_paths=artifact_paths,
+            )
+            store_promo_frame = pd.read_csv(artifacts.per_store_promotion_csv_paths[0]).reset_index(drop=True)
+
+        self.assertEqual(str(store_promo_frame.loc[0, "operator_decision"]), "REDUCE_HOLDING")
+        self.assertNotEqual(str(store_promo_frame.loc[0, "operator_decision"]), "BORDERLINE_OOS_REVIEW")
+        self.assertEqual(str(store_promo_frame.loc[0, "risk_flag"]), "CAPITAL_DRAG_HIGH")
+
+    def test_store_action_label_protects_availability_below_two_soh_with_demand(self) -> None:
+        frame = self._baseline_policy_override_frame(predicted_units_sold=[1.0])
+        frame["current_soh"] = [1.0]
+        frame["qty_on_order"] = [0.0]
+        frame["final_confidence_score"] = [0.85]
+        frame["feature_historical_promo_events_same_discount"] = [1.0]
+        frame["feature_historical_units_same_discount_avg"] = [1.0]
+        frame["feature_historical_promo_events_same_or_better_discount"] = [1.0]
+        frame["feature_historical_units_same_or_better_discount_avg"] = [1.0]
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_paths = PromotionArtifactPaths(
+                root=Path(temp_dir) / "promotions_artifacts",
+                local_inspection_root=Path(temp_dir) / "local_inspection",
+            )
+            artifacts = PromotionStorePredictionDownloadBuilder().write_report(
+                run_id="test-label-protect-availability",
+                as_of_date="2024-09-01",
+                decision_surface_frame=frame,
+                artifact_paths=artifact_paths,
+            )
+            store_promo_frame = pd.read_csv(artifacts.per_store_promotion_csv_paths[0]).reset_index(drop=True)
+
+        self.assertIn(str(store_promo_frame.loc[0, "operator_decision"]), {"PROTECT_AVAILABILITY", "BORDERLINE_OOS_REVIEW"})
+        self.assertEqual(str(store_promo_frame.loc[0, "risk_flag"]), "BELOW_2_UNIT_FLOOR_RISK")
+
+    def test_store_action_label_buy_or_protects_availability_at_zero_soh_with_demand(self) -> None:
+        frame = self._baseline_policy_override_frame(predicted_units_sold=[6.0])
+        frame["current_soh"] = [0.0]
+        frame["qty_on_order"] = [0.0]
+        frame["final_confidence_score"] = [0.90]
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_paths = PromotionArtifactPaths(
+                root=Path(temp_dir) / "promotions_artifacts",
+                local_inspection_root=Path(temp_dir) / "local_inspection",
+            )
+            artifacts = PromotionStorePredictionDownloadBuilder().write_report(
+                run_id="test-label-zero-soh-demand",
+                as_of_date="2024-09-01",
+                decision_surface_frame=frame,
+                artifact_paths=artifact_paths,
+            )
+            store_promo_frame = pd.read_csv(artifacts.per_store_promotion_csv_paths[0]).reset_index(drop=True)
+
+        self.assertIn(str(store_promo_frame.loc[0, "operator_decision"]), {"BUY", "PROTECT_AVAILABILITY"})
+        self.assertEqual(str(store_promo_frame.loc[0, "risk_flag"]), "ZERO_SOH_RISK")
+
+    def test_store_action_label_never_sold_without_credible_demand_is_not_review(self) -> None:
+        frame = self._baseline_policy_override_frame(predicted_units_sold=[0.5])
+        frame["current_soh"] = [3.0]
+        frame["feature_same_discount_prior_event_count"] = [0.0]
+        frame["feature_same_discount_history_available_flag"] = [0.0]
+        frame["feature_historical_promo_events_same_discount"] = [0.0]
+        frame["feature_historical_promo_events_same_or_better_discount"] = [0.0]
+        frame["feature_historical_units_same_discount_avg"] = [0.0]
+        frame["feature_historical_units_same_or_better_discount_avg"] = [0.0]
+        frame["feature_uplift_demand_support_flag"] = [0.0]
+        frame["feature_uplift_confidence_score"] = [0.05]
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_paths = PromotionArtifactPaths(
+                root=Path(temp_dir) / "promotions_artifacts",
+                local_inspection_root=Path(temp_dir) / "local_inspection",
+            )
+            artifacts = PromotionStorePredictionDownloadBuilder().write_report(
+                run_id="test-label-never-sold",
+                as_of_date="2024-09-01",
+                decision_surface_frame=frame,
+                artifact_paths=artifact_paths,
+            )
+            store_promo_frame = pd.read_csv(artifacts.per_store_promotion_csv_paths[0]).reset_index(drop=True)
+
+        self.assertIn(
+            str(store_promo_frame.loc[0, "operator_decision"]),
+            {"NO_PRIOR_PROMO_EVIDENCE_LOW_RISK", "NO_PRIOR_PROMO_EVIDENCE_LOW_SOH_REVIEW", "NO_DEMAND"},
+        )
+        self.assertNotEqual(str(store_promo_frame.loc[0, "operator_decision"]), "NEVER_SOLD_IN_PROMO")
+        self.assertNotIn(str(store_promo_frame.loc[0, "operator_decision"]), {"BUY", "BORDERLINE_OOS_REVIEW", "DATA_QUALITY_REVIEW"})
+
+    def test_value_relief_blocked_by_stock_gap_is_diagnostic_only_label(self) -> None:
+        frame = self._baseline_policy_override_frame(predicted_units_sold=[1.0])
+        frame["current_soh"] = [1.0]
+        frame["low_nonzero_value_relief_delta"] = [5.0]
+        frame["feature_allocation_vs_supported_total_gap_units"] = [30.0]
+        frame["feature_allocation_risk_over_uplift_score"] = [0.90]
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_paths = PromotionArtifactPaths(
+                root=Path(temp_dir) / "promotions_artifacts",
+                local_inspection_root=Path(temp_dir) / "local_inspection",
+            )
+            artifacts = PromotionStorePredictionDownloadBuilder().write_report(
+                run_id="test-label-value-relief-stock-gap",
+                as_of_date="2024-09-01",
+                decision_surface_frame=frame,
+                artifact_paths=artifact_paths,
+            )
+            store_promo_frame = pd.read_csv(artifacts.per_store_promotion_csv_paths[0]).reset_index(drop=True)
+            operator_audit_frame = _single_store_promotion_sibling_frame(
+                Path(artifacts.per_store_promotion_csv_paths[0]),
+                "operator-audit",
+            ).reset_index(drop=True)
+            master_frame = pd.read_csv(artifacts.master_csv_path).reset_index(drop=True)
+
+        self.assertEqual(float(operator_audit_frame.loc[0, "low_nonzero_value_relief_delta"]), 5.0)
+        self.assertIn(str(store_promo_frame.loc[0, "operator_decision"]), {"PROTECT_AVAILABILITY", "BORDERLINE_OOS_REVIEW"})
+        self.assertNotEqual(str(master_frame.loc[0, "decision_recommendation"]), "ORDER")
+        self.assertNotEqual(str(master_frame.loc[0, "publish_eligibility_reason"]), "eligible_publish")
+
+    def test_store_action_label_distribution_artifact_counts_all_labels(self) -> None:
+        frame = self._baseline_policy_override_frame(predicted_units_sold=[1.0, 1.0, 0.5])
+        frame["current_soh"] = [0.0, 10.0, 3.0]
+        frame["feature_same_discount_prior_event_count"] = [5.0, 5.0, 0.0]
+        frame["feature_same_discount_history_available_flag"] = [1.0, 1.0, 0.0]
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_paths = PromotionArtifactPaths(
+                root=Path(temp_dir) / "promotions_artifacts",
+                local_inspection_root=Path(temp_dir) / "local_inspection",
+            )
+            PromotionStorePredictionDownloadBuilder().write_report(
+                run_id="test-label-distribution",
+                as_of_date="2024-09-01",
+                decision_surface_frame=frame,
+                artifact_paths=artifact_paths,
+            )
+            label_distribution = pd.read_csv(
+                artifact_paths.store_prediction_diagnostics_root("test-label-distribution")
+                / "store_action_label_distribution.csv"
+            )
+
+        self.assertEqual(
+            set(label_distribution["store_action_label"].astype(str)),
+            {
+                "BUY",
+                "PROTECT_AVAILABILITY",
+                "HOLD_STOCK",
+                "HOLD_STOCK_FLOOR_SAFE",
+                "LOW_SOH_NO_AUTO_BUY",
+                "LOW_SOH_PROTECT_AVAILABILITY",
+                "LOW_SOH_BORDERLINE_REVIEW",
+                "REDUCE_HOLDING",
+                "NO_DEMAND",
+                "NEVER_SOLD_IN_PROMO",
+                "NO_PRIOR_PROMO_EVIDENCE",
+                "NO_PRIOR_PROMO_EVIDENCE_LOW_RISK",
+                "NO_PRIOR_PROMO_EVIDENCE_LOW_SOH_REVIEW",
+                "NO_PRIOR_PROMO_EVIDENCE_BASELINE_DEMAND",
+                "BORDERLINE_OOS_REVIEW",
+                "DATA_QUALITY_REVIEW",
+            },
+        )
+        self.assertEqual(int(label_distribution["row_count"].sum()), 3)
+
+    def test_policy_discount_conflict_stays_review_with_explicit_discount_reason(self) -> None:
+        frame = self._baseline_policy_override_frame(predicted_units_sold=[0.8])
+        frame["current_soh"] = [1.0]
+        frame["discount_percent"] = [0.60]
+        frame["regular_price"] = [10.0]
+        frame["promo_price"] = [8.0]
+        frame["feature_allocation_vs_supported_total_gap_units"] = [0.0]
+        frame["feature_allocation_risk_over_uplift_score"] = [0.0]
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_paths = PromotionArtifactPaths(
+                root=Path(temp_dir) / "promotions_artifacts",
+                local_inspection_root=Path(temp_dir) / "local_inspection",
+            )
+            artifacts = PromotionStorePredictionDownloadBuilder().write_report(
+                run_id="test-policy-discount-conflict-review",
+                as_of_date="2024-09-01",
+                decision_surface_frame=frame,
+                artifact_paths=artifact_paths,
+            )
+            store_promo_frame = pd.read_csv(artifacts.per_store_promotion_csv_paths[0]).reset_index(drop=True)
+            master_frame = pd.read_csv(artifacts.master_csv_path).reset_index(drop=True)
+
+        self.assertEqual(str(store_promo_frame.loc[0, "operator_action"]), "REVIEW")
+        self.assertEqual(int(store_promo_frame.loc[0, "review_flag"]), 1)
+        self.assertIn(
+            "Governed discount conflicts with price-derived discount",
+            str(store_promo_frame.loc[0, "reason_short"]),
+        )
+        self.assertEqual(str(master_frame.loc[0, "decision_recommendation"]), "REVIEW")
+        self.assertEqual(master_frame["review_reason"].fillna("").iloc[0], "review_discount_conflict")
+
     def test_model_reason_summary_handles_empty_inputs_gracefully(self) -> None:
         from surfaces.promotions.reporting.store_prediction_download_builder import (
             _compose_model_reason_summary,
@@ -2874,7 +3954,6 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
             )
             store_promo_frame = pd.read_csv(artifacts.per_store_promotion_csv_paths[0])
             for technical_column in (
-                "review_flag",
                 "zero_forecast_reason_code",
                 "zero_forecast_is_evidence_supported",
             ):
@@ -3069,11 +4148,32 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
                 "total_stock_gap_units_before_launch",
                 "total_recommended_order_units",
                 "total_expected_units_total_promo",
+                "promotion_period_days",
+                "total_expected_units_per_period",
+                "average_expected_units_per_day",
+                "total_target_end_stock_units",
+                "total_units_needed_for_trust_floor",
+                "total_units_needed_for_high_demand_cover",
+                "total_units_above_trust_target",
+                "total_capital_tied_above_trust_target",
+                "total_expected_gp_on_trust_floor_units",
+                "total_expected_gp_on_speculative_units",
+                "total_risk_adjusted_value_of_speculative_units",
+                "total_speculative_capital_above_floor_units",
+                "total_speculative_capital_above_floor_value",
                 "lead_days_to_next_action",
             ):
                 value = pd.to_numeric(row[numeric_col], errors="coerce")
                 self.assertFalse(pd.isna(value), f"{numeric_col} must be numeric")
                 self.assertGreaterEqual(int(value), 0)
+            self.assertIn(
+                str(row["cashflow_runoff_status"]),
+                {"standard_cashflow", "month_end_runoff_max_7d_cover"},
+            )
+            self.assertIn(
+                str(row["trust_floor_status"]),
+                {"trust_floor_met", "below_target_end_stock"},
+            )
             self.assertEqual(
                 int(row["total_skus"]),
                 int(row["buy_now_count"])
@@ -3098,10 +4198,8 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
             )
             store_promo_frame = pd.read_csv(artifacts.per_store_promotion_csv_paths[0])
             forbidden = {
-                "review_flag",
                 "zero_forecast_reason_code",
                 "zero_forecast_is_evidence_supported",
-                "decision_reason",
                 "client_reason",
                 "operational_note",
                 "promotion_header_key",
@@ -3131,7 +4229,27 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
                 "lead_days_to_promo_start",
                 "days_until_action",
                 "minimum_safe_stock_day_one_units",
-                "expected_units_before_promo_start",
+                "recommended_action",
+                "execution_readiness_status",
+                "data_quality_flag",
+                "stockout_probability_percent",
+                "stockout_risk_band",
+                "overstock_risk_band",
+                "estimated_leftover_units",
+                "estimated_leftover_cost_dollars",
+                "order_timing_summary",
+                "promotion_name",
+                "promotion_start_date",
+                "promotion_end_date",
+                "prediction_date",
+                "days_to_promo_start",
+                "expected_units_first_7_days",
+                "historical_promo_response_summary",
+                "discount_response_summary",
+                "promotion_backtest_comparable_event_count",
+                "promotion_backtest_within_10pct_flag",
+                "promotion_backtest_mean_absolute_pct_error",
+                "promotion_backtest_bias_class",
             }
             present = forbidden.intersection(store_promo_frame.columns)
             self.assertEqual(present, set(), f"technical columns leaked into operator CSV: {present}")
@@ -3576,15 +4694,12 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
                 [pd.read_csv(path) for path in artifacts.per_store_promotion_csv_paths],
                 ignore_index=True,
             )
-            self.assertEqual(set(store_promo_frame["data_quality_flag"].astype(str)), {"REVIEW_DISCOUNT_MISSING"})
-            self.assertFalse(
-                (
-                    store_promo_frame["recommended_action"].astype(str).str.upper().eq("ORDER")
-                    & store_promo_frame["data_quality_flag"].astype(str).str.upper().str.startswith("REVIEW")
-                ).any()
+            self.assertEqual(set(store_promo_frame["operator_action"].astype(str)), {"REVIEW"})
+            self.assertTrue(
+                pd.to_numeric(store_promo_frame["review_flag"], errors="coerce").fillna(0).eq(1).all()
             )
             self.assertTrue(
-                store_promo_frame["primary_review_reason"].astype(str).str.contains(
+                store_promo_frame["reason_short"].astype(str).str.contains(
                     "Governed discount mapping is missing; price-derived discount requires review",
                     regex=False,
                 ).all()
@@ -3610,9 +4725,12 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
                 [pd.read_csv(path) for path in artifacts.per_store_promotion_csv_paths],
                 ignore_index=True,
             )
-            self.assertEqual(set(store_promo_frame["data_quality_flag"].astype(str)), {"REVIEW_DISCOUNT_CONFLICT"})
+            self.assertEqual(set(store_promo_frame["operator_action"].astype(str)), {"REVIEW"})
             self.assertTrue(
-                store_promo_frame["primary_review_reason"].astype(str).str.contains(
+                pd.to_numeric(store_promo_frame["review_flag"], errors="coerce").fillna(0).eq(1).all()
+            )
+            self.assertTrue(
+                store_promo_frame["reason_short"].astype(str).str.contains(
                     "Governed discount conflicts with price-derived discount",
                     regex=False,
                 ).all()
@@ -3709,28 +4827,22 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
                 [pd.read_csv(path) for path in artifacts.per_store_promotion_csv_paths],
                 ignore_index=True,
             )
+            operator_audit_frame = pd.concat(
+                [
+                    _single_store_promotion_sibling_frame(Path(path), "operator-audit")
+                    for path in artifacts.per_store_promotion_csv_paths
+                ],
+                ignore_index=True,
+            )
 
-            self.assertEqual(
-                store_promo_frame["promotion_backtest_comparable_event_count"].tolist(),
-                [0, 0],
-            )
-            self.assertTrue(
-                store_promo_frame["promotion_backtest_mean_absolute_pct_error"].isna().all()
-            )
-            self.assertTrue(
-                store_promo_frame["promotion_backtest_within_10pct_flag"].isna().all()
-            )
-            self.assertEqual(
-                set(store_promo_frame["promotion_backtest_bias_class"].astype(str)),
-                {"NO_COMPARABLE_EVENTS"},
-            )
-            self.assertTrue(
-                store_promo_frame["forecast_trust_summary"].astype(str).str.contains(
-                    "no completed-promotion comparables yet",
-                    case=False,
-                    na=False,
-                ).all()
-            )
+            self.assertNotIn("SKU_MAE", store_promo_frame.columns)
+            self.assertNotIn("SKU_MSE", store_promo_frame.columns)
+            self.assertNotIn("SKU_bias", store_promo_frame.columns)
+            self.assertTrue(operator_audit_frame["SKU_MAE"].isna().all())
+            self.assertTrue(operator_audit_frame["SKU_MSE"].isna().all())
+            self.assertEqual(set(operator_audit_frame["SKU_bias"].astype(str)), {"NO_COMPARABLE_EVENTS"})
+            self.assertNotIn("promotion_backtest_comparable_event_count", store_promo_frame.columns)
+            self.assertNotIn("forecast_trust_summary", store_promo_frame.columns)
 
     def test_store_facing_csv_keeps_row_level_history_row_specific_when_backtest_is_constant(self) -> None:
         frame = _decision_surface_frame().iloc[[0]].copy()
@@ -3772,44 +4884,47 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
             )
 
             self.assertEqual(len(artifacts.per_store_promotion_csv_paths), 1)
-            store_promo_frame = pd.read_csv(artifacts.per_store_promotion_csv_paths[0]).sort_values(
+            inspection_path = next(
+                Path(artifacts.per_store_promotion_csv_paths[0]).parent.glob("*_feature-inspection.csv")
+            )
+            inspection_frame = pd.read_csv(inspection_path).sort_values(
                 "sku_number"
             ).reset_index(drop=True)
 
             self.assertEqual(
-                store_promo_frame["promotion_backtest_comparable_event_count"].tolist(),
+                inspection_frame["promotion_backtest_comparable_event_count"].tolist(),
                 [12, 12],
             )
             self.assertEqual(
                 pd.to_numeric(
-                    store_promo_frame["promotion_backtest_within_10pct_flag"],
+                    inspection_frame["promotion_backtest_within_10pct_flag"],
                     errors="coerce",
                 ).tolist(),
                 [1, 1],
             )
             self.assertEqual(
-                store_promo_frame["promotion_backtest_bias_class"].astype(str).nunique(dropna=False),
+                inspection_frame["promotion_backtest_bias_class"].astype(str).nunique(dropna=False),
                 1,
             )
             self.assertEqual(
-                store_promo_frame["forecast_trust_summary"].astype(str).nunique(dropna=False),
+                inspection_frame["forecast_trust_summary"].astype(str).nunique(dropna=False),
                 1,
             )
-            self.assertEqual(
-                store_promo_frame["historical_promo_events_same_discount"].tolist(),
-                [2, 0],
+            self.assertIn(
+                "2 same-discount event(s)",
+                inspection_frame.loc[0, "historical_promo_response_summary"],
             )
-            self.assertEqual(
-                store_promo_frame["historical_promo_events_same_or_better_discount"].tolist(),
-                [3, 1],
+            self.assertIn(
+                "1 same-or-better-discount event(s)",
+                inspection_frame.loc[1, "historical_promo_response_summary"],
             )
             self.assertIn(
                 "Same-discount history has 2 event(s), avg 6.0 units.",
-                store_promo_frame.loc[0, "discount_response_summary"],
+                inspection_frame.loc[0, "discount_response_summary"],
             )
             self.assertIn(
                 "No exact same-discount history; same-or-better discounts have 1 event(s), avg 2.0 units.",
-                store_promo_frame.loc[1, "discount_response_summary"],
+                inspection_frame.loc[1, "discount_response_summary"],
             )
 
     def test_store_facing_csv_generation_survives_comparable_backtest_below_threshold(self) -> None:
@@ -3845,20 +4960,10 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
                 ignore_index=True,
             )
 
-            self.assertEqual(
-                pd.to_numeric(
-                    store_promo_frame["promotion_backtest_within_10pct_flag"],
-                    errors="coerce",
-                ).tolist(),
-                [0, 0],
-            )
-            self.assertTrue(
-                store_promo_frame["forecast_trust_summary"].astype(str).str.contains(
-                    "less than half within 10%",
-                    case=False,
-                    na=False,
-                ).all()
-            )
+            self.assertEqual(len(store_promo_frame.index), 2)
+            self.assertEqual(tuple(store_promo_frame.columns), tuple(STORE_FACING_OUTPUT_COLUMNS))
+            self.assertNotIn("promotion_backtest_within_10pct_flag", store_promo_frame.columns)
+            self.assertNotIn("forecast_trust_summary", store_promo_frame.columns)
 
     def test_store_facing_csv_preserves_row_count_with_updated_trust_fields(self) -> None:
         frame = _decision_surface_frame().copy()
@@ -3883,9 +4988,28 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
             self.assertNotIn("backtest_mean_absolute_pct_error", store_promo_frame.columns)
 
     def test_execution_readiness_status_maps_from_recommended_action(self) -> None:
-        action = pd.Series(["ORDER", "REVIEW", "HOLD", "DO_NOT_ORDER", "unknown"])
+        action = pd.Series([
+            "ORDER",
+            "REVIEW_REQUIRED",
+            "HOLD_MONITOR",
+            "DO_NOT_ORDER_LOW_VALUE",
+            "HOLD",
+            "DO_NOT_ORDER",
+            "unknown",
+        ])
         readiness = _compose_execution_readiness_status(action)
-        self.assertEqual(readiness.tolist(), ["READY", "REVIEW_REQUIRED", "BLOCKED", "BLOCKED", "BLOCKED"])
+        self.assertEqual(
+            readiness.tolist(),
+            [
+                "READY_TO_ORDER",
+                "REVIEW_REQUIRED",
+                "MONITOR",
+                "NO_ORDER",
+                "MONITOR",
+                "NO_ORDER",
+                "BLOCKED",
+            ],
+        )
 
     def test_store_facing_operator_contract_rejects_narrative_count_contradiction(self) -> None:
         frame = pd.DataFrame(
@@ -3979,6 +5103,22 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
             str(raised.exception),
         )
 
+    def test_store_facing_clean_operator_output_allows_low_nonzero_zero_soh_do_not_buy(self) -> None:
+        frame = pd.DataFrame(
+            {
+                "operator_decision": ["REDUCE_HOLDING"],
+                "operator_action": ["DO_NOT_BUY"],
+                "order_units": [0],
+                "reason_short": ["Do not buy."],
+                "risk_flag": ["ZERO_SOH_RISK"],
+                "review_flag": [0],
+                "audit_notes": ["demand=NO_DEMAND; availability=ZERO_SOH_RISK"],
+                "expected_promo_demand": [1.0],
+            }
+        )
+
+        _validate_store_facing_clean_operator_output(frame)
+
     def test_model_confidence_percent_in_0_100_and_int_dtype(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             artifact_paths = PromotionArtifactPaths(
@@ -3991,7 +5131,10 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
                 decision_surface_frame=_decision_surface_frame(),
                 artifact_paths=artifact_paths,
             )
-            store_promo_frame = pd.read_csv(artifacts.per_store_promotion_csv_paths[0])
+            inspection_path = next(
+                Path(artifacts.per_store_promotion_csv_paths[0]).parent.glob("*_feature-inspection.csv")
+            )
+            store_promo_frame = pd.read_csv(inspection_path)
             confidence_values = pd.to_numeric(
                 store_promo_frame["model_confidence_percent"], errors="coerce"
             )
@@ -4034,6 +5177,9 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
                 "margin_risk_penalty": [0.0, 0.0],
                 "leftover_risk_penalty": [0.0, 0.0],
                 "stockout_risk_penalty": [0.0, 0.0],
+                "discount_percent": [20.0, 20.0],
+                "regular_price": [10.0, 10.0],
+                "promo_price": [8.0, 8.0],
                 "promo_effective_cost": [10.0, 10.0],
             }
         )
@@ -4048,19 +5194,10 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
                 decision_surface_frame=frame,
                 artifact_paths=artifact_paths,
             )
-            master = pd.read_csv(artifacts.master_csv_path)
-            cap_high = float(
-                master.loc[master["store_number"].astype(str) == "1"].iloc[0][
-                    "capital_at_risk_adjusted_dollars"
-                ]
-            ) if "capital_at_risk_adjusted_dollars" in master.columns else None
-            # capital_at_risk_adjusted_dollars also lives on the per-store CSV
-            csv_paths = artifacts.per_store_promotion_csv_paths
             store_caps: dict[str, float] = {}
-            for path in csv_paths:
-                df = pd.read_csv(path)
-                if "capital_at_risk_adjusted_dollars" not in df.columns:
-                    continue
+            for path in artifacts.per_store_promotion_csv_paths:
+                inspection_path = next(Path(path).parent.glob("*_feature-inspection.csv"))
+                df = pd.read_csv(inspection_path)
                 store_token = Path(path).name.split("_", 1)[0]
                 for _, row in df.iterrows():
                     store_caps[store_token] = float(
@@ -4108,6 +5245,9 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
                 "margin_risk_penalty": [0.0, 0.0],
                 "leftover_risk_penalty": [0.0, 0.0],
                 "stockout_risk_penalty": [0.0, 0.0],
+                "discount_percent": [20.0, 20.0],
+                "regular_price": [10.0, 10.0],
+                "promo_price": [8.0, 8.0],
                 "promo_effective_cost": [10.0, 10.0],
             }
         )
@@ -4123,16 +5263,565 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
                 artifact_paths=artifact_paths,
             )
             store_recs: dict[str, int] = {}
+            store_raw_recs: dict[str, int] = {}
             for path in artifacts.per_store_promotion_csv_paths:
                 df = pd.read_csv(path)
                 store_token = Path(path).name.split("_", 1)[0]
+                feature_inspection_path = sorted(Path(path).parent.glob("*_feature-inspection.csv"))[0]
+                feature_inspection_frame = pd.read_csv(feature_inspection_path)
                 for _, row in df.iterrows():
-                    store_recs[store_token] = int(
-                        row["recommended_order_units"]
-                    )
+                    store_recs[store_token] = int(row["order_units"])
+                for _, row in feature_inspection_frame.iterrows():
+                    store_raw_recs[store_token] = int(row["raw_model_order_units"])
             self.assertIn("1", store_recs)
             self.assertIn("2", store_recs)
-            self.assertGreater(store_recs["1"], store_recs["2"])
+            self.assertIn("1", store_raw_recs)
+            self.assertIn("2", store_raw_recs)
+            self.assertGreater(store_raw_recs["1"], store_raw_recs["2"])
+            self.assertGreater(store_recs["1"], 0)
+            self.assertGreater(store_recs["2"], 0)
+            self.assertLessEqual(store_recs["1"], 52)
+            self.assertLessEqual(store_recs["2"], 52)
+
+    def test_order_reconciliation_helper_suppresses_non_executable_labels_and_preserves_review_provisional_units(self) -> None:
+        cases = [
+            (
+                "NO_DEMAND",
+                _minimal_order_reconciliation_input_frame(
+                    store_action_label=["NO_DEMAND"],
+                    raw_model_order_units=[4],
+                    raw_model_order_value=[40.0],
+                    projected_SOH_at_promo_start=[3],
+                    expected_promo_demand=[1],
+                    available_to_sell_before_floor=[1],
+                    demand_evidence_label=["NO_DEMAND"],
+                ),
+                0,
+                0,
+                "SUPPRESSED_BY_LABEL_GOVERNANCE",
+                "Demand evidence",
+            ),
+            (
+                "REDUCE_HOLDING",
+                _minimal_order_reconciliation_input_frame(
+                    store_action_label=["REDUCE_HOLDING"],
+                    raw_model_order_units=[3],
+                    raw_model_order_value=[30.0],
+                    projected_SOH_at_promo_start=[10],
+                    expected_promo_demand=[1],
+                    available_to_sell_before_floor=[8],
+                    capital_drag_label=["CAPITAL_DRAG_HIGH"],
+                ),
+                0,
+                0,
+                "SUPPRESSED_BY_LABEL_GOVERNANCE",
+                "capital drag",
+            ),
+            (
+                "HOLD_STOCK",
+                _minimal_order_reconciliation_input_frame(
+                    store_action_label=["HOLD_STOCK"],
+                    raw_model_order_units=[2],
+                    raw_model_order_value=[20.0],
+                    projected_SOH_at_promo_start=[19],
+                    expected_promo_demand=[14],
+                    available_to_sell_before_floor=[17],
+                ),
+                0,
+                0,
+                "SUPPRESSED_BY_LABEL_GOVERNANCE",
+                "2-unit floor is protected",
+            ),
+            (
+                "NEVER_SOLD_IN_PROMO",
+                _minimal_order_reconciliation_input_frame(
+                    store_action_label=["NEVER_SOLD_IN_PROMO"],
+                    raw_model_order_units=[5],
+                    raw_model_order_value=[50.0],
+                    projected_SOH_at_promo_start=[3],
+                    expected_promo_demand=[1],
+                    available_to_sell_before_floor=[1],
+                    demand_evidence_label=["NEVER_SOLD_IN_PROMO"],
+                ),
+                0,
+                0,
+                "SUPPRESSED_BY_LABEL_GOVERNANCE",
+                "Prior promotion evidence is limited",
+            ),
+            (
+                "DATA_QUALITY_REVIEW",
+                _minimal_order_reconciliation_input_frame(
+                    store_action_label=["DATA_QUALITY_REVIEW"],
+                    raw_model_order_units=[6],
+                    raw_model_order_value=[60.0],
+                    blocker_reason=["MAPPING_SOURCE_CONFLICT"],
+                ),
+                6,
+                0,
+                "PROVISIONAL_REVIEW_ONLY",
+                "Data-quality conflict",
+            ),
+            (
+                "BORDERLINE_OOS_REVIEW",
+                _minimal_order_reconciliation_input_frame(
+                    store_action_label=["BORDERLINE_OOS_REVIEW"],
+                    raw_model_order_units=[6],
+                    raw_model_order_value=[60.0],
+                    projected_SOH_at_promo_start=[1],
+                    expected_promo_demand=[3],
+                    availability_risk_label=["BELOW_2_UNIT_FLOOR_RISK"],
+                    demand_evidence_label=["CREDIBLE_PROMO_DEMAND"],
+                ),
+                6,
+                0,
+                "PROVISIONAL_REVIEW_ONLY",
+                "Review only",
+            ),
+        ]
+
+        for case_name, frame, expected_provisional_units, expected_final_units, expected_status, expected_reason_fragment in cases:
+            with self.subTest(case=case_name):
+                reconciled = _build_store_order_reconciliation_frame(store_frame=frame)
+                self.assertEqual(int(reconciled.loc[0, "provisional_review_order_units"]), expected_provisional_units)
+                self.assertEqual(int(reconciled.loc[0, "final_store_order_units"]), expected_final_units)
+                self.assertEqual(str(reconciled.loc[0, "order_reconciliation_status"]), expected_status)
+                self.assertIn(expected_reason_fragment, str(reconciled.loc[0, "order_reconciliation_reason"]))
+
+    def test_shadow_policy_uses_promo_allocated_units_as_shadow_only_pl_proof(self) -> None:
+        reconciled = _build_store_order_reconciliation_frame(
+            store_frame=_minimal_order_reconciliation_input_frame(
+                store_action_label=["LOW_SOH_NO_AUTO_BUY"],
+                raw_model_order_units=[2],
+                raw_model_order_value=[20.0],
+                projected_SOH_at_promo_start=[1],
+                floor_units_required=[2],
+                expected_promo_demand=[1],
+                available_to_sell_before_floor=[0],
+                projected_stock_gap_units=[1],
+                availability_risk_label=["BELOW_2_UNIT_FLOOR_RISK"],
+                demand_evidence_label=["NO_DEMAND"],
+                capital_drag_label=["CAPITAL_DRAG_LOW"],
+                promo_allocated_units=[9],
+                pack_size=[1],
+            )
+        )
+
+        self.assertEqual(int(reconciled.loc[0, "shadow_policy_candidate_flag"]), 1)
+        self.assertEqual(int(reconciled.loc[0, "shadow_policy_order_units"]), 1)
+        self.assertLessEqual(int(reconciled.loc[0, "shadow_policy_order_units"]), 1)
+        self.assertEqual(int(reconciled.loc[0, "low_soh_policy_shadow_order_units"]), 1)
+        self.assertEqual(int(reconciled.loc[0, "final_store_order_units"]), 0)
+        self.assertEqual(int(reconciled.loc[0, "shadow_policy_should_publish_flag"]), 0)
+        self.assertEqual(int(reconciled.loc[0, "shadow_policy_should_affect_final_order_flag"]), 0)
+        self.assertEqual(int(reconciled.loc[0, "low_soh_policy_production_eligible_flag"]), 0)
+        self.assertEqual(int(reconciled.loc[0, "low_soh_policy_final_order_units"]), 0)
+        self.assertEqual(str(reconciled.loc[0, "shadow_policy_guardrail_status"]), "PASS_SHADOW_ONLY")
+
+    def test_shadow_policy_without_promo_allocated_units_stays_blocked_for_pl_signal(self) -> None:
+        reconciled = _build_store_order_reconciliation_frame(
+            store_frame=_minimal_order_reconciliation_input_frame(
+                store_action_label=["LOW_SOH_NO_AUTO_BUY"],
+                raw_model_order_units=[2],
+                raw_model_order_value=[20.0],
+                projected_SOH_at_promo_start=[1],
+                floor_units_required=[2],
+                expected_promo_demand=[1],
+                available_to_sell_before_floor=[0],
+                projected_stock_gap_units=[1],
+                availability_risk_label=["BELOW_2_UNIT_FLOOR_RISK"],
+                demand_evidence_label=["NO_DEMAND"],
+                promo_allocated_units=[0],
+                pack_size=[1],
+            )
+        )
+
+        self.assertEqual(int(reconciled.loc[0, "shadow_policy_order_units"]), 0)
+        self.assertIn("NO_PL_ALLOCATION_SIGNAL", str(reconciled.loc[0, "shadow_policy_blocker_reason"]))
+
+    def test_shadow_policy_below_promo_allocated_threshold_stays_blocked_for_shadow_strength(self) -> None:
+        reconciled = _build_store_order_reconciliation_frame(
+            store_frame=_minimal_order_reconciliation_input_frame(
+                store_action_label=["LOW_SOH_NO_AUTO_BUY"],
+                raw_model_order_units=[2],
+                raw_model_order_value=[20.0],
+                projected_SOH_at_promo_start=[1],
+                floor_units_required=[2],
+                expected_promo_demand=[1],
+                available_to_sell_before_floor=[0],
+                projected_stock_gap_units=[1],
+                availability_risk_label=["BELOW_2_UNIT_FLOOR_RISK"],
+                demand_evidence_label=["NO_DEMAND"],
+                promo_allocated_units=[5],
+                pack_size=[1],
+            )
+        )
+
+        self.assertEqual(int(reconciled.loc[0, "shadow_policy_order_units"]), 0)
+        self.assertEqual(int(reconciled.loc[0, "low_soh_policy_shadow_order_units"]), 0)
+        self.assertIn(
+            "PL_ALLOCATION_BELOW_SHADOW_STRENGTH_THRESHOLD",
+            str(reconciled.loc[0, "shadow_policy_blocker_reason"]),
+        )
+
+    def test_shadow_policy_with_zero_expected_demand_stays_blocked_for_demand_signal(self) -> None:
+        reconciled = _build_store_order_reconciliation_frame(
+            store_frame=_minimal_order_reconciliation_input_frame(
+                store_action_label=["LOW_SOH_NO_AUTO_BUY"],
+                raw_model_order_units=[2],
+                raw_model_order_value=[20.0],
+                projected_SOH_at_promo_start=[1],
+                floor_units_required=[2],
+                expected_promo_demand=[0],
+                available_to_sell_before_floor=[0],
+                projected_stock_gap_units=[0],
+                availability_risk_label=["BELOW_2_UNIT_FLOOR_RISK"],
+                demand_evidence_label=["NO_DEMAND"],
+                promo_allocated_units=[9],
+                pack_size=[1],
+            )
+        )
+
+        self.assertEqual(int(reconciled.loc[0, "shadow_policy_order_units"]), 0)
+        self.assertIn("NO_PROVEN_DEMAND_SIGNAL", str(reconciled.loc[0, "shadow_policy_blocker_reason"]))
+
+    def test_order_reconciliation_helper_caps_protect_availability_to_controlled_need(self) -> None:
+        frame = _minimal_order_reconciliation_input_frame(
+            store_action_label=["PROTECT_AVAILABILITY"],
+            raw_model_order_units=[8],
+            raw_model_order_value=[80.0],
+            projected_SOH_at_promo_start=[1],
+            expected_promo_demand=[5],
+            available_to_sell_before_floor=[0],
+            projected_stock_gap_units=[6],
+            retail_risk_reward_ratio=[2.0],
+            availability_risk_label=["BELOW_2_UNIT_FLOOR_RISK"],
+            demand_evidence_label=["CREDIBLE_PROMO_DEMAND"],
+        )
+
+        reconciled = _build_store_order_reconciliation_frame(store_frame=frame)
+
+        self.assertEqual(int(reconciled.loc[0, "final_store_order_units"]), 6)
+        self.assertEqual(int(reconciled.loc[0, "provisional_review_order_units"]), 0)
+        self.assertEqual(
+            str(reconciled.loc[0, "order_reconciliation_status"]),
+            "CAPPED_TO_AVAILABILITY_NEED",
+        )
+        self.assertIn("capped to 6 unit(s)", str(reconciled.loc[0, "order_reconciliation_reason"]))
+
+    def test_order_reconciliation_helper_does_not_claim_floor_protection_when_below_floor_with_weak_demand(self) -> None:
+        frame = _minimal_order_reconciliation_input_frame(
+            store_action_label=["NO_DEMAND"],
+            raw_model_order_units=[2],
+            raw_model_order_value=[20.0],
+            projected_SOH_at_promo_start=[1],
+            floor_units_required=[2],
+            expected_promo_demand=[1],
+            available_to_sell_before_floor=[0],
+            projected_stock_gap_units=[1],
+            demand_evidence_label=["NO_DEMAND"],
+        )
+
+        reconciled = _build_store_order_reconciliation_frame(store_frame=frame)
+
+        reason = str(reconciled.loc[0, "order_reconciliation_reason"])
+        self.assertNotIn("floor is protected", reason)
+        self.assertNotIn("already protects", reason)
+        self.assertEqual(
+            reason,
+            "Do not auto-order. Projected SOH is below the 2-unit floor, but demand evidence is weak, so the system is not allocating extra capital automatically.",
+        )
+
+    def test_order_reconciliation_helper_keeps_buy_units_when_executable(self) -> None:
+        frame = _minimal_order_reconciliation_input_frame(
+            store_action_label=["BUY"],
+            raw_model_order_units=[7],
+            raw_model_order_value=[70.0],
+            projected_SOH_at_promo_start=[0],
+            expected_promo_demand=[7],
+            available_to_sell_before_floor=[0],
+            projected_stock_gap_units=[9],
+            retail_risk_reward_ratio=[2.5],
+            availability_risk_label=["ZERO_SOH_RISK"],
+            demand_evidence_label=["CREDIBLE_PROMO_DEMAND"],
+        )
+
+        reconciled = _build_store_order_reconciliation_frame(store_frame=frame)
+
+        self.assertEqual(int(reconciled.loc[0, "final_store_order_units"]), 7)
+        self.assertEqual(float(reconciled.loc[0, "final_store_order_value"]), 70.0)
+        self.assertEqual(
+            str(reconciled.loc[0, "order_reconciliation_status"]),
+            "EXECUTABLE_BUY",
+        )
+
+    def test_order_reconciliation_summary_reports_zero_contradictions_for_mixed_labels(self) -> None:
+        mixed = pd.concat(
+            [
+                _minimal_order_reconciliation_input_frame(
+                    store_action_label=["NO_DEMAND"],
+                    raw_model_order_units=[4],
+                    raw_model_order_value=[40.0],
+                    final_store_order_units=[0],
+                    final_store_order_value=[0.0],
+                    provisional_review_order_units=[0],
+                ),
+                _minimal_order_reconciliation_input_frame(
+                    store_action_label=["DATA_QUALITY_REVIEW"],
+                    raw_model_order_units=[6],
+                    raw_model_order_value=[60.0],
+                    final_store_order_units=[0],
+                    final_store_order_value=[0.0],
+                    provisional_review_order_units=[6],
+                ),
+                _minimal_order_reconciliation_input_frame(
+                    store_action_label=["PROTECT_AVAILABILITY"],
+                    raw_model_order_units=[8],
+                    raw_model_order_value=[80.0],
+                    final_store_order_units=[6],
+                    final_store_order_value=[60.0],
+                    provisional_review_order_units=[0],
+                ),
+            ],
+            ignore_index=True,
+        )
+
+        summary = _build_store_order_reconciliation_summary_frame(store_facing_frame=mixed)
+
+        self.assertEqual(int(summary.loc[0, "count_of_contradictions_after_reconciliation"]), 0)
+        self.assertEqual(int(summary.loc[0, "rows_where_raw_order_positive"]), 3)
+        self.assertEqual(int(summary.loc[0, "rows_where_final_order_positive"]), 1)
+        self.assertEqual(int(summary.loc[0, "rows_sent_to_provisional_review"]), 1)
+
+    def test_store_order_reconciliation_diagnostics_are_written_and_zero_contradictions(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_paths = PromotionArtifactPaths(
+                root=Path(temp_dir) / "promotions_artifacts",
+                local_inspection_root=Path(temp_dir) / "local_inspection",
+            )
+            artifacts = PromotionStorePredictionDownloadBuilder().write_report(
+                run_id="test-order-reconciliation-diagnostics",
+                as_of_date="2024-09-01",
+                decision_surface_frame=_decision_surface_frame(),
+                artifact_paths=artifact_paths,
+            )
+            diagnostics_root = artifact_paths.store_prediction_diagnostics_root(
+                "test-order-reconciliation-diagnostics"
+            )
+            diagnostic_frame = pd.read_csv(
+                diagnostics_root / "store_order_reconciliation_diagnostic.csv"
+            )
+            summary_frame = pd.read_csv(
+                diagnostics_root / "store_order_reconciliation_summary.csv"
+            )
+            store_frame = pd.concat(
+                [pd.read_csv(path) for path in artifacts.per_store_promotion_csv_paths],
+                ignore_index=True,
+            )
+
+        self.assertIn("order_reconciliation_status", diagnostic_frame.columns)
+        self.assertIn("order_reconciliation_reason", diagnostic_frame.columns)
+        self.assertEqual(
+            int(summary_frame.loc[0, "count_of_contradictions_after_reconciliation"]),
+            0,
+        )
+        contradiction_mask = (
+            ~store_frame["operator_action"].astype(str).str.upper().isin({"BUY", "REVIEW"})
+            & pd.to_numeric(store_frame["order_units"], errors="coerce").fillna(0).gt(0)
+        )
+        self.assertFalse(bool(contradiction_mask.any()))
+
+    def test_suppressed_order_risk_audit_classifies_safe_stock_cover(self) -> None:
+        frame = _minimal_suppressed_order_risk_frame(
+            store_action_label=["HOLD_STOCK"],
+            raw_model_order_units=[4],
+            raw_model_order_value=[40.0],
+            projected_SOH_at_promo_start=[19],
+            current_soh=[19],
+            expected_promo_demand=[14],
+            available_to_sell_before_floor=[17],
+            demand_evidence_label=["CREDIBLE_PROMO_DEMAND"],
+            availability_risk_label=["FLOOR_PROTECTED"],
+        )
+
+        audit = _build_store_suppressed_order_risk_audit_frame(store_facing_frame=frame)
+
+        self.assertEqual(int(audit.loc[0, "final_store_order_units"]), 0)
+        self.assertEqual(
+            str(audit.loc[0, "suppression_risk_label"]),
+            "SAFE_SUPPRESSION_STOCK_COVERS_DEMAND",
+        )
+
+    def test_suppressed_order_risk_audit_classifies_safe_capital_drag(self) -> None:
+        frame = _minimal_suppressed_order_risk_frame(
+            store_action_label=["REDUCE_HOLDING"],
+            raw_model_order_units=[3],
+            raw_model_order_value=[30.0],
+            projected_SOH_at_promo_start=[10],
+            current_soh=[10],
+            expected_promo_demand=[1],
+            available_to_sell_before_floor=[8],
+            capital_drag_label=["CAPITAL_DRAG_HIGH"],
+        )
+
+        audit = _build_store_suppressed_order_risk_audit_frame(store_facing_frame=frame)
+
+        self.assertEqual(
+            str(audit.loc[0, "suppression_risk_label"]),
+            "SAFE_SUPPRESSION_CAPITAL_DRAG",
+        )
+
+    def test_suppressed_order_risk_audit_classifies_safe_no_demand(self) -> None:
+        frame = _minimal_suppressed_order_risk_frame(
+            store_action_label=["NO_DEMAND"],
+            raw_model_order_units=[4],
+            raw_model_order_value=[40.0],
+            projected_SOH_at_promo_start=[1],
+            current_soh=[1],
+            expected_promo_demand=[1],
+            available_to_sell_before_floor=[0],
+            demand_evidence_label=["NO_DEMAND"],
+            availability_risk_label=["BELOW_2_UNIT_FLOOR_RISK"],
+        )
+
+        audit = _build_store_suppressed_order_risk_audit_frame(store_facing_frame=frame)
+
+        self.assertEqual(
+            str(audit.loc[0, "suppression_risk_label"]),
+            "SAFE_SUPPRESSION_NO_DEMAND",
+        )
+
+    def test_suppressed_order_risk_validator_rejects_credible_demand_floor_risk(self) -> None:
+        frame = _minimal_suppressed_order_risk_frame(
+            store_action_label=["HOLD_STOCK"],
+            raw_model_order_units=[6],
+            raw_model_order_value=[60.0],
+            projected_SOH_at_promo_start=[1],
+            current_soh=[1],
+            expected_promo_demand=[4],
+            available_to_sell_before_floor=[0],
+            demand_evidence_label=["CREDIBLE_PROMO_DEMAND"],
+            availability_risk_label=["BELOW_2_UNIT_FLOOR_RISK"],
+        )
+        audit = _build_store_suppressed_order_risk_audit_frame(store_facing_frame=frame)
+
+        with self.assertRaises(PromotionStoreDownloadCommercialValidationError):
+            _validate_store_suppressed_order_risk_audit(audit)
+
+    def test_suppressed_order_risk_validator_allows_borderline_review(self) -> None:
+        frame = _minimal_suppressed_order_risk_frame(
+            store_action_label=["BORDERLINE_OOS_REVIEW"],
+            raw_model_order_units=[5],
+            raw_model_order_value=[50.0],
+            projected_SOH_at_promo_start=[1],
+            current_soh=[1],
+            expected_promo_demand=[4],
+            available_to_sell_before_floor=[0],
+            demand_evidence_label=["CREDIBLE_PROMO_DEMAND"],
+            availability_risk_label=["BELOW_2_UNIT_FLOOR_RISK"],
+        )
+        audit = _build_store_suppressed_order_risk_audit_frame(store_facing_frame=frame)
+
+        self.assertEqual(
+            str(audit.loc[0, "suppression_risk_label"]),
+            "BORDERLINE_SUPPRESSION_REVIEW",
+        )
+        _validate_store_suppressed_order_risk_audit(audit)
+
+    def test_suppressed_order_risk_summary_reports_zero_unsafe_rows_when_safe(self) -> None:
+        audit = pd.concat(
+            [
+                _build_store_suppressed_order_risk_audit_frame(
+                    store_facing_frame=_minimal_suppressed_order_risk_frame(
+                        store_action_label=["HOLD_STOCK"],
+                        raw_model_order_units=[4],
+                        raw_model_order_value=[40.0],
+                        projected_SOH_at_promo_start=[19],
+                        current_soh=[19],
+                        expected_promo_demand=[14],
+                        available_to_sell_before_floor=[17],
+                        demand_evidence_label=["CREDIBLE_PROMO_DEMAND"],
+                        availability_risk_label=["FLOOR_PROTECTED"],
+                    )
+                ),
+                _build_store_suppressed_order_risk_audit_frame(
+                    store_facing_frame=_minimal_suppressed_order_risk_frame(
+                        store_action_label=["NO_DEMAND"],
+                        raw_model_order_units=[4],
+                        raw_model_order_value=[40.0],
+                        projected_SOH_at_promo_start=[1],
+                        current_soh=[1],
+                        expected_promo_demand=[1],
+                        available_to_sell_before_floor=[0],
+                        demand_evidence_label=["NO_DEMAND"],
+                        availability_risk_label=["BELOW_2_UNIT_FLOOR_RISK"],
+                    )
+                ),
+            ],
+            ignore_index=True,
+        )
+        store_frame = pd.concat(
+            [
+                _minimal_suppressed_order_risk_frame(
+                    store_action_label=["HOLD_STOCK"],
+                    raw_model_order_units=[4],
+                    raw_model_order_value=[40.0],
+                    projected_SOH_at_promo_start=[19],
+                    current_soh=[19],
+                    expected_promo_demand=[14],
+                    available_to_sell_before_floor=[17],
+                    demand_evidence_label=["CREDIBLE_PROMO_DEMAND"],
+                    availability_risk_label=["FLOOR_PROTECTED"],
+                ),
+                _minimal_suppressed_order_risk_frame(
+                    store_action_label=["NO_DEMAND"],
+                    raw_model_order_units=[4],
+                    raw_model_order_value=[40.0],
+                    projected_SOH_at_promo_start=[1],
+                    current_soh=[1],
+                    expected_promo_demand=[1],
+                    available_to_sell_before_floor=[0],
+                    demand_evidence_label=["NO_DEMAND"],
+                    availability_risk_label=["BELOW_2_UNIT_FLOOR_RISK"],
+                ),
+            ],
+            ignore_index=True,
+        )
+
+        summary = _build_store_suppressed_order_risk_summary_frame(
+            store_facing_frame=store_frame,
+            audit_frame=audit,
+        )
+
+        self.assertEqual(int(summary.loc[0, "unsafe_suppression_rows"]), 0)
+        self.assertEqual(int(summary.loc[0, "contradiction_count"]), 0)
+
+    def test_store_suppressed_order_risk_diagnostics_are_written_and_unsafe_rows_zero(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_paths = PromotionArtifactPaths(
+                root=Path(temp_dir) / "promotions_artifacts",
+                local_inspection_root=Path(temp_dir) / "local_inspection",
+            )
+            artifacts = PromotionStorePredictionDownloadBuilder().write_report(
+                run_id="test-suppressed-order-risk-diagnostics",
+                as_of_date="2024-09-01",
+                decision_surface_frame=_decision_surface_frame(),
+                artifact_paths=artifact_paths,
+            )
+            diagnostics_root = artifact_paths.store_prediction_diagnostics_root(
+                "test-suppressed-order-risk-diagnostics"
+            )
+            audit_frame = pd.read_csv(
+                diagnostics_root / "store_suppressed_order_risk_audit.csv"
+            )
+            summary_frame = pd.read_csv(
+                diagnostics_root / "store_suppressed_order_risk_summary.csv"
+            )
+            self.assertTrue(Path(artifacts.manifest_path).exists())
+
+        self.assertIn("suppression_risk_label", audit_frame.columns)
+        self.assertIn("should_have_been_protect_availability_flag", audit_frame.columns)
+        self.assertEqual(int(summary_frame.loc[0, "unsafe_suppression_rows"]), 0)
+        self.assertEqual(int(summary_frame.loc[0, "contradiction_count"]), 0)
 
     def test_use_base_stock_first_zeros_recommended_when_stock_already_covers(self) -> None:
         # Single SKU with current_soh massively above target — recommended
@@ -4183,7 +5872,7 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
                 artifact_paths=artifact_paths,
             )
             df = pd.read_csv(artifacts.per_store_promotion_csv_paths[0])
-            self.assertEqual(int(df.iloc[0]["recommended_order_units"]), 0)
+            self.assertEqual(int(df.iloc[0]["order_units"]), 0)
 
     def test_do_not_order_action_forces_zero_recommended_order(self) -> None:
         frame = _decision_surface_frame().copy()
@@ -4205,15 +5894,56 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
             for path in artifacts.per_store_promotion_csv_paths:
                 df = pd.read_csv(path)
                 do_not_order = df.loc[
-                    df["recommended_action"].astype(str).str.upper().eq("DO_NOT_ORDER")
+                    df["operator_action"].astype(str).str.upper().eq("DO_NOT_BUY")
                 ]
                 if not do_not_order.empty:
                     self.assertTrue(
                         (
                             pd.to_numeric(
-                                do_not_order["recommended_order_units"], errors="coerce"
+                                do_not_order["order_units"], errors="coerce"
                             ).fillna(0)
                             == 0
                         ).all(),
-                        "DO_NOT_ORDER rows must have recommended_order_units == 0",
+                        "DO_NOT_ORDER rows must have order_units == 0",
                     )
+
+    def test_collapsed_prediction_flag_does_not_raise_when_all_flat_promotions_resolved(self) -> None:
+        """Regression: integerization floor creates cohort modal spike at 1 unit, but must not block
+        publication when every per-promotion flat issue has been resolved (unresolved_flat_promotion_count=0).
+
+        Replicates the exact failure mode from the golden-20260520-commercial-20260528b run:
+        required_implied_units ~ 0.03–0.16 across 1037 actionable rows → all integerized to 1 unit,
+        yielding actionable_modal_prediction_share = 0.994 (> 0.98 threshold) while
+        unresolved_flat_promotion_count = 0.
+        """
+        builder = PromotionStorePredictionDownloadBuilder()
+        n = 120
+        # 118/120 = 98.3% of rows have value 1 (integerized floor) → modal share > 0.98.
+        # 2 rows have value 14 to confirm the forecast is not entirely degenerate.
+        totals = [1] * 118 + [14] * 2
+        first7 = [1] * 118 + [7] * 2
+        frame = self._commercial_validation_frame(
+            row_count=n,
+            promo_key="PROMO-INTEGERIZE-FLOOR-COLLAPSE",
+            total_units=totals,
+            first7_units=first7,
+        )
+        forecast_health = builder._forecast_health_summary(frame)
+        # Confirm the test actually exercises the collapse path (modal share must be > 0.98).
+        self.assertGreater(
+            float(forecast_health["actionable_modal_prediction_share"]),
+            0.98,
+            "Test prerequisite: actionable_modal_prediction_share must exceed 0.98 to exercise the collapse guard.",
+        )
+        self.assertTrue(
+            bool(forecast_health["collapsed_prediction_flag"]),
+            "Test prerequisite: collapsed_prediction_flag must be True.",
+        )
+        # The per-promotion unresolved count must be 0 — all flat issues resolved.
+        self.assertEqual(
+            int(forecast_health["unresolved_flat_promotion_count"]),
+            0,
+            "unresolved_flat_promotion_count must be 0 when the promotion passed source selection.",
+        )
+        # Must NOT raise: collapse from integerization floor with no unresolved promotions is not an error.
+        builder._validate_commercial_contract(frame, forecast_health=forecast_health)

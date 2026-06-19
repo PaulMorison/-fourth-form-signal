@@ -38,6 +38,7 @@ class PublicationOpportunityInput:
     stage11_true_zero_rows: int
     stage11_cold_start_rows: int
     stage11_low_nonzero_rows: int
+    stage11_healthy_nonzero_rows: int
     stage11_artificial_collapse_rows: int
     stage12_publish_status: str
     stage12_publish_status_reason: str
@@ -127,6 +128,7 @@ class PublishReconciliationSummary:
     stage11_true_zero_rows: int
     stage11_cold_start_rows: int
     stage11_low_nonzero_rows: int
+    stage11_healthy_nonzero_rows: int
     stage11_artificial_collapse_rows: int
     stage12_candidate_row_count: int
     stage12_publishable_row_count: int
@@ -329,26 +331,69 @@ def build_publish_reconciliation_summary(payload: PublicationOpportunityInput) -
 
     Verifies that counts reconcile exactly. Raises ValueError if reconciliation fails.
     """
-    # Stage 11 demand evidence classifications should sum to total rows
+    # Stage 11 demand evidence classifications should sum to total rows.
+    # Stage 11 action rows and Stage 12 publishability rows are separate
+    # dimensions; do not hide a final review-only hold inside a generic
+    # "demand-classified" bucket.
     stage11_demand_classes_sum = (
         payload.stage11_true_zero_rows
         + payload.stage11_cold_start_rows
         + payload.stage11_low_nonzero_rows
+        + payload.stage11_healthy_nonzero_rows
         + payload.stage11_artificial_collapse_rows
     )
-    stage11_reconciliation_expected = payload.stage11_order_rows + stage11_demand_classes_sum + payload.stage11_review_rows
-
-    reconciled_flag = stage11_reconciliation_expected == payload.stage11_total_rows
-    reconciliation_message = (
-        f"Stage 11→12 flow reconciled: {payload.stage11_total_rows} total, "
-        f"{payload.stage11_order_rows} order, {stage11_demand_classes_sum} demand-classified, "
-        f"{payload.stage11_review_rows} review."
-        if reconciled_flag
-        else f"Reconciliation FAILED: expected {stage11_reconciliation_expected} but stage11_total_rows is {payload.stage11_total_rows}"
+    stage12_publishability_sum = (
+        payload.stage12_publishable_row_count
+        + payload.stage12_review_only_row_count
+        + payload.stage12_legitimate_excluded_row_count
+        + payload.stage12_defect_excluded_row_count
+        + payload.stage12_duplicate_registry_skip_count
     )
+    failures: list[str] = []
+    if stage11_demand_classes_sum != payload.stage11_total_rows:
+        failures.append(
+            f"Stage 11 demand classes sum to {stage11_demand_classes_sum} but stage11_total_rows is {payload.stage11_total_rows}"
+        )
+    if payload.stage11_order_rows + payload.stage11_review_rows > payload.stage11_total_rows:
+        failures.append(
+            "Stage 11 action counts exceed total rows: "
+            f"order={payload.stage11_order_rows}, review={payload.stage11_review_rows}, total={payload.stage11_total_rows}"
+        )
+    if stage12_publishability_sum != payload.stage12_candidate_row_count:
+        failures.append(
+            f"Stage 12 publishability classes sum to {stage12_publishability_sum} but stage12_candidate_row_count is {payload.stage12_candidate_row_count}"
+        )
 
-    if not reconciled_flag:
-        raise ValueError(reconciliation_message)
+    if failures:
+        raise ValueError("Reconciliation FAILED: " + "; ".join(failures))
+
+    stage11_order_held_for_review_count = max(
+        int(payload.stage11_order_rows)
+        - int(payload.stage12_publishable_row_count)
+        - int(payload.stage12_duplicate_registry_skip_count),
+        0,
+    )
+    semantic_review_hold = (
+        stage11_order_held_for_review_count > 0
+        and payload.stage12_review_only_row_count > 0
+        and payload.stage12_publishable_row_count == 0
+    )
+    reconciled_flag = not semantic_review_hold
+    if reconciled_flag:
+        reconciliation_message = (
+            f"Stage 11→12 flow reconciled: {payload.stage11_total_rows} total, "
+            f"{payload.stage11_order_rows} Stage 11 order, {payload.stage11_review_rows} Stage 11 review, "
+            f"{stage11_demand_classes_sum} demand-classified, "
+            f"{payload.stage12_publishable_row_count} Stage 12 publishable, "
+            f"{payload.stage12_review_only_row_count} Stage 12 review-only."
+        )
+    else:
+        reconciliation_message = (
+            "Stage 11→12 flow NOT auto-publish reconciled: "
+            f"{stage11_order_held_for_review_count} Stage 11 order row(s) are held by Stage 12 review-only gates; "
+            f"Stage 12 publishable rows={payload.stage12_publishable_row_count}, "
+            f"Stage 12 review-only rows={payload.stage12_review_only_row_count}."
+        )
 
     return PublishReconciliationSummary(
         stage11_total_rows=payload.stage11_total_rows,
@@ -357,6 +402,7 @@ def build_publish_reconciliation_summary(payload: PublicationOpportunityInput) -
         stage11_true_zero_rows=payload.stage11_true_zero_rows,
         stage11_cold_start_rows=payload.stage11_cold_start_rows,
         stage11_low_nonzero_rows=payload.stage11_low_nonzero_rows,
+        stage11_healthy_nonzero_rows=payload.stage11_healthy_nonzero_rows,
         stage11_artificial_collapse_rows=payload.stage11_artificial_collapse_rows,
         stage12_candidate_row_count=payload.stage12_candidate_row_count,
         stage12_publishable_row_count=payload.stage12_publishable_row_count,

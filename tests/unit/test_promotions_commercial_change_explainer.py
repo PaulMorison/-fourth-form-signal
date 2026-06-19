@@ -139,6 +139,32 @@ class CommercialChangeExplainerTests(unittest.TestCase):
             self.assertIn(row["row_change_class"], {"RECOMMENDATION_CHANGED", "ELIGIBILITY_CHANGED"})
             self.assertEqual(row["operator_action_class"], ACTION_REVIEW_NOW)
 
+    def test_review_only_no_publish_cycle_suppresses_publish_now_actions(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            manifests_root = Path(tmp) / "manifests"
+            manifests_root.mkdir(parents=True, exist_ok=True)
+            current = _frame([_row(store_number=1, sku_number=102, reco="ORDER", demand="healthy_nonzero_demand")])
+            current_csv = Path(tmp) / "current.csv"
+            current.to_csv(current_csv, index=False, encoding="utf-8")
+
+            artifacts = build_commercial_change_explainability_artifacts(
+                run_id="run-review-only-no-publish",
+                as_of_date="2024-09-01",
+                manifests_root=manifests_root,
+                current_store_prediction_csv_path=str(current_csv),
+                current_commercial_outcome_class="COMMERCIAL_SUCCESS_GOVERNED_NOOP_NO_PUBLISHABLE_ROWS",
+                current_freshness_class="NO_NEW_PUBLICATIONS_REVIEW_ONLY",
+                current_delta_class="FIRST_OBSERVATION_NO_PRIOR_BASELINE",
+                duplicate_registry_skip_count=0,
+                prior_cycle_run_id=None,
+            )
+
+            row = artifacts.explanations.iloc[0]
+            self.assertEqual(row["operator_action_class"], ACTION_REVIEW_NOW)
+            self.assertTrue(bool(row["excluded_from_publish_flag"]))
+            self.assertEqual(artifacts.action_summary.action_publish_now_count, 0)
+            self.assertEqual(artifacts.action_summary.action_review_now_count, 1)
+
     def test_true_zero_row_is_no_action_true_zero(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             manifests_root = Path(tmp) / "manifests"

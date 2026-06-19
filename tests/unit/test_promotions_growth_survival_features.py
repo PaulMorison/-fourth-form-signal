@@ -183,6 +183,44 @@ class PromotionsGrowthSurvivalFeatureTests(unittest.TestCase):
             result.loc["candidate-early", "feature_survival_convexity_confidence_score"],
         )
 
+    def test_survival_merge_asof_normalizes_second_and_millisecond_datetime_keys(self) -> None:
+        candidate = pd.DataFrame(
+            [_row_from_daily_segments("candidate-dtype", (2.0, 3.0, 5.0), start_date=date(2024, 5, 1))]
+        )
+        reference = pd.DataFrame(
+            [
+                _prior_row(
+                    "prior-dtype",
+                    start_date=date(2024, 4, 1),
+                    actual_units_sold_promo=50.0,
+                    post_14d_units=10.0,
+                    actual_days_with_sales_promo=7.0,
+                )
+            ]
+        )
+
+        candidate = candidate.drop(columns=["promotion_start_date_date"]).assign(
+            promotion_start_date_date=pd.to_datetime(
+                candidate["promotion_start_date_date"],
+                errors="coerce",
+            ).astype("datetime64[s]")
+        )
+        reference = reference.drop(columns=["promotional_end_date_date"]).assign(
+            promotional_end_date_date=pd.to_datetime(
+                reference["promotional_end_date_date"],
+                errors="coerce",
+            ).astype("datetime64[ms]")
+        )
+
+        result = apply_ft_survival_convexity(
+            apply_ft_growth_curve_shape(candidate),
+            reference_frame=reference,
+        )
+
+        for column_name in SURVIVAL_CONVEXITY_FEATURE_COLUMNS:
+            self.assertIn(column_name, result.columns)
+        self.assertFalse(result.loc[:, list(SURVIVAL_CONVEXITY_FEATURE_COLUMNS)].isna().any().any())
+
     def test_future_only_current_values_do_not_change_feature_outputs(self) -> None:
         reference = pd.DataFrame(
             [_prior_row("prior", start_date=date(2024, 1, 1), actual_units_sold_promo=55.0, post_14d_units=18.0, actual_days_with_sales_promo=7.0)]

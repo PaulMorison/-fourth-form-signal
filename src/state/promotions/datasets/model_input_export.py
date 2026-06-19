@@ -39,6 +39,7 @@ from datetime import UTC, datetime
 import json
 import logging
 from pathlib import Path
+import re
 from typing import Iterable, Mapping, Sequence
 
 import numpy as np
@@ -49,6 +50,9 @@ from state.promotions.feature_engineering.demand.ft_allocation_discipline import
 )
 from state.promotions.feature_engineering.demand.ft_basket_context_feature_bundle import (
     BASKET_MODEL_USE_FEATURE_COLUMNS,
+)
+from state.promotions.feature_engineering.demand.ft_basket_structure_dependency import (
+    BASKET_STRUCTURE_DEPENDENCY_MODEL_USE_FEATURE_COLUMNS,
 )
 from state.promotions.feature_engineering.demand.ft_baseline_demand_orientation import (
     BASELINE_DEMAND_ORIENTATION_FEATURE_COLUMNS,
@@ -62,10 +66,38 @@ from state.promotions.feature_engineering.demand.ft_discount_elasticity import (
 from state.promotions.feature_engineering.demand.ft_uplift_decomposition import (
     UPLIFT_DECOMPOSITION_FEATURE_COLUMNS,
 )
-from models.promotions.model_input_quality import build_model_input_quality_summary_text
+from state.promotions.feature_engineering.demand.ft_sparse_demand_noise import (
+    SPARSE_DEMAND_NOISE_MODEL_USE_FEATURE_COLUMNS,
+)
+from state.promotions.feature_engineering.demand.ft_micro_market_equilibrium import (
+    MICRO_MARKET_EQUILIBRIUM_MODEL_USE_FEATURE_COLUMNS,
+)
+from state.promotions.feature_engineering.demand.ft_basket_equilibrium import (
+    BASKET_EQUILIBRIUM_MODEL_USE_FEATURE_COLUMNS,
+)
+from models.promotions.model_input_quality import (
+    DOWNSTREAM_DECISION_SUPPORT_FEATURE_FAMILIES,
+    STRICT_NUMERIC_KEY_COLUMNS,
+    UNITS_HEAD_CORE_FEATURE_FAMILIES,
+    build_model_input_quality_summary_text,
+    classify_engineered_feature_role,
+    classify_leakage_risk,
+    filter_model_use_engineered_feature_columns,
+    iter_review_only_engineered_feature_columns,
+    iter_units_head_core_feature_columns,
+)
+from models.promotions.preprocessing import GOVERNED_CRITICAL_MODEL_USE_FEATURE_COLUMNS
+from state.promotions.datasets.dataset_assembler import (
+    apply_governed_training_numeric_zero_fill_contract,
+)
+from state.promotions.datasets.dataset_validators import PromotionDatasetValidationError
+from state.promotions.feature_engineering.registry import iter_registered_feature_modules
 from state.promotions.feature_engineering.demand.probability import (
     PROBABILITY_MODEL_USE_FEATURE_COLUMNS,
     PROBABILITY_REVIEW_ONLY_FEATURE_COLUMNS,
+)
+from state.promotions.feature_engineering.stock.ft_target_stock_logic import (
+    TARGET_STOCK_MODEL_USE_FEATURE_COLUMNS,
 )
 
 
@@ -131,6 +163,7 @@ REQUIRED_NEW_ENGINEERED_FEATURES: tuple[str, ...] = (
     *DISCOUNT_CONDITIONED_DEMAND_FEATURE_COLUMNS,
     *DISCOUNT_ELASTICITY_FEATURE_COLUMNS,
     *UPLIFT_DECOMPOSITION_FEATURE_COLUMNS,
+    *TARGET_STOCK_MODEL_USE_FEATURE_COLUMNS,
     # promo-vs-baseline separation
     "feature_non_promo_units_56d",
     "feature_promo_units_56d",
@@ -143,6 +176,10 @@ REQUIRED_NEW_ENGINEERED_FEATURES: tuple[str, ...] = (
     "feature_sales_day_density_56d",
     # governed basket / mission layer: explicit model-use subset only
     *BASKET_MODEL_USE_FEATURE_COLUMNS,
+    # governed basket-structure and sparse-noise layer: first-class commercial support
+    *BASKET_STRUCTURE_DEPENDENCY_MODEL_USE_FEATURE_COLUMNS,
+    *MICRO_MARKET_EQUILIBRIUM_MODEL_USE_FEATURE_COLUMNS,
+    *SPARSE_DEMAND_NOISE_MODEL_USE_FEATURE_COLUMNS,
 )
 
 REVIEW_ONLY_PROBABILITY_ENGINEERED_FEATURES: tuple[str, ...] = (
@@ -171,6 +208,243 @@ MODEL_INPUT_CSV_DICTIONARY_COLUMNS: tuple[str, ...] = (
     "whether_used_in_training",
     "whether_used_in_scoring",
     "source_family",
+)
+
+TRAINING_DATA_SAMPLE_SCHEMA_COLUMNS: tuple[str, ...] = (
+    "ordinal",
+    "column_name",
+    "source_dtype",
+    "export_dtype",
+    "column_role",
+    "is_row_grain_column",
+    "is_key_column",
+    "is_engineered_feature",
+    "is_model_use_engineered_feature",
+    "is_review_only_engineered_feature",
+    "is_target_column",
+    "feature_family",
+    "source_module",
+    "null_count",
+    "null_rate",
+    "all_null_flag",
+    "sample_value",
+)
+
+TRAINING_DATA_REQUIRED_IDENTITY_COLUMN_GROUPS: tuple[tuple[str, ...], ...] = (
+    ("promotion_row_key",),
+    ("store_number", "store_number_key"),
+    ("promotion_header_key", "promotional_sku_id_key", "promotion_name"),
+    ("sku_number", "sku_number_key"),
+)
+
+TRAINING_DATA_OPTIONAL_SKU_IDENTITY_COLUMNS: tuple[str, ...] = (
+    "sku_number",
+    "sku_number_key",
+)
+
+TRAINING_DATA_KNOWN_KEY_COLUMNS: tuple[str, ...] = (
+    "promotion_row_key",
+    "store_number",
+    "store_number_key",
+    "promotion_header_key",
+    "sku_number",
+    "sku_number_key",
+    "promotional_sku_id",
+    "promotional_sku_id_key",
+)
+
+TRAINING_DATA_NUMERIC_NAME_TOKENS: tuple[str, ...] = (
+    "allocation",
+    "amount",
+    "avg",
+    "baseline",
+    "capital",
+    "confidence",
+    "cost",
+    "count",
+    "cover",
+    "days",
+    "demand",
+    "depth",
+    "discount",
+    "dollar",
+    "elasticity",
+    "gm",
+    "margin",
+    "pct",
+    "percent",
+    "price",
+    "probability",
+    "profit",
+    "qty",
+    "quantity",
+    "rate",
+    "ratio",
+    "response",
+    "revenue",
+    "risk",
+    "sales",
+    "score",
+    "sell_through",
+    "share",
+    "soh",
+    "stock",
+    "support",
+    "trend",
+    "turnover",
+    "unit",
+    "uplift",
+    "value",
+    "velocity",
+    "window",
+)
+
+TRAINING_DATA_TEXTUAL_SUFFIX_TOKENS: tuple[str, ...] = (
+    "_reason",
+    "_state",
+    "_regime",
+    "_posture",
+    "_summary",
+    "_source_column",
+    "_source_table_name",
+    "_table_name",
+)
+
+TRAINING_DATA_REQUESTED_FAMILY_ALIASES: tuple[dict[str, object], ...] = (
+    {"requested_name": "allocation_discipline", "family_names": ("allocation_discipline",)},
+    {"requested_name": "same_discount_history", "family_names": ("same_discount_promo_history",)},
+    {"requested_name": "probability", "family_names": ("probability",)},
+    {"requested_name": "target_stock_shape", "family_names": ("target_stock_shape",)},
+    {"requested_name": "PCA", "family_names": ("pca",)},
+    {"requested_name": "situational_awareness", "family_names": ("situational_awareness",)},
+    {
+        "requested_name": "fragility_opportunity_shape",
+        "family_names": ("fragility_opportunity_shape", "fragility_opportunity"),
+    },
+    {
+        "requested_name": "basket_equilibrium_or_transaction_object",
+        "family_names": (
+            "basket_context",
+            "basket_structure_dependency",
+            "micro_market_equilibrium",
+        ),
+    },
+)
+
+TRAINING_DATA_REQUIRED_NONNULL_MODEL_VISIBLE_FEATURE_COLUMNS: frozenset[str] = frozenset(
+    {*GOVERNED_CRITICAL_MODEL_USE_FEATURE_COLUMNS}
+)
+
+_BOOL_TRUE_VALUES = {"1", "true", "yes", "y", "t"}
+_BOOL_FALSE_VALUES = {"0", "false", "no", "n", "f"}
+_DATE_LIKE_NAME_PATTERN = re.compile(r"(^|_)(date|datetime|timestamp|time|at)(_|$)", re.IGNORECASE)
+
+FEATURE_DATASET_COVERAGE_AUDIT_COLUMNS: tuple[str, ...] = (
+    "feature_name",
+    "module_name",
+    "registry_registered_flag",
+    "present_in_training_ready_flag",
+    "present_in_scoring_ready_flag",
+    "present_in_model_use_flag",
+    "review_only_flag",
+    "recommended_action",
+    "rationale",
+)
+
+MODEL_USE_FEATURE_COVERAGE_SUMMARY_COLUMNS: tuple[str, ...] = (
+    "feature_family",
+    "required_presence_scope",
+    "feature_count",
+    "present_in_training_ready_count",
+    "present_in_scoring_ready_count",
+    "present_in_model_use_count",
+    "review_only_feature_count",
+    "missing_model_use_feature_count",
+    "review_only_model_use_leak_count",
+    "family_status",
+    "rationale",
+)
+
+FEATURE_FAMILY_SCOPE_MODEL_USE = "model_use"
+FEATURE_FAMILY_SCOPE_REVIEW_ONLY_READY = "review_only_ready_dataset"
+FEATURE_FAMILY_SCOPE_IF_PRESENT = "if_present"
+
+MODEL_USE_FEATURE_FAMILY_REQUIREMENTS: tuple[dict[str, str], ...] = (
+    {
+        "feature_family": "basket_equilibrium",
+        "required_presence_scope": FEATURE_FAMILY_SCOPE_IF_PRESENT,
+        "rationale": "Basket-equilibrium features are downstream decision-support context derived from prior-safe basket structure and should surface in diagnostics when present.",
+    },
+    {
+        "feature_family": "basket_structure_dependency",
+        "required_presence_scope": FEATURE_FAMILY_SCOPE_MODEL_USE,
+        "rationale": "Basket structure, anchor, drag-along, and dependency features are the governed cross-store generalisation layer.",
+    },
+    {
+        "feature_family": "sparse_demand_noise",
+        "required_presence_scope": FEATURE_FAMILY_SCOPE_MODEL_USE,
+        "rationale": "Sparse-demand and noise-regime features must reach model-use to distinguish stable low demand from random tail noise.",
+    },
+    {
+        "feature_family": "micro_market_equilibrium",
+        "required_presence_scope": FEATURE_FAMILY_SCOPE_IF_PRESENT,
+        "rationale": "Micro-market equilibrium features are downstream decision-support context and should surface in diagnostics when present without being required in the slim default units head.",
+    },
+    {
+        "feature_family": "allocation_discipline",
+        "required_presence_scope": FEATURE_FAMILY_SCOPE_MODEL_USE,
+        "rationale": "Trust-floor, allocation, and capital-discipline features must reach model-use unless explicitly governed review-only.",
+    },
+    {
+        "feature_family": "same_discount_promo_history",
+        "required_presence_scope": FEATURE_FAMILY_SCOPE_MODEL_USE,
+        "rationale": "Same-discount and prior-promotion memory are the governed commercial demand basis for train/score use.",
+    },
+    {
+        "feature_family": "probability",
+        "required_presence_scope": FEATURE_FAMILY_SCOPE_MODEL_USE,
+        "rationale": "The explicit probability model-use subset must be present while review-only probability diagnostics stay out.",
+    },
+    {
+        "feature_family": "target_stock_shape",
+        "required_presence_scope": FEATURE_FAMILY_SCOPE_MODEL_USE,
+        "rationale": "Period-aware target-stock shape features must be model-visible for trust-floor sizing.",
+    },
+    {
+        "feature_family": "pca",
+        "required_presence_scope": FEATURE_FAMILY_SCOPE_REVIEW_ONLY_READY,
+        "rationale": "PCA interpretation layers must surface for analyst review and must not enter model-use.",
+    },
+    {
+        "feature_family": "situational_awareness",
+        "required_presence_scope": FEATURE_FAMILY_SCOPE_REVIEW_ONLY_READY,
+        "rationale": "Situational-awareness interpretation layers must surface for analyst review and must not enter model-use.",
+    },
+    {
+        "feature_family": "kalman_state",
+        "required_presence_scope": FEATURE_FAMILY_SCOPE_REVIEW_ONLY_READY,
+        "rationale": "Kalman-style demand-state diagnostics must surface for review first and must not enter model-use in this pass.",
+    },
+    {
+        "feature_family": "distribution_shape_distance",
+        "required_presence_scope": FEATURE_FAMILY_SCOPE_REVIEW_ONLY_READY,
+        "rationale": "Distribution-distance diagnostics must surface for review first and must not enter model-use in this pass.",
+    },
+    {
+        "feature_family": "fragility_opportunity",
+        "required_presence_scope": FEATURE_FAMILY_SCOPE_REVIEW_ONLY_READY,
+        "rationale": "Fragility-adjusted opportunity diagnostics are review-only until replay and audit evidence support promotion.",
+    },
+    {
+        "feature_family": "dag_dependency_support",
+        "required_presence_scope": FEATURE_FAMILY_SCOPE_REVIEW_ONLY_READY,
+        "rationale": "DAG-informed support indicators are audit signals only and must not be treated as causal model-use proof.",
+    },
+    {
+        "feature_family": "fragility_opportunity_shape",
+        "required_presence_scope": FEATURE_FAMILY_SCOPE_IF_PRESENT,
+        "rationale": "Fragility, opportunity, survival, and demand-shape layers are audited when present.",
+    },
 )
 
 TRACE_IDENTIFIER_PREFIX = "trace_"
@@ -301,6 +575,9 @@ class ModelInputAuditPaths:
     metadata_json_path: str
     feature_lineage_csv_path: str
     feature_lineage_json_path: str
+    feature_dataset_coverage_audit_csv_path: str
+    model_use_feature_coverage_summary_csv_path: str
+    model_use_feature_coverage_summary_json_path: str
     contract_validation_json_path: str
     feature_quality_audit_csv_path: str | None = None
     feature_quality_audit_json_path: str | None = None
@@ -332,12 +609,1217 @@ class ModelInputCsvDiagnosisExportPaths:
     manifest_json_path: str
 
 
+@dataclass(frozen=True)
+class PromotionTrainingDataSampleExportPaths:
+    full_parquet_path: str
+    sample_csv_path: str
+    schema_csv_path: str
+    quality_summary_json_path: str
+    feature_coverage_audit_csv_path: str | None = None
+    model_use_feature_coverage_summary_csv_path: str | None = None
+    model_use_feature_coverage_summary_json_path: str | None = None
+    feature_role_audit_csv_path: str | None = None
+    feature_role_audit_summary_json_path: str | None = None
+    core_head_candidate_review_csv_path: str | None = None
+    core_head_candidate_review_summary_json_path: str | None = None
+
+
 class PromotionFinalModelContractError(ValueError):
     """Raised when the final model-input frame violates the governed contract."""
 
 
 class PromotionModelInputCsvExportError(ValueError):
     """Raised when the governed full CSV diagnosis export cannot be written safely."""
+
+
+class PromotionTrainingDataExportError(ValueError):
+    """Raised when a governed training-data inspection export cannot be written safely."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        details: Mapping[str, object] | None = None,
+    ) -> None:
+        super().__init__(message)
+        self.details = dict(details or {})
+
+
+def _trim_export_string_value(value: object) -> object:
+    if value is None or pd.isna(value):
+        return pd.NA
+    trimmed = str(value).strip()
+    return pd.NA if trimmed == "" else trimmed
+
+
+def _trim_export_string_series(series: pd.Series) -> pd.Series:
+    return series.map(_trim_export_string_value).astype(object)
+
+
+def _looks_like_date_column(column_name: str, series: pd.Series) -> bool:
+    if pd.api.types.is_datetime64_any_dtype(series):
+        return True
+    return bool(_DATE_LIKE_NAME_PATTERN.search(column_name))
+
+
+def _is_datetime_export_column(column_name: str, series: pd.Series, parsed: pd.Series) -> bool:
+    lowered = column_name.lower()
+    if any(token in lowered for token in ("datetime", "timestamp", "_at")):
+        return True
+    if not pd.api.types.is_datetime64_any_dtype(series):
+        return False
+    non_null = parsed.dropna()
+    if non_null.empty:
+        return False
+    return bool(
+        non_null.dt.hour.ne(0).any()
+        or non_null.dt.minute.ne(0).any()
+        or non_null.dt.second.ne(0).any()
+        or non_null.dt.microsecond.ne(0).any()
+    )
+
+
+def _format_temporal_series_for_export(
+    parsed: pd.Series,
+    *,
+    include_time: bool,
+) -> pd.Series:
+    formatted = pd.Series(pd.NA, index=parsed.index, dtype=object)
+    non_null = parsed.notna()
+    if not bool(non_null.any()):
+        return formatted
+    values = parsed.loc[non_null]
+    if include_time:
+        formatted.loc[non_null] = values.map(lambda value: value.isoformat())
+    else:
+        formatted.loc[non_null] = values.dt.strftime("%Y-%m-%d")
+    return formatted
+
+
+def _is_flag_column(column_name: str, series: pd.Series) -> bool:
+    if pd.api.types.is_bool_dtype(series):
+        return True
+    lowered = column_name.lower()
+    return lowered.endswith("_flag") or lowered.startswith("is_")
+
+
+def _series_sample_values(series: pd.Series, *, limit: int = 5) -> list[str]:
+    if series.empty:
+        return []
+    return [str(value) for value in series.dropna().drop_duplicates().head(limit).tolist()]
+
+
+def _normalize_flag_series(
+    series: pd.Series,
+    *,
+    column_name: str,
+) -> tuple[pd.Series, dict[str, object] | None]:
+    if pd.api.types.is_bool_dtype(series):
+        return series.astype("Int64"), None
+    if pd.api.types.is_numeric_dtype(series):
+        numeric = pd.to_numeric(series, errors="coerce")
+        invalid_mask = series.notna() & ~numeric.isin([0, 1])
+        if bool(invalid_mask.any()):
+            return series, {
+                "column_name": column_name,
+                "reason": "flag_column_contains_non_boolean_numeric_values",
+                "sample_invalid_values": _series_sample_values(series.loc[invalid_mask]),
+            }
+        return numeric.astype("Int64"), None
+
+    trimmed = _trim_export_string_series(series)
+    normalized = trimmed.astype("string").str.lower()
+    numeric = pd.to_numeric(trimmed, errors="coerce")
+    valid_mask = normalized.isin(_BOOL_TRUE_VALUES | _BOOL_FALSE_VALUES) | numeric.isin([0, 1])
+    invalid_mask = trimmed.notna() & ~valid_mask
+    if bool(invalid_mask.any()):
+        return trimmed, {
+            "column_name": column_name,
+            "reason": "flag_column_contains_non_boolean_values",
+            "sample_invalid_values": _series_sample_values(trimmed.loc[invalid_mask]),
+        }
+    output = pd.Series(pd.NA, index=trimmed.index, dtype="Int64")
+    output.loc[normalized.isin(_BOOL_TRUE_VALUES)] = 1
+    output.loc[normalized.isin(_BOOL_FALSE_VALUES)] = 0
+    numeric_bool_mask = trimmed.notna() & numeric.isin([0, 1])
+    if bool(numeric_bool_mask.any()):
+        output.loc[numeric_bool_mask] = numeric.loc[numeric_bool_mask].astype("Int64")
+    return output, None
+
+
+def _column_expected_numeric(
+    column_name: str,
+    *,
+    feature_columns: set[str],
+    target_columns: set[str],
+) -> bool:
+    if column_name in STRICT_NUMERIC_KEY_COLUMNS:
+        return True
+    lowered = column_name.lower()
+    if _DATE_LIKE_NAME_PATTERN.search(lowered):
+        return False
+    if any(lowered.endswith(token) for token in TRAINING_DATA_TEXTUAL_SUFFIX_TOKENS):
+        return False
+    if lowered.endswith("_flag") or lowered.startswith("is_"):
+        return True
+    return any(token in lowered for token in TRAINING_DATA_NUMERIC_NAME_TOKENS)
+
+
+def _coerce_expected_numeric_series(
+    series: pd.Series,
+    *,
+    column_name: str,
+    strict_integer: bool,
+) -> tuple[pd.Series, dict[str, object] | None, dict[str, object] | None]:
+    trimmed = _trim_export_string_series(series)
+    coerced = pd.to_numeric(trimmed, errors="coerce")
+    non_null_mask = trimmed.notna()
+    numeric_like_mask = non_null_mask & coerced.notna()
+    nonnumeric_like_mask = non_null_mask & coerced.isna()
+
+    mixed_type_issue: dict[str, object] | None = None
+    coercion_failure: dict[str, object] | None = None
+    if bool(numeric_like_mask.any() and nonnumeric_like_mask.any()):
+        mixed_type_issue = {
+            "column_name": column_name,
+            "numeric_like_count": int(numeric_like_mask.sum()),
+            "nonnumeric_like_count": int(nonnumeric_like_mask.sum()),
+            "sample_nonnumeric_values": _series_sample_values(trimmed.loc[nonnumeric_like_mask]),
+        }
+    elif bool(nonnumeric_like_mask.any()):
+        coercion_failure = {
+            "column_name": column_name,
+            "reason": "expected_numeric_column_contains_non_numeric_values",
+            "sample_invalid_values": _series_sample_values(trimmed.loc[nonnumeric_like_mask]),
+        }
+
+    if coercion_failure is None and strict_integer:
+        non_integer_mask = non_null_mask & coerced.notna() & coerced.mod(1).ne(0)
+        if bool(non_integer_mask.any()):
+            coercion_failure = {
+                "column_name": column_name,
+                "reason": "strict_numeric_key_contains_non_integer_values",
+                "sample_invalid_values": _series_sample_values(trimmed.loc[non_integer_mask]),
+            }
+
+    if mixed_type_issue is not None or coercion_failure is not None:
+        return trimmed, mixed_type_issue, coercion_failure
+
+    non_null = coerced.dropna()
+    if non_null.empty:
+        dtype = "Int64" if strict_integer else "Float64"
+        return pd.Series(pd.NA, index=trimmed.index, dtype=dtype), None, None
+    if strict_integer or bool(non_null.mod(1).eq(0).all()):
+        return coerced.round(0).astype("Int64"), None, None
+    return coerced.astype("float64"), None, None
+
+
+def _numeric_columns_with_excess_precision(
+    numeric_columns: Mapping[str, pd.Series],
+    *,
+    decimals: int,
+) -> list[dict[str, object]]:
+    rows: list[dict[str, object]] = []
+    tolerance = 10 ** (-(decimals + 2))
+    for column_name, series in numeric_columns.items():
+        numeric = pd.to_numeric(series, errors="coerce")
+        non_null = numeric.dropna()
+        if non_null.empty or bool(non_null.mod(1).eq(0).all()):
+            continue
+        diff = (non_null.astype(float) - non_null.astype(float).round(decimals)).abs()
+        offending = diff > tolerance
+        if not bool(offending.any()):
+            continue
+        rows.append(
+            {
+                "column_name": column_name,
+                "offending_row_count": int(offending.sum()),
+                "sample_values": [float(value) for value in non_null.loc[offending].head(5).tolist()],
+            }
+        )
+    return rows
+
+
+def _numeric_min_max_summary(frame: pd.DataFrame) -> dict[str, dict[str, object]]:
+    summary: dict[str, dict[str, object]] = {}
+    for column_name in frame.columns:
+        series = frame[column_name]
+        if not pd.api.types.is_numeric_dtype(series):
+            continue
+        non_null = series.dropna()
+        if non_null.empty:
+            continue
+        min_value = non_null.min()
+        max_value = non_null.max()
+        summary[str(column_name)] = {
+            "min": _json_scalar(min_value),
+            "max": _json_scalar(max_value),
+        }
+    return summary
+
+
+def _json_scalar(value: object) -> object:
+    if value is None or pd.isna(value):
+        return None
+    if isinstance(value, (np.integer, int)):
+        return int(value)
+    if isinstance(value, (np.floating, float)):
+        return round(float(value), NUMERIC_EXPORT_DECIMALS)
+    return str(value)
+
+
+def _required_training_identity_columns(columns: Sequence[str]) -> tuple[list[str], list[str]]:
+    column_set = {str(column_name) for column_name in columns}
+    selected_required_columns: list[str] = []
+    missing: list[str] = []
+    for column_group in TRAINING_DATA_REQUIRED_IDENTITY_COLUMN_GROUPS:
+        present = [column_name for column_name in column_group if column_name in column_set]
+        if present:
+            selected_required_columns.append(present[0])
+        else:
+            missing.append("_or_".join(column_group))
+    present_keys = [
+        column_name
+        for column_name in TRAINING_DATA_KNOWN_KEY_COLUMNS
+        if column_name in column_set
+    ]
+    present_keys = list(dict.fromkeys([*selected_required_columns, *present_keys]))
+    return missing, present_keys
+
+
+def _present_required_training_identity_columns(columns: Sequence[str]) -> list[str]:
+    column_set = {str(column_name) for column_name in columns}
+    selected_required_columns: list[str] = []
+    for column_group in TRAINING_DATA_REQUIRED_IDENTITY_COLUMN_GROUPS:
+        present = [column_name for column_name in column_group if column_name in column_set]
+        if present:
+            selected_required_columns.append(present[0])
+    return selected_required_columns
+
+
+def _training_feature_family_summary(
+    *,
+    engineered_feature_columns: Sequence[str],
+) -> list[dict[str, object]]:
+    module_by_feature = _registered_feature_module_by_column()
+    review_only_features = set(iter_review_only_engineered_feature_columns())
+    present_features = {
+        str(column_name)
+        for column_name in engineered_feature_columns
+        if str(column_name).startswith(ENGINEERED_FEATURE_PREFIX)
+    }
+    relevant_feature_names = sorted(set(module_by_feature) | present_features)
+    feature_family_by_name = {
+        feature_name: _feature_family_for_coverage_row(feature_name, module_by_feature.get(feature_name, ""))
+        for feature_name in relevant_feature_names
+    }
+    family_names = [row["feature_family"] for row in MODEL_USE_FEATURE_FAMILY_REQUIREMENTS]
+    family_names.extend(
+        family_name
+        for family_name in sorted(set(feature_family_by_name.values()))
+        if family_name not in set(family_names)
+    )
+    rows: list[dict[str, object]] = []
+    for family_name in family_names:
+        family_feature_names = [
+            feature_name
+            for feature_name, classified_family in feature_family_by_name.items()
+            if classified_family == family_name
+        ]
+        registered_feature_names = [
+            feature_name for feature_name in family_feature_names if feature_name in module_by_feature
+        ]
+        present_feature_names = [
+            feature_name for feature_name in family_feature_names if feature_name in present_features
+        ]
+        present_model_use_feature_names = [
+            feature_name for feature_name in present_feature_names if feature_name not in review_only_features
+        ]
+        present_review_only_feature_names = [
+            feature_name for feature_name in present_feature_names if feature_name in review_only_features
+        ]
+        missing_registered_model_use_feature_names = [
+            feature_name
+            for feature_name in registered_feature_names
+            if feature_name not in review_only_features and feature_name not in present_features
+        ]
+        missing_registered_review_only_feature_names = [
+            feature_name
+            for feature_name in registered_feature_names
+            if feature_name in review_only_features and feature_name not in present_features
+        ]
+        if not registered_feature_names:
+            family_status = "not_registered"
+        elif not present_feature_names:
+            family_status = "missing_from_training_dataset"
+        elif present_model_use_feature_names and present_review_only_feature_names:
+            family_status = "model_use_and_review_only_present"
+        elif present_model_use_feature_names:
+            family_status = "model_use_present"
+        elif present_review_only_feature_names:
+            family_status = "review_only_present"
+        else:
+            family_status = "present_unclassified"
+        rows.append(
+            {
+                "feature_family": family_name,
+                "registered_feature_count": int(len(registered_feature_names)),
+                "present_feature_count": int(len(present_feature_names)),
+                "present_model_use_feature_count": int(len(present_model_use_feature_names)),
+                "present_review_only_feature_count": int(len(present_review_only_feature_names)),
+                "missing_registered_model_use_feature_names": missing_registered_model_use_feature_names,
+                "missing_registered_review_only_feature_names": missing_registered_review_only_feature_names,
+                "present_feature_names": present_feature_names,
+                "family_status": family_status,
+            }
+        )
+    return rows
+
+
+def _requested_training_family_visibility(
+    family_rows: Sequence[Mapping[str, object]],
+) -> dict[str, dict[str, object]]:
+    family_rows_by_name = {str(row["feature_family"]): row for row in family_rows}
+    family_requirements = {
+        str(row["feature_family"]): str(row["required_presence_scope"])
+        for row in MODEL_USE_FEATURE_FAMILY_REQUIREMENTS
+    }
+    visibility: dict[str, dict[str, object]] = {}
+    for mapping in TRAINING_DATA_REQUESTED_FAMILY_ALIASES:
+        requested_name = str(mapping["requested_name"])
+        family_names = tuple(str(name) for name in mapping["family_names"])
+        matched_rows = [family_rows_by_name[name] for name in family_names if name in family_rows_by_name]
+        registered_feature_count = int(
+            sum(int(row.get("registered_feature_count", 0)) for row in matched_rows)
+        )
+        present_feature_count = int(
+            sum(int(row.get("present_feature_count", 0)) for row in matched_rows)
+        )
+        present_families = [
+            str(row["feature_family"])
+            for row in matched_rows
+            if int(row.get("present_feature_count", 0)) > 0
+        ]
+        review_only_policy_exclusion = (
+            bool(matched_rows)
+            and present_feature_count == 0
+            and all(
+                family_requirements.get(str(row["feature_family"])) == FEATURE_FAMILY_SCOPE_REVIEW_ONLY_READY
+                for row in matched_rows
+            )
+        )
+        if registered_feature_count == 0:
+            status = "not_registered"
+        elif review_only_policy_exclusion:
+            status = "review_only_excluded_by_policy"
+        elif present_feature_count > 0:
+            status = "present"
+        else:
+            status = "missing"
+        visibility[requested_name] = {
+            "status": status,
+            "matched_families": list(family_names),
+            "present_families": present_families,
+            "registered_feature_count": registered_feature_count,
+            "present_feature_count": present_feature_count,
+        }
+    return visibility
+
+
+def _feature_role_label(column_name: str) -> str:
+    """Return the governed role label for one training-dataset column."""
+
+    if column_name.startswith(ENGINEERED_FEATURE_PREFIX):
+        role = classify_engineered_feature_role(column_name)
+        if role == "review_only":
+            return "review_only_diagnostic"
+        return str(role)
+    if column_name.startswith(TARGET_COLUMN_PREFIX):
+        return "target_or_realised_audit"
+    leakage = classify_leakage_risk(column_name)
+    if leakage is not None and leakage[0] != "audit_only":
+        return "target_or_realised_audit"
+    return "non_feature_or_metadata"
+
+
+def _build_feature_role_audit_frame(
+    *,
+    original_frame: pd.DataFrame,
+    ml_ready_frame: pd.DataFrame,
+    feature_columns: Sequence[str],
+    target_columns: Sequence[str],
+    zero_fill_summary: Mapping[str, object],
+) -> pd.DataFrame:
+    """Return column-level role and missingness audit rows for training data."""
+
+    role_rows: list[dict[str, object]] = []
+    module_by_feature = _registered_feature_module_by_column()
+    feature_column_set = set(str(column_name) for column_name in feature_columns)
+    target_column_set = set(str(column_name) for column_name in target_columns)
+    zero_fill_rows_by_column = {
+        str(row["column_name"]): row
+        for row in zero_fill_summary.get("column_rows", [])
+    }
+    single_store_slice = bool(
+        "store_number" in ml_ready_frame.columns
+        and ml_ready_frame["store_number"].dropna().astype(str).nunique() <= 1
+    )
+    candidate_columns = [
+        str(column_name)
+        for column_name in original_frame.columns
+        if _feature_role_label(str(column_name)) != "non_feature_or_metadata"
+    ]
+    for column_name in candidate_columns:
+        role = _feature_role_label(column_name)
+        source_series = original_frame[column_name]
+        ml_ready_series = ml_ready_frame[column_name]
+        zero_fill_row = zero_fill_rows_by_column.get(column_name, {})
+        pre_null_count = int(zero_fill_row.get("pre_zero_fill_null_count", int(source_series.isna().sum())))
+        post_null_count = int(zero_fill_row.get("post_zero_fill_null_count", int(ml_ready_series.isna().sum())))
+        zero_filled_count = int(zero_fill_row.get("zero_filled_count", 0))
+        feature_family = (
+            _feature_family_for_coverage_row(column_name, module_by_feature.get(column_name, ""))
+            if column_name in feature_column_set
+            else "target_or_realised_audit"
+        )
+        non_null = ml_ready_series.dropna()
+        unique_count = int(non_null.nunique(dropna=True))
+        constant_flag = bool(len(non_null.index) > 0 and unique_count <= 1)
+        if constant_flag:
+            constant_behavior_class = (
+                "constant_single_store_slice"
+                if single_store_slice
+                else "constant_multi_store_or_structural"
+            )
+        else:
+            constant_behavior_class = "non_constant"
+        role_rows.append(
+            {
+                "column_name": column_name,
+                "feature_family": feature_family,
+                "feature_role": role,
+                "source_dtype": str(source_series.dtype),
+                "ml_ready_dtype": str(ml_ready_series.dtype),
+                "pre_zero_fill_null_count": pre_null_count,
+                "pre_zero_fill_null_rate": round(float(pre_null_count / max(len(source_series.index), 1)), 6),
+                "post_zero_fill_null_count": post_null_count,
+                "post_zero_fill_null_rate": round(float(post_null_count / max(len(ml_ready_series.index), 1)), 6),
+                "zero_filled_count": zero_filled_count,
+                "structurally_unavailable_count": int(zero_fill_row.get("structurally_unavailable_count", 0)),
+                "insufficient_history_count": int(zero_fill_row.get("insufficient_history_count", 0)),
+                "unclassified_missingness_count": int(zero_fill_row.get("unclassified_missingness_count", 0)),
+                "constant_flag": constant_flag,
+                "constant_behavior_class": constant_behavior_class,
+                "selected_for_training_contract_flag": column_name in feature_column_set or column_name in target_column_set,
+            }
+        )
+    return pd.DataFrame(role_rows)
+
+
+def _build_feature_role_audit_summary(
+    *,
+    role_audit_frame: pd.DataFrame,
+    zero_fill_summary: Mapping[str, object],
+) -> dict[str, object]:
+    """Return aggregate role, null-burden, and constant-burden diagnostics."""
+
+    summary_by_role: dict[str, dict[str, object]] = {}
+    for role_name, group in role_audit_frame.groupby("feature_role", dropna=False):
+        row_count = max(int(len(group.index)), 1)
+        summary_by_role[str(role_name)] = {
+            "column_count": int(len(group.index)),
+            "pre_zero_fill_null_count": int(group["pre_zero_fill_null_count"].sum()),
+            "pre_zero_fill_null_rate": round(float(group["pre_zero_fill_null_count"].sum() / row_count), 6),
+            "post_zero_fill_null_count": int(group["post_zero_fill_null_count"].sum()),
+            "post_zero_fill_null_rate": round(float(group["post_zero_fill_null_count"].sum() / row_count), 6),
+            "zero_filled_cell_count": int(group["zero_filled_count"].sum()),
+            "constant_column_count": int(group["constant_flag"].astype(bool).sum()),
+            "constant_column_rate": round(float(group["constant_flag"].astype(bool).mean()), 6),
+            "feature_families": sorted(group["feature_family"].astype(str).unique().tolist()),
+        }
+
+    return {
+        "role_counts": {key: int(value["column_count"]) for key, value in summary_by_role.items()},
+        "role_summary": summary_by_role,
+        "numeric_zero_fill_summary": zero_fill_summary,
+        "columns_intentionally_left_nullable": list(zero_fill_summary.get("columns_intentionally_left_nullable", [])),
+        "columns_excluded_from_zero_fill_non_numeric": list(zero_fill_summary.get("columns_excluded_from_zero_fill_non_numeric", [])),
+        "invalid_numeric_coercion_cases": list(zero_fill_summary.get("invalid_numeric_coercion_cases", [])),
+    }
+
+
+def _build_core_head_candidate_review_frame(
+    *,
+    role_audit_frame: pd.DataFrame,
+    family_rows: Sequence[Mapping[str, object]],
+) -> pd.DataFrame:
+    """Return advisory family ranking rows for units-head suitability."""
+
+    family_status_by_name = {
+        str(row["feature_family"]): str(row["family_status"])
+        for row in family_rows
+    }
+    rows: list[dict[str, object]] = []
+    feature_roles = role_audit_frame.loc[
+        role_audit_frame["feature_role"].astype(str) != "target_or_realised_audit"
+    ]
+    for family_name, group in feature_roles.groupby("feature_family", dropna=False):
+        family_name = str(family_name)
+        if family_name == "target_or_realised_audit":
+            continue
+        role_candidates = group["feature_role"].astype(str)
+        if role_candidates.eq("units_head_core").any():
+            role = "units_head_core"
+        elif role_candidates.eq("review_only_diagnostic").any():
+            role = "review_only_diagnostic"
+        else:
+            role = "downstream_decision_support"
+        if family_status_by_name.get(family_name) in {"missing_from_training_dataset", "not_registered"}:
+            recommendation_label = "remove_from_default_head"
+        elif role == "units_head_core":
+            recommendation_label = "keep_core"
+        elif role == "review_only_diagnostic":
+            recommendation_label = "review_only"
+        else:
+            recommendation_label = "keep_downstream_only"
+        rows.append(
+            {
+                "feature_family": family_name,
+                "feature_role": role,
+                "feature_count": int(len(group.index)),
+                "mean_pre_zero_fill_null_rate": round(float(group["pre_zero_fill_null_rate"].mean()), 6),
+                "mean_post_zero_fill_null_rate": round(float(group["post_zero_fill_null_rate"].mean()), 6),
+                "zero_filled_cell_count": int(group["zero_filled_count"].sum()),
+                "constant_feature_count": int(group["constant_flag"].astype(bool).sum()),
+                "constant_feature_rate": round(float(group["constant_flag"].astype(bool).mean()), 6),
+                "family_status": family_status_by_name.get(family_name, "unknown"),
+                "ablation_evidence_status": (
+                    "approved_units_head_core_contract"
+                    if family_name in UNITS_HEAD_CORE_FEATURE_FAMILIES
+                    else "approved_downstream_only_contract"
+                    if family_name in DOWNSTREAM_DECISION_SUPPORT_FEATURE_FAMILIES
+                    else "not_attached_in_training_export"
+                ),
+                "recommendation_label": recommendation_label,
+            }
+        )
+    return pd.DataFrame(rows).sort_values(["feature_role", "feature_family"]).reset_index(drop=True)
+
+
+def _build_core_head_candidate_review_summary(
+    *,
+    review_frame: pd.DataFrame,
+) -> dict[str, object]:
+    """Return aggregate counts for advisory core-head review labels."""
+
+    if review_frame.empty:
+        return {
+            "recommendation_counts": {},
+            "families_by_recommendation": {},
+        }
+    return {
+        "recommendation_counts": {
+            str(label): int(count)
+            for label, count in review_frame["recommendation_label"].astype(str).value_counts().sort_index().items()
+        },
+        "families_by_recommendation": {
+            str(label): sorted(group["feature_family"].astype(str).tolist())
+            for label, group in review_frame.groupby("recommendation_label", dropna=False)
+        },
+    }
+
+
+def _training_feature_manifest_comparison(
+    *,
+    current_feature_columns: Sequence[str],
+    prior_feature_columns: Sequence[str],
+) -> dict[str, object]:
+    current_features = {
+        str(column_name)
+        for column_name in current_feature_columns
+        if str(column_name).startswith(ENGINEERED_FEATURE_PREFIX)
+    }
+    prior_features = {
+        str(column_name)
+        for column_name in prior_feature_columns
+        if str(column_name).startswith(ENGINEERED_FEATURE_PREFIX)
+    }
+    module_by_feature = _registered_feature_module_by_column()
+
+    def _families(feature_names: set[str]) -> list[str]:
+        return sorted(
+            {
+                _feature_family_for_coverage_row(feature_name, module_by_feature.get(feature_name, ""))
+                for feature_name in feature_names
+            }
+        )
+
+    def _modules(feature_names: set[str]) -> list[str]:
+        return sorted(
+            {
+                module_by_feature[feature_name]
+                for feature_name in feature_names
+                if feature_name in module_by_feature and str(module_by_feature[feature_name]).strip()
+            }
+        )
+
+    new_features = current_features - prior_features
+    removed_features = prior_features - current_features
+    return {
+        "prior_feature_count": int(len(prior_features)),
+        "current_feature_count": int(len(current_features)),
+        "new_feature_columns_since_prior_build": sorted(new_features),
+        "removed_feature_columns_since_prior_build": sorted(removed_features),
+        "new_feature_families_since_prior_build": _families(new_features),
+        "removed_feature_families_since_prior_build": _families(removed_features),
+        "new_ft_modules_since_prior_build": _modules(new_features),
+        "removed_ft_modules_since_prior_build": _modules(removed_features),
+    }
+
+
+def _build_training_data_sample_schema(
+    *,
+    source_frame: pd.DataFrame,
+    export_frame: pd.DataFrame,
+    key_columns: Sequence[str],
+    feature_columns: Sequence[str],
+    target_columns: Sequence[str],
+) -> pd.DataFrame:
+    feature_column_set = set(feature_columns)
+    target_column_set = set(target_columns)
+    key_column_set = set(key_columns)
+    module_by_feature = _registered_feature_module_by_column()
+    review_only_features = set(iter_review_only_engineered_feature_columns())
+    row_count = max(int(len(source_frame.index)), 1)
+    rows: list[dict[str, object]] = []
+    for ordinal, column_name in enumerate(source_frame.columns, start=1):
+        source_series = source_frame[column_name]
+        export_series = export_frame[column_name]
+        non_null = source_series.dropna()
+        sample_value = "" if non_null.empty else str(non_null.iloc[0])[:120]
+        column_role = "raw_input"
+        if column_name == "promotion_row_key":
+            column_role = "row_grain"
+        elif column_name in target_column_set:
+            column_role = "target"
+        elif column_name in feature_column_set:
+            column_role = "engineered_feature"
+        elif column_name in key_column_set:
+            column_role = "key"
+        rows.append(
+            {
+                "ordinal": ordinal,
+                "column_name": str(column_name),
+                "source_dtype": str(source_series.dtype),
+                "export_dtype": str(export_series.dtype),
+                "column_role": column_role,
+                "is_row_grain_column": bool(column_name == "promotion_row_key"),
+                "is_key_column": bool(column_name in key_column_set),
+                "is_engineered_feature": bool(column_name in feature_column_set),
+                "is_model_use_engineered_feature": bool(
+                    column_name in feature_column_set and column_name not in review_only_features
+                ),
+                "is_review_only_engineered_feature": bool(column_name in review_only_features),
+                "is_target_column": bool(column_name in target_column_set),
+                "feature_family": (
+                    _feature_family_for_coverage_row(str(column_name), module_by_feature.get(str(column_name), ""))
+                    if column_name in feature_column_set
+                    else ""
+                ),
+                "source_module": module_by_feature.get(str(column_name), ""),
+                "null_count": int(source_series.isna().sum()),
+                "null_rate": round(float(source_series.isna().sum() / row_count), 6),
+                "all_null_flag": bool(source_series.isna().all()),
+                "sample_value": sample_value,
+            }
+        )
+    return pd.DataFrame(rows, columns=TRAINING_DATA_SAMPLE_SCHEMA_COLUMNS)
+
+
+def write_training_data_sample_artifacts(
+    *,
+    run_id: str,
+    dataset_frame: pd.DataFrame,
+    output_root: str | Path,
+    source_dataset_path: str | Path | None = None,
+    source_manifest_path: str | Path | None = None,
+    row_limit: int = INSPECTION_SAMPLE_ROWS,
+    feature_columns: Sequence[str] | None = None,
+    target_columns: Sequence[str] | None = None,
+    prior_feature_columns: Sequence[str] | None = None,
+) -> PromotionTrainingDataSampleExportPaths:
+    """Write a governed inspection export for the assembled training dataset."""
+
+    if row_limit <= 0:
+        raise ValueError(f"row_limit must be > 0, got {row_limit}")
+
+    feature_column_names = tuple(
+        str(column_name)
+        for column_name in (feature_columns or tuple(column_name for column_name in dataset_frame.columns if str(column_name).startswith(ENGINEERED_FEATURE_PREFIX)))
+    )
+    target_column_names = tuple(
+        str(column_name)
+        for column_name in (target_columns or tuple(column_name for column_name in dataset_frame.columns if str(column_name).startswith(TARGET_COLUMN_PREFIX)))
+    )
+    original_dataset_frame = dataset_frame.copy()
+    try:
+        ml_ready_dataset_frame, export_zero_fill_summary = apply_governed_training_numeric_zero_fill_contract(
+            dataset_frame,
+            feature_columns=feature_column_names,
+            target_columns=target_column_names,
+        )
+    except PromotionDatasetValidationError as error:
+        raise PromotionTrainingDataExportError(
+            "Training-data inspection export failed validation.",
+            details=error.details,
+        ) from error
+
+    upstream_zero_fill_summary: dict[str, object] | None = None
+    if source_manifest_path is not None and Path(source_manifest_path).exists():
+        try:
+            manifest_payload = json.loads(Path(source_manifest_path).read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            manifest_payload = {}
+        upstream_payload = manifest_payload.get("governed_numeric_zero_fill_summary")
+        if isinstance(upstream_payload, dict):
+            upstream_zero_fill_summary = upstream_payload
+
+    feature_column_set = set(feature_column_names)
+    target_column_set = set(target_column_names)
+    missing_identity_columns, key_columns = _required_training_identity_columns(tuple(ml_ready_dataset_frame.columns))
+    missing_feature_columns = [
+        column_name for column_name in feature_column_names if column_name not in set(ml_ready_dataset_frame.columns)
+    ]
+    missing_target_columns = [
+        column_name for column_name in target_column_names if column_name not in set(ml_ready_dataset_frame.columns)
+    ]
+
+    working = ml_ready_dataset_frame.copy()
+    export_frame = pd.DataFrame(index=working.index)
+    mixed_type_columns: list[dict[str, object]] = []
+    numeric_coercion_failures: list[dict[str, object]] = []
+    invalid_date_columns: list[dict[str, object]] = []
+    numeric_columns_for_precision: dict[str, pd.Series] = {}
+
+    for column_name in working.columns:
+        series = working[column_name]
+        export_series = series.copy()
+        if (
+            pd.api.types.is_object_dtype(export_series)
+            or pd.api.types.is_string_dtype(export_series)
+            or isinstance(export_series.dtype, pd.CategoricalDtype)
+        ):
+            export_series = _trim_export_string_series(export_series)
+
+        if _looks_like_date_column(str(column_name), export_series):
+            parsed = pd.to_datetime(export_series, errors="coerce")
+            invalid_mask = export_series.notna() & parsed.isna()
+            if bool(invalid_mask.any()):
+                invalid_date_columns.append(
+                    {
+                        "column_name": str(column_name),
+                        "invalid_row_count": int(invalid_mask.sum()),
+                        "sample_invalid_values": _series_sample_values(export_series.loc[invalid_mask]),
+                    }
+                )
+            include_time = _is_datetime_export_column(str(column_name), series, parsed)
+            export_frame[column_name] = _format_temporal_series_for_export(parsed, include_time=include_time)
+            continue
+
+        if _is_flag_column(str(column_name), export_series):
+            normalized_flag, flag_failure = _normalize_flag_series(export_series, column_name=str(column_name))
+            if flag_failure is not None:
+                numeric_coercion_failures.append(flag_failure)
+            export_frame[column_name] = normalized_flag
+            continue
+
+        if pd.api.types.is_bool_dtype(export_series):
+            export_frame[column_name] = export_series.astype("Int64")
+            continue
+
+        if pd.api.types.is_numeric_dtype(export_series):
+            export_frame[column_name] = export_series
+            numeric_columns_for_precision[str(column_name)] = pd.to_numeric(export_series, errors="coerce")
+            continue
+
+        if _column_expected_numeric(
+            str(column_name),
+            feature_columns=feature_column_set,
+            target_columns=target_column_set,
+        ):
+            coerced_series, mixed_issue, coercion_failure = _coerce_expected_numeric_series(
+                export_series,
+                column_name=str(column_name),
+                strict_integer=str(column_name) in STRICT_NUMERIC_KEY_COLUMNS,
+            )
+            if mixed_issue is not None:
+                mixed_type_columns.append(mixed_issue)
+            if coercion_failure is not None:
+                numeric_coercion_failures.append(coercion_failure)
+            export_frame[column_name] = coerced_series
+            if pd.api.types.is_numeric_dtype(coerced_series):
+                numeric_columns_for_precision[str(column_name)] = pd.to_numeric(coerced_series, errors="coerce")
+            continue
+
+        export_frame[column_name] = export_series
+
+    required_non_null_columns = _present_required_training_identity_columns(export_frame.columns)
+
+    required_non_null_failures = [
+        {
+            "column_name": column_name,
+            "null_count": int(export_frame[column_name].isna().sum()),
+        }
+        for column_name in required_non_null_columns
+        if bool(export_frame[column_name].isna().any())
+    ]
+    all_null_columns = [
+        str(column_name)
+        for column_name in export_frame.columns
+        if bool(export_frame[column_name].isna().all())
+    ]
+    review_only_features = set(iter_review_only_engineered_feature_columns())
+    unexpected_all_null_columns = [
+        column_name
+        for column_name in all_null_columns
+        if column_name in required_non_null_columns
+        or column_name in target_column_set
+        or (
+            column_name in feature_column_set
+            and column_name in TRAINING_DATA_REQUIRED_NONNULL_MODEL_VISIBLE_FEATURE_COLUMNS
+            and column_name not in review_only_features
+        )
+    ]
+    if (
+        "feature_uplift_allocation_discipline_score" in all_null_columns
+        and _uplift_allocation_score_support_rows_present(export_frame)
+    ):
+        unexpected_all_null_columns.append("feature_uplift_allocation_discipline_score")
+    unexpected_all_null_columns = list(dict.fromkeys(unexpected_all_null_columns))
+
+    precision_rows = _numeric_columns_with_excess_precision(
+        numeric_columns_for_precision,
+        decimals=NUMERIC_EXPORT_DECIMALS,
+    )
+
+    validation_details = {
+        "missing_identity_columns": missing_identity_columns,
+        "missing_feature_columns": missing_feature_columns,
+        "missing_target_columns": missing_target_columns,
+        "mixed_type_columns": mixed_type_columns,
+        "numeric_coercion_failures": numeric_coercion_failures,
+        "invalid_date_columns": invalid_date_columns,
+        "required_non_null_failures": required_non_null_failures,
+        "unexpected_all_null_columns": unexpected_all_null_columns,
+    }
+    has_fatal_issues = any(
+        bool(validation_details[key])
+        for key in (
+            "missing_identity_columns",
+            "missing_feature_columns",
+            "missing_target_columns",
+            "mixed_type_columns",
+            "numeric_coercion_failures",
+            "invalid_date_columns",
+            "required_non_null_failures",
+            "unexpected_all_null_columns",
+        )
+    )
+    if has_fatal_issues:
+        raise PromotionTrainingDataExportError(
+            "Training-data inspection export failed validation.",
+            details=validation_details,
+        )
+
+    root = Path(output_root)
+    root.mkdir(parents=True, exist_ok=True)
+    full_parquet_path = root / "training_data_full.parquet"
+    sample_csv_path = root / f"training_data_sample_top_{int(row_limit)}.csv"
+    schema_csv_path = root / "training_data_sample_schema.csv"
+    quality_summary_json_path = root / "training_data_sample_quality_summary.json"
+    feature_coverage_audit_csv_path = root / "training_dataset_feature_coverage_audit.csv"
+    model_use_feature_coverage_summary_csv_path = root / "training_dataset_model_use_feature_coverage_summary.csv"
+    model_use_feature_coverage_summary_json_path = root / "training_dataset_model_use_feature_coverage_summary.json"
+    feature_role_audit_csv_path = root / "feature_role_audit.csv"
+    feature_role_audit_summary_json_path = root / "feature_role_audit_summary.json"
+    core_head_candidate_review_csv_path = root / "core_head_candidate_review.csv"
+    core_head_candidate_review_summary_json_path = root / "core_head_candidate_review_summary.json"
+
+    working.to_parquet(full_parquet_path, index=False)
+    rounded_sample = _round_for_export(export_frame.head(row_limit), decimals=NUMERIC_EXPORT_DECIMALS)
+    rounded_sample.to_csv(sample_csv_path, index=False)
+
+    schema_frame = _build_training_data_sample_schema(
+        source_frame=working,
+        export_frame=export_frame,
+        key_columns=key_columns,
+        feature_columns=feature_column_names,
+        target_columns=target_column_names,
+    )
+    schema_frame.to_csv(schema_csv_path, index=False)
+
+    model_use_feature_column_names = filter_model_use_engineered_feature_columns(feature_column_names)
+    feature_coverage_audit_frame = _build_feature_dataset_coverage_audit(
+        stage_label="training",
+        engineered_columns=feature_column_names,
+        model_input_columns=model_use_feature_column_names,
+    )
+    feature_coverage_audit_frame.to_csv(feature_coverage_audit_csv_path, index=False)
+    model_use_feature_coverage_summary_frame = _build_model_use_feature_coverage_summary(
+        audit_frame=feature_coverage_audit_frame,
+        stage_label="training",
+    )
+    model_use_feature_coverage_summary_frame.to_csv(
+        model_use_feature_coverage_summary_csv_path,
+        index=False,
+    )
+    model_use_feature_coverage_summary_json_path.write_text(
+        json.dumps(
+            {
+                "run_id": run_id,
+                "stage": "training",
+                "generated_at_utc": datetime.now(tz=UTC).isoformat(),
+                "diagnostics_only": True,
+                "summary_csv_path": str(model_use_feature_coverage_summary_csv_path),
+                "feature_coverage_audit_csv_path": str(feature_coverage_audit_csv_path),
+                "model_use_feature_columns": list(model_use_feature_column_names),
+                "feature_family_rows": model_use_feature_coverage_summary_frame.to_dict(orient="records"),
+                "missing_model_use_feature_names": feature_coverage_audit_frame.loc[
+                    ~feature_coverage_audit_frame["review_only_flag"].astype(bool)
+                    & ~feature_coverage_audit_frame["present_in_model_use_flag"].astype(bool),
+                    "feature_name",
+                ].astype(str).tolist(),
+                "review_only_features_in_model_use": feature_coverage_audit_frame.loc[
+                    feature_coverage_audit_frame["review_only_flag"].astype(bool)
+                    & feature_coverage_audit_frame["present_in_model_use_flag"].astype(bool),
+                    "feature_name",
+                ].astype(str).tolist(),
+            },
+            indent=2,
+            sort_keys=True,
+            default=str,
+        ),
+        encoding="utf-8",
+    )
+
+    duplicate_key_series = pd.Series(dtype=object)
+    duplicate_key_count = 0
+    if "promotion_row_key" in working.columns:
+        duplicate_mask = working["promotion_row_key"].astype(str).duplicated(keep=False)
+        duplicate_key_series = working.loc[duplicate_mask, "promotion_row_key"].astype(str)
+        duplicate_key_count = int(duplicate_key_series.nunique())
+
+    row_count = max(int(len(export_frame.index)), 1)
+    null_columns = [
+        {
+            "column_name": str(column_name),
+            "null_count": int(export_frame[column_name].isna().sum()),
+            "null_rate": round(float(export_frame[column_name].isna().sum() / row_count), 6),
+        }
+        for column_name in export_frame.columns
+        if bool(export_frame[column_name].isna().any())
+    ]
+    family_rows = _training_feature_family_summary(engineered_feature_columns=feature_column_names)
+    requested_family_visibility = _requested_training_family_visibility(family_rows)
+    prior_manifest_comparison = _training_feature_manifest_comparison(
+        current_feature_columns=feature_column_names,
+        prior_feature_columns=tuple(prior_feature_columns or ()),
+    )
+    feature_role_audit_frame = _build_feature_role_audit_frame(
+        original_frame=original_dataset_frame,
+        ml_ready_frame=working,
+        feature_columns=feature_column_names,
+        target_columns=target_column_names,
+        zero_fill_summary=export_zero_fill_summary,
+    )
+    feature_role_audit_frame.to_csv(feature_role_audit_csv_path, index=False)
+    feature_role_audit_summary = _build_feature_role_audit_summary(
+        role_audit_frame=feature_role_audit_frame,
+        zero_fill_summary=upstream_zero_fill_summary or export_zero_fill_summary,
+    )
+    feature_role_audit_summary_json_path.write_text(
+        json.dumps(feature_role_audit_summary, indent=2, sort_keys=True, default=str),
+        encoding="utf-8",
+    )
+    core_head_candidate_review_frame = _build_core_head_candidate_review_frame(
+        role_audit_frame=feature_role_audit_frame,
+        family_rows=family_rows,
+    )
+    core_head_candidate_review_frame.to_csv(core_head_candidate_review_csv_path, index=False)
+    core_head_candidate_review_summary = _build_core_head_candidate_review_summary(
+        review_frame=core_head_candidate_review_frame,
+    )
+    core_head_candidate_review_summary_json_path.write_text(
+        json.dumps(core_head_candidate_review_summary, indent=2, sort_keys=True, default=str),
+        encoding="utf-8",
+    )
+    quality_summary = {
+        "run_id": run_id,
+        "created_at_utc": datetime.now(tz=UTC).isoformat(),
+        "row_count": int(len(working.index)),
+        "column_count": int(len(working.columns)),
+        "sample_row_limit": int(row_limit),
+        "sample_row_count": int(min(row_limit, len(working.index))),
+        "row_grain": {
+            "grain_column": "promotion_row_key",
+            "duplicate_key_count": duplicate_key_count,
+            "duplicate_key_examples": _series_sample_values(duplicate_key_series),
+        },
+        "source_dataset_path": str(source_dataset_path) if source_dataset_path is not None else None,
+        "source_manifest_path": str(source_manifest_path) if source_manifest_path is not None else None,
+        "governed_numeric_zero_fill_summary": upstream_zero_fill_summary or export_zero_fill_summary,
+        "export_numeric_zero_fill_summary": export_zero_fill_summary,
+        "artifact_files": {
+            "training_data_full.parquet": str(full_parquet_path),
+            str(sample_csv_path.name): str(sample_csv_path),
+            "training_data_sample_schema.csv": str(schema_csv_path),
+            "training_data_sample_quality_summary.json": str(quality_summary_json_path),
+            "training_dataset_feature_coverage_audit.csv": str(feature_coverage_audit_csv_path),
+            "training_dataset_model_use_feature_coverage_summary.csv": str(model_use_feature_coverage_summary_csv_path),
+            "training_dataset_model_use_feature_coverage_summary.json": str(model_use_feature_coverage_summary_json_path),
+            "feature_role_audit.csv": str(feature_role_audit_csv_path),
+            "feature_role_audit_summary.json": str(feature_role_audit_summary_json_path),
+            "core_head_candidate_review.csv": str(core_head_candidate_review_csv_path),
+            "core_head_candidate_review_summary.json": str(core_head_candidate_review_summary_json_path),
+        },
+        "governed_key_columns_present": key_columns,
+        "columns_with_nulls": null_columns,
+        "mixed_type_columns": mixed_type_columns,
+        "numeric_coercion_failures": numeric_coercion_failures,
+        "numeric_min_max": _numeric_min_max_summary(export_frame),
+        "numeric_columns_more_than_4_decimal_places_before_rounding": precision_rows,
+        "invalid_date_columns": invalid_date_columns,
+        "all_null_columns": all_null_columns,
+        "unexpected_all_null_columns": unexpected_all_null_columns,
+        "engineered_feature_columns_present": list(feature_column_names),
+        "target_columns_present": list(target_column_names),
+        "review_only_engineered_feature_columns_present": sorted(
+            column_name for column_name in feature_column_names if column_name in review_only_features
+        ),
+        "model_use_engineered_feature_columns_present": list(model_use_feature_column_names),
+        "feature_coverage_audit_csv_path": str(feature_coverage_audit_csv_path),
+        "feature_coverage_audit_row_count": int(len(feature_coverage_audit_frame.index)),
+        "model_use_feature_coverage_summary_csv_path": str(model_use_feature_coverage_summary_csv_path),
+        "model_use_feature_coverage_summary_json_path": str(model_use_feature_coverage_summary_json_path),
+        "model_use_feature_coverage_summary_row_count": int(len(model_use_feature_coverage_summary_frame.index)),
+        "engineered_feature_family_rows": family_rows,
+        "dataset_model_use_feature_family_rows": model_use_feature_coverage_summary_frame.to_dict(orient="records"),
+        "engineered_feature_families_present": sorted(
+            row["feature_family"]
+            for row in family_rows
+            if int(row["present_feature_count"]) > 0
+        ),
+        "units_head_core_feature_families_present": sorted(
+            row["feature_family"]
+            for row in family_rows
+            if row["feature_family"] in UNITS_HEAD_CORE_FEATURE_FAMILIES
+            and int(row["present_feature_count"]) > 0
+        ),
+        "downstream_decision_support_feature_families_present": sorted(
+            row["feature_family"]
+            for row in family_rows
+            if row["feature_family"] in DOWNSTREAM_DECISION_SUPPORT_FEATURE_FAMILIES
+            and int(row["present_feature_count"]) > 0
+        ),
+        "engineered_feature_families_missing": sorted(
+            row["feature_family"]
+            for row in family_rows
+            if int(row["registered_feature_count"]) > 0 and int(row["present_feature_count"]) == 0
+        ),
+        "model_use_feature_families_present": sorted(
+            row["feature_family"]
+            for row in family_rows
+            if int(row["present_model_use_feature_count"]) > 0
+        ),
+        "model_use_feature_families_fully_present": sorted(
+            row["feature_family"]
+            for row in model_use_feature_coverage_summary_frame.to_dict(orient="records")
+            if str(row["family_status"]) == "model_use_covered"
+        ),
+        "model_use_feature_families_partial": sorted(
+            row["feature_family"]
+            for row in model_use_feature_coverage_summary_frame.to_dict(orient="records")
+            if str(row["family_status"]) in {"missing_from_model_use", "observed_partial"}
+        ),
+        "model_use_feature_families_missing": sorted(
+            row["feature_family"]
+            for row in family_rows
+            if int(row["registered_feature_count"]) > 0
+            and int(row["present_model_use_feature_count"]) == 0
+            and int(row["present_review_only_feature_count"]) == 0
+        ),
+        "review_only_feature_families_present": sorted(
+            row["feature_family"]
+            for row in family_rows
+            if int(row["present_review_only_feature_count"]) > 0
+        ),
+        "review_only_feature_families_excluded_by_policy": sorted(
+            row["feature_family"]
+            for row in model_use_feature_coverage_summary_frame.to_dict(orient="records")
+            if str(row["required_presence_scope"]) == FEATURE_FAMILY_SCOPE_REVIEW_ONLY_READY
+            and str(row["family_status"]) == "review_only_excluded_from_ready_dataset"
+        ),
+        "review_only_feature_families_missing": sorted(
+            row["feature_family"]
+            for row in model_use_feature_coverage_summary_frame.to_dict(orient="records")
+            if str(row["required_presence_scope"]) == FEATURE_FAMILY_SCOPE_REVIEW_ONLY_READY
+            and str(row["family_status"]) not in {
+                "review_only_excluded_from_ready_dataset",
+                "review_only_ready_no_model_leak",
+            }
+        ),
+        "requested_family_visibility": requested_family_visibility,
+        "feature_role_audit_summary_json_path": str(feature_role_audit_summary_json_path),
+        "core_head_candidate_review_summary_json_path": str(core_head_candidate_review_summary_json_path),
+        "prior_manifest_comparison": prior_manifest_comparison,
+        "missing_identity_columns": missing_identity_columns,
+        "missing_feature_columns": missing_feature_columns,
+        "missing_target_columns": missing_target_columns,
+        "dropped_columns": [],
+    }
+    quality_summary_json_path.write_text(
+        json.dumps(quality_summary, indent=2, sort_keys=True, default=str),
+        encoding="utf-8",
+    )
+
+    return PromotionTrainingDataSampleExportPaths(
+        full_parquet_path=str(full_parquet_path),
+        sample_csv_path=str(sample_csv_path),
+        schema_csv_path=str(schema_csv_path),
+        quality_summary_json_path=str(quality_summary_json_path),
+        feature_coverage_audit_csv_path=str(feature_coverage_audit_csv_path),
+        model_use_feature_coverage_summary_csv_path=str(model_use_feature_coverage_summary_csv_path),
+        model_use_feature_coverage_summary_json_path=str(model_use_feature_coverage_summary_json_path),
+        feature_role_audit_csv_path=str(feature_role_audit_csv_path),
+        feature_role_audit_summary_json_path=str(feature_role_audit_summary_json_path),
+        core_head_candidate_review_csv_path=str(core_head_candidate_review_csv_path),
+        core_head_candidate_review_summary_json_path=str(core_head_candidate_review_summary_json_path),
+    )
+
+
+def _uplift_allocation_score_support_rows_present(frame: pd.DataFrame) -> bool:
+    uplift_units = pd.to_numeric(
+        frame.get("feature_expected_incremental_uplift_units_same_discount"),
+        errors="coerce",
+    ).fillna(0.0)
+    total_stock_available = pd.to_numeric(
+        frame.get("total_stock_available"),
+        errors="coerce",
+    ).fillna(0.0)
+    model_use_flag = pd.to_numeric(
+        frame.get("feature_probability_model_use_flag"),
+        errors="coerce",
+    ).fillna(0.0)
+    same_discount_history_available = pd.to_numeric(
+        frame.get("feature_same_discount_history_available_flag"),
+        errors="coerce",
+    ).fillna(0.0)
+    support_rows = (
+        uplift_units.gt(0.0)
+        & total_stock_available.gt(0.0)
+        & (model_use_flag.eq(1.0) | same_discount_history_available.eq(1.0))
+    )
+    return bool(support_rows.any())
 
 
 def _is_integer_dtype(series: pd.Series) -> bool:
@@ -724,11 +2206,38 @@ def _source_family_for_model_input_column(column_name: str) -> str:
     lowered = column_name.lower()
     if "promotion_backtest" in lowered or "forecast_trust" in lowered:
         return "backtest_promotion_level_trust"
+    if any(
+        token in lowered
+        for token in (
+            "anchor_centrality",
+            "anchor_presence_support",
+            "top_anchor_dependency",
+            "multi_sku_promo_basket_rate",
+            "three_plus_promo_sku_basket_rate",
+            "basket_equilibrium",
+            "conditional_sale_rate_with_anchor",
+            "conditional_lift_with_anchor",
+            "transaction_object_uncertainty",
+        )
+    ):
+        return "demand_basket_equilibrium"
+    if any(token in lowered for token in ("sparse_demand", "random_tail", "noise_regime")):
+        return "demand_sparse_noise"
+    if any(token in lowered for token in ("equilibrium", "clearing_pressure", "anchor_presence_dependency", "small_unit_option_value")):
+        return "demand_micro_market_equilibrium"
+    if "kalman" in lowered:
+        return "demand_kalman_state_review"
+    if "wasserstein" in lowered or "distribution_shape" in lowered:
+        return "demand_distribution_shape_review"
+    if "fragility_adjusted_opportunity" in lowered or "dag_dependency" in lowered or "dependency_support" in lowered:
+        return "demand_fragility_opportunity_review"
     if column_name.startswith(ENGINEERED_FEATURE_PREFIX) and any(
         token in lowered
         for token in (
+            "anchor_sku",
             "basket",
             "companion",
+            "dependency",
             "weekend",
             "pay_cycle",
             "mission",
@@ -741,6 +2250,8 @@ def _source_family_for_model_input_column(column_name: str) -> str:
     ):
         if "probability_" in lowered:
             return "demand_basket_mission_probability"
+        if any(token in lowered for token in ("anchor_sku", "drag_along", "dependency", "lone_random")):
+            return "demand_basket_structure_dependency"
         return "demand_basket_mission"
     if (
         "prior_promo" in lowered
@@ -1062,13 +2573,14 @@ def _validate_final_model_contract(
     if missing_expected:
         issues.append(f"missing_expected_columns:{missing_expected}")
 
-    # Fail loud when the governed prior-promo memory / intermittent-demand
-    # features are not reaching the model. They MUST be in the model input.
-    # `required_engineered_features=None` means "use the production registry"
-    # (`REQUIRED_NEW_ENGINEERED_FEATURES`); unit tests can pass `()` to opt out
-    # when validating tiny synthetic frames.
+    # Fail loud when the governed slim units-head features are not reaching the
+    # default model input. Downstream decision-support families remain in the
+    # dataset and audit surfaces, but they are not required in the units head.
+    # `required_engineered_features=None` means "use the production units-head
+    # contract"; unit tests can pass `()` to opt out when validating tiny
+    # synthetic frames.
     required_new_features = (
-        REQUIRED_NEW_ENGINEERED_FEATURES
+        iter_units_head_core_feature_columns()
         if required_engineered_features is None
         else tuple(required_engineered_features)
     )
@@ -1238,6 +2750,391 @@ def _build_feature_lineage_table(
     return pd.DataFrame(rows)
 
 
+def _registered_feature_module_by_column() -> dict[str, str]:
+    module_by_feature: dict[str, str] = {}
+    for definition in iter_registered_feature_modules():
+        for column_name in definition.output_columns:
+            module_by_feature.setdefault(str(column_name), definition.name)
+    return module_by_feature
+
+
+def _boolish(value: object) -> bool:
+    if isinstance(value, bool):
+        return value
+    if value is None or pd.isna(value):
+        return False
+    if isinstance(value, (int, float, np.integer, np.floating)):
+        return bool(value)
+    return str(value).strip().lower() in {"1", "true", "yes", "y"}
+
+
+def _existing_feature_coverage_flags(audit_path: Path) -> dict[str, dict[str, bool]]:
+    if not audit_path.exists():
+        return {}
+    existing = pd.read_csv(audit_path)
+    flags: dict[str, dict[str, bool]] = {}
+    for row in existing.to_dict(orient="records"):
+        feature_name = str(row.get("feature_name", ""))
+        if not feature_name:
+            continue
+        flags[feature_name] = {
+            "present_in_training_ready_flag": _boolish(row.get("present_in_training_ready_flag")),
+            "present_in_scoring_ready_flag": _boolish(row.get("present_in_scoring_ready_flag")),
+            "present_in_model_use_flag": _boolish(row.get("present_in_model_use_flag")),
+        }
+    return flags
+
+
+def _feature_coverage_recommendation(
+    *,
+    registered: bool,
+    training_ready: bool,
+    scoring_ready: bool,
+    model_use: bool,
+    review_only: bool,
+) -> tuple[str, str]:
+    if review_only and model_use:
+        return (
+            "remove_from_model_use",
+            "Feature is governed review-only but appears in the final model input.",
+        )
+    if review_only:
+        return (
+            "keep_review_only",
+            "Feature family is governed for diagnostics/operator review unless explicitly promoted.",
+        )
+    if not registered:
+        return (
+            "register_or_remove_unregistered_feature",
+            "Feature appears outside the registry path; trace ownership before model use.",
+        )
+    if not training_ready and not scoring_ready:
+        return (
+            "investigate_missing_from_ready_datasets",
+            "Registered feature was not observed in the audited training/scoring-ready dataset columns.",
+        )
+    if not model_use:
+        return (
+            "promote_to_model_use_or_document_exclusion",
+            "Feature reaches a ready dataset but is excluded by model-use filtering or quality cleanup.",
+        )
+    return (
+        "keep_model_use",
+        "Registered governed feature reaches the final model input.",
+    )
+
+
+def _build_feature_dataset_coverage_audit(
+    *,
+    stage_label: str,
+    engineered_columns: Sequence[str],
+    model_input_columns: Sequence[str],
+    existing_flags: Mapping[str, Mapping[str, bool]] | None = None,
+) -> pd.DataFrame:
+    """Build row-per-feature coverage across registry, ready data, and model use."""
+
+    module_by_feature = _registered_feature_module_by_column()
+    review_only_features = set(iter_review_only_engineered_feature_columns())
+    engineered_feature_set = {
+        str(column_name)
+        for column_name in engineered_columns
+        if str(column_name).startswith(ENGINEERED_FEATURE_PREFIX)
+    }
+    model_input_feature_set = {
+        str(column_name)
+        for column_name in model_input_columns
+        if str(column_name).startswith(ENGINEERED_FEATURE_PREFIX)
+    }
+    existing_feature_names = set((existing_flags or {}).keys())
+    feature_names = sorted(
+        set(module_by_feature)
+        | engineered_feature_set
+        | model_input_feature_set
+        | existing_feature_names
+    )
+    rows: list[dict[str, object]] = []
+    for feature_name in feature_names:
+        prior = (existing_flags or {}).get(feature_name, {})
+        training_ready = bool(prior.get("present_in_training_ready_flag", False)) or (
+            stage_label == "training" and feature_name in engineered_feature_set
+        )
+        scoring_ready = bool(prior.get("present_in_scoring_ready_flag", False)) or (
+            stage_label == "scoring" and feature_name in engineered_feature_set
+        )
+        model_use = bool(prior.get("present_in_model_use_flag", False)) or feature_name in model_input_feature_set
+        registered = feature_name in module_by_feature
+        review_only = feature_name in review_only_features
+        recommended_action, rationale = _feature_coverage_recommendation(
+            registered=registered,
+            training_ready=training_ready,
+            scoring_ready=scoring_ready,
+            model_use=model_use,
+            review_only=review_only,
+        )
+        rows.append(
+            {
+                "feature_name": feature_name,
+                "module_name": module_by_feature.get(feature_name, ""),
+                "registry_registered_flag": registered,
+                "present_in_training_ready_flag": training_ready,
+                "present_in_scoring_ready_flag": scoring_ready,
+                "present_in_model_use_flag": model_use,
+                "review_only_flag": review_only,
+                "recommended_action": recommended_action,
+                "rationale": rationale,
+            }
+        )
+    return pd.DataFrame(rows, columns=FEATURE_DATASET_COVERAGE_AUDIT_COLUMNS)
+
+
+def _write_feature_dataset_coverage_audit(
+    *,
+    audit_path: Path,
+    stage_label: str,
+    engineered_columns: Sequence[str],
+    model_input_columns: Sequence[str],
+) -> pd.DataFrame:
+    existing_flags = _existing_feature_coverage_flags(audit_path)
+    audit_frame = _build_feature_dataset_coverage_audit(
+        stage_label=stage_label,
+        engineered_columns=engineered_columns,
+        model_input_columns=model_input_columns,
+        existing_flags=existing_flags,
+    )
+    audit_frame.to_csv(audit_path, index=False)
+    return audit_frame
+
+
+def _feature_family_for_coverage_row(feature_name: str, module_name: str) -> str:
+    """Classify one engineered feature into the governed coverage family used in summaries."""
+
+    lowered_feature = feature_name.lower()
+    lowered_module = module_name.lower()
+    if "basket_equilibrium" in lowered_module or any(
+        token in lowered_feature
+        for token in (
+            "anchor_centrality",
+            "anchor_presence_support",
+            "top_anchor_dependency",
+            "multi_sku_promo_basket_rate",
+            "three_plus_promo_sku_basket_rate",
+            "basket_equilibrium",
+            "conditional_sale_rate_with_anchor",
+            "conditional_lift_with_anchor",
+            "transaction_object_uncertainty",
+        )
+    ):
+        return "basket_equilibrium"
+    if "basket_structure_dependency" in lowered_module:
+        return "basket_structure_dependency"
+    if "micro_market_equilibrium" in lowered_module or "equilibrium" in lowered_feature:
+        return "micro_market_equilibrium"
+    if "sparse_demand_noise" in lowered_module or "sparse_demand" in lowered_feature:
+        return "sparse_demand_noise"
+    if "kalman" in lowered_module or "kalman" in lowered_feature:
+        return "kalman_state"
+    if "distribution_shape" in lowered_module or "wasserstein" in lowered_feature:
+        return "distribution_shape_distance"
+    if "dag" in lowered_feature or "dependency_support" in lowered_feature:
+        return "dag_dependency_support"
+    if "fragility_adjusted_opportunity" in lowered_module:
+        return "fragility_opportunity"
+    if "pca" in lowered_feature or "pca" in lowered_module:
+        return "pca"
+    if "situational_awareness" in lowered_module or "situational" in lowered_feature:
+        return "situational_awareness"
+    if "probability" in lowered_feature or "probability" in lowered_module:
+        return "probability"
+    if "target_stock" in lowered_module or "end_of_promo_target" in lowered_feature:
+        return "target_stock_shape"
+    if "allocation" in lowered_module or any(
+        token in lowered_feature
+        for token in ("allocation", "trust_floor", "capital_tied", "overallocation")
+    ):
+        return "allocation_discipline"
+    if any(
+        token in lowered_feature
+        for token in ("same_discount", "same_or_better", "prior_promo", "promo_history", "historical_")
+    ):
+        return "same_discount_promo_history"
+    if any(
+        token in lowered_feature or token in lowered_module
+        for token in ("fragility", "opportunity", "survival", "shape", "growth_curve")
+    ):
+        return "fragility_opportunity_shape"
+    if "basket" in lowered_feature or "basket" in lowered_module:
+        return "basket_context"
+    if any(token in lowered_module for token in ("discount", "uplift", "baseline")):
+        return "baseline_discount_uplift"
+    return "other_engineered_feature"
+
+
+def _build_model_use_feature_coverage_summary(
+    *,
+    audit_frame: pd.DataFrame,
+    stage_label: str,
+) -> pd.DataFrame:
+    """Aggregate feature coverage into governed model-use and review-only families."""
+
+    working = audit_frame.copy()
+    working["feature_family"] = [
+        _feature_family_for_coverage_row(str(row.feature_name), str(row.module_name))
+        for row in working.itertuples(index=False)
+    ]
+    requirements = {
+        row["feature_family"]: row
+        for row in MODEL_USE_FEATURE_FAMILY_REQUIREMENTS
+    }
+    family_names = list(requirements)
+    family_names.extend(
+        family_name
+        for family_name in sorted(set(working["feature_family"].astype(str)))
+        if family_name not in requirements
+    )
+    rows: list[dict[str, object]] = []
+    for family_name in family_names:
+        family_frame = working.loc[working["feature_family"].astype(str).eq(family_name)]
+        requirement = requirements.get(
+            family_name,
+            {
+                "required_presence_scope": FEATURE_FAMILY_SCOPE_IF_PRESENT,
+                "rationale": "Additional engineered feature family observed during audit.",
+            },
+        )
+        feature_count = int(len(family_frame.index))
+        training_ready_count = int(family_frame["present_in_training_ready_flag"].astype(bool).sum()) if feature_count else 0
+        scoring_ready_count = int(family_frame["present_in_scoring_ready_flag"].astype(bool).sum()) if feature_count else 0
+        model_use_count = int(family_frame["present_in_model_use_flag"].astype(bool).sum()) if feature_count else 0
+        review_only_count = int(family_frame["review_only_flag"].astype(bool).sum()) if feature_count else 0
+        missing_model_use_count = int(
+            (
+                ~family_frame["review_only_flag"].astype(bool)
+                & ~family_frame["present_in_model_use_flag"].astype(bool)
+            ).sum()
+        ) if feature_count else 0
+        review_only_model_use_leak_count = int(
+            (
+                family_frame["review_only_flag"].astype(bool)
+                & family_frame["present_in_model_use_flag"].astype(bool)
+            ).sum()
+        ) if feature_count else 0
+        family_status = _coverage_family_status(
+            required_presence_scope=str(requirement["required_presence_scope"]),
+            stage_label=stage_label,
+            feature_count=feature_count,
+            training_ready_count=training_ready_count,
+            scoring_ready_count=scoring_ready_count,
+            present_model_use_count=model_use_count,
+            missing_model_use_count=missing_model_use_count,
+            review_only_feature_count=review_only_count,
+            review_only_model_use_leak_count=review_only_model_use_leak_count,
+        )
+        rows.append(
+            {
+                "feature_family": family_name,
+                "required_presence_scope": requirement["required_presence_scope"],
+                "feature_count": feature_count,
+                "present_in_training_ready_count": training_ready_count,
+                "present_in_scoring_ready_count": scoring_ready_count,
+                "present_in_model_use_count": model_use_count,
+                "review_only_feature_count": review_only_count,
+                "missing_model_use_feature_count": missing_model_use_count,
+                "review_only_model_use_leak_count": review_only_model_use_leak_count,
+                "family_status": family_status,
+                "rationale": requirement["rationale"],
+            }
+        )
+    return pd.DataFrame(rows, columns=MODEL_USE_FEATURE_COVERAGE_SUMMARY_COLUMNS)
+
+
+def _coverage_family_status(
+    *,
+    required_presence_scope: str,
+    stage_label: str,
+    feature_count: int,
+    training_ready_count: int,
+    scoring_ready_count: int,
+    present_model_use_count: int,
+    missing_model_use_count: int,
+    review_only_feature_count: int,
+    review_only_model_use_leak_count: int,
+) -> str:
+    """Return the governed status label for one feature-family coverage row."""
+
+    if review_only_model_use_leak_count > 0:
+        return "review_only_leaked_to_model_use"
+    if feature_count == 0:
+        return "not_observed"
+    ready_count = training_ready_count if stage_label == "training" else scoring_ready_count
+    if required_presence_scope == FEATURE_FAMILY_SCOPE_MODEL_USE:
+        if ready_count == 0:
+            return "missing_from_ready_dataset"
+        if missing_model_use_count > 0:
+            return "missing_from_model_use"
+        return "model_use_covered"
+    if required_presence_scope == FEATURE_FAMILY_SCOPE_REVIEW_ONLY_READY:
+        if ready_count == 0:
+            return "review_only_excluded_from_ready_dataset"
+        return "review_only_ready_no_model_leak"
+    if ready_count == 0:
+        if review_only_feature_count == feature_count and present_model_use_count == 0:
+            return "review_only_excluded_from_ready_dataset"
+        return "not_observed"
+    if missing_model_use_count > 0:
+        return "observed_partial"
+    if present_model_use_count > 0:
+        return "model_use_covered"
+    if review_only_feature_count > 0:
+        return "review_only_excluded_from_ready_dataset"
+    return "observed"
+
+
+def _write_model_use_feature_coverage_summary(
+    *,
+    summary_csv_path: Path,
+    summary_json_path: Path,
+    run_id: str,
+    stage_label: str,
+    audit_frame: pd.DataFrame,
+) -> pd.DataFrame:
+    """Write compact CSV and JSON coverage summaries for governed feature families."""
+
+    summary_frame = _build_model_use_feature_coverage_summary(
+        audit_frame=audit_frame,
+        stage_label=stage_label,
+    )
+    summary_frame.to_csv(summary_csv_path, index=False)
+    missing_model_use = audit_frame.loc[
+        ~audit_frame["review_only_flag"].astype(bool)
+        & ~audit_frame["present_in_model_use_flag"].astype(bool),
+        "feature_name",
+    ].astype(str).tolist()
+    review_only_leaks = audit_frame.loc[
+        audit_frame["review_only_flag"].astype(bool)
+        & audit_frame["present_in_model_use_flag"].astype(bool),
+        "feature_name",
+    ].astype(str).tolist()
+    summary_json_path.write_text(
+        json.dumps(
+            {
+                "run_id": run_id,
+                "stage": stage_label,
+                "generated_at_utc": datetime.now(tz=UTC).isoformat(),
+                "diagnostics_only": True,
+                "summary_csv_path": str(summary_csv_path),
+                "feature_family_rows": summary_frame.to_dict(orient="records"),
+                "missing_model_use_feature_names": missing_model_use,
+                "review_only_features_in_model_use": review_only_leaks,
+            },
+            indent=2,
+            sort_keys=True,
+            default=str,
+        ),
+        encoding="utf-8",
+    )
+    return summary_frame
+
+
 def _frame_records_for_json(
     frame: pd.DataFrame,
     *,
@@ -1361,6 +3258,9 @@ def write_model_input_audit_artifacts(
     metadata_json_path = inspection_root / f"model_{stage_label}_input_metadata.json"
     feature_lineage_csv_path = inspection_root / f"feature_lineage_audit_{stage_label}.csv"
     feature_lineage_json_path = inspection_root / f"feature_lineage_audit_{stage_label}.json"
+    feature_dataset_coverage_audit_csv_path = inspection_root / "feature_dataset_coverage_audit.csv"
+    model_use_feature_coverage_summary_csv_path = inspection_root / f"model_use_feature_coverage_summary_{stage_label}.csv"
+    model_use_feature_coverage_summary_json_path = inspection_root / f"model_use_feature_coverage_summary_{stage_label}.json"
     contract_validation_json_path = (
         inspection_root / f"final_model_contract_validation_{stage_label}.json"
     )
@@ -1379,7 +3279,7 @@ def write_model_input_audit_artifacts(
     if stage_label == "scoring":
         required_engineered_features = tuple(
             column_name
-            for column_name in REQUIRED_NEW_ENGINEERED_FEATURES
+            for column_name in iter_units_head_core_feature_columns()
             if column_name in set(feature_columns)
         )
     validation_report = _validate_final_model_contract(
@@ -1437,6 +3337,19 @@ def write_model_input_audit_artifacts(
         ),
         encoding="utf-8",
     )
+    feature_dataset_coverage_audit_frame = _write_feature_dataset_coverage_audit(
+        audit_path=feature_dataset_coverage_audit_csv_path,
+        stage_label=stage_label,
+        engineered_columns=engineered_columns,
+        model_input_columns=tuple(model_input.columns),
+    )
+    model_use_feature_coverage_summary_frame = _write_model_use_feature_coverage_summary(
+        summary_csv_path=model_use_feature_coverage_summary_csv_path,
+        summary_json_path=model_use_feature_coverage_summary_json_path,
+        run_id=run_id,
+        stage_label=stage_label,
+        audit_frame=feature_dataset_coverage_audit_frame,
+    )
 
     if quality_report is not None:
         quality_artifact_paths = _write_model_input_quality_artifacts(
@@ -1466,6 +3379,11 @@ def write_model_input_audit_artifacts(
                 "sample_csv_numeric_decimals": int(decimals),
                 "feature_lineage_csv_path": str(feature_lineage_csv_path),
                 "feature_lineage_json_path": str(feature_lineage_json_path),
+                "feature_dataset_coverage_audit_csv_path": str(feature_dataset_coverage_audit_csv_path),
+                "feature_dataset_coverage_audit_row_count": int(len(feature_dataset_coverage_audit_frame.index)),
+                "model_use_feature_coverage_summary_csv_path": str(model_use_feature_coverage_summary_csv_path),
+                "model_use_feature_coverage_summary_json_path": str(model_use_feature_coverage_summary_json_path),
+                "model_use_feature_coverage_summary_row_count": int(len(model_use_feature_coverage_summary_frame.index)),
                 "contract_validation_json_path": str(contract_validation_json_path),
                 **quality_artifact_paths,
                 "created_at_utc": datetime.now(tz=UTC).isoformat(),
@@ -1492,6 +3410,9 @@ def write_model_input_audit_artifacts(
         metadata_json_path=str(metadata_json_path),
         feature_lineage_csv_path=str(feature_lineage_csv_path),
         feature_lineage_json_path=str(feature_lineage_json_path),
+        feature_dataset_coverage_audit_csv_path=str(feature_dataset_coverage_audit_csv_path),
+        model_use_feature_coverage_summary_csv_path=str(model_use_feature_coverage_summary_csv_path),
+        model_use_feature_coverage_summary_json_path=str(model_use_feature_coverage_summary_json_path),
         contract_validation_json_path=str(contract_validation_json_path),
         feature_quality_audit_csv_path=quality_artifact_paths.get("feature_quality_audit_csv_path"),
         feature_quality_audit_json_path=quality_artifact_paths.get("feature_quality_audit_json_path"),

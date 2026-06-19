@@ -12,7 +12,7 @@ Canon ownership:
 from typing import Any
 
 from decision.router.router_service import RouterResolution
-from platform.audit.audit_event_store import AuditEventStore
+from ff_platform.audit.audit_event_store import AuditEventStore
 from state.lifecycle.transition_validator import TransitionEvaluation
 
 

@@ -45,6 +45,7 @@ _RULE_SPARSE_MULTI_DRIVER_BASELINE_ONLY = "sparse_history_multi_driver_baseline_
 _RULE_FALLING_BASE_LAUNCH_CONFLICT = "falling_base_launch_conflict_review"
 _RULE_WEAK_SAME_DISCOUNT_AND_UPLIFT = "weak_same_discount_and_uplift_cap"
 _RULE_WEAK_ELASTICITY = "weak_elasticity_uplift_restraint"
+_RULE_INVENTORY_SUFFICIENT_LOW_VALUE = "inventory_sufficient_low_value_history_review"
 _RULE_STOCK_GAP_HIGH = "stock_gap_high_review_cap"
 
 ORDER_POLICY_RULE_NAMES: tuple[str, ...] = (
@@ -52,17 +53,22 @@ ORDER_POLICY_RULE_NAMES: tuple[str, ...] = (
     _RULE_FALLING_BASE_LAUNCH_CONFLICT,
     _RULE_WEAK_SAME_DISCOUNT_AND_UPLIFT,
     _RULE_WEAK_ELASTICITY,
+    _RULE_INVENTORY_SUFFICIENT_LOW_VALUE,
     _RULE_STOCK_GAP_HIGH,
 )
 
 _REVIEW_REASON_SPARSE_MULTI_DRIVER = "policy_sparse_history_multi_driver"
 _REVIEW_REASON_FALLING_BASE_LAUNCH_CONFLICT = "policy_falling_base_launch_total_conflict"
+_REVIEW_REASON_INVENTORY_SUFFICIENT_LOW_VALUE = "policy_inventory_sufficient_low_value_history"
 _REVIEW_REASON_STOCK_GAP_HIGH = "policy_stock_gap_high"
 
 _LAUNCH_WINDOW_DAYS = 7.0
 _SPARSE_MULTI_DRIVER_THRESHOLD = 3.0
 _MAJOR_BUCKET_MULTI_DRIVER_THRESHOLD = 2.0
 _MIN_POLICY_SIGNAL_COLUMNS_PRESENT = 4
+_TARGETED_WEAK_ELASTICITY_DISCOUNT_MAX = 10.0
+_TARGETED_WEAK_ELASTICITY_PROMO_DAYS_MIN = 8.0
+_TARGETED_WEAK_ELASTICITY_PROMO_DAYS_MAX = 14.0
 _POLICY_SIGNAL_COLUMNS: tuple[str, ...] = (
     "feature_same_discount_prior_event_count",
     "feature_same_discount_history_available_flag",
@@ -88,6 +94,7 @@ _POLICY_STRENGTH_BY_REASON: dict[str, float] = {
     _RULE_STOCK_GAP_HIGH: 0.55,
     _RULE_WEAK_SAME_DISCOUNT_AND_UPLIFT: 0.60,
     _RULE_FALLING_BASE_LAUNCH_CONFLICT: 0.75,
+    _RULE_INVENTORY_SUFFICIENT_LOW_VALUE: 0.80,
     _RULE_SPARSE_MULTI_DRIVER_BASELINE_ONLY: 0.90,
 }
 
@@ -104,7 +111,36 @@ def build_order_policy_adjustments(
     calibrated_predicted_units: pd.Series,
     diagnostics_frame: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
-    """Build explicit conservative caps and review overrides from governed diagnostics."""
+    """Build governed post-calibration policy caps and review overrides.
+
+    Purpose:
+        Apply explicit conservative rules after model calibration so the scored
+        output can suppress weak demand or dead-capital situations without
+        retraining the model or changing Stage 12 publish semantics.
+
+    Inputs:
+        frame: scored row-grain promotion candidates with governed engineered
+            features.
+        raw_predicted_units: pre-calibration units forecast.
+        calibrated_predicted_units: post-calibration units forecast before the
+            policy overlay.
+        diagnostics_frame: optional precomputed diagnostics for the same rows.
+
+    Outputs:
+        A frame containing policy-adjusted caps, review flags, reasons, and
+        removed-unit diagnostics.
+
+    Important assumptions:
+        Policy rules may only cap downward or force review. They must not widen
+        BUY / ORDER behaviour or use realised future outcomes.
+
+    Side effects:
+        None.
+
+    Failure behaviour:
+        If the minimum required policy-signal columns are absent, the function
+        returns an explicit no-op policy output.
+    """
 
     working = frame.copy()
     diagnostics = diagnostics_frame if diagnostics_frame is not None else build_live_order_decision_diagnostics(
@@ -237,6 +273,17 @@ def build_order_policy_adjustments(
             "feature_sparse_history_penalty",
         ),
     )
+    has_inventory_low_value_signals = _has_columns(
+        working,
+        (
+            "feature_inventory_sufficiency_flag",
+            "feature_weak_promo_low_value_flag",
+            "feature_speculative_above_trust_floor_risk_flag",
+            "feature_expected_leftover_above_trust_floor_units",
+            "feature_expected_bill_cycle_capital_drag_ratio",
+            "feature_trust_floor_missed_demand_risk_score",
+        ),
+    )
 
     major_bucket_frame = build_order_policy_major_bucket_frame(diagnostics)
     same_discount_uplift_mask = (
@@ -268,6 +315,15 @@ def build_order_policy_adjustments(
         and has_elasticity_signals
         and has_uplift_signals
     ) else _false_mask(working.index)
+    inventory_sufficient_low_value_mask = _inventory_sufficient_low_value_mask(
+        working,
+        calibrated_units=calibrated_units,
+    ) if has_inventory_low_value_signals else _false_mask(working.index)
+    inventory_sufficient_low_value_mask = (
+        inventory_sufficient_low_value_mask
+        & ~sparse_multi_driver_mask
+        & ~falling_base_launch_conflict_mask
+    )
 
     adjusted_supported_total_units = _apply_policy_cap(
         current_units=adjusted_supported_total_units,
@@ -341,8 +397,8 @@ def build_order_policy_adjustments(
         uplift_units=uplift_total_units,
         calibrated_units=calibrated_units,
         mask=elasticity_weak_mask & policy_adjustment_reason.eq(_NO_POLICY_REASON),
-        uplift_retain_share=0.60,
-        fallback_total_share=0.80,
+        uplift_retain_share=0.50,
+        fallback_total_share=0.70,
     )
     adjusted_launch_units = _apply_policy_cap(
         current_units=adjusted_launch_units,
@@ -356,6 +412,29 @@ def build_order_policy_adjustments(
     policy_adjustment_reason = policy_adjustment_reason.where(
         ~(elasticity_weak_mask & policy_adjustment_reason.eq(_NO_POLICY_REASON)),
         _RULE_WEAK_ELASTICITY,
+    )
+
+    targeted_weak_elasticity_mask = (
+        _targeted_weak_elasticity_segment_mask(working)
+        & policy_adjustment_reason.eq(_RULE_WEAK_ELASTICITY)
+    )
+    adjusted_supported_total_units = _apply_policy_cap(
+        current_units=adjusted_supported_total_units,
+        baseline_units=baseline_total_units,
+        uplift_units=uplift_total_units,
+        calibrated_units=calibrated_units,
+        mask=targeted_weak_elasticity_mask,
+        uplift_retain_share=0.45,
+        fallback_total_share=0.65,
+    )
+    adjusted_launch_units = _apply_policy_cap(
+        current_units=adjusted_launch_units,
+        baseline_units=baseline_launch_units,
+        uplift_units=uplift_launch_units,
+        calibrated_units=adjusted_launch_units,
+        mask=targeted_weak_elasticity_mask,
+        uplift_retain_share=0.50,
+        fallback_total_share=0.70,
     )
 
     adjusted_supported_total_units = _apply_policy_cap(
@@ -381,6 +460,29 @@ def build_order_policy_adjustments(
         _RULE_STOCK_GAP_HIGH,
     )
 
+    adjusted_supported_total_units = _apply_policy_cap(
+        current_units=adjusted_supported_total_units,
+        baseline_units=baseline_total_units,
+        uplift_units=uplift_total_units,
+        calibrated_units=calibrated_units,
+        mask=inventory_sufficient_low_value_mask,
+        uplift_retain_share=0.10,
+        fallback_total_share=0.45,
+    )
+    adjusted_launch_units = _apply_policy_cap(
+        current_units=adjusted_launch_units,
+        baseline_units=baseline_launch_units,
+        uplift_units=uplift_launch_units,
+        calibrated_units=adjusted_launch_units,
+        mask=inventory_sufficient_low_value_mask,
+        uplift_retain_share=0.05,
+        fallback_total_share=0.40,
+    )
+    policy_adjustment_reason = policy_adjustment_reason.where(
+        ~inventory_sufficient_low_value_mask,
+        _RULE_INVENTORY_SUFFICIENT_LOW_VALUE,
+    )
+
     review_override_flag = review_override_flag.where(~sparse_multi_driver_mask, 1.0)
     review_override_reason = review_override_reason.where(~sparse_multi_driver_mask, _REVIEW_REASON_SPARSE_MULTI_DRIVER)
     review_override_flag = review_override_flag.where(~falling_base_launch_conflict_mask, 1.0)
@@ -392,6 +494,11 @@ def build_order_policy_adjustments(
     review_override_reason = review_override_reason.where(
         ~(stock_gap_high_mask & review_override_reason.eq(_NO_REVIEW_OVERRIDE_REASON)),
         _REVIEW_REASON_STOCK_GAP_HIGH,
+    )
+    review_override_flag = review_override_flag.where(~inventory_sufficient_low_value_mask, 1.0)
+    review_override_reason = review_override_reason.where(
+        ~inventory_sufficient_low_value_mask,
+        _REVIEW_REASON_INVENTORY_SUFFICIENT_LOW_VALUE,
     )
 
     for reason_name, strength_value in _POLICY_STRENGTH_BY_REASON.items():
@@ -532,6 +639,17 @@ def build_order_policy_rule_trigger_frame(
             "feature_sparse_history_penalty",
         ),
     )
+    has_inventory_low_value_signals = _has_columns(
+        frame,
+        (
+            "feature_inventory_sufficiency_flag",
+            "feature_weak_promo_low_value_flag",
+            "feature_speculative_above_trust_floor_risk_flag",
+            "feature_expected_leftover_above_trust_floor_units",
+            "feature_expected_bill_cycle_capital_drag_ratio",
+            "feature_trust_floor_missed_demand_risk_score",
+        ),
+    )
 
     major_bucket_frame = build_order_policy_major_bucket_frame(diagnostics)
     same_discount_uplift_mask = (
@@ -563,6 +681,19 @@ def build_order_policy_rule_trigger_frame(
         and has_elasticity_signals
         and has_uplift_signals
     ) else _false_mask(frame.index)
+    diagnostics_predicted_units = pd.to_numeric(
+        diagnostics.get("predicted_units_sold"),
+        errors="coerce",
+    ) if "predicted_units_sold" in diagnostics.columns else pd.Series(np.nan, index=frame.index, dtype="float64")
+    inventory_sufficient_low_value_mask = _inventory_sufficient_low_value_mask(
+        frame,
+        calibrated_units=diagnostics_predicted_units,
+    ) if has_inventory_low_value_signals else _false_mask(frame.index)
+    inventory_sufficient_low_value_mask = (
+        inventory_sufficient_low_value_mask
+        & ~sparse_multi_driver_mask
+        & ~falling_base_launch_conflict_mask
+    )
 
     return pd.DataFrame(
         {
@@ -570,6 +701,7 @@ def build_order_policy_rule_trigger_frame(
             _RULE_FALLING_BASE_LAUNCH_CONFLICT: falling_base_launch_conflict_mask.astype(float),
             _RULE_WEAK_SAME_DISCOUNT_AND_UPLIFT: same_discount_uplift_mask.astype(float),
             _RULE_WEAK_ELASTICITY: elasticity_weak_mask.astype(float),
+            _RULE_INVENTORY_SUFFICIENT_LOW_VALUE: inventory_sufficient_low_value_mask.astype(float),
             _RULE_STOCK_GAP_HIGH: stock_gap_high_mask.astype(float),
         },
         index=frame.index,
@@ -668,3 +800,110 @@ def _has_columns(frame: pd.DataFrame, column_names: tuple[str, ...]) -> bool:
 
 def _false_mask(index: pd.Index) -> pd.Series:
     return pd.Series(False, index=index, dtype=bool)
+
+
+def _inventory_sufficient_low_value_mask(
+    frame: pd.DataFrame,
+    *,
+    calibrated_units: pd.Series,
+) -> pd.Series:
+    """Return the governed low-value mask for material speculative exposure only.
+
+    Purpose:
+        Restrict the inventory-sufficient low-value rule to rows where explicit
+        speculative-above-floor exposure exists and the policy would materially
+        reduce the forecast, rather than merely labelling covered rows.
+
+    Inputs:
+        frame: scored promotion rows with trust-floor and capital-discipline
+            features.
+        calibrated_units: current post-calibration units forecast used to test
+            whether the rule would make a material cap change.
+
+    Outputs:
+        A boolean mask for rows that should fire the low-value rule.
+
+    Important assumptions:
+        The trust-floor feature layer has already separated floor protection from
+        speculative-above-floor exposure on the row.
+
+    Side effects:
+        None.
+
+    Failure behaviour:
+        Missing signal columns yield ``False`` through the caller's presence
+        checks; the helper does not silently fall back to the older broader rule.
+    """
+
+    inventory_sufficiency_flag = _first_present_numeric_series(frame, ("feature_inventory_sufficiency_flag",))
+    weak_promo_low_value_flag = _first_present_numeric_series(frame, ("feature_weak_promo_low_value_flag",))
+    speculative_above_floor_risk_flag = _first_present_numeric_series(
+        frame,
+        ("feature_speculative_above_trust_floor_risk_flag",),
+    )
+    expected_leftover_above_trust_floor_units = _first_present_numeric_series(
+        frame,
+        ("feature_expected_leftover_above_trust_floor_units",),
+    )
+    expected_bill_cycle_capital_drag_ratio = _first_present_numeric_series(
+        frame,
+        ("feature_expected_bill_cycle_capital_drag_ratio",),
+    )
+    trust_floor_missed_demand_risk_score = _first_present_numeric_series(
+        frame,
+        ("feature_trust_floor_missed_demand_risk_score",),
+    )
+    baseline_units = _first_present_numeric_series(
+        frame,
+        (
+            "feature_expected_baseline_units_promo_window",
+            "feature_baseline_units_expected_promo_window",
+            "baseline_expected_units",
+        ),
+    ).fillna(0.0).clip(lower=0.0)
+    uplift_units = _first_present_numeric_series(
+        frame,
+        (
+            "feature_expected_incremental_uplift_units_same_discount",
+            "feature_uplift_units_expected_total",
+            "feature_probability_uplift_supported_units",
+        ),
+    ).fillna(0.0).clip(lower=0.0)
+    low_value_target_units = _policy_target_units(
+        baseline_units=baseline_units,
+        uplift_units=uplift_units,
+        calibrated_units=calibrated_units,
+        uplift_retain_share=0.10,
+        fallback_total_share=0.45,
+    )
+    material_units_removed = (
+        pd.to_numeric(calibrated_units, errors="coerce").fillna(0.0).clip(lower=0.0)
+        - pd.to_numeric(low_value_target_units, errors="coerce").fillna(0.0).clip(lower=0.0)
+    ).clip(lower=0.0)
+    return (
+        inventory_sufficiency_flag.ge(1.0)
+        & weak_promo_low_value_flag.ge(1.0)
+        & speculative_above_floor_risk_flag.ge(1.0)
+        & expected_leftover_above_trust_floor_units.ge(1.0)
+        & expected_bill_cycle_capital_drag_ratio.ge(0.15)
+        & trust_floor_missed_demand_risk_score.le(0.35)
+        & material_units_removed.ge(1.0)
+    )
+
+
+def _targeted_weak_elasticity_segment_mask(frame: pd.DataFrame) -> pd.Series:
+    discount_percent = _first_present_numeric_series(frame, ("discount_percent",))
+    promo_days = _first_present_numeric_series(frame, ("promo_days", "live_promo_window_days"))
+    intermittent_flag = _first_present_numeric_series(frame, ("feature_intermittent_demand_flag",))
+    prior_same_or_better_flag = _first_present_numeric_series(
+        frame,
+        ("feature_prior_same_or_better_discount_56d_flag",),
+    )
+    return (
+        discount_percent.ge(0.0)
+        & discount_percent.lt(_TARGETED_WEAK_ELASTICITY_DISCOUNT_MAX)
+        & promo_days.ge(_TARGETED_WEAK_ELASTICITY_PROMO_DAYS_MIN)
+        & promo_days.le(_TARGETED_WEAK_ELASTICITY_PROMO_DAYS_MAX)
+        & intermittent_flag.ge(1.0)
+        & prior_same_or_better_flag.ge(1.0)
+    )

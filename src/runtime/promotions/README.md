@@ -12,6 +12,7 @@ The promotions runtime remains split by owned layer and entrypoint:
 - `python -m runtime.promotions.score_promotions --model-run-id <train_run_id>`
 - `python -m runtime.promotions.backtest_promotion_cohorts --dataset-run-id <train_run_id>`
 - `python -m runtime.promotions.run_promotions_decision_surface --dataset-run-id <train_run_id> --model-run-id <train_run_id>`
+- `python -m runtime.promotions.run_promotions_policy_slice_replay --current-csv-path <current_code_replay.csv> --baseline-csv-path <baseline_governed.csv> --output-root <review_output_dir> --replay-mode future_stage12`
 - `python -m runtime.promotions.run_promotions_operational_cycle --run-id <run_id> --as-of-date YYYY-MM-DD [--enable-landed-batches true|false] [--batch-row-count N] [--enable-chunked-fetch true|false] [--chunk-row-count N] [--resume-completed-partitions true|false] [--stage-temp-chunk-files true|false] [--partition-strategy store_number|supplier_number|store_sku_hash_bucket|promotion_name_hash_bucket|promotion_row_key_hash_bucket --partition-count N] [--run-preflight] [--max-candidate-promotion-rows N] [--max-candidate-store-sku N] [--max-window-span-days-total N] [--max-window-span-days-max N] [--planner-only]`
 - `python -m runtime.promotions.inspect_promotions_sql_extraction --selection-mode completed --as-of-date YYYY-MM-DD [--test-connection] [--save-rendered-sql] [--run-row-count-probe] [--run-preflight] [--planner-only] [--run-extraction] [--extraction-mode live_sql|diagnostic_topn] [--limit-promotions N] [--promotion-name-like TEXT] [--store-number N] [--supplier-number N] [--enable-landed-batches true|false] [--batch-row-count N] [--enable-chunked-fetch true|false] [--chunk-row-count N] [--resume-completed-partitions true|false] [--stage-temp-chunk-files true|false] [--partition-strategy store_number|supplier_number|store_sku_hash_bucket|promotion_name_hash_bucket|promotion_row_key_hash_bucket --partition-count N --partition-index I] [--max-candidate-promotion-rows N] [--max-candidate-store-sku N] [--max-window-span-days-total N] [--max-window-span-days-max N]`
 - `python -m runtime.promotions.run_promotions_system_smoke --run-id <run_id> --mode smoke_synthetic --as-of-date YYYY-MM-DD`
@@ -82,6 +83,21 @@ python -m runtime.promotions.print_promotions_run_artifacts \
 	--run-id promotions-operator-live-YYYYMMDDTHHMMSSZ \
 	--artifact-root /absolute/governed/promotions_root
 ```
+
+Diagnostics-only policy slice replay:
+
+```bash
+python -m runtime.promotions.run_promotions_policy_slice_replay \
+	--current-csv-path /absolute/current_code_replay.csv \
+	--baseline-csv-path /absolute/baseline_governed.csv \
+	--output-root /absolute/local/promotions_policy_replay \
+	--run-id promotions-policy-replay-YYYYMMDDTHHMMSSZ \
+	--replay-mode future_stage12
+```
+
+This runner compares persisted governed baseline artifacts with current-code replay artifacts without rerunning extraction or training. It writes analyst evidence only: summary JSON, action delta CSV, Stage 12 publishability delta CSV, policy-reason delta CSV, review-only delta CSV, row deltas, and a runtime manifest. It does not create a publish tree or change the store-facing commercial CSV.
+
+Buy/order widening is based on governed action classes only: any replay row becomes BUY/ORDER when its governed baseline row was not BUY/ORDER, or the current slice has a net increase in BUY/ORDER rows. Positive quantities or technical forecasts do not create BUY/ORDER widening. A long extraction/training rerun should be preceded by this replay when policy allocation logic changes, because it proves whether capital and units were removed without expanding BUY/ORDER decisions, review-only rows, or Stage 12 publishability unexpectedly.
 
 Good behavior looks like this:
 

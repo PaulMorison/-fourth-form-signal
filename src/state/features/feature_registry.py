@@ -15,8 +15,8 @@ import json
 from pathlib import Path
 from typing import Any, Mapping, Protocol, Sequence
 
-from platform.audit.audit_event_store import AuditEventStore
-from platform.validation.contract_schema_validator import ContractSchemaValidator
+from ff_platform.audit.audit_event_store import AuditEventStore
+from ff_platform.validation.contract_schema_validator import ContractSchemaValidator
 
 
 class FeatureRegistryError(ValueError):

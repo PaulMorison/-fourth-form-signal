@@ -11,14 +11,36 @@ import pandas as pd
 from state.promotions.feature_engineering.demand.ft_basket_context_feature_bundle import (
     BASKET_REVIEW_ONLY_FEATURE_COLUMNS,
 )
+from state.promotions.feature_engineering.demand.ft_basket_equilibrium import (
+    BASKET_EQUILIBRIUM_REVIEW_ONLY_FEATURE_COLUMNS,
+)
+from state.promotions.feature_engineering.demand.ft_distribution_shape_distance import (
+    DISTRIBUTION_SHAPE_DISTANCE_REVIEW_ONLY_FEATURE_COLUMNS,
+)
+from state.promotions.feature_engineering.demand.ft_fragility_adjusted_opportunity import (
+    FRAGILITY_ADJUSTED_OPPORTUNITY_REVIEW_ONLY_FEATURE_COLUMNS,
+)
+from state.promotions.feature_engineering.demand.ft_kalman_state import (
+    KALMAN_STATE_REVIEW_ONLY_FEATURE_COLUMNS,
+)
 from state.promotions.feature_engineering.demand.ft_demand_uplift import (
     DEMAND_UPLIFT_REVIEW_ONLY_FEATURE_COLUMNS,
 )
 from state.promotions.feature_engineering.demand.ft_order_decision_diagnostics import (
     ORDER_DECISION_DIAGNOSTICS_REVIEW_ONLY_FEATURE_COLUMNS,
 )
+from state.promotions.feature_engineering.demand.ft_pca_residual_structure import (
+    PCA_RESIDUAL_STRUCTURE_REVIEW_ONLY_FEATURE_COLUMNS,
+)
+from state.promotions.feature_engineering.demand.ft_promotion_situational_awareness import (
+    PROMOTION_SITUATIONAL_AWARENESS_REVIEW_ONLY_FEATURE_COLUMNS,
+)
 from state.promotions.feature_engineering.demand.probability import (
+    PROBABILITY_MODEL_USE_FEATURE_COLUMNS,
     PROBABILITY_REVIEW_ONLY_FEATURE_COLUMNS,
+)
+from state.promotions.feature_engineering.stock.ft_target_stock_logic import (
+    TARGET_STOCK_REVIEW_ONLY_FEATURE_COLUMNS,
 )
 from state.promotions.feature_engineering.registry import iter_registered_feature_modules
 
@@ -28,6 +50,24 @@ TARGET_COLUMN_PREFIX = "target_"
 NEAR_CONSTANT_DOMINANCE_THRESHOLD = 0.995
 HIGH_NULL_RATE_THRESHOLD = 0.5
 CORRELATION_REVIEW_THRESHOLD = 0.98
+
+UNITS_HEAD_CORE_FEATURE_FAMILIES: tuple[str, ...] = (
+    "basket_structure_dependency",
+    "sparse_demand_noise",
+    "probability",
+    "same_discount_promo_history",
+)
+
+DOWNSTREAM_DECISION_SUPPORT_FEATURE_FAMILIES: tuple[str, ...] = (
+    "basket_equilibrium",
+    "target_stock_shape",
+    "allocation_discipline",
+    "micro_market_equilibrium",
+    "fragility_opportunity_shape",
+    "baseline_discount_uplift",
+    "basket_context",
+    "other_engineered_feature",
+)
 
 STRICT_NUMERIC_KEY_COLUMNS: tuple[str, ...] = (
     "store_number",
@@ -100,6 +140,15 @@ BOUNDED_ZERO_ONE_COLUMNS: tuple[str, ...] = (
     "feature_sparse_history_penalty",
     "feature_order_evidence_quality_score",
     "feature_overallocation_risk_score",
+    "feature_historical_zero_sale_after_buy_rate",
+    "feature_same_discount_success_rate_56d",
+    "feature_historical_trapped_capital_rate",
+    "feature_historical_sell_through_on_accepted_qty",
+    "feature_historical_allocation_efficiency_rate",
+    "feature_historical_overallocation_above_floor_rate",
+    "feature_historical_under_floor_missed_demand_rate",
+    "feature_historical_memory_category_fallback_flag",
+    "feature_historical_memory_department_fallback_flag",
     "feature_probability_poisson_zero_sale_probability",
     "feature_probability_poisson_one_or_more_sale_probability",
     "feature_probability_poisson_tail_probability",
@@ -150,6 +199,15 @@ BOUNDED_ZERO_ONE_COLUMNS: tuple[str, ...] = (
     "feature_allocation_risk_over_uplift_score",
     "feature_launch_stock_support_score",
     "feature_total_window_pressure_vs_launch_support_conflict_score",
+    "feature_stock_below_trust_floor_flag",
+    "feature_trust_floor_missed_demand_risk_score",
+    "feature_expected_bill_cycle_capital_drag_ratio",
+    "feature_speculative_above_trust_floor_risk_flag",
+    "feature_inventory_sufficiency_flag",
+    "feature_weak_promo_low_value_flag",
+    "feature_high_underlying_demand_flag",
+    "feature_no_promo_history_flag",
+    "feature_month_end_cash_runoff_pressure_flag",
     "feature_order_risk_reason_same_discount_weak_flag",
     "feature_order_risk_reason_elasticity_weak_flag",
     "feature_order_risk_reason_uplift_weak_flag",
@@ -176,7 +234,32 @@ BOUNDED_ZERO_ONE_COLUMNS: tuple[str, ...] = (
     "feature_probability_units_given_multi_item_basket",
     "feature_probability_zero_units_given_low_traffic",
     "feature_companion_absence_risk_score",
+    "feature_anchor_centrality_score",
+    "feature_anchor_presence_support_score",
+    "feature_top_anchor_dependency_score",
+    "feature_anchor_absence_risk_score",
+    "feature_drag_along_probability",
+    "feature_companion_cluster_support_score",
+    "feature_companion_concentration_score",
+    "feature_multi_sku_promo_basket_rate",
+    "feature_three_plus_promo_sku_basket_rate",
+    "feature_solo_purchase_rate",
+    "feature_sparse_random_purchase_score",
+    "feature_basket_noise_score",
+    "feature_transaction_object_uncertainty_score",
+    "feature_conditional_sale_rate_with_anchor",
+    "feature_conditional_sale_rate_without_anchor",
+    "feature_substitution_pressure_score",
+    "feature_promo_basket_depth_alignment_score",
+    "feature_anchor_mix_stability_score",
+    "feature_basket_equilibrium_score",
+    "feature_basket_equilibrium_fragility_score",
     "feature_basket_history_missing_evidence_flag",
+    "feature_pca_structure_residual_score",
+    "feature_pca_structure_fit_score",
+    "feature_pca_structure_outlier_flag",
+    "feature_pca_allocation_residual_score",
+    "feature_pca_allocation_outlier_flag",
 )
 
 _INTEGERISH_PATTERN = re.compile(r"^[+-]?\d+(?:\.0+)?$")
@@ -223,12 +306,144 @@ def iter_registered_model_feature_columns() -> tuple[str, ...]:
     return tuple(columns)
 
 
+def _registered_feature_module_by_column() -> dict[str, str]:
+    module_by_feature: dict[str, str] = {}
+    for definition in iter_registered_feature_modules():
+        for column_name in definition.output_columns:
+            module_by_feature.setdefault(str(column_name), definition.name)
+    return module_by_feature
+
+
+def _feature_family_for_column(column_name: str, module_name: str) -> str:
+    lowered_feature = column_name.lower()
+    lowered_module = module_name.lower()
+    if "basket_equilibrium" in lowered_module or any(
+        token in lowered_feature
+        for token in (
+            "anchor_centrality",
+            "anchor_presence_support",
+            "top_anchor_dependency",
+            "multi_sku_promo_basket_rate",
+            "three_plus_promo_sku_basket_rate",
+            "basket_equilibrium",
+            "conditional_sale_rate_with_anchor",
+            "conditional_lift_with_anchor",
+            "transaction_object_uncertainty",
+        )
+    ):
+        return "basket_equilibrium"
+    if "basket_structure_dependency" in lowered_module:
+        return "basket_structure_dependency"
+    if "micro_market_equilibrium" in lowered_module or any(
+        token in lowered_feature
+        for token in (
+            "micro_market_",
+            "local_equilibrium_gap",
+            "small_unit_option_value",
+            "convexity_to_capital",
+            "trust_floor_convexity",
+            "high_demand_underprotection",
+            "end_shape_fragility",
+        )
+    ):
+        return "micro_market_equilibrium"
+    if "sparse_demand_noise" in lowered_module or "sparse_demand" in lowered_feature:
+        return "sparse_demand_noise"
+    if "kalman" in lowered_module or "kalman" in lowered_feature:
+        return "kalman_state"
+    if "distribution_shape" in lowered_module or "wasserstein" in lowered_feature:
+        return "distribution_shape_distance"
+    if "dag" in lowered_feature or "dependency_support" in lowered_feature:
+        return "dag_dependency_support"
+    if "fragility_adjusted_opportunity" in lowered_module:
+        return "fragility_opportunity"
+    if "pca" in lowered_feature or "pca" in lowered_module:
+        return "pca"
+    if "situational_awareness" in lowered_module or "situational" in lowered_feature:
+        return "situational_awareness"
+    if "probability" in lowered_feature or "probability" in lowered_module:
+        return "probability"
+    if "target_stock" in lowered_module or "end_of_promo_target" in lowered_feature:
+        return "target_stock_shape"
+    if "allocation" in lowered_module or any(
+        token in lowered_feature
+        for token in ("allocation", "trust_floor", "capital_tied", "overallocation")
+    ):
+        return "allocation_discipline"
+    if any(
+        token in lowered_feature
+        for token in ("same_discount", "same_or_better", "prior_promo", "promo_history", "historical_")
+    ):
+        return "same_discount_promo_history"
+    if any(
+        token in lowered_feature or token in lowered_module
+        for token in ("fragility", "opportunity", "survival", "shape", "growth_curve")
+    ):
+        return "fragility_opportunity_shape"
+    if "basket" in lowered_feature or "basket" in lowered_module:
+        return "basket_context"
+    if any(token in lowered_module for token in ("discount", "uplift", "baseline")):
+        return "baseline_discount_uplift"
+    return "other_engineered_feature"
+
+
+def classify_engineered_feature_role(column_name: str) -> str:
+    review_only_feature_columns = _review_only_engineered_feature_columns()
+    if column_name in review_only_feature_columns:
+        return "review_only"
+    module_by_feature = _registered_feature_module_by_column()
+    family_name = _feature_family_for_column(column_name, module_by_feature.get(column_name, ""))
+    if family_name in UNITS_HEAD_CORE_FEATURE_FAMILIES:
+        return "units_head_core"
+    if family_name in DOWNSTREAM_DECISION_SUPPORT_FEATURE_FAMILIES:
+        return "downstream_decision_support"
+    return "downstream_decision_support"
+
+
+def iter_units_head_core_feature_columns() -> tuple[str, ...]:
+    return tuple(
+        column_name
+        for column_name in iter_registered_model_feature_columns()
+        if classify_engineered_feature_role(column_name) == "units_head_core"
+    )
+
+
+def iter_downstream_decision_support_feature_columns() -> tuple[str, ...]:
+    return tuple(
+        column_name
+        for column_name in iter_registered_model_feature_columns()
+        if classify_engineered_feature_role(column_name) == "downstream_decision_support"
+    )
+
+
 def iter_default_model_use_feature_columns() -> tuple[str, ...]:
     review_only_feature_columns = _review_only_engineered_feature_columns()
     return tuple(
         column_name
         for column_name in iter_registered_model_feature_columns()
         if column_name not in review_only_feature_columns
+    )
+
+
+def iter_review_only_engineered_feature_columns() -> tuple[str, ...]:
+    """Return registered engineered feature columns governed as review-only."""
+
+    return tuple(
+        dict.fromkeys(
+            (
+                *PROBABILITY_REVIEW_ONLY_FEATURE_COLUMNS,
+                *BASKET_REVIEW_ONLY_FEATURE_COLUMNS,
+                *BASKET_EQUILIBRIUM_REVIEW_ONLY_FEATURE_COLUMNS,
+                *DEMAND_UPLIFT_REVIEW_ONLY_FEATURE_COLUMNS,
+                *PCA_RESIDUAL_STRUCTURE_REVIEW_ONLY_FEATURE_COLUMNS,
+                *PROMOTION_SITUATIONAL_AWARENESS_REVIEW_ONLY_FEATURE_COLUMNS,
+                *ORDER_DECISION_DIAGNOSTICS_REVIEW_ONLY_FEATURE_COLUMNS,
+                *TARGET_STOCK_REVIEW_ONLY_FEATURE_COLUMNS,
+                *KALMAN_STATE_REVIEW_ONLY_FEATURE_COLUMNS,
+                *DISTRIBUTION_SHAPE_DISTANCE_REVIEW_ONLY_FEATURE_COLUMNS,
+                *FRAGILITY_ADJUSTED_OPPORTUNITY_REVIEW_ONLY_FEATURE_COLUMNS,
+            )
+        )
     )
 
 
@@ -247,12 +462,7 @@ def filter_model_use_engineered_feature_columns(
 
 
 def _review_only_engineered_feature_columns() -> set[str]:
-    return {
-        *PROBABILITY_REVIEW_ONLY_FEATURE_COLUMNS,
-        *BASKET_REVIEW_ONLY_FEATURE_COLUMNS,
-        *DEMAND_UPLIFT_REVIEW_ONLY_FEATURE_COLUMNS,
-        *ORDER_DECISION_DIAGNOSTICS_REVIEW_ONLY_FEATURE_COLUMNS,
-    }
+    return set(iter_review_only_engineered_feature_columns())
 
 
 def classify_leakage_risk(column_name: str) -> tuple[str, str] | None:

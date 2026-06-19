@@ -48,6 +48,19 @@ def _policy_row(**overrides: object) -> dict[str, object]:
         "feature_expected_incremental_uplift_units_same_discount": 20.0,
         "feature_expected_incremental_uplift_units_first_7_days": 10.0,
         "feature_expected_total_units_from_baseline_plus_uplift": 40.0,
+        "feature_base_soh_trust_floor_units": 2.0,
+        "feature_stock_below_trust_floor_flag": 0.0,
+        "feature_projected_stock_gap_to_trust_floor_units": 0.0,
+        "feature_trust_floor_missed_demand_risk_score": 0.0,
+        "feature_expected_lost_units_below_trust_floor": 0.0,
+        "feature_demand_pressure_vs_total_available_stock_ratio": 0.7,
+        "feature_units_above_trust_floor": 8.0,
+        "feature_expected_residual_stock_units": 6.0,
+        "feature_expected_leftover_above_trust_floor_units": 4.0,
+        "feature_expected_bill_cycle_capital_drag_dollars": 8.0,
+        "feature_expected_bill_cycle_capital_drag_ratio": 0.20,
+        "feature_expected_gp_per_capital_committed": 0.30,
+        "feature_speculative_above_trust_floor_risk_flag": 1.0,
         "effective_cost_per_unit": 2.0,
         "stock_basis_units": 60.0,
         "feature_probability_model_use_flag": 1.0,
@@ -107,7 +120,29 @@ class PromotionOrderPolicyAdjustmentTests(unittest.TestCase):
         self.assertEqual(outputs.loc[0, "policy_adjustment_reason"], "weak_elasticity_uplift_restraint")
         self.assertAlmostEqual(outputs.loc[0, "policy_adjustment_strength"], 0.35)
         self.assertAlmostEqual(outputs.loc[0, "review_override_flag"], 0.0)
-        self.assertAlmostEqual(outputs.loc[0, "adjusted_order_cap_units"], 32.0)
+        self.assertAlmostEqual(outputs.loc[0, "adjusted_order_cap_units"], 30.0)
+
+    def test_targeted_low_discount_intermittent_segment_caps_weak_elasticity_more_aggressively(self) -> None:
+        frame = pd.DataFrame(
+            [
+                _policy_row(
+                    discount_percent=5.0,
+                    promo_days=14.0,
+                    feature_intermittent_demand_flag=1.0,
+                    feature_prior_same_or_better_discount_56d_flag=1.0,
+                    feature_discount_elasticity_confidence_score=0.10,
+                    feature_discount_response_event_count=1.0,
+                )
+            ]
+        )
+
+        outputs = _policy_outputs(frame, raw_units=55.0, calibrated_units=50.0)
+
+        self.assertEqual(outputs.loc[0, "policy_adjustment_reason"], "weak_elasticity_uplift_restraint")
+        self.assertAlmostEqual(outputs.loc[0, "policy_adjustment_strength"], 0.35)
+        self.assertAlmostEqual(outputs.loc[0, "review_override_flag"], 0.0)
+        self.assertAlmostEqual(outputs.loc[0, "adjusted_launch_units"], 15.0)
+        self.assertAlmostEqual(outputs.loc[0, "adjusted_order_cap_units"], 29.0)
 
     def test_falling_base_and_launch_conflict_forces_review(self) -> None:
         frame = pd.DataFrame(
@@ -145,6 +180,63 @@ class PromotionOrderPolicyAdjustmentTests(unittest.TestCase):
         self.assertAlmostEqual(outputs.loc[0, "review_override_flag"], 1.0)
         self.assertEqual(outputs.loc[0, "review_override_reason"], "policy_stock_gap_high")
         self.assertLess(outputs.loc[0, "adjusted_order_cap_units"], 50.0)
+
+    def test_inventory_sufficient_low_value_history_forces_review_and_stricter_cap(self) -> None:
+        frame = pd.DataFrame(
+            [
+                _policy_row(
+                    feature_allocation_vs_supported_total_gap_units=8.0,
+                    feature_allocation_risk_over_uplift_score=0.25,
+                    feature_inventory_sufficiency_flag=1.0,
+                    feature_weak_promo_low_value_flag=1.0,
+                    feature_speculative_above_trust_floor_risk_flag=1.0,
+                    feature_expected_leftover_above_trust_floor_units=6.0,
+                    feature_expected_bill_cycle_capital_drag_ratio=0.35,
+                    feature_trust_floor_missed_demand_risk_score=0.0,
+                    feature_pre_promo_cover_ratio=1.4,
+                    feature_capital_at_risk_per_expected_unit=3.5,
+                    feature_gross_profit_per_incremental_unit_expected=0.8,
+                    feature_historical_comparable_promo_event_count=3.0,
+                    feature_historical_zero_sale_after_buy_rate=0.5,
+                    feature_same_discount_success_rate_56d=0.2,
+                    feature_historical_trapped_capital_rate=0.6,
+                    feature_historical_sell_through_on_accepted_qty=0.4,
+                    feature_historical_overforecast_bias=0.6,
+                    feature_historical_allocation_efficiency_rate=0.4,
+                    feature_historical_overallocation_above_floor_rate=0.7,
+                )
+            ]
+        )
+
+        outputs = _policy_outputs(frame, raw_units=48.0, calibrated_units=42.0)
+
+        self.assertEqual(outputs.loc[0, "policy_adjustment_reason"], "inventory_sufficient_low_value_history_review")
+        self.assertAlmostEqual(outputs.loc[0, "policy_adjustment_strength"], 0.80)
+        self.assertAlmostEqual(outputs.loc[0, "review_override_flag"], 1.0)
+        self.assertEqual(outputs.loc[0, "review_override_reason"], "policy_inventory_sufficient_low_value_history")
+        self.assertAlmostEqual(outputs.loc[0, "adjusted_order_cap_units"], 22.0)
+
+    def test_inventory_sufficient_low_value_rule_stays_off_when_cap_change_is_not_material(self) -> None:
+        frame = pd.DataFrame(
+            [
+                _policy_row(
+                    feature_inventory_sufficiency_flag=1.0,
+                    feature_weak_promo_low_value_flag=1.0,
+                    feature_speculative_above_trust_floor_risk_flag=1.0,
+                    feature_expected_leftover_above_trust_floor_units=4.0,
+                    feature_expected_bill_cycle_capital_drag_ratio=0.30,
+                    feature_trust_floor_missed_demand_risk_score=0.0,
+                    feature_historical_allocation_efficiency_rate=0.4,
+                    feature_historical_overallocation_above_floor_rate=0.7,
+                )
+            ]
+        )
+
+        outputs = _policy_outputs(frame, raw_units=24.0, calibrated_units=22.0)
+
+        self.assertEqual(outputs.loc[0, "policy_adjustment_reason"], "no_policy_adjustment")
+        self.assertEqual(outputs.loc[0, "review_override_reason"], "no_review_override")
+        self.assertAlmostEqual(outputs.loc[0, "policy_adjustment_fired_flag"], 0.0)
 
     def test_sparse_history_multi_driver_uses_baseline_only_and_sets_major_bucket(self) -> None:
         frame = pd.DataFrame(

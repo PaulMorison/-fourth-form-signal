@@ -303,6 +303,7 @@ class PromotionOperationalCycleArtifacts:
     promotion_demand_backtest_csv_path: str | None = None
     promotion_demand_backtest_parquet_path: str | None = None
     promotion_demand_backtest_summary_path: str | None = None
+    promotion_demand_backtest_summary_csv_path: str | None = None
     promotion_demand_backtest_by_segment_csv_path: str | None = None
     promotion_demand_backtest_watchlist_csv_path: str | None = None
     promotion_demand_backtest_brief_path: str | None = None
@@ -1828,6 +1829,7 @@ def run_operational_cycle(
                 decision_surface_frame=decision_surface_frame,
                 artifact_paths=settings.artifacts,
                 completed_backtest_summary_path=backtest_paths.summary_json_path,
+                completed_backtest_rows_path=backtest_paths.rows_parquet_path,
             )
         progress.complete_stage(
             row_count=store_prediction_artifacts.row_count,
@@ -1848,7 +1850,12 @@ def run_operational_cycle(
             heartbeat_seconds=8.0,
             row_count=int(store_prediction_artifacts.row_count),
         ):
-            store_download_frame = pd.read_csv(store_prediction_artifacts.master_csv_path)
+            # Preserve blank Stage 11 text fields so Stage 12 does not turn
+            # empty review/publish reasons into semantic "nan" strings.
+            store_download_frame = pd.read_csv(
+                store_prediction_artifacts.master_csv_path,
+                keep_default_na=False,
+            )
             commercial_publish_artifacts = StorePredictionPublisher().publish(
                 run_id=run_id,
                 as_of_date=settings.as_of_date.isoformat(),
@@ -2057,6 +2064,7 @@ def run_operational_cycle(
         stage11_true_zero_rows = 0
         stage11_cold_start_rows = 0
         stage11_low_nonzero_rows = 0
+        stage11_healthy_nonzero_rows = 0
         stage11_artificial_collapse_rows = 0
         
         if "demand_evidence_class" in store_prediction_frame.columns:
@@ -2071,16 +2079,14 @@ def run_operational_cycle(
                     stage11_cold_start_rows = int(count)
                 elif demand_class == "low_nonzero_demand":
                     stage11_low_nonzero_rows = int(count)
+                elif demand_class == "healthy_nonzero_demand":
+                    stage11_healthy_nonzero_rows = int(count)
                 elif demand_class == "artificial_collapse":
                     stage11_artificial_collapse_rows = int(count)
-                elif demand_class == "healthy_nonzero_demand":
-                    stage11_order_rows += int(count)
-                # null/missing demand_class = healthy rows publishable as orders
-                elif pd.isna(demand_class):
-                    stage11_order_rows += int(count)
-            
-            # Any review-only classification would be flagged separately - default to 0 for now
-            stage11_review_rows = 0
+        if "decision_recommendation" in store_prediction_frame.columns:
+            stage11_action = store_prediction_frame["decision_recommendation"].astype(str).str.strip().str.upper()
+            stage11_order_rows = int(stage11_action.eq("ORDER").sum())
+            stage11_review_rows = int(stage11_action.eq("REVIEW").sum())
 
         stage12_legitimate_excluded_row_count = _derive_stage12_legitimate_excluded_row_count(
             commercial_publish_artifacts
@@ -2094,6 +2100,7 @@ def run_operational_cycle(
             stage11_true_zero_rows=stage11_true_zero_rows,
             stage11_cold_start_rows=stage11_cold_start_rows,
             stage11_low_nonzero_rows=stage11_low_nonzero_rows,
+            stage11_healthy_nonzero_rows=stage11_healthy_nonzero_rows,
             stage11_artificial_collapse_rows=stage11_artificial_collapse_rows,
             stage12_publish_status=commercial_publish_artifacts.publish_status,
             stage12_publish_status_reason=commercial_publish_artifacts.publish_status_reason,
@@ -2116,7 +2123,7 @@ def run_operational_cycle(
             )
         except ValueError as e:
             progress.detail(f"reconciliation_error: {str(e)}")
-            publish_reconciliation_summary = None
+            raise
 
         # Build commercial stage timing summary
         commercial_stage_timing = build_commercial_stage_timing(
@@ -3544,6 +3551,7 @@ def run_operational_cycle(
             promotion_demand_backtest_csv_path=backtest_paths.rows_csv_path,
             promotion_demand_backtest_parquet_path=backtest_paths.rows_parquet_path,
             promotion_demand_backtest_summary_path=backtest_paths.summary_json_path,
+            promotion_demand_backtest_summary_csv_path=backtest_paths.summary_csv_path,
             promotion_demand_backtest_by_segment_csv_path=backtest_paths.by_segment_csv_path,
             promotion_demand_backtest_watchlist_csv_path=backtest_paths.watchlist_csv_path,
             promotion_demand_backtest_brief_path=backtest_paths.brief_md_path,
@@ -5990,6 +5998,12 @@ def _extract_completed_promotions_partitioned_artifact(
                         "extracted_rows"
                         f"[{partition_index}/{partition_settings.partition_count}]: {int(partition_artifact.manifest.get('row_count', 0) or 0)}"
                     )
+                    _assert_completed_partition_row_count_alignment(
+                        partition_artifact=partition_artifact,
+                        partition_label=(
+                            f"{partition_index}/{partition_settings.partition_count}"
+                        ),
+                    )
                     continue
             preflight_result: PromotionExtractionPreflightResult | None = None
             if run_preflight:
@@ -6064,6 +6078,10 @@ def _extract_completed_promotions_partitioned_artifact(
                 "extracted_rows"
                 f"[{partition_index}/{partition_settings.partition_count}]: {int(partition_artifact.manifest.get('row_count', 0) or 0)}"
             )
+            _assert_completed_partition_row_count_alignment(
+                partition_artifact=partition_artifact,
+                partition_label=f"{partition_index}/{partition_settings.partition_count}",
+            )
         combined_artifact = _combine_completed_partition_artifacts(
             settings=settings,
             run_id=run_id,
@@ -6117,6 +6135,24 @@ def _extract_completed_promotions_partitioned_artifact(
         )
         setattr(error, "completed_partition_summary_path", partition_summary_path)
         raise
+
+
+def _assert_completed_partition_row_count_alignment(
+    *,
+    partition_artifact: PromotionOperationalCycleExtractionArtifacts,
+    partition_label: str,
+) -> None:
+    candidate_rows = partition_artifact.candidate_promotion_row_count
+    extracted_rows = int(partition_artifact.manifest.get("row_count", 0) or 0)
+    if candidate_rows is None:
+        return
+    if int(candidate_rows) != extracted_rows:
+        raise PromotionOperationalCycleError(
+            "Completed partition extraction row-count mismatch detected. "
+            f"partition={partition_label} candidate_rows={int(candidate_rows)} "
+            f"extracted_rows={extracted_rows}. "
+            "This indicates an incomplete landed-batch partition artifact; rerun this partition."
+        )
 
 
 def _combine_completed_partition_artifacts(

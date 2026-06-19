@@ -53,6 +53,31 @@ def _stage11_frame() -> pd.DataFrame:
     )
 
 
+def _published_store_frame() -> pd.DataFrame:
+    return pd.DataFrame(
+        {
+            "priority_rank": [1, 2],
+            "priority_band": ["BUY_NOW", "REVIEW"],
+            "sku_number": ["1001", "1002"],
+            "sku_description": ["SKU 1001", "SKU 1002"],
+            "store_action": ["BUY", "REVIEW"],
+            "operator_status": ["ORDER_READY", "REVIEW_REQUIRED"],
+            "recommended_order_units": [3, 0],
+            "primary_review_reason": ["", "Needs review"],
+            "decision_reason": ["reason", "reason"],
+        }
+    )
+
+
+def _minimal_published_store_frame() -> pd.DataFrame:
+    return pd.DataFrame(
+        {
+            "sku_number": ["1001", "1002"],
+            "store_action": ["BUY", "REVIEW"],
+        }
+    )
+
+
 def _stage13_review_frame() -> pd.DataFrame:
     return pd.DataFrame(
         {
@@ -107,6 +132,21 @@ def _canonical_stage11_path(artifact_paths: PromotionArtifactPaths, *, run_id: s
     )
 
 
+def _colliding_stage11_path(
+    artifact_paths: PromotionArtifactPaths,
+    *,
+    run_id: str = "pilot-run",
+    collision_key: str,
+) -> Path:
+    return artifact_paths.store_prediction_store_promotion_csv_path(
+        run_id=run_id,
+        store_number="0772",
+        promotion_start_date="2024-09-05",
+        promotion_name="Spring Launch",
+        collision_key=collision_key,
+    )
+
+
 def _canonical_stage13_paths(
     artifact_paths: PromotionArtifactPaths,
     *,
@@ -137,6 +177,86 @@ def _canonical_stage13_paths(
         extension="csv",
     )
     return review_path, pos_path, reconciliation_path
+
+
+def _colliding_stage13_paths(
+    artifact_paths: PromotionArtifactPaths,
+    *,
+    run_id: str = "pilot-run",
+    collision_key: str,
+) -> tuple[Path, Path, Path]:
+    review_path = artifact_paths.store_prediction_store_promotion_artifact_path(
+        run_id=run_id,
+        store_number="0772",
+        promotion_start_date="2024-09-05",
+        promotion_name="Spring Launch",
+        artifact_name="store-prediction-review",
+        extension="csv",
+        collision_key=collision_key,
+    )
+    pos_path = artifact_paths.store_prediction_store_promotion_artifact_path(
+        run_id=run_id,
+        store_number="0772",
+        promotion_start_date="2024-09-05",
+        promotion_name="Spring Launch",
+        artifact_name="pos-order-upload",
+        extension="csv",
+        collision_key=collision_key,
+    )
+    reconciliation_path = artifact_paths.store_prediction_store_promotion_artifact_path(
+        run_id=run_id,
+        store_number="0772",
+        promotion_start_date="2024-09-05",
+        promotion_name="Spring Launch",
+        artifact_name="reconciliation",
+        extension="csv",
+        collision_key=collision_key,
+    )
+    return review_path, pos_path, reconciliation_path
+
+
+def _prediction_manifest_path(
+    artifact_paths: PromotionArtifactPaths,
+    *,
+    run_id: str = "pilot-run",
+    collision_key: str | None = None,
+) -> Path:
+    return artifact_paths.store_prediction_store_promotion_artifact_path(
+        run_id=run_id,
+        store_number="0772",
+        promotion_start_date="2024-09-05",
+        promotion_name="Spring Launch",
+        artifact_name="prediction-manifest",
+        extension="json",
+        collision_key=collision_key,
+    )
+
+
+def _write_prediction_manifest(
+    *,
+    manifest_path: Path,
+    promotion_cycle_id: str,
+    review_path: Path,
+    pos_path: Path,
+    reconciliation_path: Path,
+) -> None:
+    manifest_path.write_text(
+        json.dumps(
+            {
+                "store_number": "0772",
+                "promotion_header_key": "PROMO_A",
+                "promotion_cycle_id": promotion_cycle_id,
+                "output_files": {
+                    "store_prediction_review_csv": str(review_path),
+                    "pos_order_upload_csv": str(pos_path),
+                    "reconciliation_csv": str(reconciliation_path),
+                },
+            },
+            indent=2,
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
 
 
 class PromotionPilotValidationTests(unittest.TestCase):
@@ -216,6 +336,146 @@ class PromotionPilotValidationTests(unittest.TestCase):
 
             self.assertEqual(artifacts.validation_failure_count, 0)
             self.assertIn("/promotions/priceline/0772/prediction/2024-09-05/", str(store_promo_path))
+
+    def test_manifest_resolves_existing_published_store_csv(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_paths = PromotionArtifactPaths(root=Path(temp_dir) / "promotions_artifacts")
+
+            store_promo_path = _canonical_stage11_path(artifact_paths)
+            review_path, pos_path, reconciliation_path = _canonical_stage13_paths(artifact_paths)
+            manifest_path = _prediction_manifest_path(artifact_paths)
+            for path in (store_promo_path, review_path, pos_path, reconciliation_path, manifest_path):
+                path.parent.mkdir(parents=True, exist_ok=True)
+
+            _published_store_frame().to_csv(store_promo_path, index=False)
+            _stage13_review_frame().to_csv(review_path, index=False)
+            _stage13_pos_frame().to_csv(pos_path, index=False)
+            _stage13_reconciliation_frame("PASS").to_csv(reconciliation_path, index=False)
+            _write_prediction_manifest(
+                manifest_path=manifest_path,
+                promotion_cycle_id=store_promo_path.stem,
+                review_path=review_path,
+                pos_path=pos_path,
+                reconciliation_path=reconciliation_path,
+            )
+
+            artifacts = PromotionPilotValidationService().write_validation_outputs(
+                run_id="pilot-run",
+                as_of_date="2024-09-01",
+                source_frame=_source_frame(),
+                stage11_store_promotion_paths=tuple(),
+                stage13_review_paths=(str(review_path),),
+                stage13_pos_upload_paths=(str(pos_path),),
+                stage13_reconciliation_paths=(str(reconciliation_path),),
+                artifact_paths=artifact_paths,
+            )
+
+            self.assertEqual(artifacts.validation_failure_count, 0)
+
+    def test_manifest_resolution_wins_over_deterministic_reconstruction(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_paths = PromotionArtifactPaths(root=Path(temp_dir) / "promotions_artifacts")
+            collision_key = "duplicate-cycle"
+
+            store_promo_path = _colliding_stage11_path(artifact_paths, collision_key=collision_key)
+            review_path, pos_path, reconciliation_path = _colliding_stage13_paths(
+                artifact_paths,
+                collision_key=collision_key,
+            )
+            manifest_path = _prediction_manifest_path(artifact_paths, collision_key=collision_key)
+            for path in (store_promo_path, review_path, pos_path, reconciliation_path, manifest_path):
+                path.parent.mkdir(parents=True, exist_ok=True)
+
+            _published_store_frame().to_csv(store_promo_path, index=False)
+            _stage13_review_frame().to_csv(review_path, index=False)
+            _stage13_pos_frame().to_csv(pos_path, index=False)
+            _stage13_reconciliation_frame("PASS").to_csv(reconciliation_path, index=False)
+            _write_prediction_manifest(
+                manifest_path=manifest_path,
+                promotion_cycle_id=store_promo_path.stem,
+                review_path=review_path,
+                pos_path=pos_path,
+                reconciliation_path=reconciliation_path,
+            )
+
+            artifacts = PromotionPilotValidationService().write_validation_outputs(
+                run_id="pilot-run",
+                as_of_date="2024-09-01",
+                source_frame=_source_frame(),
+                stage11_store_promotion_paths=(str(_canonical_stage11_path(artifact_paths)),),
+                stage13_review_paths=(str(review_path),),
+                stage13_pos_upload_paths=(str(pos_path),),
+                stage13_reconciliation_paths=(str(reconciliation_path),),
+                artifact_paths=artifact_paths,
+            )
+
+            self.assertEqual(artifacts.validation_failure_count, 0)
+
+    def test_store_csv_without_rich_columns_does_not_trigger_missing_file_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_paths = PromotionArtifactPaths(root=Path(temp_dir) / "promotions_artifacts")
+
+            store_promo_path = _canonical_stage11_path(artifact_paths)
+            review_path, pos_path, reconciliation_path = _canonical_stage13_paths(artifact_paths)
+            manifest_path = _prediction_manifest_path(artifact_paths)
+            for path in (store_promo_path, review_path, pos_path, reconciliation_path, manifest_path):
+                path.parent.mkdir(parents=True, exist_ok=True)
+
+            _minimal_published_store_frame().to_csv(store_promo_path, index=False)
+            _stage13_review_frame().to_csv(review_path, index=False)
+            _stage13_pos_frame().to_csv(pos_path, index=False)
+            _stage13_reconciliation_frame("PASS").to_csv(reconciliation_path, index=False)
+            _write_prediction_manifest(
+                manifest_path=manifest_path,
+                promotion_cycle_id=store_promo_path.stem,
+                review_path=review_path,
+                pos_path=pos_path,
+                reconciliation_path=reconciliation_path,
+            )
+
+            artifacts = PromotionPilotValidationService().write_validation_outputs(
+                run_id="pilot-run",
+                as_of_date="2024-09-01",
+                source_frame=_source_frame(),
+                stage11_store_promotion_paths=tuple(),
+                stage13_review_paths=(str(review_path),),
+                stage13_pos_upload_paths=(str(pos_path),),
+                stage13_reconciliation_paths=(str(reconciliation_path),),
+                artifact_paths=artifact_paths,
+            )
+
+            self.assertEqual(artifacts.validation_failure_count, 0)
+            summary = pd.read_csv(artifacts.pilot_validation_summary_csv_path)
+            self.assertFalse(
+                summary["failure_reason"].astype(str).str.contains("missing_store_promotion_output_file").any()
+            )
+
+    def test_missing_prediction_manifest_uses_deterministic_fallback(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_paths = PromotionArtifactPaths(root=Path(temp_dir) / "promotions_artifacts")
+
+            store_promo_path = _canonical_stage11_path(artifact_paths)
+            review_path, pos_path, reconciliation_path = _canonical_stage13_paths(artifact_paths)
+            for path in (store_promo_path, review_path, pos_path, reconciliation_path):
+                path.parent.mkdir(parents=True, exist_ok=True)
+
+            _published_store_frame().to_csv(store_promo_path, index=False)
+            _stage13_review_frame().to_csv(review_path, index=False)
+            _stage13_pos_frame().to_csv(pos_path, index=False)
+            _stage13_reconciliation_frame("PASS").to_csv(reconciliation_path, index=False)
+
+            artifacts = PromotionPilotValidationService().write_validation_outputs(
+                run_id="pilot-run",
+                as_of_date="2024-09-01",
+                source_frame=_source_frame(),
+                stage11_store_promotion_paths=tuple(),
+                stage13_review_paths=(str(review_path),),
+                stage13_pos_upload_paths=(str(pos_path),),
+                stage13_reconciliation_paths=(str(reconciliation_path),),
+                artifact_paths=artifact_paths,
+            )
+
+            self.assertEqual(artifacts.validation_failure_count, 0)
 
     def test_stage13_skips_when_stage12_noop_and_no_new_publications(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

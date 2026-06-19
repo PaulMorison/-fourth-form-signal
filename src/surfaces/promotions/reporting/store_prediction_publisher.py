@@ -88,6 +88,12 @@ PUBLISH_ELIGIBILITY_CLASS_REVIEW_ONLY = "review_only"
 PUBLISH_ELIGIBILITY_CLASS_EXCLUDED_LEGITIMATE = "excluded_legitimate"
 PUBLISH_ELIGIBILITY_CLASS_EXCLUDED_DEFECT = "excluded_defect"
 
+MANUAL_REVIEW_CLIENT_REASON_TO_STRUCTURED_REASON = {
+    "likely capital trap risk: resolve quantity manually before release.": "review_high_leftover_risk",
+    "review required: confidence is below production threshold, so local store context should guide the final call.": "review_low_confidence",
+    "launch demand support is weaker than the total-promo signal; confirm replenishment timing before releasing quantity.": "review_launch_window_support_conflict",
+}
+
 
 @dataclass(frozen=True)
 class PublishEligibilityEvaluation:
@@ -1021,7 +1027,10 @@ class StorePredictionPublisher:
             }
         )
         row["demand_evidence_class"] = str(
-            row.get("demand_evidence_class") or demand_classification.demand_evidence_class
+            _coalesce(
+                row.get("demand_evidence_class"),
+                demand_classification.demand_evidence_class,
+            )
         )
         row["cold_start_flag"] = int(_review_flag_value(row.get("cold_start_flag")) or demand_classification.cold_start_flag)
         row["insufficient_history_flag"] = int(
@@ -1029,9 +1038,17 @@ class StorePredictionPublisher:
         )
         row["artificial_collapse_flag"] = int(demand_classification.artificial_collapse_flag)
         row["publish_eligibility_reason"] = str(
-            row.get("publish_eligibility_reason") or demand_classification.publish_eligibility_reason
+            _coalesce(
+                row.get("publish_eligibility_reason"),
+                demand_classification.publish_eligibility_reason,
+            )
         )
-        row["review_reason"] = str(row.get("review_reason") or demand_classification.review_reason)
+        row["review_reason"] = str(
+            _coalesce(
+                row.get("review_reason"),
+                demand_classification.review_reason,
+            )
+        )
         if demand_classification.requires_review == 1:
             row["review_required_flag"] = 1
 
@@ -1211,6 +1228,24 @@ class StorePredictionPublisher:
         frame["excluded_from_publish_reason"] = [entry.excluded_from_publish_reason for entry in evaluations]
         frame["publish_defect_flag"] = [entry.defect_flag for entry in evaluations]
         frame["publish_policy_contradiction_flag"] = [entry.policy_contradiction_flag for entry in evaluations]
+        existing_review_reason = frame.get(
+            "review_reason",
+            pd.Series("", index=frame.index, dtype="object"),
+        ).fillna("").astype(str).str.strip()
+        derived_review_reason = pd.Series(
+            [
+                entry.publish_eligibility_reason
+                if entry.publish_eligibility_class == PUBLISH_ELIGIBILITY_CLASS_REVIEW_ONLY
+                else ""
+                for entry in evaluations
+            ],
+            index=frame.index,
+            dtype="object",
+        )
+        frame["review_reason"] = existing_review_reason.where(
+            existing_review_reason.ne(""),
+            derived_review_reason,
+        )
         return frame
 
     def _evaluate_publish_eligibility_row(self, row: object) -> PublishEligibilityEvaluation:
@@ -1243,6 +1278,7 @@ class StorePredictionPublisher:
         decision_action = str(getattr(row, "decision_action", "") or "").strip().upper()
         review_reason_text = str(getattr(row, "review_reason", "") or "").strip()
         publish_reason_text = str(getattr(row, "publish_eligibility_reason", "") or "").strip()
+        manual_review_reason = _derive_manual_review_reason_fallback(row)
         manual_review = _review_flag_value(getattr(row, "manual_review_flag", 0)) == 1
         review_required = _review_flag_value(getattr(row, "review_required_flag", 0)) == 1
 
@@ -1265,11 +1301,11 @@ class StorePredictionPublisher:
 
         review_only_reason = ""
         if manual_review:
-            review_only_reason = "manual_review"
+            review_only_reason = manual_review_reason or "manual_review"
         elif review_required:
-            review_only_reason = "review_required"
+            review_only_reason = manual_review_reason or "review_required"
         elif decision_action == "REVIEW":
-            review_only_reason = "review_action"
+            review_only_reason = manual_review_reason or "review_action"
         elif demand_class == DEMAND_EVIDENCE_CLASS_COLD_START:
             review_only_reason = "cold_start_new_line"
         elif demand_class == DEMAND_EVIDENCE_CLASS_ARTIFICIAL_COLLAPSE:
@@ -1297,6 +1333,20 @@ class StorePredictionPublisher:
             legitimate_reason = "true_zero_demand"
         elif publish_reason_text.startswith("excluded_true_zero"):
             legitimate_reason = "true_zero_demand"
+        elif decision_action == "HOLD":
+            legitimate_reason = (
+                publish_reason_text.removeprefix("excluded_legitimate_")
+                if publish_reason_text.startswith("excluded_legitimate_")
+                else "hold_inventory_sufficient"
+            )
+        elif decision_action == "DO_NOT_ORDER":
+            legitimate_reason = (
+                publish_reason_text.removeprefix("excluded_legitimate_")
+                if publish_reason_text.startswith("excluded_legitimate_")
+                else "do_not_order"
+            )
+        elif publish_reason_text.startswith("excluded_legitimate_"):
+            legitimate_reason = publish_reason_text.removeprefix("excluded_legitimate_")
 
         if legitimate_reason:
             return PublishEligibilityEvaluation(
@@ -2146,6 +2196,17 @@ def _coalesce(*values: object) -> object:
         if text and text.lower() not in {"nan", "none", "<na>"}:
             return value
     return ""
+
+
+def _derive_manual_review_reason_fallback(row: object) -> str:
+    review_reason_text = str(getattr(row, "review_reason", "") or "").strip()
+    if review_reason_text:
+        return review_reason_text
+
+    decision_reason_text = str(getattr(row, "decision_reason", "") or "").strip().lower()
+    if not decision_reason_text:
+        return ""
+    return MANUAL_REVIEW_CLIENT_REASON_TO_STRUCTURED_REASON.get(decision_reason_text, "")
 
 
 def _as_date_string(value: object) -> str:
