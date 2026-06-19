@@ -62,9 +62,18 @@ class PromotionDecisionCalibrator:
         disagreement = build_row_cohort_disagreement_score(working)
 
         breakpoints = {
-            "critical": max(minimum_sample_size, int(sample_size.replace(0.0, pd.NA).dropna().quantile(0.25) or minimum_sample_size)),
-            "developing": max(minimum_sample_size + 1, int(sample_size.replace(0.0, pd.NA).dropna().quantile(0.50) or (minimum_sample_size + 1))),
-            "stable": max(minimum_sample_size + 2, int(sample_size.replace(0.0, pd.NA).dropna().quantile(0.75) or (minimum_sample_size + 2))),
+            "critical": max(
+                minimum_sample_size,
+                _safe_int_quantile(sample_size, 0.25, fallback=minimum_sample_size),
+            ),
+            "developing": max(
+                minimum_sample_size + 1,
+                _safe_int_quantile(sample_size, 0.50, fallback=minimum_sample_size + 1),
+            ),
+            "stable": max(
+                minimum_sample_size + 2,
+                _safe_int_quantile(sample_size, 0.75, fallback=minimum_sample_size + 2),
+            ),
         }
         thresholds = {
             "similarity_threshold_suggestion": float(_bounded_quantile(similarity, 0.50, lower=0.45, upper=0.85, default=0.55)),
@@ -122,6 +131,16 @@ def _first_present_series(frame: pd.DataFrame, column_names: tuple[str, ...]) ->
         if column_name in frame.columns:
             return pd.to_numeric(frame[column_name], errors="coerce").fillna(0.0)
     return pd.Series(0.0, index=frame.index, dtype="float64")
+
+
+def _safe_int_quantile(series: pd.Series, quantile: float, *, fallback: int) -> int:
+    clean = pd.to_numeric(series, errors="coerce").replace(0.0, pd.NA).dropna()
+    if clean.empty:
+        return int(fallback)
+    value = clean.quantile(float(quantile))
+    if pd.isna(value):
+        return int(fallback)
+    return int(value)
 
 
 def _bounded_quantile(
