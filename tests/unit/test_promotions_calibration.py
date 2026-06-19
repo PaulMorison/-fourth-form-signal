@@ -55,3 +55,14 @@ class PromotionDecisionCalibrationTests(unittest.TestCase):
             calibration.thresholds["minimum_archetype_sample_size_breakpoints"]["stable"],
             calibration.thresholds["minimum_archetype_sample_size_breakpoints"]["developing"],
         )
+
+    def test_calibration_handles_zero_sample_size_rows(self) -> None:
+        frame = _calibration_frame()
+        frame["nearest_archetype_sample_size"] = 0
+
+        calibration = PromotionDecisionCalibrator().calibrate(frame, minimum_sample_size=3)
+
+        breakpoints = calibration.thresholds["minimum_archetype_sample_size_breakpoints"]
+        self.assertEqual(breakpoints["critical"], 3)
+        self.assertEqual(breakpoints["developing"], 4)
+        self.assertEqual(breakpoints["stable"], 5)

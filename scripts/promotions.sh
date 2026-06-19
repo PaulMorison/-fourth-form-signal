@@ -76,4 +76,4 @@ exec "$python_bin" -m runtime.promotions.promotion_run_controller \
   --artifact-root "$artifact_root" \
   --local-inspection-root "$local_inspection_root" \
   --connect-timeout-seconds "$connect_timeout_seconds" \
-  "${extra_args[@]}"
+  ${extra_args[@]+"${extra_args[@]}"}
