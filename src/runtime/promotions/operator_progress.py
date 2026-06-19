@@ -7,11 +7,16 @@ from datetime import UTC, datetime
 import csv
 from contextlib import contextmanager
 import json
+import os
 from pathlib import Path
 import sys
 from threading import Event, Lock, Thread, current_thread
 import time
-from typing import Sequence, TextIO
+import logging
+import warnings
+from typing import Literal, Sequence, TextIO
+
+import pandas as pd
 
 from data.promotions.mssql_query_executor import (
     PromotionMssqlConnectionError,
@@ -63,6 +68,34 @@ class PromotionOperatorProgressArtifacts:
         return asdict(self)
 
 
+OperatorDisplayMode = Literal["verbose", "operator"]
+
+
+def resolve_operator_display_mode(
+    *,
+    requested_mode: str | None = None,
+) -> OperatorDisplayMode:
+    """Resolve terminal display mode from CLI override or environment."""
+
+    candidate = (requested_mode or os.getenv("PROMOTIONS_OPERATOR_DISPLAY", "verbose")).strip().lower()
+    if candidate in {"operator", "summary", "human"}:
+        return "operator"
+    return "verbose"
+
+
+def configure_operator_console_quiet() -> None:
+    """Reduce engineering noise when operator display mode is active."""
+
+    logging.basicConfig(level=logging.WARNING, format="%(levelname)s %(name)s %(message)s", force=True)
+    warnings.filterwarnings("ignore", category=FutureWarning)
+    try:
+        from pandas.errors import PerformanceWarning
+
+        warnings.filterwarnings("ignore", category=PerformanceWarning)
+    except Exception:
+        pass
+
+
 class PromotionOperatorProgress:
     """Emit clean operator progress to stdout and persist durable run traces."""
 
@@ -72,10 +105,15 @@ class PromotionOperatorProgress:
         run_id: str,
         artifact_paths: PromotionArtifactPaths,
         stream: TextIO | None = None,
+        display_mode: OperatorDisplayMode | str = "verbose",
     ) -> None:
         self._run_id = run_id
         self._artifact_paths = artifact_paths
         self._stream = stream or sys.stdout
+        resolved_mode = str(display_mode).strip().lower()
+        self._display_mode: OperatorDisplayMode = (
+            "operator" if resolved_mode in {"operator", "summary", "human"} else "verbose"
+        )
         self._lines: list[str] = []
         self._stage_records: list[PromotionOperatorStageRecord] = []
         self._active_stage: dict[str, object] | None = None
@@ -86,6 +124,7 @@ class PromotionOperatorProgress:
         self._heartbeat_state: dict[str, object] | None = None
         self._heartbeat_stop_event: Event | None = None
         self._heartbeat_thread: Thread | None = None
+        self._last_heartbeat_emit_perf: float | None = None
 
     def start_run(
         self,
@@ -147,6 +186,18 @@ class PromotionOperatorProgress:
         }
         if sql_settings_summary is not None:
             self._run_context.update(sql_settings_summary.to_context_dict())
+        if self._display_mode == "operator":
+            self._emit("")
+            self._emit("=" * 72)
+            self._emit(f"  PROMOTIONS RUN · {self._run_id}")
+            self._emit(
+                f"  As of {as_of_date}  |  Mode {execution_mode}  |  DB {database}"
+            )
+            self._emit(f"  Outputs {artifact_root}")
+            self._emit("=" * 72)
+            self._emit("")
+            return
+
         self._emit("PROMOTIONS OPERATIONAL CYCLE")
         self._emit(f"run_id: {self._run_id}")
         self._emit(f"execution_mode: {execution_mode}")
@@ -212,10 +263,16 @@ class PromotionOperatorProgress:
             "started_at_perf": time.perf_counter(),
         }
         self._emit("")
+        if self._display_mode == "operator":
+            self._emit(f"[{stage_number:>2}/{total_stages}] {stage_name}")
+            return
         self._emit(f"START STAGE {stage_number}/{total_stages}: {stage_name}")
         self._emit(f"  run_id: {self._run_id}")
 
     def detail(self, message: str) -> None:
+        if self._display_mode == "operator":
+            self._log_only(f"  {message}")
+            return
         self._emit(f"  {message}")
 
     def update_heartbeat(
@@ -335,16 +392,27 @@ class PromotionOperatorProgress:
             note=note,
         )
         self._stage_records.append(record)
-        self._emit(f"FINISH STAGE {record.stage_number}/{record.total_stages}: {record.stage_name}")
-        if row_count is not None:
-            self._emit(f"  rows: {row_count}")
-        if file_count is not None:
-            self._emit(f"  files: {file_count}")
-        for index, output_path in enumerate(normalized_outputs, start=1):
-            self._emit(f"  output_path[{index}/{len(normalized_outputs)}]: {output_path}")
-        if note:
-            self._emit(f"  note: {note}")
-        self._emit(f"  elapsed: {record.elapsed_seconds:.3f}s")
+        if self._display_mode == "operator":
+            summary_parts = [f"        ✓ Done in {_format_duration(record.elapsed_seconds)}"]
+            if row_count is not None:
+                summary_parts.append(f"{_format_integer(row_count)} rows")
+            if file_count is not None:
+                summary_parts.append(f"{_format_integer(file_count)} files")
+            self._emit(" · ".join(summary_parts))
+            if note:
+                self._log_only(f"        note: {note}")
+            self._emit("")
+        else:
+            self._emit(f"FINISH STAGE {record.stage_number}/{record.total_stages}: {record.stage_name}")
+            if row_count is not None:
+                self._emit(f"  rows: {row_count}")
+            if file_count is not None:
+                self._emit(f"  files: {file_count}")
+            for index, output_path in enumerate(normalized_outputs, start=1):
+                self._emit(f"  output_path[{index}/{len(normalized_outputs)}]: {output_path}")
+            if note:
+                self._emit(f"  note: {note}")
+            self._emit(f"  elapsed: {record.elapsed_seconds:.3f}s")
         self._active_stage = None
         return record
 
@@ -377,20 +445,37 @@ class PromotionOperatorProgress:
         )
         self._stage_records.append(record)
         self._emit("")
-        self._emit("FAILED STAGE")
-        self._emit(f"  stage: {record.stage_number}/{record.total_stages} {record.stage_name}")
-        self._emit(f"  exception_type: {record.exception_type}")
-        self._emit(f"  subphase: {record.sql_subphase or 'unavailable'}")
-        self._emit(f"  owner: {owner}")
-        self._emit(f"  reason: {reason}")
-        self._emit(f"  next_action: {action}")
-        for label, path in _iter_failure_artifact_labels(error):
-            self._emit(f"  {label}_path: {path}")
-        self._emit(f"  operator_log_path: {self._artifact_paths.operator_log_path(self._run_id)}")
-        self._emit(f"  operator_summary_json_path: {self._artifact_paths.operator_summary_path(self._run_id)}")
-        self._emit(f"  operator_summary_csv_path: {self._artifact_paths.operator_summary_csv_path(self._run_id)}")
-        self._emit(f"  manifest_root: {self._artifact_paths.manifests_run_root(self._run_id)}")
-        self._emit(f"  elapsed: {record.elapsed_seconds:.3f}s")
+        if self._display_mode == "operator":
+            self._emit("!" * 72)
+            self._emit(
+                f"  FAILED at stage {record.stage_number}/{record.total_stages}: {record.stage_name}"
+            )
+            self._emit(f"  Reason: {reason}")
+            self._emit(f"  Next step: {action}")
+            self._emit(f"  Elapsed: {_format_duration(record.elapsed_seconds)}")
+            self._emit("!" * 72)
+            self._log_only(f"  exception_type: {record.exception_type}")
+            self._log_only(f"  subphase: {record.sql_subphase or 'unavailable'}")
+            self._log_only(f"  owner: {owner}")
+            for label, path in _iter_failure_artifact_labels(error):
+                self._log_only(f"  {label}_path: {path}")
+            self._log_only(f"  operator_log_path: {self._artifact_paths.operator_log_path(self._run_id)}")
+            self._log_only(f"  manifest_root: {self._artifact_paths.manifests_run_root(self._run_id)}")
+        else:
+            self._emit("FAILED STAGE")
+            self._emit(f"  stage: {record.stage_number}/{record.total_stages} {record.stage_name}")
+            self._emit(f"  exception_type: {record.exception_type}")
+            self._emit(f"  subphase: {record.sql_subphase or 'unavailable'}")
+            self._emit(f"  owner: {owner}")
+            self._emit(f"  reason: {reason}")
+            self._emit(f"  next_action: {action}")
+            for label, path in _iter_failure_artifact_labels(error):
+                self._emit(f"  {label}_path: {path}")
+            self._emit(f"  operator_log_path: {self._artifact_paths.operator_log_path(self._run_id)}")
+            self._emit(f"  operator_summary_json_path: {self._artifact_paths.operator_summary_path(self._run_id)}")
+            self._emit(f"  operator_summary_csv_path: {self._artifact_paths.operator_summary_csv_path(self._run_id)}")
+            self._emit(f"  manifest_root: {self._artifact_paths.manifests_run_root(self._run_id)}")
+            self._emit(f"  elapsed: {record.elapsed_seconds:.3f}s")
         self._active_stage = None
         return record
 
@@ -399,10 +484,117 @@ class PromotionOperatorProgress:
         *,
         outputs: dict[str, str],
     ) -> None:
+        if self._display_mode == "operator":
+            self._emit("")
+            self._emit("-" * 72)
+            self._emit("  KEY OUTPUTS")
+            priority_keys = (
+                "store_prediction_download_path",
+                "nas_store_prediction_download_path",
+                "inspection_review_packet_csv_path",
+                "operational_cycle_manifest_path",
+                "operator_summary_json_path",
+                "local_inspection_csv_path",
+            )
+            emitted: set[str] = set()
+            for key in priority_keys:
+                path = outputs.get(key)
+                if path and path not in {"unavailable", "not_generated"}:
+                    self._emit(f"  {key}: {path}")
+                    emitted.add(key)
+            for key, path in sorted(outputs.items()):
+                if key in emitted or path in {"unavailable", "not_generated", "none"}:
+                    continue
+                if key.endswith("_path") and "stage6" not in key and "completed_rendered" not in key:
+                    self._log_only(f"  {key}: {path}")
+            self._emit("-" * 72)
+            return
+
         self._emit("")
         self._emit("FINAL OUTPUTS")
         for label, path in outputs.items():
             self._emit(f"  {label}: {path}")
+
+    def emit_run_summary(self) -> None:
+        if self._display_mode != "operator" or not self._stage_records:
+            return
+        self._emit("")
+        self._emit("-" * 72)
+        self._emit("  RUN SUMMARY")
+        self._emit("-" * 72)
+        self._emit(f"  {'Stage':<42} {'Time':>8}  {'Rows':>10}")
+        total_elapsed = 0.0
+        for record in self._stage_records:
+            if record.status != "completed":
+                continue
+            elapsed = float(record.elapsed_seconds or 0.0)
+            total_elapsed += elapsed
+            rows = _format_integer(record.row_count) if record.row_count is not None else "—"
+            self._emit(
+                f"  {record.stage_name[:42]:<42} {_format_duration(elapsed):>8}  {rows:>10}"
+            )
+        self._emit(f"  {'TOTAL':<42} {_format_duration(total_elapsed):>8}")
+        self._emit("-" * 72)
+
+    def emit_order_preview(self, *, store_prediction_csv_path: str | Path, limit: int = 20) -> None:
+        if self._display_mode != "operator":
+            return
+        csv_path = Path(store_prediction_csv_path)
+        if not csv_path.exists():
+            self._emit("")
+            self._emit("  ORDER PREVIEW: store prediction CSV not available.")
+            return
+        frame = pd.read_csv(csv_path, keep_default_na=False, low_memory=False)
+        if frame.empty:
+            self._emit("")
+            self._emit("  ORDER PREVIEW: no rows in store prediction CSV.")
+            return
+
+        preview_columns = [
+            column
+            for column in (
+                "store_number",
+                "sku_number",
+                "sku_description",
+                "operator_action",
+                "order_units",
+                "expected_promo_demand",
+                "current_soh",
+                "projected_stock_gap_units",
+                "reason_short",
+                "review_flag",
+            )
+            if column in frame.columns
+        ]
+        if not preview_columns:
+            preview_columns = list(frame.columns[:8])
+
+        order_frame = frame.copy()
+        if "order_units" in order_frame.columns:
+            order_units = pd.to_numeric(order_frame["order_units"], errors="coerce").fillna(0)
+            order_frame = order_frame.loc[order_units.gt(0)].copy()
+        if order_frame.empty:
+            order_frame = frame.head(limit)
+        else:
+            order_frame = order_frame.head(limit)
+
+        self._emit("")
+        self._emit("-" * 72)
+        self._emit(f"  ORDER RECOMMENDATIONS (showing {len(order_frame)} of {len(frame)} rows)")
+        self._emit("-" * 72)
+        header = "  " + " | ".join(f"{column:>16}" for column in preview_columns[:6])
+        self._emit(header)
+        self._emit("  " + "-" * (len(header) - 2))
+        for _, row in order_frame.iterrows():
+            values = []
+            for column in preview_columns[:6]:
+                text = str(row.get(column, "")).strip().replace("\n", " ")
+                if len(text) > 16:
+                    text = text[:15] + "…"
+                values.append(f"{text:>16}")
+            self._emit("  " + " | ".join(values))
+        self._emit("-" * 72)
+        self._emit(f"  Full review file: {csv_path}")
 
     def persist(
         self,
@@ -544,6 +736,24 @@ class PromotionOperatorProgress:
             stage_timings_path=str(stage_timings_path),
         )
 
+    def finalize_operator_view(
+        self,
+        *,
+        status: str,
+        store_prediction_csv_path: str | Path | None = None,
+    ) -> None:
+        if self._display_mode != "operator":
+            return
+        self.emit_run_summary()
+        if store_prediction_csv_path is not None:
+            self.emit_order_preview(store_prediction_csv_path=store_prediction_csv_path)
+        self._emit("")
+        if status == "completed":
+            self._emit("  ✓ Promotions run completed successfully.")
+        else:
+            self._emit(f"  Run finished with status: {status}")
+        self._emit("")
+
     @property
     def has_active_stage(self) -> bool:
         return self._active_stage is not None
@@ -559,11 +769,43 @@ class PromotionOperatorProgress:
         self._lines.append(message)
         print(message, file=self._stream, flush=True)
 
+    def _log_only(self, message: str) -> None:
+        self._lines.append(message)
+
     def _emit_heartbeat(self, snapshot: dict[str, object]) -> None:
         active_stage = self._active_stage
         if active_stage is None:
             return
         elapsed_seconds = time.perf_counter() - float(active_stage["started_at_perf"])
+        if self._display_mode == "operator":
+            now_perf = time.perf_counter()
+            if (
+                self._last_heartbeat_emit_perf is not None
+                and (now_perf - self._last_heartbeat_emit_perf) < 8.0
+            ):
+                return
+            self._last_heartbeat_emit_perf = now_perf
+            parts = [
+                "        … still running",
+                _format_duration(elapsed_seconds),
+                str(snapshot.get("subtask", "")).strip(),
+            ]
+            row_count = snapshot.get("row_count")
+            if row_count is not None:
+                parts.append(f"{_format_integer(int(row_count))} rows")
+            self._emit(" · ".join(part for part in parts if part))
+            self._log_only(
+                " | ".join(
+                    [
+                        f"HEARTBEAT STAGE {snapshot.get('stage_number')}/{snapshot.get('total_stages')}",
+                        str(snapshot.get("stage_name")),
+                        f"subphase: {snapshot.get('subtask', '')}",
+                        f"elapsed_seconds: {elapsed_seconds:.1f}",
+                        f"rows: {row_count}" if row_count is not None else "",
+                    ]
+                ).strip()
+            )
+            return
         parts = [
             f"  HEARTBEAT STAGE {snapshot.get('stage_number')}/{snapshot.get('total_stages')}",
             str(snapshot.get("stage_name")),
@@ -582,6 +824,26 @@ class PromotionOperatorProgress:
         if self._active_stage is None:
             raise RuntimeError("No active operator stage is available.")
         return self._active_stage
+
+
+def _format_duration(seconds: float | None) -> str:
+    if seconds is None:
+        return "—"
+    total_seconds = max(float(seconds), 0.0)
+    if total_seconds < 60.0:
+        return f"{total_seconds:.1f}s"
+    minutes = int(total_seconds // 60)
+    remainder = int(round(total_seconds % 60))
+    if remainder == 60:
+        minutes += 1
+        remainder = 0
+    return f"{minutes}m {remainder:02d}s"
+
+
+def _format_integer(value: int | float | None) -> str:
+    if value is None:
+        return "—"
+    return f"{int(value):,}"
 
 
 def classify_operator_failure(error: BaseException) -> tuple[str, str, str]:
