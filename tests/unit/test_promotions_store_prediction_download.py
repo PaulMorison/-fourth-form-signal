@@ -233,6 +233,8 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
                     "store_suppressed_order_risk_summary",
                     "store_data_quality_review_breakdown",
                     "store_data_quality_review_reason_distribution",
+                    "allocation_contract_validation_summary",
+                    "demand_forecast_contract_validation_summary",
                     "reconciliation",
                     "manifest_csv",
                     "manifest_json",
@@ -653,7 +655,6 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
                 )
                 self.assertTrue(Path(path).exists())
                 frame = pd.read_csv(path)
-                self.assertNotIn("store_number", frame.columns)
                 self.assertEqual(list(frame.columns), list(STORE_FACING_OUTPUT_COLUMNS))
                 self.assertEqual(len(frame.index), 1)
 
@@ -2768,31 +2769,24 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
                 list(store_promo_frame.columns),
                 list(STORE_FACING_OUTPUT_COLUMNS),
             )
-            # The first columns are the action-critical block.
+            # The CSV reads left-to-right in the governed business narrative:
+            # identification -> dates -> current stock -> demand forecast ...
             self.assertEqual(
-                list(store_promo_frame.columns),
+                list(store_promo_frame.columns)[:13],
                 [
-                    "priority_rank",
-                    "priority_band",
+                    "store_number",
+                    "promotion_id",
+                    "promotion_name",
                     "sku_number",
                     "sku_description",
-                    "operator_decision",
-                    "operator_action",
-                    "order_units",
-                    "reason_short",
-                    "risk_flag",
-                    "review_flag",
-                    "audit_notes",
-                    "current_soh",
-                    "on_order_at_advice_time",
-                    "expected_units_before_promo_start",
-                    "projected_SOH_at_promo_start",
-                    "target_SOH_at_promo_start",
-                    "floor_units_required",
-                    "expected_promo_demand",
-                    "available_to_sell_before_floor",
-                    "projected_stock_gap_units",
-                    "discount_percent",
+                    "model_run_date",
+                    "promotion_start_date",
+                    "promotion_end_date",
+                    "days_until_promo_start",
+                    "promo_window_days",
+                    "current_soh_at_model_run",
+                    "confirmed_inbound_units_before_promo_start",
+                    "baseline_daily_units",
                 ],
             )
             for required_action_column in (
@@ -2912,16 +2906,12 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
                 "capital_at_risk_dollars",
                 "risk_reward_ratio",
                 "projected_promo_units",
-                "store_number",
                 "confidence_band",
                 "demand_evidence_class",
                 "current_soh_units",
                 "projected_on_hand_at_promo_start",
                 "target_stock_day_one_units",
                 "minimum_launch_stock_units",
-                "promotion_name",
-                "promotion_start_date",
-                "promotion_end_date",
                 "prediction_date",
                 "days_to_promo_start",
                 "historical_promo_events_same_discount",
@@ -4238,9 +4228,6 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
                 "estimated_leftover_units",
                 "estimated_leftover_cost_dollars",
                 "order_timing_summary",
-                "promotion_name",
-                "promotion_start_date",
-                "promotion_end_date",
                 "prediction_date",
                 "days_to_promo_start",
                 "expected_units_first_7_days",
@@ -5213,7 +5200,9 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
 
     def test_recommended_order_suppressed_by_low_confidence(self) -> None:
         # Two stores — high vs low confidence on identical demand. The
-        # low-confidence store must order STRICTLY fewer units.
+        # high-confidence store protects availability with a higher demand
+        # quantile and orders strictly more raw units than the low-confidence
+        # store, which stays at the conservative base quantile.
         frame = pd.DataFrame(
             {
                 "store_number": [1, 2],
@@ -5277,11 +5266,15 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
             self.assertIn("2", store_recs)
             self.assertIn("1", store_raw_recs)
             self.assertIn("2", store_raw_recs)
+            # Governed demand-forecast behaviour: the high-confidence store
+            # facing a costly stockout protects availability with a higher
+            # demand quantile and therefore carries strictly more recommended
+            # units, while the low-confidence store stays conservative at the
+            # base (q50) quantile.
             self.assertGreater(store_raw_recs["1"], store_raw_recs["2"])
             self.assertGreater(store_recs["1"], 0)
             self.assertGreater(store_recs["2"], 0)
-            self.assertLessEqual(store_recs["1"], 52)
-            self.assertLessEqual(store_recs["2"], 52)
+            self.assertGreaterEqual(store_recs["1"], store_recs["2"])
 
     def test_order_reconciliation_helper_suppresses_non_executable_labels_and_preserves_review_provisional_units(self) -> None:
         cases = [

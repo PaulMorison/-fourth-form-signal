@@ -143,10 +143,15 @@ def test_validation_catches_identity_failures() -> None:
         expected_promo_window_demand_units=pd.Series([8.0, 5.0]),
         floor_units_required_at_promo_start=pd.Series([2.0, 2.0]),
     )
+    frame["audit_notes"] = ""
+    frame["priority_band"] = "REVIEW"
+    frame["operator_action"] = "REVIEW"
+    # Row 0: stock identity violation only.
     frame.loc[0, "projected_soh_at_promo_start_before_order"] = 999
-    frame["audit_notes"] = "demand=NO_DEMAND"
-    frame["priority_band"] = "BUY_NOW"
-    frame["operator_action"] = "DO_NOT_BUY"
+    # Row 1: contradiction violations only (positive promo demand present).
+    frame.loc[1, "audit_notes"] = "demand=NO_DEMAND"
+    frame.loc[1, "priority_band"] = "BUY_NOW"
+    frame.loc[1, "operator_action"] = "DO_NOT_BUY"
     summary, issues = validate_allocation_stock_contract_frame(frame)
     assert summary.rows_failing_stock_identity == 1
     assert summary.rows_with_no_demand_label_but_positive_demand == 1

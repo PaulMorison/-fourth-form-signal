@@ -15,6 +15,13 @@ import numpy as np
 import pandas as pd
 
 from runtime.promotions.config import PromotionArtifactPaths
+from models.promotions.allocation_demand_forecast_contract import (
+    build_demand_forecast_contract_frame,
+    build_demand_forecast_validation_summary_frame,
+    log_demand_forecast_validation,
+    sync_demand_forecast_aliases,
+    validate_demand_forecast_contract_frame,
+)
 from models.promotions.order_policy_adjustments import build_order_policy_adjustments
 from state.promotions.feature_engineering.demand.ft_order_decision_diagnostics import (
     build_live_order_decision_diagnostics,
@@ -146,6 +153,11 @@ STORE_FACING_ROW_LEVEL_EVIDENCE_COLUMNS: tuple[str, ...] = ()
 
 STORE_FACING_PROMOTION_LEVEL_DIAGNOSTIC_COLUMNS: tuple[str, ...] = ()
 
+# ---- Operator OUTPUT contract, defined as ordered business-narrative blocks.
+# The CSV reads left-to-right:
+#   identification -> dates -> current stock -> demand forecast ->
+#   selected quantile -> promo-start target -> order decision -> priority ->
+#   explanation -> deprecated aliases (retained one release).
 STORE_FACING_VISIBLE_IDENTITY_COLUMNS = (
     "store_number",
     "promotion_id",
@@ -154,38 +166,85 @@ STORE_FACING_VISIBLE_IDENTITY_COLUMNS = (
     "sku_description",
 )
 
-STORE_FACING_SIMPLIFIED_OPERATOR_COLUMNS = (
+STORE_FACING_DATE_COLUMNS = (
+    "model_run_date",
+    "promotion_start_date",
+    "promotion_end_date",
+    "days_until_promo_start",
+    "promo_window_days",
+)
+
+STORE_FACING_CURRENT_STOCK_COLUMNS = (
+    "current_soh_at_model_run",
+    "confirmed_inbound_units_before_promo_start",
+)
+
+# Governed demand-forecast contract — forecast block (sufficient-stock demand).
+STORE_FACING_DEMAND_FORECAST_BLOCK = (
+    "baseline_daily_units",
+    "promo_uplift_factor",
+    "pre_promo_demand_units",
+    "promo_window_demand_units",
+    "total_expected_demand_units",
+    "stock_constraint_adjustment_units",
+    "stock_constraint_flag",
+    "demand_forecast_units_q50",
+    "demand_forecast_units_q70",
+    "demand_forecast_units_q85",
+    "demand_forecast_units_q95",
+)
+
+# Governed demand-forecast contract — selected-quantile + provenance block.
+STORE_FACING_SELECTED_DEMAND_BLOCK = (
+    "selected_demand_quantile",
+    "selected_demand_units",
+    "demand_forecast_confidence",
+    "demand_forecast_basis",
+    "demand_forecast_reason_code",
+    "demand_forecast_warning",
+)
+
+# Full demand-forecast column set (used for schema membership).
+STORE_FACING_DEMAND_FORECAST_COLUMNS = (
+    *STORE_FACING_DEMAND_FORECAST_BLOCK,
+    *STORE_FACING_SELECTED_DEMAND_BLOCK,
+)
+
+STORE_FACING_PROMO_START_TARGET_COLUMNS = (
+    "projected_soh_at_promo_start_before_order",
+    "floor_units_required_at_promo_start",
+    "target_soh_at_promo_start",
+    "raw_stock_gap_units",
+)
+
+# `order_units` is the single operator-visible order quantity (the governed
+# recommended_order_units value); recommended_order_units itself stays
+# audit-only per the internal-order-state governance.
+STORE_FACING_ORDER_DECISION_COLUMNS = (
+    "recommended_order_units_before_pack_rounding",
+    "order_units",
+    "projected_soh_at_promo_start_after_order",
+    "projected_soh_at_promo_end_after_order",
+    "stock_position_status",
+    "order_reason_code",
+)
+
+STORE_FACING_PRIORITY_COLUMNS = (
+    "priority_rank",
+    "priority_band",
+)
+
+STORE_FACING_EXPLANATION_COLUMNS = (
     "operator_decision",
     "operator_action",
-    "order_units",
     "reason_short",
     "risk_flag",
     "review_flag",
     "audit_notes",
 )
 
-STORE_FACING_RETAINED_CONTEXT_COLUMNS = (
-    "model_run_date",
-    "promotion_start_date",
-    "promotion_end_date",
-    "days_until_promo_start",
-    "promo_window_days",
-    "current_soh_at_model_run",
-    "confirmed_inbound_units_before_promo_start",
-    "expected_pre_promo_demand_units",
-    "expected_promo_window_demand_units",
-    "total_expected_demand_model_run_to_promo_end_units",
-    "projected_soh_at_promo_start_before_order",
-    "floor_units_required_at_promo_start",
-    "target_soh_at_promo_start",
-    "raw_stock_gap_units",
-    "recommended_order_units_before_pack_rounding",
-    "recommended_order_units",
-    "projected_soh_at_promo_start_after_order",
-    "projected_soh_at_promo_end_after_order",
-    "stock_position_status",
-    "order_reason_code",
-    # Deprecated aliases retained for one release.
+# Deprecated aliases retained for one release for downstream compatibility.
+STORE_FACING_DEPRECATED_ALIAS_COLUMNS = (
     "current_soh",
     "on_order_at_advice_time",
     "expected_units_before_promo_start",
@@ -196,6 +255,27 @@ STORE_FACING_RETAINED_CONTEXT_COLUMNS = (
     "available_to_sell_before_floor",
     "projected_stock_gap_units",
     "discount_percent",
+)
+
+# Operator simplified-decision fields (used by governance checks).
+STORE_FACING_SIMPLIFIED_OPERATOR_COLUMNS = (
+    "operator_decision",
+    "operator_action",
+    "order_units",
+    "reason_short",
+    "risk_flag",
+    "review_flag",
+    "audit_notes",
+)
+
+# Retained-context union (schema membership for the canonical contract fields).
+STORE_FACING_RETAINED_CONTEXT_COLUMNS = (
+    *STORE_FACING_DATE_COLUMNS,
+    *STORE_FACING_CURRENT_STOCK_COLUMNS,
+    *STORE_FACING_DEMAND_FORECAST_COLUMNS,
+    *STORE_FACING_PROMO_START_TARGET_COLUMNS,
+    *STORE_FACING_ORDER_DECISION_COLUMNS,
+    *STORE_FACING_DEPRECATED_ALIAS_COLUMNS,
 )
 
 STORE_FACING_SHADOW_POLICY_COLUMNS = (
@@ -228,10 +308,15 @@ STORE_FACING_INTERNAL_ORDER_STATE_COLUMNS = (
 
 STORE_FACING_OUTPUT_COLUMNS = (
     *STORE_FACING_VISIBLE_IDENTITY_COLUMNS,
-    *STORE_FACING_RETAINED_CONTEXT_COLUMNS,
-    "priority_rank",
-    "priority_band",
-    *STORE_FACING_SIMPLIFIED_OPERATOR_COLUMNS,
+    *STORE_FACING_DATE_COLUMNS,
+    *STORE_FACING_CURRENT_STOCK_COLUMNS,
+    *STORE_FACING_DEMAND_FORECAST_BLOCK,
+    *STORE_FACING_SELECTED_DEMAND_BLOCK,
+    *STORE_FACING_PROMO_START_TARGET_COLUMNS,
+    *STORE_FACING_ORDER_DECISION_COLUMNS,
+    *STORE_FACING_PRIORITY_COLUMNS,
+    *STORE_FACING_EXPLANATION_COLUMNS,
+    *STORE_FACING_DEPRECATED_ALIAS_COLUMNS,
 )
 
 # Full intermediate schema retained for internal consumers (manager summary,
@@ -391,6 +476,26 @@ STORE_FACING_SCHEMA_COLUMNS = (
     "SKU_bias",
     # Validation flags
     "data_quality_flag",
+    # Governed allocation stock contract canonical fields (also surfaced in OUTPUT)
+    "model_run_date",
+    "days_until_promo_start",
+    "promo_window_days",
+    "current_soh_at_model_run",
+    "confirmed_inbound_units_before_promo_start",
+    "expected_pre_promo_demand_units",
+    "expected_promo_window_demand_units",
+    "total_expected_demand_model_run_to_promo_end_units",
+    "projected_soh_at_promo_start_before_order",
+    "floor_units_required_at_promo_start",
+    "target_soh_at_promo_start",
+    "raw_stock_gap_units",
+    "recommended_order_units_before_pack_rounding",
+    "projected_soh_at_promo_start_after_order",
+    "projected_soh_at_promo_end_after_order",
+    "stock_position_status",
+    "order_reason_code",
+    # Governed demand forecast contract fields (also surfaced in OUTPUT)
+    *STORE_FACING_DEMAND_FORECAST_COLUMNS,
 )
 
 STORE_FACING_INTEGER_COLUMNS = (
@@ -975,6 +1080,31 @@ class PromotionStorePredictionDownloadBuilder:
             )
             diagnostics_paths["allocation_contract_validation_summary_csv_path"] = str(
                 allocation_validation_summary_path
+            )
+        demand_forecast_validation_summary_path = (
+            artifact_paths.store_prediction_diagnostics_root(run_id)
+            / "demand_forecast_contract_validation_summary.csv"
+        )
+        demand_forecast_validation_summary_path.parent.mkdir(parents=True, exist_ok=True)
+        demand_forecast_summary_payload = store_facing_projection_frame.attrs.get(
+            "demand_forecast_contract_validation_summary"
+        )
+        if demand_forecast_summary_payload:
+            demand_forecast_validation_summary_frame = pd.DataFrame([demand_forecast_summary_payload])
+            demand_forecast_validation_summary_frame.to_csv(
+                demand_forecast_validation_summary_path, index=False
+            )
+            generated_file_rows.append(
+                _build_file_manifest_row(
+                    run_id=run_id,
+                    as_of_date=as_of_date,
+                    file_type="demand_forecast_contract_validation_summary",
+                    file_path=str(demand_forecast_validation_summary_path),
+                    frame=demand_forecast_validation_summary_frame,
+                )
+            )
+            diagnostics_paths["demand_forecast_contract_validation_summary_csv_path"] = str(
+                demand_forecast_validation_summary_path
             )
         store_facing_output_frame = _project_store_facing_output_columns(store_facing_projection_frame)
         label_distribution_path = artifact_paths.store_prediction_diagnostics_root(run_id) / "store_action_label_distribution.csv"
@@ -9558,19 +9688,30 @@ def _apply_allocation_contract_final_orders(
 ) -> pd.DataFrame:
     """Keep final operator order units aligned with the governed stock contract."""
     out = store_frame.copy()
-    contract_order = pd.to_numeric(out["recommended_order_units"], errors="coerce").fillna(0.0).clip(lower=0.0)
+    # The order reconciliation frame has already applied operator-decision
+    # gating (non-executable labels, review holds, low-SOH policy, hard
+    # blockers) to the governed contract order that was published as
+    # `raw_model_order_units`. The operator-visible recommended order must
+    # equal that gated final so the report stays internally consistent.
+    final_units = pd.to_numeric(out["final_store_order_units"], errors="coerce").fillna(0.0).clip(lower=0.0)
+    final_units_int = final_units.round(0).astype("int64")
+    final_value = pd.to_numeric(
+        out.get("final_store_order_value", pd.Series(0.0, index=out.index)),
+        errors="coerce",
+    ).fillna(0.0).clip(lower=0.0)
+    out["final_store_order_units"] = final_units_int
+    out["recommended_order_units"] = final_units_int
+    out["final_store_order_value"] = final_value.round(2).astype(float)
+    out["recommended_order_value"] = out["final_store_order_value"]
+
+    # Where a genuine stock gap was suppressed to zero by the operator-decision
+    # gating without an explicit hard blocker, record a documented review
+    # blocker so the gap/order reconciliation remains auditable.
+    raw_gap = pd.to_numeric(out.get("raw_stock_gap_units", pd.Series(0.0, index=out.index)), errors="coerce").fillna(0.0)
     order_reason = out.get("order_reason_code", pd.Series("", index=out.index)).fillna("").astype(str).str.strip()
     has_hard_blocker = order_reason.isin(HARD_ORDER_BLOCKER_CODES)
-    contract_order = contract_order.where(~has_hard_blocker, 0.0)
-    contract_order_int = contract_order.round(0).astype("int64")
-    prior_value = pd.to_numeric(out.get("recommended_order_value", pd.Series(0.0, index=out.index)), errors="coerce").fillna(0.0)
-    prior_units = pd.to_numeric(out.get("recommended_order_units", contract_order_int), errors="coerce").fillna(0.0)
-    unit_cost = prior_value.divide(prior_units.where(prior_units.gt(0.0), 1.0)).replace([np.inf, -np.inf], np.nan).fillna(0.0)
-    out["raw_model_order_units"] = contract_order_int
-    out["final_store_order_units"] = contract_order_int
-    out["recommended_order_units"] = contract_order_int
-    out["final_store_order_value"] = (contract_order_int.astype("float64") * unit_cost).round(2).astype(float)
-    out["recommended_order_value"] = out["final_store_order_value"]
+    suppressed_by_gating = raw_gap.gt(0.0) & final_units_int.le(0) & ~has_hard_blocker
+    out["order_reason_code"] = order_reason.where(~suppressed_by_gating, "blocked_by_manual_review")
     return out
 
 
@@ -9676,6 +9817,77 @@ def _build_store_facing_frame(
         .astype(float)
     )
 
+    # ---- Governed demand-forecast contract (runs BEFORE the stock contract) ----
+    # Forecasted units must represent expected demand under sufficient stock,
+    # not raw historical sales which may be stock-constrained. The demand
+    # contract separates pre-promo leakage from promo-window demand and never
+    # silently fills missing demand with zero (routes to REVIEW instead).
+    raw_soh_for_integrity = pd.to_numeric(frame["current_soh_units"], errors="coerce")
+    demand_confidence_fraction = (
+        _numeric_series(frame, ("final_confidence_score",))
+        .fillna(CAPITAL_AT_RISK_DEFAULT_CONFIDENCE)
+        .clip(lower=0.0, upper=1.0)
+    )
+    demand_evidence_lower = frame["demand_evidence_class"].astype(str).str.strip().str.lower()
+    demand_sparse_mask = demand_evidence_lower.isin(ORDER_EVIDENCE_SPARSE_CLASSES) | demand_evidence_lower.isin(
+        ORDER_EVIDENCE_NO_EVIDENCE_CLASSES
+    )
+    demand_cash_band = (
+        frame.get("estimated_cash_risk_band", pd.Series("", index=frame.index))
+        .fillna("")
+        .astype(str)
+        .str.upper()
+    )
+    demand_capital_drag_mask = demand_cash_band.eq("HIGH")
+    # Pass the raw (unfilled) model promo prediction so a missing forecast can
+    # route to baseline/REVIEW instead of being silently coerced to zero.
+    model_promo_units_raw = pd.to_numeric(frame["predicted_units_total_promo"], errors="coerce")
+    # Stockout is costly when on-hand plus confirmed inbound cannot cover the
+    # expected promo-window demand. Combined with high trust this escalates the
+    # selected demand quantile (protect availability); low trust stays at q50.
+    demand_soh_plus_inbound = (
+        raw_soh_for_integrity.clip(lower=0.0).fillna(0.0)
+        + pd.to_numeric(frame["qty_on_order_units"], errors="coerce").fillna(0.0).clip(lower=0.0)
+    )
+    demand_high_stockout_cost = demand_soh_plus_inbound.lt(
+        model_promo_units_raw.fillna(0.0)
+    ) & model_promo_units_raw.fillna(0.0).gt(0.0)
+    demand_forecast_frame = build_demand_forecast_contract_frame(
+        model_run_date=as_of_date or "",
+        promotion_start_date=frame["promotion_start_date"],
+        promotion_end_date=frame["promotion_end_date"],
+        baseline_daily_units=out["expected_units_per_day"],
+        promo_uplift_factor=1.0,
+        pre_promo_demand_units_input=bounded_expected_pre,
+        model_promo_window_units=model_promo_units_raw,
+        confidence_fraction=demand_confidence_fraction,
+        sparse_or_weak_evidence=demand_sparse_mask,
+        negative_soh_detected=raw_soh_for_integrity.lt(0.0),
+        high_capital_drag=demand_capital_drag_mask,
+        high_stockout_cost=demand_high_stockout_cost,
+    )
+    demand_validation_started = time.perf_counter()
+    demand_validation_summary, demand_validation_issues = validate_demand_forecast_contract_frame(
+        demand_forecast_frame
+    )
+    log_demand_forecast_validation(demand_validation_summary, started_at=demand_validation_started)
+    for column_name in demand_forecast_frame.columns:
+        out[column_name] = demand_forecast_frame[column_name]
+    out = sync_demand_forecast_aliases(out)
+    out.attrs["demand_forecast_contract_validation_summary"] = demand_validation_summary.to_dict()
+    out.attrs["demand_forecast_contract_validation_issue_count"] = int(len(demand_validation_issues.index))
+
+    # The allocation stock contract consumes the governed demand fields: the
+    # horizon-bounded pre-promo demand and the policy-selected promo-window
+    # demand quantile. Selected demand defaults to q50 (the model prediction)
+    # so governed production ordering is preserved for the common case.
+    demand_pre_promo_units = pd.to_numeric(
+        demand_forecast_frame["pre_promo_demand_units"], errors="coerce"
+    ).fillna(0.0).clip(lower=0.0)
+    demand_selected_units = pd.to_numeric(
+        demand_forecast_frame["selected_demand_units"], errors="coerce"
+    ).fillna(0.0).clip(lower=0.0)
+
     # ---- Current stock position (governed allocation contract) ----------
     soh = pd.to_numeric(frame["current_soh_units"], errors="coerce").fillna(0.0)
     on_order = pd.to_numeric(frame["qty_on_order_units"], errors="coerce").fillna(0.0)
@@ -9690,8 +9902,8 @@ def _build_store_facing_frame(
         promotion_end_date=frame["promotion_end_date"],
         current_soh_at_model_run=soh,
         confirmed_inbound_units_before_promo_start=on_order,
-        expected_pre_promo_demand_units=bounded_expected_pre,
-        expected_promo_window_demand_units=expected_units_per_period,
+        expected_pre_promo_demand_units=demand_pre_promo_units,
+        expected_promo_window_demand_units=demand_selected_units,
         floor_units_required_at_promo_start=floor_units,
         pack_size=pack_size,
     )
