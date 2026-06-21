@@ -123,6 +123,11 @@ DEMAND_COLLAPSE_FEATURE_RATIO = 3.0
 DEMAND_COLLAPSE_RISK_WARNING = "DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER"
 DEMAND_COLLAPSE_RISK_DETAIL = "MODEL_PREDICTION_COLLAPSE_RISK"
 
+# Phase 3B — tiny positive model demand must not be masked as 1 whole unit.
+MODEL_DEMAND_COLLAPSED_WARNING = "MODEL_DEMAND_COLLAPSED"
+TINY_MODEL_DEMAND_THRESHOLD = 1.0
+CUSTOMER_READY_TINY_MODEL_DEMAND_SHARE_THRESHOLD = 0.75
+
 
 @dataclass(frozen=True)
 class DemandForecastInputRow:
@@ -171,6 +176,11 @@ def _is_valid_number(value: float | None) -> bool:
 
 def _as_whole_units(value: float) -> int:
     return int(max(round(float(value)), 0))
+
+
+def _canonical_demand_units(value: float) -> float:
+    """Preserve fractional model demand for canonical contract fields."""
+    return round(max(float(value), 0.0), 4)
 
 
 def compute_days_until_promo_start(
@@ -230,13 +240,13 @@ def _resolve_uncertainty(
     return max(min(uncertainty, 1.0), 0.0)
 
 
-def _compute_quantiles(*, base_units: float, uncertainty: float) -> tuple[int, int, int, int]:
+def _compute_quantiles(*, base_units: float, uncertainty: float) -> tuple[float, float, float, float]:
     base = max(float(base_units), 0.0)
     spread = QUANTILE_SPREAD_FLOOR + QUANTILE_SPREAD_GAIN * max(min(uncertainty, 1.0), 0.0)
-    q50 = _as_whole_units(base)
-    q70 = _as_whole_units(base * (1.0 + QUANTILE_MULTIPLIER_Q70 * spread))
-    q85 = _as_whole_units(base * (1.0 + QUANTILE_MULTIPLIER_Q85 * spread))
-    q95 = _as_whole_units(base * (1.0 + QUANTILE_MULTIPLIER_Q95 * spread))
+    q50 = _canonical_demand_units(base)
+    q70 = _canonical_demand_units(base * (1.0 + QUANTILE_MULTIPLIER_Q70 * spread))
+    q85 = _canonical_demand_units(base * (1.0 + QUANTILE_MULTIPLIER_Q85 * spread))
+    q95 = _canonical_demand_units(base * (1.0 + QUANTILE_MULTIPLIER_Q95 * spread))
     # Enforce monotonicity defensively against rounding ties.
     q70 = max(q70, q50)
     q85 = max(q85, q70)
@@ -376,30 +386,47 @@ def compute_demand_forecast_row(row: DemandForecastInputRow) -> dict[str, Any]:
     )
     if _is_valid_number(row.selected_demand_units_override):
         selected_quantile = QUANTILE_OVERRIDE
-        selected_units = _as_whole_units(max(float(row.selected_demand_units_override), 0.0))
+        selected_units = _canonical_demand_units(max(float(row.selected_demand_units_override), 0.0))
     else:
-        selected_units = int(quantile_lookup[selected_quantile])
+        selected_units = _canonical_demand_units(float(quantile_lookup[selected_quantile]))
 
     if routed_to_review:
         warnings.append("Demand evidence missing or too weak to forecast; routed to REVIEW_DEMAND_FORECAST.")
 
+    # ---- Tiny model demand guard (Phase 3B) ------------------------------
+    raw_model_units = (
+        max(float(row.model_promo_window_units), 0.0)
+        if model_units_valid and _is_valid_number(row.model_promo_window_units)
+        else None
+    )
+    if (
+        raw_model_units is not None
+        and 0.0 < raw_model_units < TINY_MODEL_DEMAND_THRESHOLD
+        and basis == BASIS_MODEL_PREDICTION
+    ):
+        warnings.append(
+            f"{MODEL_DEMAND_COLLAPSED_WARNING}: model promo-window demand is "
+            f"{raw_model_units:.4f} units (< {TINY_MODEL_DEMAND_THRESHOLD:.0f}); "
+            "fractional demand preserved for audit — do not treat as 1 whole unit."
+        )
+
     # ---- Demand-collapse guard (Patch B) ----------------------------------
-    # If the model/source promo-window demand collapsed to 0/1 while the
+    # If the model/source promo-window demand collapsed to <=1 while the
     # feature-layer demand signal is materially higher, surface a warning. We do
     # NOT inflate demand and do NOT route to REVIEW; the numeric forecast stays
     # exactly as predicted so the collapse remains visible rather than masked.
-    promo_window_units = _as_whole_units(promo_window)
+    promo_window_canonical = _canonical_demand_units(promo_window)
     if _is_valid_number(row.feature_demand_signal):
         feature_signal = max(float(row.feature_demand_signal), 0.0)
-        collapse_candidate = promo_window_units <= DEMAND_COLLAPSE_PROMO_UNITS_MAX
+        collapse_candidate = promo_window_canonical <= float(DEMAND_COLLAPSE_PROMO_UNITS_MAX)
         feature_threshold = max(
             DEMAND_COLLAPSE_FEATURE_FLOOR,
-            float(promo_window_units) * DEMAND_COLLAPSE_FEATURE_RATIO,
+            promo_window_canonical * DEMAND_COLLAPSE_FEATURE_RATIO,
         )
         if collapse_candidate and feature_signal >= feature_threshold:
             warnings.append(
                 f"{DEMAND_COLLAPSE_RISK_WARNING}: model promo-window demand is "
-                f"{promo_window_units} unit(s) but feature-layer demand signal is "
+                f"{promo_window_canonical:.4f} unit(s) but feature-layer demand signal is "
                 f"{feature_signal:.1f}; review demand bridge ({DEMAND_COLLAPSE_RISK_DETAIL})."
             )
 
@@ -411,17 +438,17 @@ def compute_demand_forecast_row(row: DemandForecastInputRow) -> dict[str, Any]:
         "promo_window_days": int(promo_window_days),
         "baseline_daily_units": round(float(baseline_daily), 4),
         "promo_uplift_factor": round(float(uplift), 4),
-        "pre_promo_demand_units": _as_whole_units(pre_promo),
-        "promo_window_demand_units": _as_whole_units(promo_window),
-        "total_expected_demand_units": _as_whole_units(total_demand),
-        "stock_constraint_adjustment_units": _as_whole_units(stock_constraint_adjustment),
+        "pre_promo_demand_units": _canonical_demand_units(pre_promo),
+        "promo_window_demand_units": _canonical_demand_units(promo_window),
+        "total_expected_demand_units": _canonical_demand_units(total_demand),
+        "stock_constraint_adjustment_units": _canonical_demand_units(stock_constraint_adjustment),
         "stock_constraint_flag": bool(stock_constraint_flag),
-        "demand_forecast_units_q50": int(q50),
-        "demand_forecast_units_q70": int(q70),
-        "demand_forecast_units_q85": int(q85),
-        "demand_forecast_units_q95": int(q95),
+        "demand_forecast_units_q50": float(q50),
+        "demand_forecast_units_q70": float(q70),
+        "demand_forecast_units_q85": float(q85),
+        "demand_forecast_units_q95": float(q95),
         "selected_demand_quantile": str(selected_quantile),
-        "selected_demand_units": int(selected_units),
+        "selected_demand_units": float(selected_units),
         "demand_forecast_confidence": str(confidence_level),
         "demand_forecast_basis": str(basis),
         "demand_forecast_reason_code": str(reason_code),
@@ -551,6 +578,8 @@ class DemandForecastValidationSummary:
     rows_with_missing_reason_code: int
     rows_with_invalid_confidence: int
     rows_with_demand_collapse_risk: int = 0
+    rows_with_tiny_model_demand: int = 0
+    rows_with_model_demand_collapsed_warning: int = 0
 
     def to_dict(self) -> dict[str, int]:
         return {
@@ -566,6 +595,8 @@ class DemandForecastValidationSummary:
             "rows_with_missing_reason_code": self.rows_with_missing_reason_code,
             "rows_with_invalid_confidence": self.rows_with_invalid_confidence,
             "rows_with_demand_collapse_risk": self.rows_with_demand_collapse_risk,
+            "rows_with_tiny_model_demand": self.rows_with_tiny_model_demand,
+            "rows_with_model_demand_collapsed_warning": self.rows_with_model_demand_collapsed_warning,
         }
 
 
@@ -641,6 +672,8 @@ def validate_demand_forecast_contract_frame(
         "demand_forecast_warning", pd.Series("", index=working.index)
     ).fillna("").astype(str)
     demand_collapse_risk = warning_text.str.contains(DEMAND_COLLAPSE_RISK_WARNING, regex=False)
+    model_demand_collapsed = warning_text.str.contains(MODEL_DEMAND_COLLAPSED_WARNING, regex=False)
+    tiny_model_demand = (selected_units.gt(0.0) & selected_units.lt(TINY_MODEL_DEMAND_THRESHOLD)) | model_demand_collapsed
     routed_to_review = basis.eq(BASIS_REVIEW)
     stock_constrained = basis.eq(BASIS_STOCK_CONSTRAINED_HISTORY)
     inventory_contaminated = basis.eq(BASIS_INVENTORY_INTEGRITY_CONTAMINATED)
@@ -665,6 +698,7 @@ def validate_demand_forecast_contract_frame(
     _append_issues(invalid_confidence, "invalid_confidence_level")
     # Diagnostic-only: surfaced as a soft issue/count, not a hard invariant.
     _append_issues(demand_collapse_risk, "demand_collapse_risk")
+    _append_issues(model_demand_collapsed, "model_demand_collapsed")
 
     summary = DemandForecastValidationSummary(
         row_count=int(len(working.index)),
@@ -679,9 +713,29 @@ def validate_demand_forecast_contract_frame(
         rows_with_missing_reason_code=int(missing_reason.sum()),
         rows_with_invalid_confidence=int(invalid_confidence.sum()),
         rows_with_demand_collapse_risk=int(demand_collapse_risk.sum()),
+        rows_with_tiny_model_demand=int(tiny_model_demand.sum()),
+        rows_with_model_demand_collapsed_warning=int(model_demand_collapsed.sum()),
     )
     issue_frame = pd.DataFrame(issue_rows)
     return summary, issue_frame
+
+
+def compute_tiny_model_demand_share(frame: pd.DataFrame) -> float:
+    """Share of rows with canonical selected demand in (0, threshold)."""
+    if frame.empty:
+        return 0.0
+    selected = pd.to_numeric(frame.get("selected_demand_units"), errors="coerce").fillna(0.0)
+    tiny_mask = selected.gt(0.0) & selected.lt(TINY_MODEL_DEMAND_THRESHOLD)
+    return float(tiny_mask.sum()) / float(len(frame.index))
+
+
+def customer_ready_blocked_by_tiny_model_demand(
+    frame: pd.DataFrame,
+    *,
+    share_threshold: float = CUSTOMER_READY_TINY_MODEL_DEMAND_SHARE_THRESHOLD,
+) -> bool:
+    """Return True when a large share of SKUs have tiny positive model demand."""
+    return compute_tiny_model_demand_share(frame) >= float(share_threshold)
 
 
 def log_demand_forecast_validation(

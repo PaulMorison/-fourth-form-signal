@@ -1974,6 +1974,10 @@ class PromotionStorePredictionDownloadBuilder:
             }
         )
         download_frame = download_frame.loc[:, list(COMMERCIAL_SCHEMA_COLUMNS)]
+        download_frame.attrs = dict(getattr(download_frame, "attrs", {}))
+        download_frame.attrs["predicted_units_total_promo_fractional"] = (
+            forecast_outputs["predicted_units_total_promo_fractional"].tolist()
+        )
         per_row_forecast_diagnostics = pd.DataFrame(
             {
                 "store_number": inputs["store_number"].astype(str),
@@ -2297,6 +2301,7 @@ class PromotionStorePredictionDownloadBuilder:
         predicted_units_total_promo = _integerize_forecast_total_units(
             predicted_units_total_promo_raw
         )
+        predicted_units_total_promo_fractional = predicted_units_total_promo_raw.round(4)
         predicted_units_until_promo_start = _round_non_negative_units(leadup_units_raw)
         launch_window_units_raw = launch_window_units_raw.where(
             launch_window_units_raw.le(predicted_units_total_promo_raw + 0.5),
@@ -2346,6 +2351,7 @@ class PromotionStorePredictionDownloadBuilder:
             "current_soh_units": current_soh_units,
             "qty_on_order_units": qty_on_order_units,
             "predicted_units_total_promo": predicted_units_total_promo,
+            "predicted_units_total_promo_fractional": predicted_units_total_promo_fractional,
             "predicted_units_until_promo_start": predicted_units_until_promo_start,
             "predicted_units_first_7_days_of_promo": predicted_units_first_7_days_of_promo,
             "base_units_target": base_units_target,
@@ -2418,6 +2424,7 @@ class PromotionStorePredictionDownloadBuilder:
             working["final_confidence_score"],
             errors="coerce",
         ).round(4)
+        _sync_fractional_promo_attrs(working)
 
         return _CommercialSanitizationResult(
             cleaned_frame=working,
@@ -6130,13 +6137,33 @@ def _sortable_text(series: pd.Series) -> pd.Series:
     return series.fillna("").astype(str)
 
 
+def _sync_fractional_promo_attrs(frame: pd.DataFrame) -> None:
+    values = frame.attrs.get("predicted_units_total_promo_fractional")
+    if isinstance(values, list) and len(values) != len(frame.index):
+        frame.attrs.pop("predicted_units_total_promo_fractional", None)
+
+
+def _resolve_fractional_promo_units_series(frame: pd.DataFrame) -> pd.Series | None:
+    column = frame.get("predicted_units_total_promo_fractional")
+    if column is not None:
+        return pd.to_numeric(column, errors="coerce")
+    values = frame.attrs.get("predicted_units_total_promo_fractional")
+    if isinstance(values, list) and len(values) == len(frame.index):
+        return pd.Series(values, index=frame.index, dtype="float64")
+    return None
+
+
 def _round_non_negative_units(series: pd.Series) -> pd.Series:
     numeric = pd.to_numeric(series, errors="coerce").fillna(0.0).clip(lower=0.0)
     return numeric.round(0).astype("int64")
 
 
 def _integerize_forecast_total_units(series: pd.Series) -> pd.Series:
-    """Convert forecast totals to integer-safe units without erasing positive low-demand evidence."""
+    """Display/order-support integer rounding for forecast totals.
+
+    Canonical demand fields come from the governed demand contract and preserve
+    fractional model output. This helper must not be used as contract input.
+    """
     numeric = pd.to_numeric(series, errors="coerce").fillna(0.0).clip(lower=0.0)
     converted = [
         0 if float(value) <= 0.0 else max(int(round(float(value))), 1)
@@ -9910,9 +9937,15 @@ def _build_store_facing_frame(
         .str.upper()
     )
     demand_capital_drag_mask = demand_cash_band.eq("HIGH")
-    # Pass the raw (unfilled) model promo prediction so a missing forecast can
-    # route to baseline/REVIEW instead of being silently coerced to zero.
-    model_promo_units_raw = pd.to_numeric(frame["predicted_units_total_promo"], errors="coerce")
+    # Pass the raw fractional model promo prediction so sub-unit demand is not
+    # silently floored to 1 before the governed demand contract runs.
+    fractional_promo_units = _resolve_fractional_promo_units_series(frame)
+    model_promo_units_raw = pd.to_numeric(
+        fractional_promo_units
+        if fractional_promo_units is not None
+        else frame["predicted_units_total_promo"],
+        errors="coerce",
+    )
     # Stockout is costly when on-hand plus confirmed inbound cannot cover the
     # expected promo-window demand. Combined with high trust this escalates the
     # selected demand quantile (protect availability); low trust stays at q50.

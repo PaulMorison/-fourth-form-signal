@@ -9,11 +9,14 @@ from models.promotions.allocation_demand_forecast_contract import (
     BASIS_REVIEW,
     BASIS_STOCK_CONSTRAINED_HISTORY,
     CONFIDENCE_REVIEW,
+    CUSTOMER_READY_TINY_MODEL_DEMAND_SHARE_THRESHOLD,
     DEMAND_COLLAPSE_RISK_WARNING,
     DEMAND_CONFIDENCE_LEVELS,
+    MODEL_DEMAND_COLLAPSED_WARNING,
     DemandForecastInputRow,
     build_demand_forecast_contract_frame,
     compute_demand_forecast_row,
+    customer_ready_blocked_by_tiny_model_demand,
     validate_demand_forecast_contract_frame,
 )
 from surfaces.promotions.reporting.allocation_stock_contract import (
@@ -293,3 +296,41 @@ def test_confidence_values_are_within_closed_set() -> None:
         confidence_fraction=pd.Series([0.9, 0.5, 0.2]),
     )
     assert set(frame["demand_forecast_confidence"]).issubset(DEMAND_CONFIDENCE_LEVELS)
+
+
+def test_integerize_does_not_floor_subunit_demand_for_contract_input() -> None:
+    result = compute_demand_forecast_row(_row(model_promo_window_units=0.0528))
+    assert result["promo_window_demand_units"] == 0.0528
+    assert result["selected_demand_units"] == 0.0528
+    assert result["demand_forecast_units_q50"] == 0.0528
+    assert result["demand_forecast_basis"] == BASIS_MODEL_PREDICTION
+
+
+def test_tiny_calibrated_demand_emits_model_demand_collapsed_warning() -> None:
+    result = compute_demand_forecast_row(_row(model_promo_window_units=0.0528))
+    assert MODEL_DEMAND_COLLAPSED_WARNING in result["demand_forecast_warning"]
+
+
+def test_customer_ready_blocked_when_many_tiny_model_demands() -> None:
+    tiny_frame = build_demand_forecast_contract_frame(
+        model_run_date="2026-05-20",
+        promotion_start_date=pd.Series(["2026-06-01"] * 100),
+        promotion_end_date=pd.Series(["2026-06-14"] * 100),
+        baseline_daily_units=pd.Series([0.0] * 100),
+        model_promo_window_units=pd.Series([0.05] * 80 + [12.0] * 20),
+        confidence_fraction=pd.Series([0.7] * 100),
+    )
+    healthy_frame = build_demand_forecast_contract_frame(
+        model_run_date="2026-05-20",
+        promotion_start_date=pd.Series(["2026-06-01"] * 100),
+        promotion_end_date=pd.Series(["2026-06-14"] * 100),
+        baseline_daily_units=pd.Series([0.0] * 100),
+        model_promo_window_units=pd.Series([12.0] * 100),
+        confidence_fraction=pd.Series([0.7] * 100),
+    )
+    assert customer_ready_blocked_by_tiny_model_demand(tiny_frame)
+    assert not customer_ready_blocked_by_tiny_model_demand(healthy_frame)
+    summary, _ = validate_demand_forecast_contract_frame(tiny_frame)
+    assert summary.rows_with_model_demand_collapsed_warning == 80
+    assert summary.rows_with_tiny_model_demand >= 80
+    assert 80 / 100 >= CUSTOMER_READY_TINY_MODEL_DEMAND_SHARE_THRESHOLD

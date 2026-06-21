@@ -13,6 +13,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.append(str(REPO_ROOT / "src"))
 
 from runtime.promotions.config import PromotionArtifactPaths  # noqa: E402
+from models.promotions.allocation_demand_forecast_contract import MODEL_DEMAND_COLLAPSED_WARNING  # noqa: E402
 from surfaces.promotions.reporting.store_prediction_download_builder import (  # noqa: E402
     COMMERCIAL_SCHEMA_COLUMNS,
     PromotionStoreDownloadCommercialValidationError,
@@ -2356,6 +2357,39 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
             forecast_health = summary_payload["forecast_health"]
             self.assertFalse(bool(forecast_health["collapsed_prediction_flag"]))
             self.assertEqual(int(forecast_health["unresolved_flat_promotion_count"]), 0)
+
+    def test_fractional_subunit_demand_preserved_in_store_canonical_contract(self) -> None:
+        """Phase 3B: canonical demand stays fractional; display integer stays separate."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_paths = PromotionArtifactPaths(
+                root=Path(temp_dir) / "promotions_artifacts",
+                local_inspection_root=Path(temp_dir) / "local_inspection",
+            )
+            n = 60
+            subunit_values = [0.05 + (i % 10) * 0.04 for i in range(n)]
+            frame = self._make_promo_frame(
+                row_count=n,
+                required_implied_units=subunit_values,
+                demand_reference_units=[0.0] * n,
+                baseline_expected_units=[0.0] * n,
+                predicted_units_sold=subunit_values,
+            )
+            artifacts = PromotionStorePredictionDownloadBuilder().write_report(
+                run_id="test-fractional-subunit-canonical",
+                as_of_date="2024-09-01",
+                decision_surface_frame=frame,
+                artifact_paths=artifact_paths,
+            )
+            store_frame = pd.read_csv(artifacts.per_store_promotion_csv_paths[0])
+            master_frame = pd.read_csv(artifacts.master_csv_path)
+
+        selected = pd.to_numeric(store_frame["selected_demand_units"], errors="coerce").fillna(0.0)
+        self.assertTrue(selected.gt(0.0).all())
+        self.assertTrue(selected.lt(1.0).all(), "canonical selected demand must stay sub-unit fractional")
+        self.assertEqual(int(master_frame["predicted_units_total_promo"].nunique(dropna=True)), 1)
+        self.assertEqual(int(master_frame["predicted_units_total_promo"].iloc[0]), 1)
+        warnings = store_frame["demand_forecast_warning"].fillna("").astype(str)
+        self.assertTrue(warnings.str.contains(MODEL_DEMAND_COLLAPSED_WARNING, regex=False).all())
 
     def test_first7_uses_low_positive_row_signal_when_selected_source_is_zero(self) -> None:
         """A zero selected source row may use a low-positive alternate row signal."""
