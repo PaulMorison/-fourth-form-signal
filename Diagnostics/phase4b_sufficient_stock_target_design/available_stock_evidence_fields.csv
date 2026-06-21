@@ -1,0 +1,30 @@
+field_name,field_category,source_layer,available_in_training_dataset_today,trust_level,stockout_or_demand_relevance,notes
+actual_units_sold,realized_outcome,completed_dataset_joiner,Y,HIGH — observed,Realized promo-window net units sold; training label today,Stock-constrained lower bound not demand ceiling
+actual_units_sold_promo,realized_outcome,completed_dataset_joiner,Y,HIGH — observed,Alias of actual_units_sold at promo grain,Same semantics as actual_units_sold
+actual_refund_units,realized_outcome,window_aggregate,Y,MEDIUM,Netting already in actual_units_sold path,Use for integrity checks not primary target
+promo_sales_day_count,realized_outcome,window_aggregate,Y,HIGH,Days with sales during promo window,Low days-with-sales + high sell-through suggests stock cap
+actual_days_with_sales_promo,realized_outcome,completed_dataset_joiner,Y,HIGH,Derived from promo_sales_day_count,Partial availability signal
+post_14d_units,realized_outcome,window_aggregate,Y,MEDIUM — follow-through,Post-promo demand continuation after stockout,Supports stock-constrained repair uplift bound
+post_14d_days_with_sales,realized_outcome,window_aggregate,Y,MEDIUM,Post-window selling days,Confirms latent demand after promo stockout
+current_soh,stock_at_decision,advice_packet / base_frame,Y,MEDIUM — point-in-time,SOH at advice time; negative values indicate integrity issue,Not full intra-promo stock path
+qty_on_order,stock_at_decision,advice_packet,Y,MEDIUM,Replenishment in flight at decision time,Combined with current_soh for availability proxy
+pl_allocation_qty,allocation,advice_packet,Y,MEDIUM — planned,Planned allocation quantity,Input to stock_basis resolution
+store_adjusted_qty,allocation,advice_packet,Y,MEDIUM,Store-adjusted allocation,Preferred stock_basis candidate
+total_units_commited,allocation,advice_packet,Y,MEDIUM,Total committed units,Stock_basis fallback
+total_stock_available,allocation,advice_packet,Y,MEDIUM,Total stock available,Stock_basis fallback
+stock_basis_units,derived_stock,ft_group_windows / resolve_allocation_basis_units,Y,MEDIUM — derived,Best available stock at promo start for sell-through math,Primary stock cap reference for targets
+demand_reference_units,derived_demand,ft_group_windows,Y,LOW — prior estimate,max(baseline_expected_units required_implied_units),Prior-only; not realized; repair ceiling candidate only
+baseline_expected_units,derived_demand,ft_group_windows,Y,LOW — prior,prior baseline * promo days,Repair prior bound not truth
+required_implied_units,derived_demand,ft_group_windows,Y,LOW — prior,Implied units from commercial logic,Repair ceiling component
+baseline_daily_units,derived_demand,ft_group_windows,Y,LOW — prior,Pre-promo daily rate,Sparse-history fallback context only
+target_sell_through_pct,derived_target,ft_target_sell_through,Y,MEDIUM — derived,actual/stock_basis,Sell-through saturation signal
+target_leftover_stock_pct,derived_target,ft_target_leftover_stock,Y,MEDIUM — derived,(stock_basis-actual)/stock_basis,Excess stock evidence
+target_stockout_flag,derived_target,ft_target_stockout_flag,Y,MEDIUM — heuristic,actual>=0.98*stock_basis OR post_14d follow-through,Existing stockout proxy; not packet-level stockout
+target_underallocation_flag,derived_target,ft_target_underallocation_flag,Y,MEDIUM — heuristic,stock_basis < 0.85*demand_reference OR stockout_flag,Allocation shortage signal
+target_overallocation_flag,derived_target,ft_target_overallocation_flag,Y,LOW for demand,Excess allocation signal,Exclude from demand target not primary stockout
+feature_stock_constrained_history_flag,derived_feature,ft_stock_constrained_demand_features,Y,LOW — historical proxy,Basket history stock-cap event share,Feature only; not row-level stockout truth
+feature_lost_sales_risk_score,derived_feature,ft_stock_constrained_demand_features,Y,LOW — historical proxy,Historical lost-sales proxy score,Diagnostic / feature only
+actual_stockout_flag,realized_outcome,actual_outcome packet (planned),N,NOT YET — blocked,True stockout during promo window,Planned in actual_outcome_source contract; not in training dataset today
+actual_leftover_units,realized_outcome,actual_outcome packet (planned),N,NOT YET,End-of-promo leftover,Future validation field
+intra_promo_daily_soh,stock_during_promo,NOT AVAILABLE,N,NOT AVAILABLE,Day-level SOH during promo,Would strengthen sufficient-stock proof; absent today
+intra_promo_stockout_days,stock_during_promo,NOT AVAILABLE,N,NOT AVAILABLE,Count of stockout days in window,Strongest evidence; not available without new SQL

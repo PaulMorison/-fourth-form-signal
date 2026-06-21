@@ -1,0 +1,11 @@
+risk_id,severity,likelihood,description,mitigation,patch_now
+R01,HIGH,MEDIUM,Repair uplift inflates demand beyond true sufficient-stock demand,Cap all repairs at min(demand_reference stock_basis*1.25); never use feature consensus,NO
+R02,HIGH,MEDIUM,Excluding sparse zero rows reduces training rows sharply,Report exclusion rates by department; tune INSUFFICIENT_EVIDENCE threshold with slice inventory,NO
+R03,MEDIUM,HIGH,Heuristic target_stockout_flag mislabels clean rows as constrained,Add slice review + future actual_stockout_flag upgrade path,NO
+R04,MEDIUM,MEDIUM,demand_reference_units is prior estimate not ground truth,Use only as repair ceiling never as clean target,NO
+R05,MEDIUM,LOW,Negative SOH rows coerced to zero in legacy paths,Explicit stock_integrity_issue_flag + exclude,NO
+R06,HIGH,LOW,Premature trainer switch breaks allocation classifiers,Change units head only; leave stockout/overallocation classifiers on legacy flags initially,NO
+R07,MEDIUM,MEDIUM,Sample weights under-weight repaired rows too aggressively → still flat model,Monitor post-retrain modal share; tune 0.30-0.50 band after shadow train,NO
+R08,LOW,MEDIUM,Legacy target_actual_units_sold removed too early,Keep target_actual_units_sold_legacy parallel for one release cycle,NO
+R09,HIGH,LOW,Feature consensus accidentally wired as repair input,Hard prohibition in rule engine tests + code review gate,NO
+R10,MEDIUM,HIGH,No intra-promo SOH limits repair accuracy,Document as known gap; prioritize actual_outcome packet fields in 4B.7,NO
