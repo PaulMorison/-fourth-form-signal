@@ -1,0 +1,7 @@
+comparison_metric,legacy_value,shadow_value,delta_shadow_minus_legacy,interpretation
+flat_prediction_share,0.488827,0.041899,-0.446927,shadow materially less flat
+tiny_prediction_share_le_1,0.594972,0.25,-0.344972,shadow fewer zero/tiny preds
+mean_prediction,1.263822,8.055101,6.791279,shadow predicts higher average units
+median_prediction,0.059945,10.277171,10.217226,shadow median much higher
+p90_prediction,2.869175,12.061101,9.191926,shadow upper mid-tail higher
+max_prediction,25.499640,86.664756,61.165116,shadow max tail elevated; needs stock-basis check on formal eval
