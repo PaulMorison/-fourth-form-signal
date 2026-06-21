@@ -1,0 +1,7 @@
+check,file,line_ref,finding,unit_scale_bug
+scoring_service predicted_units_sold semantics,src/runtime/promotions/scoring_service.py,~228,Model forecasts TOTAL promo-window units; predicted_units_first_day = predicted_units_sold / promo_window_days,NO
+Stage 11 forecast resolution total vs daily,src/surfaces/promotions/reporting/store_prediction_download_builder.py,_compute_resolved_forecast_values ~4674,"Source values treated as TOTAL; daily = total / window (divide once, not multiply twice)",NO
+baseline_expected_units in feature engineering,src/state/promotions/feature_engineering/shared/ft_group_windows.py,~37-38,baseline_expected_units = baseline_daily_units * promo_window_days (TOTAL),NO
+prior diagnostic ×7 multiplication,Diagnostics/upstream_demand_collapse_diagnostic/,memo,Prior diagnostic incorrectly treated raw as per-day and multiplied by 7; values are already total promo-window units,CORRECTED — no double-horizon bug
+policy cap applied to forecast total in Stage 11,src/surfaces/promotions/reporting/store_prediction_download_builder.py,_build_download_forecast_outputs ~2218-2226,resolved_total_units capped DOWN to adjusted_order_cap_units when resolved > cap; crushes baseline source (e.g. 7→0.05),NO — but demand/order semantic conflation bug
+integerize anti-collapse floor,src/surfaces/promotions/reporting/store_prediction_download_builder.py,_integerize_forecast_total_units ~6152,0 < value <= 0.5 rounds to 0 then forced to 1; produces uniform selected_demand=1 pattern,NO — rounding floor masks true low demand
