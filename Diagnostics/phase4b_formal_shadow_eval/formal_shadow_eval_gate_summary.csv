@@ -1,0 +1,10 @@
+gate,pass,detail
+shadow_flat_share_improves_materially,False,legacy=0.007 shadow=0.021
+shadow_tiny_share_improves_materially,True,legacy=0.712 shadow=0.325
+weighted_mae_clean_repaired_acceptable,False,delta=3.020
+tail_risk_acceptable,False,over_2x_demand=0.035 over_stock=0.572
+artifact_safety,True,separate shadow joblib; production gb preserved
+live_model_unchanged,True,no production scoring swap
+production_retrain_not_run,True,shadow eval only
+no_feature_consensus_as_truth,True,target=sufficient_stock_demand_units_target
+formal_overall,False,FAIL
