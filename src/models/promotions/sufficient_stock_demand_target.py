@@ -65,6 +65,7 @@ SELL_THROUGH_BORDERLINE_MAX = 0.98
 LEFTOVER_CLEAN_MIN = 0.05
 PARTIAL_WINDOW_DAY_SHARE = 0.5
 PARTIAL_WINDOW_SELL_THROUGH_MIN = 0.90
+REPAIRED_TARGET_WEIGHT_MAX = 0.20
 
 
 class SufficientStockDemandTargetError(ValueError):
@@ -204,19 +205,28 @@ def build_sufficient_stock_demand_target_frame(frame: pd.DataFrame) -> pd.DataFr
         & stockout_flag.ge(1.0)
         & post_14d_units.gt(0.0)
         & demand_reference.notna()
+        & stock_basis.gt(0.0)
     )
-    repair_post14_value = np.maximum(
-        realized.clip(lower=0.0),
-        _cap_repair(
-            realized.clip(lower=0.0) + np.minimum(post_14d_units, post_14d_units * 0.5),
-            demand_reference,
-            stock_basis * 1.25,
-        ),
+    repair_post14_proposed = realized.clip(lower=0.0) + np.minimum(post_14d_units, post_14d_units * 0.5)
+    repair_post14_value, post14_stock_capped, post14_realized_override = _governed_repaired_target(
+        realized=realized,
+        proposed=repair_post14_proposed,
+        demand_reference=demand_reference,
+        stock_basis=stock_basis,
     )
     target_units = target_units.where(~repair_post14_mask, repair_post14_value)
     target_label = target_label.where(~repair_post14_mask, "STOCK_CONSTRAINED_REPAIRED")
-    target_weight = target_weight.where(~repair_post14_mask, 0.50)
-    target_repair_basis = target_repair_basis.where(~repair_post14_mask, "REPAIR_POST14_FOLLOWTHROUGH")
+    target_weight = target_weight.where(~repair_post14_mask, REPAIRED_TARGET_WEIGHT_MAX)
+    target_repair_basis = target_repair_basis.where(
+        ~repair_post14_mask,
+        "REPAIR_POST14_FOLLOWTHROUGH|CEILING_MIN_DEMAND_STOCK",
+    )
+    target_warning = _append_warning(target_warning, repair_post14_mask & post14_stock_capped, "REPAIR_STOCK_DEMAND_CEILING_APPLIED")
+    target_warning = _append_warning(
+        target_warning,
+        repair_post14_mask & post14_realized_override,
+        "REPAIR_CEILING_BELOW_REALIZED_USED_REALIZED",
+    )
     unresolved = unresolved & ~repair_post14_mask
 
     repair_saturated_mask = (
@@ -226,18 +236,26 @@ def build_sufficient_stock_demand_target_frame(frame: pd.DataFrame) -> pd.DataFr
         & stock_basis.gt(0.0)
         & demand_reference.notna()
     )
-    repair_saturated_value = np.maximum(
-        realized.clip(lower=0.0),
-        _cap_repair(
-            np.maximum(realized.clip(lower=0.0), np.minimum(demand_reference, stock_basis * 1.15)),
-            demand_reference,
-            stock_basis * 1.15,
-        ),
+    repair_saturated_proposed = np.minimum(demand_reference, stock_basis)
+    repair_saturated_value, sat_stock_capped, sat_realized_override = _governed_repaired_target(
+        realized=realized,
+        proposed=repair_saturated_proposed,
+        demand_reference=demand_reference,
+        stock_basis=stock_basis,
     )
     target_units = target_units.where(~repair_saturated_mask, repair_saturated_value)
     target_label = target_label.where(~repair_saturated_mask, "STOCK_CONSTRAINED_REPAIRED")
-    target_weight = target_weight.where(~repair_saturated_mask, 0.40)
-    target_repair_basis = target_repair_basis.where(~repair_saturated_mask, "REPAIR_SATURATED_SELLTHROUGH")
+    target_weight = target_weight.where(~repair_saturated_mask, REPAIRED_TARGET_WEIGHT_MAX)
+    target_repair_basis = target_repair_basis.where(
+        ~repair_saturated_mask,
+        "REPAIR_SATURATED_SELLTHROUGH|CEILING_MIN_DEMAND_STOCK",
+    )
+    target_warning = _append_warning(target_warning, repair_saturated_mask & sat_stock_capped, "REPAIR_STOCK_DEMAND_CEILING_APPLIED")
+    target_warning = _append_warning(
+        target_warning,
+        repair_saturated_mask & sat_realized_override,
+        "REPAIR_CEILING_BELOW_REALIZED_USED_REALIZED",
+    )
     unresolved = unresolved & ~repair_saturated_mask
 
     repair_underalloc_mask = (
@@ -245,12 +263,28 @@ def build_sufficient_stock_demand_target_frame(frame: pd.DataFrame) -> pd.DataFr
         & pure_underallocation_flag.ge(1.0)
         & stockout_flag.lt(1.0)
         & demand_reference.notna()
+        & stock_basis.gt(0.0)
     )
-    repair_underalloc_value = np.maximum(realized.clip(lower=0.0), demand_reference * 0.85)
+    repair_underalloc_proposed = np.minimum(demand_reference, stock_basis)
+    repair_underalloc_value, under_stock_capped, under_realized_override = _governed_repaired_target(
+        realized=realized,
+        proposed=repair_underalloc_proposed,
+        demand_reference=demand_reference,
+        stock_basis=stock_basis,
+    )
     target_units = target_units.where(~repair_underalloc_mask, repair_underalloc_value)
     target_label = target_label.where(~repair_underalloc_mask, "STOCK_CONSTRAINED_REPAIRED")
-    target_weight = target_weight.where(~repair_underalloc_mask, 0.35)
-    target_repair_basis = target_repair_basis.where(~repair_underalloc_mask, "REPAIR_UNDERALLOCATION")
+    target_weight = target_weight.where(~repair_underalloc_mask, REPAIRED_TARGET_WEIGHT_MAX)
+    target_repair_basis = target_repair_basis.where(
+        ~repair_underalloc_mask,
+        "REPAIR_UNDERALLOCATION|CEILING_MIN_DEMAND_STOCK",
+    )
+    target_warning = _append_warning(target_warning, repair_underalloc_mask & under_stock_capped, "REPAIR_STOCK_DEMAND_CEILING_APPLIED")
+    target_warning = _append_warning(
+        target_warning,
+        repair_underalloc_mask & under_realized_override,
+        "REPAIR_CEILING_BELOW_REALIZED_USED_REALIZED",
+    )
     unresolved = unresolved & ~repair_underalloc_mask
 
     repair_partial_mask = (
@@ -258,18 +292,31 @@ def build_sufficient_stock_demand_target_frame(frame: pd.DataFrame) -> pd.DataFr
         & partial_window_flag
         & baseline_expected.notna()
         & demand_reference.notna()
+        & stock_basis.gt(0.0)
     )
-    repair_partial_value = np.maximum(
-        realized.clip(lower=0.0),
-        np.minimum(
-            np.maximum(realized.clip(lower=0.0), baseline_expected),
-            demand_reference,
-        ),
+    repair_partial_proposed = np.minimum(
+        np.maximum(realized.clip(lower=0.0), baseline_expected),
+        demand_reference,
+    )
+    repair_partial_value, partial_stock_capped, partial_realized_override = _governed_repaired_target(
+        realized=realized,
+        proposed=repair_partial_proposed,
+        demand_reference=demand_reference,
+        stock_basis=stock_basis,
     )
     target_units = target_units.where(~repair_partial_mask, repair_partial_value)
     target_label = target_label.where(~repair_partial_mask, "STOCK_CONSTRAINED_REPAIRED")
-    target_weight = target_weight.where(~repair_partial_mask, 0.30)
-    target_repair_basis = target_repair_basis.where(~repair_partial_mask, "REPAIR_PARTIAL_SELLING_DAYS")
+    target_weight = target_weight.where(~repair_partial_mask, REPAIRED_TARGET_WEIGHT_MAX)
+    target_repair_basis = target_repair_basis.where(
+        ~repair_partial_mask,
+        "REPAIR_PARTIAL_SELLING_DAYS|CEILING_MIN_DEMAND_STOCK",
+    )
+    target_warning = _append_warning(target_warning, repair_partial_mask & partial_stock_capped, "REPAIR_STOCK_DEMAND_CEILING_APPLIED")
+    target_warning = _append_warning(
+        target_warning,
+        repair_partial_mask & partial_realized_override,
+        "REPAIR_CEILING_BELOW_REALIZED_USED_REALIZED",
+    )
     unresolved = unresolved & ~repair_partial_mask
 
     unrepairable_stockout_mask = unresolved & stock_constrained.eq(1)
@@ -451,6 +498,45 @@ def _safe_ratio(numerator: pd.Series, denominator: pd.Series) -> pd.Series:
     valid = denominator.notna() & denominator.gt(0.0)
     ratio = numerator / denominator.where(valid)
     return ratio.where(valid)
+
+
+def _conservative_repair_ceiling(
+    demand_reference: pd.Series,
+    stock_basis: pd.Series,
+) -> pd.Series:
+    valid = (
+        demand_reference.notna()
+        & demand_reference.gt(0.0)
+        & stock_basis.notna()
+        & stock_basis.gt(0.0)
+    )
+    ceiling = pd.Series(np.nan, index=demand_reference.index, dtype="float64")
+    if bool(valid.any()):
+        ceiling.loc[valid] = np.minimum(
+            demand_reference.loc[valid],
+            stock_basis.loc[valid],
+        )
+    return ceiling
+
+
+def _governed_repaired_target(
+    *,
+    realized: pd.Series,
+    proposed: pd.Series,
+    demand_reference: pd.Series,
+    stock_basis: pd.Series,
+) -> tuple[pd.Series, pd.Series, pd.Series]:
+    """Conservative repaired target: max(realized, min(proposed, min(demand, stock)))."""
+
+    realized_clipped = realized.clip(lower=0.0)
+    ceiling = _conservative_repair_ceiling(demand_reference, stock_basis)
+    has_ceiling = ceiling.notna()
+    capped_proposed = proposed.where(~has_ceiling, np.minimum(proposed, ceiling))
+    repaired_target = np.maximum(realized_clipped, capped_proposed)
+    stock_capped_mask = has_ceiling & proposed.gt(ceiling)
+    realized_override_mask = has_ceiling & ceiling.lt(realized_clipped)
+    repaired_target = repaired_target.where(~realized_override_mask, realized_clipped)
+    return repaired_target, stock_capped_mask.fillna(False), realized_override_mask.fillna(False)
 
 
 def _cap_repair(value: pd.Series, *ceilings: pd.Series) -> pd.Series:
