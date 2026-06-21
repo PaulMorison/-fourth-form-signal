@@ -1280,8 +1280,9 @@ class PromotionModelTrainer:
 
     # Persist honest out-of-sample test-set predictions for the completed-promotion
     # demand backtest. Predictions follow the governed live scoring path: raw head,
-    # allocation-aware calibration, then the post-calibration policy overlay that
-    # ultimately owns `predicted_units_total_promo` in scoring. Output parquet uses
+    # allocation-aware calibration, then order-policy caps as separate columns.
+    # `predicted_units_total_promo` is the demand export (= calibrated); policy caps
+    # live in `policy_adjusted_predicted_units_total_promo` only. Output parquet uses
     # the `promotion_row_key` grain and carries through the segment columns the
     # backtest orchestrator splits on.
     _BACKTEST_PASSTHROUGH_COLUMNS: tuple[str, ...] = (
@@ -1492,7 +1493,9 @@ class PromotionModelTrainer:
         out["calibrated_predicted_units_total_promo"] = calibrated_predicted_units.values
         out["policy_adjusted_predicted_units_total_promo"] = policy_adjusted_predicted_units.values
         out["policy_adjustment_reason"] = policy_adjustments["policy_adjustment_reason"].values
-        out["predicted_units_total_promo"] = policy_adjusted_predicted_units.values
+        # Phase 2 demand/order separation: demand export follows calibrated path;
+        # policy_adjusted_predicted_units_total_promo remains order-cap compatibility only.
+        out["predicted_units_total_promo"] = calibrated_predicted_units.values
         # Make sure the canonical actual column is present even if only `actual_units_sold`
         # exists on this dataset variant.
         if "actual_units_sold_promo" not in out.columns and "actual_units_sold" in out.columns:

@@ -126,15 +126,50 @@ class PromotionTrainingScoringPipelineTests(unittest.TestCase):
                 self.assertIn(column_name, predictions.columns)
             self.assertTrue(
                 predictions["predicted_units_total_promo"].equals(
-                    predictions["policy_adjusted_predicted_units_total_promo"]
+                    predictions["calibrated_predicted_units_total_promo"]
                 )
             )
-            self.assertTrue(
-                (
-                    predictions["predicted_units_total_promo"]
-                    <= predictions["calibrated_predicted_units_total_promo"]
-                ).all()
+            policy_cap = predictions["policy_adjusted_predicted_units_total_promo"]
+            calibrated = predictions["calibrated_predicted_units_total_promo"]
+            if not policy_cap.equals(calibrated):
+                self.assertFalse(
+                    predictions["predicted_units_total_promo"].equals(policy_cap)
+                )
+
+    def test_backtest_export_predicted_units_total_promo_is_calibrated(self) -> None:
+        completed_base_frame = build_completed_promotions_base_frame()
+        target_result = PromotionTargetEngineer().engineer(completed_base_frame)
+        feature_result = PromotionFeatureEngineer().engineer(target_result.frame)
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_paths = PromotionArtifactPaths(root=Path(temp_dir) / "promotions_artifacts")
+            dataset = PromotionDatasetAssembler().assemble_training_dataset(
+                run_id="promotions-train-run",
+                base_frame=completed_base_frame,
+                target_frame=target_result.frame,
+                feature_frame=feature_result.frame,
+                target_columns=target_result.target_columns,
+                feature_columns=feature_result.feature_columns,
+                artifact_paths=artifact_paths,
             )
+            training_artifacts = PromotionModelTrainer().train(
+                run_id="promotions-train-run",
+                dataset=dataset.frame,
+                dataset_path=dataset.dataset_path,
+                artifact_paths=artifact_paths,
+            )
+            predictions = pd.read_parquet(training_artifacts.test_set_predictions_path)
+            self.assertTrue(
+                predictions["predicted_units_total_promo"].equals(
+                    predictions["calibrated_predicted_units_total_promo"]
+                )
+            )
+            for column_name in (
+                "policy_adjusted_predicted_units_total_promo",
+                "policy_adjustment_reason",
+                "raw_predicted_units_total_promo",
+            ):
+                self.assertIn(column_name, predictions.columns)
 
     def test_training_and_scoring_flow_persists_outputs(self) -> None:
         completed_base_frame = build_completed_promotions_base_frame()
