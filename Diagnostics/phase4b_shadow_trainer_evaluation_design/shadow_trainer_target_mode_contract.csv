@@ -1,0 +1,13 @@
+parameter,default_value,optional_value,scope,production_behavior,shadow_behavior,notes
+units_target_mode,legacy_realized_sales,sufficient_stock_shadow,PromotionModelTrainer.train only,Train/evaluate units heads on target_actual_units_sold,Train/evaluate separate shadow units heads on sufficient_stock_demand_units_target,Do not change scoring_service default bundle
+trainer_target_mode,current_trainer_contract,sufficient_stock_shadow_dual_eval,CLI / operational cycle,Unchanged for production runs,Enable shadow comparison artifacts when explicitly requested,Keep existing historical_allocation modes separate
+live_units_training_target_column,target_actual_units_sold,target_actual_units_sold,manifest + inference schema,Always recorded as live target,Never swap manifest live target to sufficient_stock_demand_units_target,
+shadow_units_training_target_column,,sufficient_stock_demand_units_target,shadow artifacts only,Not used,Shadow fit/eval target only,
+sample_weight_column,,target_weight,shadow units fit only,Not passed today,Use rows with target_weight > 0; pass target_weight to fit when mode is shadow,Exclude INSUFFICIENT/EXCLUDED rows via weight=0
+quality_filter,,target_quality_label in {CLEAN_REALIZED_DEMAND STOCK_CONSTRAINED_REPAIRED},shadow eval reporting,Not applied,Slice metrics by label; do not drop contaminated from eval readout,Contaminated rows remain weight=0
+repair_truth_source,demand_reference_units + stock_basis_units,same,shadow target construction only,N/A,Already persisted in training_ready; never feature_probability_expected_units_consensus,
+run_id_convention,{base_run_id},{base_run_id}-shadow-sufficient-stock,artifact paths,Production model_family_root/{run_id}/,Separate run_id or suffix prevents overwrite,Required safety gate
+production_model_files,units_gradient_boosting.joblib units_linear.joblib,,live bundle,Written only when units_target_mode=legacy_realized_sales,Shadow run must not write these filenames,
+shadow_model_files,,target_mode_shadow_sufficient_stock_units_gb.joblib target_mode_shadow_sufficient_stock_units_linear.joblib,shadow only,Absent,target_mode_shadow_model_path pattern,
+shadow_predictions_file,,test_set_predictions_sufficient_stock_shadow.parquet,shadow only,test_set_predictions.parquet remains live,Parallel predictions with shadow_ prefix columns,
+scoring_surface,units_gradient_boosting.joblib,,decision_surface_service scoring_service,Unchanged,Shadow models never loaded by production scoring,

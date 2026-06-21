@@ -1,0 +1,15 @@
+test_id,scope,assertion,priority
+shadow_default_mode_legacy,trainer,Default train() uses target_actual_units_sold and writes units_gradient_boosting.joblib,P0
+shadow_mode_does_not_overwrite_production,trainer,sufficient_stock_shadow run writes target_mode_shadow_* only; no units_gradient_boosting.joblib,P0
+shadow_target_column_resolution,trainer,legacy mode -> target_actual_units_sold; shadow mode -> sufficient_stock_demand_units_target,P0
+shadow_sample_weight_wiring,trainer,When shadow mode and target_weight present fit receives sample_weight; zero-weight rows excluded,P0
+shadow_manifest_live_target_unchanged,trainer,inference_schema.target_columns still lists target_actual_units_sold as live,P0
+shadow_predictions_naming,trainer,Writes test_set_predictions_sufficient_stock_shadow.parquet not test_set_predictions.parquet,P1
+shadow_metrics_by_quality_label,trainer,Comparison summary includes MAE slices for CLEAN and REPAIRED,P1
+no_consensus_repair_truth,trainer/sufficient_stock,Shadow resolver never reads feature_probability_expected_units_consensus,P0
+enriched_parquet_fields_required,dataset assembly,training_ready includes target_weight target_quality_label sufficient_stock_demand_units_target,P0
+scoring_service_unchanged,scoring,Production loader still resolves units_gradient_boosting from live manifest,P0
+operational_cycle_default,operational cycle,No --units-target-mode defaults to legacy_realized_sales,P1
+shadow_run_id_isolation,artifacts,Shadow run_id suffix prevents collision with production run_id,P1
+weighted_error_improves_or_documents,diagnostics,Gate helper flags when shadow weighted MAE worse without documented trade-off,P2
+flat_share_gate,diagnostics,Gate fails if shadow flat_prediction_share not materially below legacy,P0

@@ -1,0 +1,11 @@
+risk,control,implementation_location,verification
+Overwrite production units_gradient_boosting.joblib,Shadow uses separate run_id suffix and target_mode_shadow_* filenames only,PromotionModelTrainer.train + PromotionArtifactPaths.target_mode_shadow_model_path,Assert production filenames absent in shadow run manifest
+Production scoring loads shadow model,scoring_service / decision_surface_service keep loading manifest artifact_files.units_gradient_boosting only,src/runtime/promotions/scoring_service.py,Integration test: shadow run does not change resolved live bundle path
+Operational cycle accidental shadow train,Default units_target_mode=legacy_realized_sales; shadow requires explicit CLI flag,run_promotions_operational_cycle.py,Unit test default mode unchanged
+Live manifest target column swap,inference_schema.target_columns always lists target_actual_units_sold first,PromotionModelTrainer.train manifest write,Manifest assertion test
+Shadow predictions mixed into customer reports,Shadow parquet/csv under inspection/ or models/{run_id}-shadow-* only; no report builder changes,surfaces/promotions/reporting/*,No customer-output code paths read shadow files
+Feature consensus used as target,Shadow target only sufficient_stock_demand_units_target from governed module,sufficient_stock_demand_target.py,Test forbids consensus column in shadow target resolver
+Insufficient rows inflate shadow fit,target_weight=0 rows excluded from weighted fit; optional hard mask target_weight>0,PromotionModelTrainer.train shadow branch,Test weight mask on INSUFFICIENT rows
+Retrain mistaken for shadow,Shadow run writes comparison diagnostics not production promotion decision,trainer target_mode comparison artifacts,Runbook: shadow run_id must include shadow-sufficient-stock
+Stage 12 / ordering touched,Shadow evaluation limited to trainer + backtest diagnostics modules,no Stage 12 entrypoints,Checklist gate before any run
+SQL / packet mutation,Use enriched local training_ready parquet only,rebuild/smoke paths under tmp/,No SQL in shadow eval command
