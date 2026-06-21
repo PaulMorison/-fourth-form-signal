@@ -112,6 +112,17 @@ STOCK_CONSTRAINED_DEMAND_UPLIFT = 0.25
 
 DEFAULT_PROMO_UPLIFT_FACTOR = 1.0
 
+# Patch B - demand-collapse guard. Surface (never auto-correct) the high-risk
+# case where the model/source promo-window demand collapses to 0 or 1 unit while
+# a feature-layer demand signal is materially higher. We do not inflate demand
+# and do not route to REVIEW; we only populate demand_forecast_warning so the
+# defect is visible in customer output and diagnostics/validation.
+DEMAND_COLLAPSE_PROMO_UNITS_MAX = 1
+DEMAND_COLLAPSE_FEATURE_FLOOR = 5.0
+DEMAND_COLLAPSE_FEATURE_RATIO = 3.0
+DEMAND_COLLAPSE_RISK_WARNING = "DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER"
+DEMAND_COLLAPSE_RISK_DETAIL = "MODEL_PREDICTION_COLLAPSE_RISK"
+
 
 @dataclass(frozen=True)
 class DemandForecastInputRow:
@@ -140,6 +151,9 @@ class DemandForecastInputRow:
     high_capital_drag: bool = False
     # Optional documented hard override of selected demand units.
     selected_demand_units_override: float | None = None
+    # Optional feature-layer demand signal used only to detect (not correct) a
+    # model/source demand collapse. Never overwrites the model prediction.
+    feature_demand_signal: float | None = None
 
     def compute(self) -> dict[str, Any]:
         return compute_demand_forecast_row(self)
@@ -369,6 +383,26 @@ def compute_demand_forecast_row(row: DemandForecastInputRow) -> dict[str, Any]:
     if routed_to_review:
         warnings.append("Demand evidence missing or too weak to forecast; routed to REVIEW_DEMAND_FORECAST.")
 
+    # ---- Demand-collapse guard (Patch B) ----------------------------------
+    # If the model/source promo-window demand collapsed to 0/1 while the
+    # feature-layer demand signal is materially higher, surface a warning. We do
+    # NOT inflate demand and do NOT route to REVIEW; the numeric forecast stays
+    # exactly as predicted so the collapse remains visible rather than masked.
+    promo_window_units = _as_whole_units(promo_window)
+    if _is_valid_number(row.feature_demand_signal):
+        feature_signal = max(float(row.feature_demand_signal), 0.0)
+        collapse_candidate = promo_window_units <= DEMAND_COLLAPSE_PROMO_UNITS_MAX
+        feature_threshold = max(
+            DEMAND_COLLAPSE_FEATURE_FLOOR,
+            float(promo_window_units) * DEMAND_COLLAPSE_FEATURE_RATIO,
+        )
+        if collapse_candidate and feature_signal >= feature_threshold:
+            warnings.append(
+                f"{DEMAND_COLLAPSE_RISK_WARNING}: model promo-window demand is "
+                f"{promo_window_units} unit(s) but feature-layer demand signal is "
+                f"{feature_signal:.1f}; review demand bridge ({DEMAND_COLLAPSE_RISK_DETAIL})."
+            )
+
     return {
         "model_run_date": str(row.model_run_date or ""),
         "promotion_start_date": str(row.promotion_start_date or ""),
@@ -416,6 +450,7 @@ def build_demand_forecast_contract_frame(
     high_basket_importance: pd.Series | None = None,
     high_capital_drag: pd.Series | None = None,
     selected_demand_units_override: pd.Series | None = None,
+    feature_demand_signal: pd.Series | None = None,
 ) -> pd.DataFrame:
     """Vectorised builder that produces the governed demand-forecast frame."""
     index = promotion_start_date.index
@@ -450,6 +485,7 @@ def build_demand_forecast_contract_frame(
     basket_series = _series(high_basket_importance, False)
     capital_drag_series = _series(high_capital_drag, False)
     override_series = _series(selected_demand_units_override, None)
+    feature_signal_series = _series(feature_demand_signal, None)
 
     def _opt_float(value: Any) -> float | None:
         if value is None or (isinstance(value, float) and math.isnan(value)):
@@ -484,6 +520,7 @@ def build_demand_forecast_contract_frame(
             high_basket_importance=bool(basket_series.iloc[position]),
             high_capital_drag=bool(capital_drag_series.iloc[position]),
             selected_demand_units_override=_opt_float(override_series.iloc[position]),
+            feature_demand_signal=_opt_float(feature_signal_series.iloc[position]),
         )
         records.append(compute_demand_forecast_row(input_row))
 
@@ -513,6 +550,7 @@ class DemandForecastValidationSummary:
     rows_with_selected_mismatch: int
     rows_with_missing_reason_code: int
     rows_with_invalid_confidence: int
+    rows_with_demand_collapse_risk: int = 0
 
     def to_dict(self) -> dict[str, int]:
         return {
@@ -527,6 +565,7 @@ class DemandForecastValidationSummary:
             "rows_with_selected_mismatch": self.rows_with_selected_mismatch,
             "rows_with_missing_reason_code": self.rows_with_missing_reason_code,
             "rows_with_invalid_confidence": self.rows_with_invalid_confidence,
+            "rows_with_demand_collapse_risk": self.rows_with_demand_collapse_risk,
         }
 
 
@@ -598,6 +637,10 @@ def validate_demand_forecast_contract_frame(
 
     missing_reason = reason_code.str.strip().eq("")
     invalid_confidence = ~confidence.str.strip().str.upper().isin(DEMAND_CONFIDENCE_LEVELS)
+    warning_text = working.get(
+        "demand_forecast_warning", pd.Series("", index=working.index)
+    ).fillna("").astype(str)
+    demand_collapse_risk = warning_text.str.contains(DEMAND_COLLAPSE_RISK_WARNING, regex=False)
     routed_to_review = basis.eq(BASIS_REVIEW)
     stock_constrained = basis.eq(BASIS_STOCK_CONSTRAINED_HISTORY)
     inventory_contaminated = basis.eq(BASIS_INVENTORY_INTEGRITY_CONTAMINATED)
@@ -620,6 +663,8 @@ def validate_demand_forecast_contract_frame(
     _append_issues(selected_mismatch, "selected_quantile_mismatch")
     _append_issues(missing_reason, "missing_reason_code")
     _append_issues(invalid_confidence, "invalid_confidence_level")
+    # Diagnostic-only: surfaced as a soft issue/count, not a hard invariant.
+    _append_issues(demand_collapse_risk, "demand_collapse_risk")
 
     summary = DemandForecastValidationSummary(
         row_count=int(len(working.index)),
@@ -633,6 +678,7 @@ def validate_demand_forecast_contract_frame(
         rows_with_selected_mismatch=int(selected_mismatch.sum()),
         rows_with_missing_reason_code=int(missing_reason.sum()),
         rows_with_invalid_confidence=int(invalid_confidence.sum()),
+        rows_with_demand_collapse_risk=int(demand_collapse_risk.sum()),
     )
     issue_frame = pd.DataFrame(issue_rows)
     return summary, issue_frame

@@ -8223,11 +8223,28 @@ def _build_store_action_label_frame(
     label = label.where(~label.eq("NEVER_SOLD_IN_PROMO"), "NO_PRIOR_PROMO_EVIDENCE_LOW_RISK")
     label_v2 = label.copy()
 
+    # Patch C - NO_DEMAND reconciliation: the governed demand-forecast contract
+    # owns the numeric demand. NO_DEMAND / NEVER_SOLD_IN_PROMO are reserved for
+    # truly zero selected demand and must never be stamped on a SKU the contract
+    # forecast as having positive demand (weak/missing *evidence* is not the same
+    # as zero *demand*). Fall back to the legacy field only if the canonical one
+    # is absent.
+    selected_demand_units = pd.to_numeric(
+        store_frame["selected_demand_units"]
+        if "selected_demand_units" in store_frame.columns
+        else store_frame.get("expected_promo_demand", pd.Series(0.0, index=index)),
+        errors="coerce",
+    ).fillna(0.0)
+    positive_selected_demand = selected_demand_units.gt(0.0)
+
     demand_label = pd.Series("CREDIBLE_PROMO_DEMAND", index=index, dtype="object")
     demand_label = demand_label.where(~demand_class.eq("low_nonzero_demand"), "LOW_NONZERO_DEMAND")
     demand_label = demand_label.where(~demand_class.isin({"cold_start", "insufficient_history", "sparse_history"}), "SPARSE_HISTORY")
-    demand_label = demand_label.where(~weak_or_no_demand, "NO_DEMAND")
-    demand_label = demand_label.where(~(no_promo_history | zero_sales_promo_history), "NEVER_SOLD_IN_PROMO")
+    demand_label = demand_label.where(~(weak_or_no_demand & ~positive_selected_demand), "NO_DEMAND")
+    demand_label = demand_label.where(
+        ~((no_promo_history | zero_sales_promo_history) & ~positive_selected_demand),
+        "NEVER_SOLD_IN_PROMO",
+    )
 
     availability_label = pd.Series("FLOOR_PROTECTED", index=index, dtype="object")
     availability_label = availability_label.where(~(credible_demand & demand_exceeds_floor_buffer), "FLOOR_PROTECTION_NEEDED")
@@ -8963,10 +8980,32 @@ def _build_store_suppressed_order_risk_audit_frame(
     suppression_reason = store_facing_frame["order_reconciliation_reason"].fillna("").astype(str).str.strip()
     label = store_facing_frame["store_action_label"].fillna("").astype(str).str.strip().str.upper()
 
+    # De-minimis demand (<= 1 unit of honest model promo-window demand) is
+    # treated as effectively weak for suppression-safety purposes. Patch C
+    # corrects the *customer label* so a forecast of ~1 unit is no longer stamped
+    # NO_DEMAND, but suppressing the order for a single-unit model forecast
+    # remains a safe/justified hold (consistent with the legacy
+    # expected_demand <= 1 weak-demand philosophy). We use the model promo-window
+    # demand rather than the risk-buffered selected quantile so a protective
+    # quantile bump (e.g. q85 -> 2 units) does not reclassify de-minimis demand
+    # as credible. Without this, the relabel would convert previously-safe
+    # NO_DEMAND suppressions into unsafe-floor risks and hard-abort the run.
+    de_minimis_demand_basis = pd.to_numeric(
+        store_facing_frame["promo_window_demand_units"]
+        if "promo_window_demand_units" in store_facing_frame.columns
+        else (
+            store_facing_frame["selected_demand_units"]
+            if "selected_demand_units" in store_facing_frame.columns
+            else store_facing_frame.get("expected_promo_demand", pd.Series(0.0, index=store_facing_frame.index))
+        ),
+        errors="coerce",
+    ).fillna(0.0)
+    de_minimis_selected_demand = de_minimis_demand_basis.le(1.0)
+
     suppressed_mask = raw_units.gt(0.0) & final_units.le(0.0)
     projected_below_floor = projected_soh.lt(floor_units)
-    credible_demand = demand_label.isin(DYNAMIC_DEMAND_EVIDENCE_LABELS)
-    weak_demand = demand_label.isin(WEAK_DEMAND_EVIDENCE_LABELS)
+    credible_demand = demand_label.isin(DYNAMIC_DEMAND_EVIDENCE_LABELS) & ~de_minimis_selected_demand
+    weak_demand = demand_label.isin(WEAK_DEMAND_EVIDENCE_LABELS) | de_minimis_selected_demand
     materially_above_demand = projected_soh.gt(expected_demand + floor_units)
     capital_drag_safe = capital_label.eq("CAPITAL_DRAG_HIGH") | materially_above_demand
     availability_risk_high = availability_label.isin(HIGH_AVAILABILITY_RISK_LABELS)
@@ -9852,6 +9891,19 @@ def _build_store_facing_frame(
     demand_high_stockout_cost = demand_soh_plus_inbound.lt(
         model_promo_units_raw.fillna(0.0)
     ) & model_promo_units_raw.fillna(0.0).gt(0.0)
+    # Feature-layer demand signal (Patch B): used ONLY to detect a model/source
+    # demand collapse, never to inflate or replace the model prediction. Prefer
+    # the consensus expected-units signal, then first-7-days, then same-discount
+    # history.
+    demand_feature_signal = _optional_first_numeric_series(
+        frame,
+        (
+            "feature_probability_expected_units_consensus",
+            "feature_expected_total_units_first_7_days",
+            "feature_historical_units_same_discount_avg",
+            "historical_units_same_discount_avg",
+        ),
+    )
     demand_forecast_frame = build_demand_forecast_contract_frame(
         model_run_date=as_of_date or "",
         promotion_start_date=frame["promotion_start_date"],
@@ -9865,6 +9917,7 @@ def _build_store_facing_frame(
         negative_soh_detected=raw_soh_for_integrity.lt(0.0),
         high_capital_drag=demand_capital_drag_mask,
         high_stockout_cost=demand_high_stockout_cost,
+        feature_demand_signal=demand_feature_signal,
     )
     demand_validation_started = time.perf_counter()
     demand_validation_summary, demand_validation_issues = validate_demand_forecast_contract_frame(

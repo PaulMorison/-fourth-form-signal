@@ -9,6 +9,7 @@ from models.promotions.allocation_demand_forecast_contract import (
     BASIS_REVIEW,
     BASIS_STOCK_CONSTRAINED_HISTORY,
     CONFIDENCE_REVIEW,
+    DEMAND_COLLAPSE_RISK_WARNING,
     DEMAND_CONFIDENCE_LEVELS,
     DemandForecastInputRow,
     build_demand_forecast_contract_frame,
@@ -197,6 +198,70 @@ def test_case_12_stage11_integration_preserves_stock_identities() -> None:
     assert stock_summary.rows_failing_target_identity == 0
     assert stock_summary.rows_failing_total_demand_identity == 0
     assert stock_issues.empty
+
+
+def test_case_13_demand_collapse_emits_warning_when_feature_signal_higher() -> None:
+    result = compute_demand_forecast_row(
+        _row(model_promo_window_units=1.0, confidence_fraction=0.7, feature_demand_signal=30.0)
+    )
+    assert result["promo_window_demand_units"] == 1
+    assert DEMAND_COLLAPSE_RISK_WARNING in result["demand_forecast_warning"]
+
+
+def test_case_14_demand_collapse_guard_does_not_auto_inflate() -> None:
+    with_signal = compute_demand_forecast_row(
+        _row(model_promo_window_units=1.0, confidence_fraction=0.7, feature_demand_signal=50.0)
+    )
+    without_signal = compute_demand_forecast_row(
+        _row(model_promo_window_units=1.0, confidence_fraction=0.7)
+    )
+    # The feature signal must NOT change the numeric demand, only warn.
+    assert with_signal["promo_window_demand_units"] == without_signal["promo_window_demand_units"]
+    assert with_signal["selected_demand_units"] == without_signal["selected_demand_units"]
+    assert with_signal["total_expected_demand_units"] == without_signal["total_expected_demand_units"]
+
+
+def test_case_15_demand_collapse_leaves_selected_visible_with_warning() -> None:
+    result = compute_demand_forecast_row(
+        _row(model_promo_window_units=0.0, confidence_fraction=0.5, feature_demand_signal=12.0)
+    )
+    # Selected demand stays as forecast (collapse is surfaced, not hidden).
+    assert result["selected_demand_units"] <= 1
+    assert DEMAND_COLLAPSE_RISK_WARNING in result["demand_forecast_warning"]
+
+
+def test_case_15b_no_collapse_warning_when_feature_signal_not_higher() -> None:
+    healthy = compute_demand_forecast_row(
+        _row(model_promo_window_units=10.0, confidence_fraction=0.7, feature_demand_signal=12.0)
+    )
+    no_signal = compute_demand_forecast_row(
+        _row(model_promo_window_units=1.0, confidence_fraction=0.7)
+    )
+    low_feature = compute_demand_forecast_row(
+        _row(model_promo_window_units=1.0, confidence_fraction=0.7, feature_demand_signal=2.0)
+    )
+    assert DEMAND_COLLAPSE_RISK_WARNING not in healthy["demand_forecast_warning"]
+    assert DEMAND_COLLAPSE_RISK_WARNING not in no_signal["demand_forecast_warning"]
+    assert DEMAND_COLLAPSE_RISK_WARNING not in low_feature["demand_forecast_warning"]
+
+
+def test_case_16_validation_detects_demand_collapse_without_failing_invariants() -> None:
+    frame = build_demand_forecast_contract_frame(
+        model_run_date="2026-05-20",
+        promotion_start_date=pd.Series(["2026-06-01", "2026-06-01"]),
+        promotion_end_date=pd.Series(["2026-06-14", "2026-06-14"]),
+        baseline_daily_units=pd.Series([0.0, 0.0]),
+        model_promo_window_units=pd.Series([1.0, 20.0]),
+        confidence_fraction=pd.Series([0.7, 0.7]),
+        feature_demand_signal=pd.Series([40.0, 25.0]),
+    )
+    summary, issues = validate_demand_forecast_contract_frame(frame)
+    assert summary.rows_with_demand_collapse_risk == 1
+    # Collapse risk is diagnostic only: hard invariants must still pass.
+    assert summary.rows_failing_total_demand_identity == 0
+    assert summary.rows_failing_quantile_monotonicity == 0
+    assert summary.rows_with_negative_units == 0
+    assert (issues["issue_type"] == "demand_collapse_risk").sum() == 1
 
 
 def test_validation_detects_injected_violations() -> None:

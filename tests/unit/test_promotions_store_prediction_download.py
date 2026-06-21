@@ -26,6 +26,7 @@ from surfaces.promotions.reporting.store_prediction_download_builder import (  #
     STORE_FACING_OUTPUT_COLUMNS,
     STORE_FACING_SCHEMA_COLUMNS,
     _build_backtest_trust_frame,
+    _build_store_action_label_frame,
     _build_store_order_reconciliation_frame,
     _build_store_order_reconciliation_summary_frame,
     _build_store_suppressed_order_risk_audit_frame,
@@ -186,6 +187,104 @@ def _single_store_promotion_sibling_frame(store_csv: Path, suffix: str) -> pd.Da
     if len(matches) != 1:
         raise AssertionError(f"Expected exactly one {suffix} sibling for {store_csv}, found {len(matches)}")
     return pd.read_csv(matches[0])
+
+
+def _store_action_label_input_frame(rows: list[dict[str, object]]) -> pd.DataFrame:
+    """Build a minimal store_frame for `_build_store_action_label_frame`.
+
+    Defaults describe weak-evidence, no-promo-history rows so that the legacy
+    logic would stamp NO_DEMAND / NEVER_SOLD_IN_PROMO; tests override
+    `selected_demand_units` to assert the Patch C reconciliation.
+    """
+    base = {
+        "demand_evidence_class": "low_nonzero_demand",
+        "model_confidence_percent": 50.0,
+        "current_soh": 3.0,
+        "projected_on_hand_at_promo_start": 3.0,
+        "expected_promo_demand": 1.0,
+        "available_to_sell_before_floor": 1.0,
+        "recommended_order_units": 0.0,
+        "estimated_leftover_units": 0.0,
+        "capital_at_risk_adjusted_dollars": 0.0,
+        "expected_gp_on_speculative_units": 0.0,
+        "low_nonzero_value_relief_delta": 0.0,
+        "historical_promo_events_same_discount": 0.0,
+        "historical_promo_events_same_or_better_discount": 0.0,
+        "historical_units_same_discount_avg": 0.0,
+        "historical_units_same_or_better_discount_avg": 0.0,
+        "floor_units_required": 2.0,
+        "selected_demand_units": 0.0,
+    }
+    return pd.DataFrame([{**base, **row} for row in rows])
+
+
+class DemandLabelReconciliationTests(unittest.TestCase):
+    """Patch C: positive selected demand must never be labelled no-demand."""
+
+    def _labels(self, frame: pd.DataFrame) -> pd.Series:
+        result = _build_store_action_label_frame(
+            store_frame=frame,
+            display_action=pd.Series(["HOLD"] * len(frame.index), index=frame.index),
+            data_quality_flag=pd.Series(["OK"] * len(frame.index), index=frame.index),
+            publish_eligibility_reason=pd.Series([""] * len(frame.index), index=frame.index),
+            review_reason=pd.Series([""] * len(frame.index), index=frame.index),
+        )
+        return result["demand_evidence_label"]
+
+    def test_positive_selected_demand_never_no_demand(self) -> None:
+        # Weak evidence (expected_promo_demand <= 1) would historically force
+        # NO_DEMAND, but a positive governed forecast must override that.
+        frame = _store_action_label_input_frame(
+            [
+                {"selected_demand_units": 3.0, "demand_evidence_class": "low_nonzero_demand"},
+                {
+                    # Zero demand with weak (but present) promo history -> NO_DEMAND.
+                    "selected_demand_units": 0.0,
+                    "demand_evidence_class": "low_nonzero_demand",
+                    "historical_promo_events_same_discount": 2.0,
+                    "historical_units_same_discount_avg": 1.0,
+                },
+            ]
+        )
+        labels = self._labels(frame)
+        self.assertNotIn(labels.iloc[0], {"NO_DEMAND", "NEVER_SOLD_IN_PROMO"})
+        self.assertEqual(labels.iloc[0], "LOW_NONZERO_DEMAND")
+        # Zero selected demand still labels NO_DEMAND (true zero-demand evidence).
+        self.assertEqual(labels.iloc[1], "NO_DEMAND")
+
+    def test_positive_selected_demand_never_never_sold(self) -> None:
+        # No promo history would historically force NEVER_SOLD_IN_PROMO.
+        frame = _store_action_label_input_frame(
+            [
+                {
+                    "selected_demand_units": 2.0,
+                    "demand_evidence_class": "credible_promo_demand",
+                    "historical_promo_events_same_discount": 0.0,
+                    "historical_promo_events_same_or_better_discount": 0.0,
+                },
+                {
+                    "selected_demand_units": 0.0,
+                    "demand_evidence_class": "credible_promo_demand",
+                    "historical_promo_events_same_discount": 0.0,
+                    "historical_promo_events_same_or_better_discount": 0.0,
+                },
+            ]
+        )
+        labels = self._labels(frame)
+        self.assertNotIn(labels.iloc[0], {"NO_DEMAND", "NEVER_SOLD_IN_PROMO"})
+        self.assertEqual(labels.iloc[0], "CREDIBLE_PROMO_DEMAND")
+        self.assertEqual(labels.iloc[1], "NEVER_SOLD_IN_PROMO")
+
+    def test_no_positive_demand_row_is_labelled_no_demand_across_grid(self) -> None:
+        rows = []
+        for selected in (0.0, 1.0, 2.0, 5.0):
+            for cls in ("low_nonzero_demand", "credible_promo_demand", "sparse_history"):
+                rows.append({"selected_demand_units": selected, "demand_evidence_class": cls})
+        frame = _store_action_label_input_frame(rows)
+        labels = self._labels(frame)
+        selected_units = frame["selected_demand_units"]
+        positive_no_demand = labels[(selected_units > 0) & labels.isin({"NO_DEMAND", "NEVER_SOLD_IN_PROMO"})]
+        self.assertEqual(len(positive_no_demand), 0)
 
 
 class PromotionStorePredictionDownloadTests(unittest.TestCase):
