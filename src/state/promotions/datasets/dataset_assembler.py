@@ -25,6 +25,12 @@ from models.promotions.preprocessing import (
     GOVERNED_NUMERIC_TRAINING_INPUT_COLUMNS,
 )
 from runtime.promotions.config import PromotionArtifactPaths
+from state.promotions.targets.target_engineering import (
+    TARGET_REPAIR_EVIDENCE_COLUMNS,
+)
+from models.promotions.sufficient_stock_demand_target import (
+    SUFFICIENT_STOCK_DEMAND_TARGET_COLUMNS,
+)
 from state.promotions.datasets.dataset_validators import (
     DEFAULT_NEGATIVE_STOCK_QUARANTINE_MAX_ABSOLUTE,
     DEFAULT_NEGATIVE_STOCK_QUARANTINE_MAX_FRACTION,
@@ -71,6 +77,8 @@ ZERO_FILL_TEXTUAL_SUFFIX_TOKENS: tuple[str, ...] = (
 )
 ZERO_FILL_DATE_LIKE_NAME_PATTERN = re.compile(r"(^|_)(date|datetime|timestamp|time)(_|$)", re.IGNORECASE)
 
+DEFAULT_PARALLEL_SUFFICIENT_STOCK_TARGET_COLUMNS: tuple[str, ...] = SUFFICIENT_STOCK_DEMAND_TARGET_COLUMNS
+
 
 @dataclass(frozen=True)
 class PromotionDatasetManifest:
@@ -112,6 +120,8 @@ class PromotionDatasetAssembler:
         negative_stock_policy: NegativeStockPosturePolicy | str = NegativeStockPosturePolicy.FAIL_LOUD,
         negative_stock_quarantine_max_fraction: float = DEFAULT_NEGATIVE_STOCK_QUARANTINE_MAX_FRACTION,
         negative_stock_quarantine_max_absolute: int = DEFAULT_NEGATIVE_STOCK_QUARANTINE_MAX_ABSOLUTE,
+        repair_evidence_columns: tuple[str, ...] | None = None,
+        parallel_sufficient_stock_target_columns: tuple[str, ...] | None = None,
     ) -> AssembledPromotionDataset:
         """Create a single governed training dataset and persist it as parquet.
 
@@ -124,10 +134,20 @@ class PromotionDatasetAssembler:
         training_feature_columns, excluded_review_only_feature_columns = _training_dataset_feature_columns(
             feature_columns
         )
+        effective_repair_evidence_columns = repair_evidence_columns or TARGET_REPAIR_EVIDENCE_COLUMNS
+        effective_parallel_target_columns = (
+            parallel_sufficient_stock_target_columns or DEFAULT_PARALLEL_SUFFICIENT_STOCK_TARGET_COLUMNS
+        )
+        merged_target_columns = _target_frame_columns_to_persist(
+            target_frame,
+            target_columns=target_columns,
+            repair_evidence_columns=effective_repair_evidence_columns,
+            parallel_sufficient_stock_target_columns=effective_parallel_target_columns,
+        )
 
         dataset = base_frame.copy()
         dataset = dataset.merge(
-            target_frame[["promotion_row_key", *target_columns]],
+            target_frame.loc[:, merged_target_columns],
             on="promotion_row_key",
             how="left",
         )
@@ -241,6 +261,15 @@ class PromotionDatasetAssembler:
             manifest_payload["excluded_review_only_feature_columns"] = list(
                 excluded_review_only_feature_columns
             )
+        manifest_payload["repair_evidence_columns"] = list(effective_repair_evidence_columns)
+        manifest_payload["parallel_sufficient_stock_target_columns"] = list(
+            effective_parallel_target_columns
+        )
+        manifest_payload["persisted_target_support_columns"] = [
+            column_name
+            for column_name in merged_target_columns
+            if column_name != "promotion_row_key" and column_name not in target_columns
+        ]
         manifest_payload["governed_numeric_zero_fill_summary"] = zero_fill_summary
         manifest_path.write_text(
             json.dumps(manifest_payload, indent=2, sort_keys=True),
@@ -276,6 +305,32 @@ def _display_sku_from_key(series: pd.Series) -> pd.Series:
     if bool(integer_mask.any()):
         display.loc[integer_mask] = numeric.loc[integer_mask].astype("int64").astype("string")
     return display
+
+
+def _target_frame_columns_to_persist(
+    target_frame: pd.DataFrame,
+    *,
+    target_columns: tuple[str, ...],
+    repair_evidence_columns: tuple[str, ...],
+    parallel_sufficient_stock_target_columns: tuple[str, ...],
+) -> tuple[str, ...]:
+    """Return ordered target-frame columns to merge into training_ready.parquet."""
+
+    ordered = tuple(
+        dict.fromkeys(
+            (
+                "promotion_row_key",
+                *target_columns,
+                *repair_evidence_columns,
+                *parallel_sufficient_stock_target_columns,
+            )
+        )
+    )
+    return tuple(
+        column_name
+        for column_name in ordered
+        if column_name == "promotion_row_key" or column_name in target_frame.columns
+    )
 
 
 def _training_dataset_feature_columns(

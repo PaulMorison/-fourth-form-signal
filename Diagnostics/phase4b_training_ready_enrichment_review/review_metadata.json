@@ -1,0 +1,19 @@
+{
+  "after_clean_share": 0.338069,
+  "after_contaminated_share": 0.004707,
+  "after_insufficient_share": 0.015185,
+  "after_repaired_share": 0.642039,
+  "after_trainable_share": 0.980108,
+  "all_repair_fields_present": true,
+  "before_clean_share": 0.3380694432110825,
+  "before_insufficient_share": 0.6572240475979043,
+  "before_repaired_share": 0.0,
+  "before_trainable_share": 0.3380694432110825,
+  "demand_reference_coverage_underallocated": 1.0,
+  "rows_total": 11261,
+  "slice_notes": [
+    "policy-measurement-envfix-recent5k-20260522 (tmp/phase4b_training_ready_enrichment_smoke/promotions_artifacts/training/datasets/phase4b-enriched-policy-measurement-envfix-recent5k-20260522/training_ready.parquet, n=5,004)",
+    "policy-measurement-envfix-hard5k-20260522 (tmp/phase4b_training_ready_enrichment_smoke/promotions_artifacts/training/datasets/phase4b-enriched-policy-measurement-envfix-hard5k-20260522/training_ready.parquet, n=6,419)"
+  ],
+  "viable_shadow_training": true
+}

@@ -51,6 +51,15 @@ _TARGET_COLUMNS = (
     *HISTORICAL_ALLOCATION_TARGET_COLUMNS,
 )
 
+# Baseline-window repair evidence computed during target engineering and persisted
+# into training_ready.parquet for sufficient-stock target review/repair (Phase 4B.5).
+TARGET_REPAIR_EVIDENCE_COLUMNS: tuple[str, ...] = (
+    "demand_reference_units",
+    "baseline_expected_units",
+    "required_implied_units",
+    "stock_basis_units",
+)
+
 # Legacy governed targets used by live units-model training today.
 _LIVE_UNITS_TRAINING_TARGET_COLUMN = "target_actual_units_sold"
 
@@ -61,6 +70,7 @@ _SUFFICIENT_STOCK_PARALLEL_TARGET_COLUMNS: tuple[str, ...] = SUFFICIENT_STOCK_DE
 class PromotionTargetEngineeringResult:
     frame: pd.DataFrame
     target_columns: tuple[str, ...] = _TARGET_COLUMNS
+    repair_evidence_columns: tuple[str, ...] = TARGET_REPAIR_EVIDENCE_COLUMNS
     sufficient_stock_target_columns: tuple[str, ...] = _SUFFICIENT_STOCK_PARALLEL_TARGET_COLUMNS
     live_units_training_target_column: str = _LIVE_UNITS_TRAINING_TARGET_COLUMN
 

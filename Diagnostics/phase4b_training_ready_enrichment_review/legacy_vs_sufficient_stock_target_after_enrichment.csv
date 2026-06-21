@@ -1,0 +1,5 @@
+metric,value
+rows_with_both_targets,11037.0
+mean_abs_delta,5.760058
+mean_delta,5.760058
+repaired_rows_mean_delta,8.793051

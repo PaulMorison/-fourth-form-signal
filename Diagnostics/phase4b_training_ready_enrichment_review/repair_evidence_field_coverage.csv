@@ -1,0 +1,5 @@
+field_name,rows_total,non_null_rate_all_rows,non_null_rate_underallocated_rows,positive_rate_all_rows
+demand_reference_units,11261,1.0,1.0,0.8295
+baseline_expected_units,11261,1.0,1.0,0.63529
+required_implied_units,11261,1.0,1.0,0.8295
+stock_basis_units,11261,1.0,1.0,0.982328

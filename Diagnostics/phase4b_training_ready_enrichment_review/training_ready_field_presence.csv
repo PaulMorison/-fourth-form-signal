@@ -1,0 +1,17 @@
+field_name,present_in_parquet,non_null_rate,positive_rate
+demand_reference_units,True,1.0,0.8295
+baseline_expected_units,True,1.0,0.63529
+required_implied_units,True,1.0,0.8295
+stock_basis_units,True,1.0,0.982328
+realized_sales_units,True,1.0,0.299973
+stock_constrained_flag,True,1.0,0.66122
+stock_integrity_issue_flag,True,1.0,0.004707
+sufficient_stock_observed_flag,True,1.0,0.338069
+sufficient_stock_demand_units_target,True,0.980108,0.727555
+target_quality_label,True,1.0,
+target_weight,True,1.0,0.980108
+target_repair_basis,True,0.0,0.0
+target_warning,True,0.0,0.0
+target_actual_units_sold,True,1.0,0.299973
+target_underallocation_flag,True,1.0,0.661131
+total_stock_available,True,1.0,0.982328
