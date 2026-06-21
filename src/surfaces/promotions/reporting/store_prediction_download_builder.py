@@ -1470,10 +1470,8 @@ class PromotionStorePredictionDownloadBuilder:
             promotion_header_key=inputs["promotion_header_key"],
             current_soh_raw=inputs["current_soh_raw"],
             on_order_qty_raw=inputs["on_order_qty_raw"],
-            policy_adjusted_total_cap_units=pd.to_numeric(
-                policy_adjustments["adjusted_order_cap_units"],
-                errors="coerce",
-            ).where(policy_fired_mask),
+            # Phase 3: order-policy total cap applies to orders only, not demand forecast display.
+            policy_adjusted_total_cap_units=None,
             policy_adjusted_launch_cap_units=pd.to_numeric(
                 policy_adjustments["adjusted_launch_units"],
                 errors="coerce",
@@ -2215,15 +2213,7 @@ class PromotionStorePredictionDownloadBuilder:
             bar_units=_numeric_series(frame, ("bar_units",)).clip(lower=0.0),
         )
         predicted_units_total_promo_raw = forecast_resolution["resolved_total_units"].clip(lower=0.0)
-        if policy_adjusted_total_cap_units is not None:
-            total_cap_units = pd.to_numeric(
-                policy_adjusted_total_cap_units,
-                errors="coerce",
-            ).fillna(predicted_units_total_promo_raw)
-            predicted_units_total_promo_raw = predicted_units_total_promo_raw.where(
-                predicted_units_total_promo_raw.le(total_cap_units),
-                total_cap_units,
-            ).clip(lower=0.0)
+        # Phase 3: do not ceiling customer demand forecast totals with order-policy caps.
         forecast_daily_units = forecast_resolution["resolved_daily_units"].clip(lower=0.0)
         baseline_daily_units = _numeric_series(
             frame,

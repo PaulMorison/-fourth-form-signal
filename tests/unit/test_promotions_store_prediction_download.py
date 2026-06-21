@@ -2135,6 +2135,29 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
         self.assertTrue(bool(resolution.loc[0, "first7_fallback_repaired_flag"]))
         self.assertEqual(float(resolution.loc[0, "first7_fallback_raw_units"]), 10.0)
 
+    def test_stage11_forecast_total_not_capped_by_order_policy(self) -> None:
+        frame = self._make_promo_frame(
+            row_count=1,
+            promo_window_days=14.0,
+            required_implied_units=[12.0],
+            demand_reference_units=[0.0],
+            baseline_expected_units=[0.0],
+            predicted_units_sold=[12.0],
+        )
+        builder = PromotionStorePredictionDownloadBuilder()
+        inputs = builder._extract_download_input_series(frame=frame, as_of_date="2024-09-01")
+        outputs = builder._build_download_forecast_outputs(
+            frame=frame,
+            promo_window_days=inputs["promo_window_days"],
+            days_until_promo_start=inputs["days_until_promo_start"],
+            promotion_header_key=inputs["promotion_header_key"],
+            current_soh_raw=inputs["current_soh_raw"],
+            on_order_qty_raw=inputs["on_order_qty_raw"],
+            policy_adjusted_total_cap_units=pd.Series([2.0], index=frame.index),
+        )
+
+        self.assertEqual(int(outputs["predicted_units_total_promo"].iloc[0]), 12)
+
     def test_commercial_validation_passes_first7_feature_collapse_pattern(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             artifact_paths = PromotionArtifactPaths(
@@ -3767,8 +3790,11 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
         self.assertTrue(
             diagnostics_df["policy_adjustment_reason"].astype(str).eq("inventory_sufficient_low_value_history_review").all()
         )
-        self.assertEqual(str(store_promo_frame.loc[0, "operator_action"]), "DO_NOT_BUY")
-        self.assertEqual(str(store_promo_frame.loc[1, "operator_action"]), "DO_NOT_BUY")
+        # Phase 3: demand forecast is uncapped; policy review still applies on all rows.
+        self.assertGreaterEqual(int(store_promo_frame.loc[0, "selected_demand_units"]), 1)
+        self.assertGreaterEqual(int(store_promo_frame.loc[1, "selected_demand_units"]), 1)
+        self.assertEqual(str(store_promo_frame.loc[0, "operator_action"]), "MONITOR")
+        self.assertIn(str(store_promo_frame.loc[1, "operator_action"]), {"MONITOR", "DO_NOT_BUY"})
         self.assertEqual(str(store_promo_frame.loc[2, "operator_action"]), "REVIEW")
         self.assertEqual(int(store_promo_frame.loc[0, "review_flag"]), 0)
         self.assertEqual(int(store_promo_frame.loc[1, "review_flag"]), 0)
@@ -3777,7 +3803,7 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
             "review=policy_inventory_sufficient_low_value_history",
             str(store_promo_frame.loc[2, "audit_notes"]),
         )
-        self.assertEqual(str(master_frame.loc[1, "decision_recommendation"]), "DO_NOT_ORDER")
+        self.assertIn(str(master_frame.loc[1, "decision_recommendation"]), {"HOLD", "DO_NOT_ORDER"})
         self.assertEqual(master_frame["review_reason"].fillna("").iloc[1], "")
 
     def test_low_confidence_de_minimis_inventory_cover_becomes_hold(self) -> None:

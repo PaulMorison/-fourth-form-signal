@@ -132,7 +132,7 @@ class ScoringServiceDemandSeparationTests(unittest.TestCase):
 
     @patch("runtime.promotions.scoring_service.write_model_input_audit_artifacts")
     @patch("runtime.promotions.scoring_service.build_order_policy_adjustments")
-    @patch("runtime.promotions.scoring_service.apply_allocation_aware_units_cap")
+    @patch("runtime.promotions.scoring_service.compute_allocation_aware_cap_units")
     @patch("runtime.promotions.scoring_service.joblib.load")
     def test_scoring_assignment_uses_calibrated_not_order_cap(
         self,
@@ -145,8 +145,8 @@ class ScoringServiceDemandSeparationTests(unittest.TestCase):
         del mock_write_audit
         index = pd.Index([0])
         raw = pd.Series([12.0], index=index)
-        calibrated = pd.Series([9.0], index=index)
-        mock_apply_cap.return_value = calibrated
+        allocation_cap = pd.Series([9.0], index=index)
+        mock_apply_cap.return_value = allocation_cap
 
         policy_frame = pd.DataFrame(
             {
@@ -199,11 +199,12 @@ class ScoringServiceDemandSeparationTests(unittest.TestCase):
             artifact_paths=artifact_paths,
         )
         out = scored.row_frame.iloc[0]
-        self.assertEqual(float(out["predicted_units_sold"]), 9.0)
-        self.assertEqual(float(out["calibrated_predicted_units_sold"]), 9.0)
+        self.assertEqual(float(out["predicted_units_sold"]), 12.0)
+        self.assertEqual(float(out["calibrated_predicted_units_sold"]), 12.0)
+        self.assertEqual(float(out["allocation_cap_units"]), 9.0)
         self.assertEqual(float(out["adjusted_order_cap_units"]), 2.0)
         self.assertEqual(float(out["policy_adjusted_predicted_units_sold"]), 2.0)
-        self.assertEqual(float(out["predicted_units_first_day"]), 9.0 / float(out["live_promo_window_days"] or out["promo_days"] or 7))
+        self.assertEqual(float(out["predicted_units_first_day"]), 12.0 / float(out["live_promo_window_days"] or out["promo_days"] or 7))
 
 
 if __name__ == "__main__":

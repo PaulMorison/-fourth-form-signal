@@ -36,7 +36,7 @@ from sklearn.metrics import (
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder, StandardScaler
 
-from models.promotions.allocation_calibration import apply_allocation_aware_units_cap
+from models.promotions.allocation_calibration import compute_allocation_aware_cap_units
 from models.promotions.model_bundle import (
     PromotionInferenceSchema,
     PromotionTrainingManifest,
@@ -1464,10 +1464,12 @@ class PromotionModelTrainer:
         ).clip(lower=0.0)
         # Floor at zero — negative unit predictions are not commercially meaningful.
         test_dataset = dataset.loc[test_mask]
-        calibrated_predicted_units = apply_allocation_aware_units_cap(
+        allocation_cap_units = compute_allocation_aware_cap_units(
             test_dataset,
             raw_predicted_units,
         )
+        # Phase 3: demand export uses raw model output; allocation cap is order-path only.
+        calibrated_predicted_units = raw_predicted_units.clip(lower=0.0)
         diagnostics = build_live_order_decision_diagnostics(
             test_dataset,
             raw_predicted_units=raw_predicted_units,
@@ -1491,6 +1493,7 @@ class PromotionModelTrainer:
         out = test_dataset.loc[:, passthrough].copy()
         out["raw_predicted_units_total_promo"] = raw_predicted_units.values
         out["calibrated_predicted_units_total_promo"] = calibrated_predicted_units.values
+        out["allocation_cap_units"] = allocation_cap_units.values
         out["policy_adjusted_predicted_units_total_promo"] = policy_adjusted_predicted_units.values
         out["policy_adjustment_reason"] = policy_adjustments["policy_adjustment_reason"].values
         # Phase 2 demand/order separation: demand export follows calibrated path;
@@ -2344,7 +2347,8 @@ def _build_allocation_split_diagnostic_rows(
     if len(features.index) == 0:
         return pd.DataFrame()
     raw_predicted_units = pd.Series(units_model.predict(features), index=features.index).clip(lower=0.0)
-    calibrated_predicted_units = apply_allocation_aware_units_cap(dataset, raw_predicted_units)
+    allocation_cap_units = compute_allocation_aware_cap_units(dataset, raw_predicted_units)
+    calibrated_predicted_units = raw_predicted_units.clip(lower=0.0)
     overallocation_probability = pd.Series(
         overallocation_model.predict_proba(features)[:, 1],
         index=features.index,
@@ -2446,7 +2450,8 @@ def _build_allocation_split_diagnostic_rows(
                     "overallocation_probability": overallocation_probability,
                     "predicted_overallocation_flag": predicted_overallocation.astype(float),
                     "actual_overallocation_flag": actual_overallocation.astype(float),
-                    "allocation_aware_units_cap_applied_flag": calibrated_predicted_units.lt(raw_predicted_units).astype(float),
+                    "allocation_aware_units_cap_applied_flag": allocation_cap_units.lt(raw_predicted_units).astype(float),
+                    "allocation_cap_units": allocation_cap_units,
                     "stock_basis_units": stock_basis,
                     "demand_reference_units": demand_reference,
                     "actual_units_sold": actual_units,

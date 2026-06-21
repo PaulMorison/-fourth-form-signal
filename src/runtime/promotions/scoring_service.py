@@ -18,7 +18,7 @@ from pathlib import Path
 import joblib
 import pandas as pd
 
-from models.promotions.allocation_calibration import apply_allocation_aware_units_cap
+from models.promotions.allocation_calibration import compute_allocation_aware_cap_units
 from models.promotions.model_bundle import read_json
 from models.promotions.order_policy_adjustments import build_order_policy_adjustments
 from models.promotions.preprocessing import prepare_model_input_frame
@@ -205,10 +205,13 @@ class PromotionModelScorer:
             index=scored_rows.index,
         ).clip(lower=0.0)
         scored_rows["raw_predicted_units_sold"] = raw_predicted_units_sold
-        calibrated_predicted_units_sold = apply_allocation_aware_units_cap(
+        allocation_cap_units = compute_allocation_aware_cap_units(
             scored_rows,
             raw_predicted_units_sold,
         )
+        # Phase 3: demand forecast stays on raw model output; allocation cap is order-path only.
+        calibrated_predicted_units_sold = raw_predicted_units_sold.clip(lower=0.0)
+        scored_rows["allocation_cap_units"] = allocation_cap_units
         allocation_decision_diagnostics = build_live_order_decision_diagnostics(
             scored_rows,
             raw_predicted_units=raw_predicted_units_sold,
@@ -308,6 +311,7 @@ def _build_empty_scored_rows(
     for column_name in (
         "raw_predicted_units_sold",
         "calibrated_predicted_units_sold",
+        "allocation_cap_units",
         "policy_adjusted_predicted_units_sold",
         "predicted_units_sold",
         "predicted_units_first_day",
