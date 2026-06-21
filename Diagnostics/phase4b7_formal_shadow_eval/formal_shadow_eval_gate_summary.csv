@@ -1,0 +1,15 @@
+gate,pass,detail
+shadow_tiny_share_improves_vs_legacy,True,legacy=0.634 shadow=0.340
+shadow_flat_share_not_materially_worse_vs_legacy,True,legacy=0.006 shadow=0.003
+weighted_mae_clean_repaired_improves_vs_prior_shadow,True,prior=3.630 new=1.124
+weighted_mae_clean_repaired_commercially_acceptable,True,new=1.124 legacy=0.592
+repaired_mae_improves_vs_prior_shadow,True,prior=8.082 new=2.267
+shadow_gt_stock_basis_falls_vs_prior,True,prior=0.572 new=0.249
+shadow_gt_2x_demand_controlled,True,new=0.081
+p99_max_not_commercially_extreme,True,p99=11.8 max=53.4
+artifact_safety,True,separate shadow joblib under tmp/phase4b7_formal_shadow_eval
+live_model_unchanged,True,no production scoring swap
+production_artifact_unchanged,True,isolated 4b7 artifact root
+production_retrain_not_run,True,shadow eval only
+no_feature_consensus_as_truth,True,target=sufficient_stock_demand_units_target
+formal_overall,True,PASS

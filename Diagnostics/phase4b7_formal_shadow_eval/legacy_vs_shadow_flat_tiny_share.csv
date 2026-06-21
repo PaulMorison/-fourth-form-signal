@@ -1,0 +1,9 @@
+metric,value
+legacy_flat_share,0.005607476635514018
+shadow_4b7_flat_share,0.002803738317757009
+legacy_tiny_share_le_1,0.6341121495327103
+shadow_4b7_tiny_share_le_1,0.3397196261682243
+prior_shadow_flat_share,0.021
+prior_shadow_tiny_share_le_1,0.325
+flat_share_delta_legacy_minus_shadow,0.002803738317757009
+tiny_share_delta_legacy_minus_shadow,0.294392523364486
