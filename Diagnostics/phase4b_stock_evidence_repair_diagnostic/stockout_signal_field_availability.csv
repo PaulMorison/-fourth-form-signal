@@ -1,0 +1,7 @@
+field_name,present_in_parquet,non_null_rate,positive_rate,zero_rate,mean_value,rows_total
+target_stockout_flag,True,1.0,0.085872,0.914128,0.085872,11261
+actual_stockout_flag,False,0.0,0.0,0.0,,11261
+observed_zero_soh_event_flag,False,0.0,0.0,0.0,,11261
+observed_negative_soh_event_flag,False,0.0,0.0,0.0,,11261
+stock_constrained_sales_evidence_flag,False,0.0,0.0,0.0,,11261
+target_underallocation_flag,True,1.0,0.661131,0.338869,0.661131,11261

@@ -1,0 +1,6 @@
+scenario,trainable_row_share,clean_share,repaired_share,insufficient_share,contaminated_share,uplift_trainable_vs_base
+baseline_current_parquet,0.338069,0.338069,0.0,0.657224,0.004707,0.0
+add_explicit_stock_basis_units_only,0.338069,0.338069,0.0,0.657224,0.004707,0.0
+add_upstream_baseline_demand_reference_columns,0.980108,0.338069,0.642039,0.015185,0.004707,0.642039
+baseline_no_change_post14_already_present,0.338069,0.338069,0.0,0.657224,0.004707,0.0
+add_demand_reference_from_pre28_x_window_proxy,0.969274,0.338069,0.631205,0.026019,0.004707,0.631205

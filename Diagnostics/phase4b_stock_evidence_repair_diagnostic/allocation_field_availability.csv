@@ -1,0 +1,8 @@
+field_name,present_in_parquet,non_null_rate,positive_rate,zero_rate,mean_value,rows_total
+store_adjusted_qty,True,1.0,0.208241,0.791759,1.071042,11261
+pl_allocation_qty,True,1.0,0.417814,0.582186,3.058254,11261
+pl_allocated,True,1.0,0.417814,0.582186,3.058254,11261
+total_units_commited,True,1.0,0.445431,0.554569,4.394104,11261
+total_stock_available,True,1.0,0.982328,0.017672,8.046443,11261
+current_soh,True,1.0,0.781902,0.217831,3.65234,11261
+qty_on_order,True,1.0,0.05115,0.94885,0.264808,11261

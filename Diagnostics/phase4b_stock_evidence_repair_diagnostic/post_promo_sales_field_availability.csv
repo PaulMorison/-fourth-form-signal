@@ -1,0 +1,5 @@
+field_name,present_in_parquet,non_null_rate,positive_rate,zero_rate,mean_value,rows_total
+post_14d_units,True,1.0,0.325282,0.673741,0.753929,11261
+post_14d_sales_ex_gst,True,1.0,0.326525,0.672409,11.138121,11261
+post_14d_days_with_sales,True,1.0,0.325815,0.674185,0.612645,11261
+actual_units_post_14d,True,1.0,0.325282,0.673741,0.753929,11261
