@@ -1,0 +1,7 @@
+sequence_order,pipeline_stage,location,function_or_field,cap_type,rows_affected,pct_rows_affected,demand_or_order,phase1_status,still_active_after_phase1,notes
+1,units_model.predict,scoring_service.py / trainer.py,raw_predicted_units_sold,model_output_flatness,2960,83.83,demand_signal_quality,unchanged,YES,Modal raw=0.052780; 83.8% identical raw
+2,apply_allocation_aware_units_cap,allocation_calibration.py L96-99,calibrated_predicted_units_sold,allocation_risk_upper_bound_on_demand,1959,55.48,demand (misplaced cap),still_on_demand_path,YES,Earliest active demand shrink AFTER Phase 1 scoring assignment
+3,scoring_service predicted_units_sold assignment,scoring_service.py L174/L231,predicted_units_sold,order_cap_overwrite_demand,3531,100.0,demand,FIXED (5365c3f),NO in new scoring,Stale DS pred==cap 3531; pred==cal 2233
+4,trainer backtest export,trainer.py L1495,predicted_units_total_promo,order_cap_overwrite_demand,code_path,N/A,demand export,NOT FIXED,YES,predicted_units_total_promo = policy_adjusted (mirrors pre-Phase-1 scoring bug)
+5,Stage 11 _build_download_forecast_outputs,store_prediction_download_builder.py L2218-2226,predicted_units_total_promo_raw,order_policy_ceiling_on_demand_display,1298,36.76,demand display,NOT FIXED,YES,Simulated on DS with post-Phase-1 predicted=calibrated semantics
+6,Stage 11 _integerize_forecast_total_units,store_prediction_download_builder.py L6148-6155,selected_demand_units,positive_floor_to_1,3526,99.86,demand display/contract,NOT FIXED,YES,All 0<cal<1 integerize to 1; uniform customer output
