@@ -230,7 +230,7 @@ class PromotionTrainingScoringPipelineTests(unittest.TestCase):
             self.assertTrue(
                 (
                     scoring_artifacts.row_frame["predicted_units_sold"]
-                    <= scoring_artifacts.row_frame["calibrated_predicted_units_sold"]
+                    == scoring_artifacts.row_frame["calibrated_predicted_units_sold"]
                 ).all()
             )
             self.assertIn("allocation_decision_diagnostics_csv_path", scoring_artifacts.diagnostic_paths)

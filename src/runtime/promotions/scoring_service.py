@@ -168,7 +168,10 @@ class PromotionModelScorer:
                 policy_adjustments["adjusted_order_cap_units"],
                 errors="coerce",
             ).fillna(0.0)
-            scored_rows["predicted_units_sold"] = scored_rows["policy_adjusted_predicted_units_sold"]
+            # Phase 1 demand/order separation: predicted_units_sold is the demand
+            # forecast (calibrated model output). Order caps live in
+            # policy_adjusted_predicted_units_sold / adjusted_order_cap_units only.
+            scored_rows["predicted_units_sold"] = scored_rows["calibrated_predicted_units_sold"]
             recommendation_frame = _build_recommendation_columns(scored_rows)
             scored_rows["recommendation_flag"] = recommendation_frame["recommendation_flag"]
             scored_rows["recommendation_reason"] = recommendation_frame["recommendation_reason"]
@@ -222,7 +225,10 @@ class PromotionModelScorer:
             policy_adjustments["adjusted_order_cap_units"],
             errors="coerce",
         ).fillna(0.0)
-        scored_rows["predicted_units_sold"] = scored_rows["policy_adjusted_predicted_units_sold"]
+        # Phase 1 demand/order separation: demand forecast stays on the calibrated
+        # path; order/risk caps remain in adjusted_order_cap_units and the
+        # deprecated-compat alias policy_adjusted_predicted_units_sold.
+        scored_rows["predicted_units_sold"] = scored_rows["calibrated_predicted_units_sold"]
         for column_name in policy_adjustments.columns:
             scored_rows[column_name] = policy_adjustments[column_name]
         # The model forecasts total promo-window units. First-day demand stays transparent and
