@@ -1,0 +1,32 @@
+column,layer,is_stage11_contract_input,present_in_ds,non_null,all_null,p50,mean,max,note
+predicted_units_total_promo,decision_surface,True,False,0,True,,,,MISSING from decision surface
+predicted_units_first_7_days_of_promo,decision_surface,True,False,0,True,,,,MISSING from decision surface
+predicted_units_until_promo_start,decision_surface,True,False,0,True,,,,MISSING from decision surface
+current_soh_units,decision_surface,True,False,0,True,,,,MISSING from decision surface
+qty_on_order_units,decision_surface,True,False,0,True,,,,MISSING from decision surface
+demand_evidence_class,decision_surface,True,False,0,True,,,,MISSING from decision surface
+final_confidence_score,decision_surface,True,True,3531,False,0.558029,0.520472,0.741141,
+estimated_cash_risk_band,decision_surface,True,False,0,True,,,,MISSING from decision surface
+raw_predicted_units_sold,decision_surface,False,True,3531,False,0.05278,0.111024,28.950378,
+calibrated_predicted_units_sold,decision_surface,False,True,3531,False,0.01148,0.027153,1.387368,
+policy_adjusted_predicted_units_sold,decision_surface,False,True,3531,False,0.005227,0.015555,0.455797,
+predicted_units_sold,decision_surface,False,True,3531,False,0.005227,0.015555,0.455797,
+baseline_expected_units,decision_surface,False,True,3531,False,0.0161,0.037484,2.7664,
+feature_probability_expected_units_consensus,decision_surface,False,True,3531,False,0.555556,1.447015,113.0,
+feature_expected_total_units_first_7_days,decision_surface,False,True,3531,False,0.0021,0.622515,24.5,
+feature_expected_total_units_from_baseline_plus_uplift,decision_surface,False,True,3531,False,0.0021,0.622515,24.5,
+historical_units_same_discount_avg,decision_surface,False,False,0,True,,,,MISSING from decision surface
+feature_probability_bayesian_poisson_expected_units,decision_surface,False,True,3531,False,0.555556,1.447015,113.0,
+feature_probability_negative_binomial_expected_units,decision_surface,False,True,1162,False,1.533333,2.507551,73.0,
+nearest_archetype_expected_units,decision_surface,False,True,3531,False,0.384925,0.697306,17.5,
+current_soh,decision_surface,False,True,3531,False,3.0,3.267913,98.0,
+qty_on_order,decision_surface,False,True,3531,False,0.0,0.07335,10.0,
+demand_evidence_class,decision_surface,True,False,0,True,,,,MISSING from decision surface
+selected_demand_units,stage11_report_output,False,False,3531,False,1.0,1.005,2.0,
+promo_window_demand_units,stage11_report_output,False,False,3531,False,1.0,0.999,1.0,
+total_expected_demand_units,stage11_report_output,False,False,3531,False,1.0,6.208,241.0,
+pre_promo_demand_units,stage11_report_output,False,False,3531,False,0.0,5.209,240.0,
+demand_forecast_basis,stage11_report_output,False,False,3531,False,MODEL_PREDICTION,,MODEL_PREDICTION,
+demand_forecast_confidence,stage11_report_output,False,False,3531,False,MEDIUM,,MEDIUM,
+demand_forecast_reason_code,stage11_report_output,False,False,3531,False,MODEL_PREDICTION_USED,,MODEL_PREDICTION_USED,
+demand_forecast_warning,stage11_report_output,False,False,160,False,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 5.0; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 5.0; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,
