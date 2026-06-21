@@ -14,6 +14,10 @@ from dataclasses import dataclass
 
 import pandas as pd
 
+from models.promotions.sufficient_stock_demand_target import (
+    SUFFICIENT_STOCK_DEMAND_TARGET_COLUMNS,
+    build_sufficient_stock_demand_target_frame,
+)
 from state.promotions.feature_engineering.targets.ft_target_gross_profit import apply_ft_target_gross_profit
 from state.promotions.feature_engineering.targets.ft_target_historical_allocation import (
     HISTORICAL_ALLOCATION_TARGET_COLUMNS,
@@ -47,11 +51,18 @@ _TARGET_COLUMNS = (
     *HISTORICAL_ALLOCATION_TARGET_COLUMNS,
 )
 
+# Legacy governed targets used by live units-model training today.
+_LIVE_UNITS_TRAINING_TARGET_COLUMN = "target_actual_units_sold"
+
+_SUFFICIENT_STOCK_PARALLEL_TARGET_COLUMNS: tuple[str, ...] = SUFFICIENT_STOCK_DEMAND_TARGET_COLUMNS
+
 
 @dataclass(frozen=True)
 class PromotionTargetEngineeringResult:
     frame: pd.DataFrame
     target_columns: tuple[str, ...] = _TARGET_COLUMNS
+    sufficient_stock_target_columns: tuple[str, ...] = _SUFFICIENT_STOCK_PARALLEL_TARGET_COLUMNS
+    live_units_training_target_column: str = _LIVE_UNITS_TRAINING_TARGET_COLUMN
 
 
 class PromotionTargetEngineer:
@@ -75,4 +86,9 @@ class PromotionTargetEngineer:
             apply_ft_target_historical_allocation,
         ):
             working = apply_fn(working)
+        # Phase 4B.2: append governed sufficient-stock demand target fields in
+        # parallel with legacy target_actual_units_sold. Phase 4B.3 will evaluate
+        # whether sufficient_stock_demand_units_target can replace or supplement
+        # target_actual_units_sold after target quality distribution review.
+        working = build_sufficient_stock_demand_target_frame(working)
         return PromotionTargetEngineeringResult(frame=working)
