@@ -1,0 +1,5 @@
+priority,layer,issue,recommended_action,patch_now
+1,training_target,target_actual_units_sold = realized actual_units_sold (stockout-contaminated),Design sufficient-stock promo-window demand target before retrain,NO
+2,units_model_inference,Flat modal raw=0.0528 on 83.8% of SE01 SKUs,Audit sparse-history feature saturation + tree leaf collapse; retrain after target fix,NO
+3,feature_prep,Missing/zero feature rate flat=0.000 vs nonflat=0.000,Review zero-fill imputation in sklearn pipeline; do not inflate demand,NO
+4,governed_fallback,Feature consensus materially exceeds raw model on many SKUs,Keep as warning-only (Patch B); do not use as demand truth without provenance,NO
