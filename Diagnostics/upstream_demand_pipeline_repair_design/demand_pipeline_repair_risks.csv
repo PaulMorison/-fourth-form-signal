@@ -1,0 +1,8 @@
+risk,likelihood,impact,mitigation
+Orders increase when demand no longer policy-capped,HIGH,MEDIUM,Keep adjusted_order_cap_units on order path; shadow replay before customer release
+Downstream code assumes predicted_units_sold is conservative,HIGH,HIGH,One-release alias + grep audit; update tests and decision surface schema notes
+Backtest metrics shift when predicted_units_total_promo uses calibrated,CERTAIN,MEDIUM,Re-baseline backtest dashboards; document metric definition change
+Flat raw model exposed without floor → many near-zero demands,HIGH,HIGH,Phase 4 gate blocks release; warnings visible; separate model repair track
+Removing allocation cap from demand reintroduces over-allocation,MEDIUM,MEDIUM,Move cap to order_units only in Phase 3
+Premature feature consensus fallback inflates demand,MEDIUM,HIGH,Phase 5 gated on actual-outcome validation — do not implement early
+Stage 11 unchanged but receives better input — regression in labels,LOW,LOW,Existing Stage 11 tests; rerun se01 diagnostics after Phase 1

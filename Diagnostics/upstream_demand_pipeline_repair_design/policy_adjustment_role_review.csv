@@ -1,0 +1,8 @@
+question,answer
+What should build_order_policy_adjustments do?,Output order caps and review flags ONLY — never mutate demand forecast columns
+Must it stop writing to predicted_units_sold?,YES — scoring_service must set predicted_units_sold = calibrated_predicted_units_sold (demand)
+Should policy_adjusted_predicted_units_sold be deprecated?,YES — misnamed; alias to adjusted_order_cap_units for one release with deprecation note
+Current outputs to keep,"adjusted_order_cap_units, adjusted_launch_units, adjusted_supported_total_units, policy_adjustment_reason, review_override_flag, policy_units_removed"
+Rename policy_adjustment_reason?,Add order_policy_reason_code alias; keep old name one release
+Stage 11 should consume policy caps for,suggested_order_units ceiling and launch cap ONLY — not predicted_units_total_promo demand
+Rules stay unchanged?,"YES — sparse_history, weak_elasticity etc. remain valid ORDER governance; must not shrink demand"

@@ -1,0 +1,9 @@
+priority,file,function,lines,overwrite,severity,phase_fix
+1,src/runtime/promotions/scoring_service.py,PromotionScoringService.score,"171, 225",predicted_units_sold ← policy_adjusted_predicted_units_sold ← adjusted_order_cap_units,CRITICAL,1
+2,src/runtime/promotions/scoring_service.py,PromotionScoringService.score,231-242,"predicted_units_first_day, predicted_sales_ex_gst, predicted_sell_through_pct derived from policy-capped predicted_units_sold",HIGH,1
+3,src/models/promotions/trainer.py,_write_test_set_predictions,1495,predicted_units_total_promo ← policy_adjusted_predicted_units_total_promo,HIGH,2
+4,src/runtime/promotions/run_promotions_feature_family_ablation.py,ablation scoring path,411,predicted_units_total_promo ← policy_adjusted,MEDIUM,2
+5,src/models/promotions/allocation_calibration.py,apply_allocation_aware_units_cap,96-99,"calibrated_predicted_units_sold replaces demand with min(raw, allocation_upper_bound)",HIGH,3
+6,src/surfaces/promotions/reporting/store_prediction_download_builder.py,_build_download_forecast_outputs,2218-2226,predicted_units_total_promo_raw capped to adjusted_order_cap_units when resolved > cap,CRITICAL,3
+7,src/surfaces/promotions/reporting/store_prediction_download_builder.py,_integerize_forecast_total_units,6152,positive fractional demand → 1 (masks collapse),MEDIUM,4
+8,src/runtime/promotions/run_promotions_low_nonzero_specialist.py,backtest frame builder,785-786,predicted_units_total_promo ← predicted_units_sold (policy cap),MEDIUM,2
