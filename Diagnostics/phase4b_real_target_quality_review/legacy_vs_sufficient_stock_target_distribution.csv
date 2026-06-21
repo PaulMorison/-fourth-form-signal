@@ -1,0 +1,12 @@
+metric,value
+rows_total,11261.0
+rows_with_legacy_target,11261.0
+rows_with_sufficient_stock_target,3807.0
+rows_with_both_targets,3807.0
+legacy_mean,0.860137
+sufficient_mean,0.635408
+mean_difference_sufficient_minus_legacy,0.0
+median_difference_sufficient_minus_legacy,0.0
+pct_sufficient_gt_legacy_by_0_01,0.0
+pct_sufficient_eq_legacy,0.338069
+pct_sufficient_lt_legacy,0.0
