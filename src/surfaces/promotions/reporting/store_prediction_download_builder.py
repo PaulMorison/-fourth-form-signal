@@ -8126,6 +8126,13 @@ def _build_store_action_label_frame(
     better_discount_events = pd.to_numeric(store_frame["historical_promo_events_same_or_better_discount"], errors="coerce").fillna(0.0)
     same_discount_units = pd.to_numeric(store_frame["historical_units_same_discount_avg"], errors="coerce").fillna(0.0)
     better_discount_units = pd.to_numeric(store_frame["historical_units_same_or_better_discount_avg"], errors="coerce").fillna(0.0)
+    selected_demand_units = pd.to_numeric(
+        store_frame["selected_demand_units"]
+        if "selected_demand_units" in store_frame.columns
+        else store_frame.get("expected_promo_demand", pd.Series(0.0, index=index)),
+        errors="coerce",
+    ).fillna(0.0)
+    positive_selected_demand = selected_demand_units.gt(0.0)
 
     no_promo_history = same_discount_events.add(better_discount_events).le(0.0)
     zero_sales_promo_history = same_discount_events.add(better_discount_events).gt(0.0) & same_discount_units.add(better_discount_units).le(0.0)
@@ -8197,8 +8204,14 @@ def _build_store_action_label_frame(
         )
     )
     label = pd.Series("HOLD_STOCK", index=index, dtype="object")
-    label = label.where(~(weak_or_no_demand & ~below_floor_now & no_promo_history), "NEVER_SOLD_IN_PROMO")
-    label = label.where(~(weak_or_no_demand & ~below_floor_now & ~no_promo_history), "NO_DEMAND")
+    label = label.where(
+        ~(weak_or_no_demand & ~below_floor_now & no_promo_history & ~positive_selected_demand),
+        "NEVER_SOLD_IN_PROMO",
+    )
+    label = label.where(
+        ~(weak_or_no_demand & ~below_floor_now & ~no_promo_history & ~positive_selected_demand),
+        "NO_DEMAND",
+    )
     label = label.where(~(low_demand_covered & ~weak_or_no_demand), "HOLD_STOCK_FLOOR_SAFE")
     label = label.where(~capital_drag_high, "REDUCE_HOLDING")
     label = label.where(~(protectable_floor_risk & display_upper.eq("ORDER") & recommended_units.gt(0.0) & expected_demand.gt(2.0)), "BUY")
@@ -8221,21 +8234,39 @@ def _build_store_action_label_frame(
     label = label.where(~(label.eq("NEVER_SOLD_IN_PROMO") & low_projected_soh), "NO_PRIOR_PROMO_EVIDENCE_LOW_SOH_REVIEW")
     label = label.where(~(label.eq("NEVER_SOLD_IN_PROMO") & baseline_demand_present), "NO_PRIOR_PROMO_EVIDENCE_BASELINE_DEMAND")
     label = label.where(~label.eq("NEVER_SOLD_IN_PROMO"), "NO_PRIOR_PROMO_EVIDENCE_LOW_RISK")
-    label_v2 = label.copy()
 
-    # Patch C - NO_DEMAND reconciliation: the governed demand-forecast contract
-    # owns the numeric demand. NO_DEMAND / NEVER_SOLD_IN_PROMO are reserved for
-    # truly zero selected demand and must never be stamped on a SKU the contract
-    # forecast as having positive demand (weak/missing *evidence* is not the same
-    # as zero *demand*). Fall back to the legacy field only if the canonical one
-    # is absent.
-    selected_demand_units = pd.to_numeric(
-        store_frame["selected_demand_units"]
-        if "selected_demand_units" in store_frame.columns
-        else store_frame.get("expected_promo_demand", pd.Series(0.0, index=index)),
-        errors="coerce",
-    ).fillna(0.0)
-    positive_selected_demand = selected_demand_units.gt(0.0)
+    # Publication-blocker fix: store_action_label must align with positive governed
+    # demand. NO_DEMAND / NEVER_SOLD_IN_PROMO are zero-demand-only. Positive demand
+    # with a stock/floor gap must not stay on suppressive hold labels without an
+    # explicit hard blocker — route to PROTECT_AVAILABILITY so reconciliation can
+    # emit a governed executable order or a documented protect decision.
+    stock_gap_present = (
+        demand_exceeds_floor_buffer
+        | projected_below_floor
+        | below_floor_now
+        | selected_demand_units.gt(available_to_sell_before_floor)
+    )
+    positive_suppressive_with_gap = (
+        positive_selected_demand
+        & stock_gap_present
+        & ~data_quality_review
+        & label.isin(
+            {
+                "NO_DEMAND",
+                "NEVER_SOLD_IN_PROMO",
+                "HOLD_STOCK",
+                "HOLD_STOCK_FLOOR_SAFE",
+                "NO_PRIOR_PROMO_EVIDENCE_LOW_RISK",
+                "NO_PRIOR_PROMO_EVIDENCE_BASELINE_DEMAND",
+                "LOW_SOH_NO_AUTO_BUY",
+            }
+        )
+    )
+    label = label.where(~positive_suppressive_with_gap, "PROTECT_AVAILABILITY")
+    positive_zero_demand_only = positive_selected_demand & label.isin({"NO_DEMAND", "NEVER_SOLD_IN_PROMO"})
+    label = label.where(~positive_zero_demand_only, "LOW_SOH_NO_AUTO_BUY")
+
+    label_v2 = label.copy()
 
     demand_label = pd.Series("CREDIBLE_PROMO_DEMAND", index=index, dtype="object")
     demand_label = demand_label.where(~demand_class.eq("low_nonzero_demand"), "LOW_NONZERO_DEMAND")
@@ -9020,6 +9051,17 @@ def _build_store_suppressed_order_risk_audit_frame(
     suppression_risk = suppression_risk.where(
         ~(suppressed_mask & expected_gap.gt(0.0) & credible_demand & ~provisional_review),
         SUPPRESSION_RISK_UNSAFE_FLOOR,
+    )
+    # PROTECT_AVAILABILITY may cap to zero when the physical floor is already met;
+    # that is a governed protect decision, not an unsafe silent suppression.
+    protect_floor_already_met = (
+        suppressed_mask
+        & label.eq("PROTECT_AVAILABILITY")
+        & projected_soh.ge(floor_units)
+    )
+    suppression_risk = suppression_risk.where(
+        ~protect_floor_already_met,
+        SUPPRESSION_RISK_SAFE_STOCK_COVERS_DEMAND,
     )
     suppression_risk = suppression_risk.where(
         ~(suppressed_mask & label.eq("REDUCE_HOLDING") & capital_drag_safe & suppression_risk.eq(SUPPRESSION_RISK_NOT_APPLICABLE)),

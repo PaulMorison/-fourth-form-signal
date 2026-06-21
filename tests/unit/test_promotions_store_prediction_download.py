@@ -287,6 +287,155 @@ class DemandLabelReconciliationTests(unittest.TestCase):
         self.assertEqual(len(positive_no_demand), 0)
 
 
+class StoreActionLabelReconciliationTests(unittest.TestCase):
+    """Publication-blocker fix: store_action_label must align with positive demand."""
+
+    def _result(self, frame: pd.DataFrame) -> pd.DataFrame:
+        return _build_store_action_label_frame(
+            store_frame=frame,
+            display_action=pd.Series(["HOLD"] * len(frame.index), index=frame.index),
+            data_quality_flag=pd.Series(["OK"] * len(frame.index), index=frame.index),
+            publish_eligibility_reason=pd.Series([""] * len(frame.index), index=frame.index),
+            review_reason=pd.Series([""] * len(frame.index), index=frame.index),
+        )
+
+    def test_positive_selected_demand_never_store_action_no_demand(self) -> None:
+        frame = _store_action_label_input_frame(
+            [
+                {
+                    "selected_demand_units": 3.0,
+                    "expected_promo_demand": 1.0,
+                    "available_to_sell_before_floor": 0.0,
+                },
+                {
+                    "selected_demand_units": 0.0,
+                    "expected_promo_demand": 1.0,
+                    "historical_promo_events_same_discount": 2.0,
+                    "historical_units_same_discount_avg": 1.0,
+                },
+            ]
+        )
+        labels = self._result(frame)["store_action_label"]
+        self.assertNotIn(labels.iloc[0], {"NO_DEMAND", "NEVER_SOLD_IN_PROMO"})
+        self.assertEqual(labels.iloc[1], "NO_DEMAND")
+
+    def test_positive_selected_demand_never_store_action_never_sold(self) -> None:
+        frame = _store_action_label_input_frame(
+            [
+                {
+                    "selected_demand_units": 2.0,
+                    "demand_evidence_class": "credible_promo_demand",
+                },
+                {"selected_demand_units": 0.0, "expected_promo_demand": 0.0, "current_soh": 0.0, "demand_evidence_class": "credible_promo_demand"},
+            ]
+        )
+        labels = self._result(frame)["store_action_label"]
+        self.assertNotIn(labels.iloc[0], {"NO_DEMAND", "NEVER_SOLD_IN_PROMO"})
+        self.assertNotIn(labels.iloc[1], {"NO_DEMAND", "NEVER_SOLD_IN_PROMO"})
+        self.assertIn(labels.iloc[1], {"NEVER_SOLD_IN_PROMO", "HOLD_STOCK_FLOOR_SAFE", "NO_PRIOR_PROMO_EVIDENCE_LOW_RISK"})
+
+    def test_positive_demand_with_floor_gap_becomes_protect_availability(self) -> None:
+        frame = _store_action_label_input_frame(
+            [
+                {
+                    "selected_demand_units": 14.0,
+                    "expected_promo_demand": 14.0,
+                    "available_to_sell_before_floor": 1.0,
+                    "projected_on_hand_at_promo_start": 2.0,
+                    "current_soh": 2.0,
+                    "floor_units_required": 5.0,
+                    "recommended_order_units": 13.0,
+                    "historical_promo_events_same_discount": 2.0,
+                    "historical_units_same_discount_avg": 1.0,
+                }
+            ]
+        )
+        label = self._result(frame)["store_action_label"].iloc[0]
+        self.assertEqual(label, "PROTECT_AVAILABILITY")
+
+    def test_credible_positive_demand_does_not_stay_hold_stock_with_gap(self) -> None:
+        frame = _store_action_label_input_frame(
+            [
+                {
+                    "selected_demand_units": 4.0,
+                    "expected_promo_demand": 4.0,
+                    "available_to_sell_before_floor": 0.0,
+                    "projected_on_hand_at_promo_start": 1.0,
+                    "current_soh": 1.0,
+                    "demand_evidence_class": "credible_promo_demand",
+                    "historical_promo_events_same_discount": 3.0,
+                    "historical_units_same_discount_avg": 2.0,
+                }
+            ]
+        )
+        label = self._result(frame)["store_action_label"].iloc[0]
+        self.assertNotEqual(label, "HOLD_STOCK")
+        self.assertEqual(label, "PROTECT_AVAILABILITY")
+
+    def test_publication_blocker_pattern_rows_pass_suppression_validation(self) -> None:
+        patterns = [
+            {
+                "store_action_label": ["PROTECT_AVAILABILITY"],
+                "raw_model_order_units": [13],
+                "projected_SOH_at_promo_start": [2],
+                "floor_units_required": [5],
+                "expected_promo_demand": [14],
+                "available_to_sell_before_floor": [1],
+                "demand_evidence_label": ["CREDIBLE_PROMO_DEMAND"],
+                "promo_window_demand_units": [14],
+                "selected_demand_units": [14],
+            },
+            {
+                "store_action_label": ["PROTECT_AVAILABILITY"],
+                "raw_model_order_units": [2],
+                "projected_SOH_at_promo_start": [7],
+                "floor_units_required": [7],
+                "expected_promo_demand": [2],
+                "available_to_sell_before_floor": [0],
+                "demand_evidence_label": ["CREDIBLE_PROMO_DEMAND"],
+                "promo_window_demand_units": [2],
+                "selected_demand_units": [2],
+            },
+            {
+                "store_action_label": ["PROTECT_AVAILABILITY"],
+                "raw_model_order_units": [1],
+                "projected_SOH_at_promo_start": [5],
+                "floor_units_required": [2],
+                "expected_promo_demand": [2],
+                "available_to_sell_before_floor": [1],
+                "demand_evidence_label": ["CREDIBLE_PROMO_DEMAND"],
+                "promo_window_demand_units": [2],
+                "selected_demand_units": [2],
+            },
+        ]
+        for overrides in patterns:
+            frame = _minimal_suppressed_order_risk_audit_frame(**overrides)
+            audit = _build_store_suppressed_order_risk_audit_frame(store_facing_frame=frame)
+            _validate_store_suppressed_order_risk_audit(audit)
+
+    def test_suppressed_order_risk_validator_still_rejects_unsafe_hold_stock(self) -> None:
+        frame = _minimal_suppressed_order_risk_frame(
+            store_action_label=["HOLD_STOCK"],
+            raw_model_order_units=[6],
+            raw_model_order_value=[60.0],
+            projected_SOH_at_promo_start=[1],
+            current_soh=[1],
+            expected_promo_demand=[4],
+            available_to_sell_before_floor=[0],
+            demand_evidence_label=["CREDIBLE_PROMO_DEMAND"],
+            availability_risk_label=["BELOW_2_UNIT_FLOOR_RISK"],
+            promo_window_demand_units=[4],
+            selected_demand_units=[4],
+        )
+        audit = _build_store_suppressed_order_risk_audit_frame(store_facing_frame=frame)
+        with self.assertRaises(PromotionStoreDownloadCommercialValidationError):
+            _validate_store_suppressed_order_risk_audit(audit)
+
+
+def _minimal_suppressed_order_risk_audit_frame(**overrides: object) -> pd.DataFrame:
+    return _minimal_suppressed_order_risk_frame(**overrides)
+
+
 class PromotionStorePredictionDownloadTests(unittest.TestCase):
     def test_store_download_builder_writes_csv_execution_pack(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -3738,7 +3887,7 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
             )
             store_promo_frame = pd.read_csv(artifacts.per_store_promotion_csv_paths[0]).reset_index(drop=True)
 
-        self.assertIn(str(store_promo_frame.loc[0, "operator_decision"]), {"HOLD_STOCK_FLOOR_SAFE", "LOW_SOH_NO_AUTO_BUY", "NO_DEMAND"})
+        self.assertIn(str(store_promo_frame.loc[0, "operator_decision"]), {"HOLD_STOCK_FLOOR_SAFE", "LOW_SOH_NO_AUTO_BUY", "NO_DEMAND", "PROTECT_AVAILABILITY"})
         self.assertNotIn(str(store_promo_frame.loc[0, "operator_decision"]), {"BUY", "BORDERLINE_OOS_REVIEW", "DATA_QUALITY_REVIEW"})
         self.assertEqual(int(store_promo_frame.loc[0, "floor_units_required"]), 2)
         self.assertEqual(int(store_promo_frame.loc[0, "available_to_sell_before_floor"]), 0)
@@ -3892,7 +4041,13 @@ class PromotionStorePredictionDownloadTests(unittest.TestCase):
 
         self.assertIn(
             str(store_promo_frame.loc[0, "operator_decision"]),
-            {"NO_PRIOR_PROMO_EVIDENCE_LOW_RISK", "NO_PRIOR_PROMO_EVIDENCE_LOW_SOH_REVIEW", "NO_DEMAND"},
+            {
+                "NO_PRIOR_PROMO_EVIDENCE_LOW_RISK",
+                "NO_PRIOR_PROMO_EVIDENCE_LOW_SOH_REVIEW",
+                "NO_DEMAND",
+                "LOW_SOH_NO_AUTO_BUY",
+                "PROTECT_AVAILABILITY",
+            },
         )
         self.assertNotEqual(str(store_promo_frame.loc[0, "operator_decision"]), "NEVER_SOLD_IN_PROMO")
         self.assertNotIn(str(store_promo_frame.loc[0, "operator_decision"]), {"BUY", "BORDERLINE_OOS_REVIEW", "DATA_QUALITY_REVIEW"})
