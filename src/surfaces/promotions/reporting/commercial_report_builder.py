@@ -18,10 +18,14 @@ OPERATOR_SHEET_COLUMNS: tuple[str, ...] = (
     "sku_description",
     "decision",
     "recommendation_type",
+    "raw_model_order_units",
     "target_order_units_to_hit_day_one_soh",
+    "commercial_recommended_order_units",
     "recommended_order_units",
-    "remaining_day_one_shortfall_units",
-    "recommendation_coverage_ratio",
+    "operator_review_order_low_units",
+    "operator_review_order_high_units",
+    "remaining_shortfall_after_commercial_recommendation_units",
+    "commercial_coverage_ratio",
     "target_day_one_soh_units",
     "projected_day_one_soh_before_order_units",
     "projected_day_one_soh_after_recommended_order_units",
@@ -31,6 +35,8 @@ OPERATOR_SHEET_COLUMNS: tuple[str, ...] = (
     "predicted_promo_period_sales_units",
     "confidence_score",
     "data_quality_score",
+    "stock_target_conflict_flag",
+    "decision_quality_label",
     "reason_order",
     "reason_risk",
     "review_reason",
@@ -52,10 +58,19 @@ ORDER_PLAN_COLUMNS: tuple[str, ...] = (
     "sku_description",
     "decision",
     "recommendation_type",
+    "recommended_order_basis",
+    "raw_model_order_units",
     "target_order_units_to_hit_day_one_soh",
+    "commercial_recommended_order_units",
     "recommended_order_units",
+    "operator_review_order_low_units",
+    "operator_review_order_high_units",
+    "remaining_shortfall_after_commercial_recommendation_units",
     "remaining_day_one_shortfall_units",
+    "commercial_coverage_ratio",
     "recommendation_coverage_ratio",
+    "stock_target_conflict_flag",
+    "stock_target_conflict_reason",
     "target_day_one_soh_units",
     "projected_day_one_soh_before_order_units",
     "projected_day_one_soh_after_recommended_order_units",
@@ -89,6 +104,8 @@ ORDER_PLAN_COLUMNS: tuple[str, ...] = (
     "operator_recommended_units",
     "operator_notes",
 )
+
+HOLD_TARGET_TOLERANCE = 2
 
 DEMAND_FIELD_HINTS = (
     "demand",
@@ -419,16 +436,11 @@ def assemble_commercial_order_rows(
     orig_action = frame.get("operator_action", pd.Series("DO_NOT_BUY", index=frame.index)).astype(str).str.upper()
     hist = _num(_first_col(frame, ("historical_units_same_discount_avg_audit", "historical_units_same_discount_avg", "historical_units_same_discount_avg_feat")), index=frame.index)
 
-    recommended = pd.Series(
-        np.where(has_raw & has_promo_demand & has_target_order, np.minimum(raw_order, np.maximum(target_order, 1)), 0),
-        index=frame.index,
-        dtype=int,
-    )
-    projected_after = (projected_before + recommended).round(3)
-    remaining_shortfall = (target_day_one - projected_after).clip(lower=0).round(0).astype(int)
+    hist_p75 = float(hist[hist > 0].quantile(0.75)) if (hist > 0).any() else 0.0
+    base_p75 = float(baseline_daily[baseline_daily > 0].quantile(0.75)) if (baseline_daily > 0).any() else 0.0
+    strong_demand_signal = (hist >= max(hist_p75, 2.0)) | (baseline_daily >= max(base_p75, 0.5))
     with np.errstate(divide="ignore", invalid="ignore"):
-        coverage_num = (recommended / target_order.replace(0, np.nan)).round(3)
-    coverage = coverage_num.where(target_order > 0, np.where(recommended > 0, 1.0, np.nan)).fillna("")
+        raw_to_target = (raw_order / target_order.replace(0, np.nan)).round(3)
 
     unsafe_demand = promo_fallback.eq("YES") | promo_source.eq("missing_promo_period_demand") | promo_quality.isin(["LOW", "VERY_LOW"])
     conf_label = conf.map(_label)
@@ -439,40 +451,106 @@ def assemble_commercial_order_rows(
         review_flag=review_flag, risk_flag=risk_flag, unsafe_pre_promo=unsafe_pre_promo,
     )
     dq_label = dq_pre.map(_label)
-    weak_evidence = unsafe_demand | conf_label.isin(["LOW", "VERY_LOW"]) | dq_label.isin(["LOW", "VERY_LOW"])
 
-    hist_p75 = float(hist[hist > 0].quantile(0.75)) if (hist > 0).any() else 0.0
-    base_p75 = float(baseline_daily[baseline_daily > 0].quantile(0.75)) if (baseline_daily > 0).any() else 0.0
-    best_seller = (
-        (hist >= max(hist_p75, 2.0))
-        | (baseline_daily >= max(base_p75, 0.5))
-    ) & (target_order >= 10) & (raw_order < target_order * 0.5) & (raw_order > 0)
-
-    buy_ok = (
-        (recommended > 0)
-        & ((coverage_num >= 0.5) | (remaining_shortfall <= 5))
-        & ~weak_evidence
-        & has_promo_demand
-        & has_target_order
+    stock_target_conflict = (target_order >= 20) & (raw_to_target < 0.5)
+    best_seller = strong_demand_signal & (target_order >= 10) & (raw_order < target_order * 0.5) & (raw_order > 0)
+    policy_b = (
+        (target_order >= 20)
+        & promo_quality.isin(["MEDIUM", "HIGH", "VERY_HIGH"])
+        & strong_demand_signal
+        & (dq_pre >= 70)
+        & (conf >= 45)
+        & (raw_order > 0)
+        & (raw_to_target < 0.5)
     )
-    decision = pd.Series("DO_NOT_BUY", index=frame.index)
-    hold_mask = (recommended == 0) & (has_promo_demand | has_target_order) & ~review_flag & ~risk_flag
-    decision = decision.where(~hold_mask, "HOLD")
-    review_mask = (
-        (recommended > 0) & ~buy_ok
-    ) | review_flag | risk_flag | unsafe_pre_promo | orig_action.isin(["REVIEW", "MONITOR"]) | best_seller
-    decision = decision.where(~review_mask, "REVIEW")
-    decision = decision.where(~buy_ok, "BUY")
-    recommended = recommended.where(~decision.isin(["HOLD", "DO_NOT_BUY"]), 0).astype(int)
-    decision = decision.where(~((decision == "BUY") & (recommended <= 0)), "REVIEW")
+    lift_units = np.ceil(target_order * 0.5).astype(int)
+    commercial = pd.Series(
+        np.where(
+            policy_b,
+            np.maximum(raw_order, np.minimum(target_order, lift_units)),
+            np.where(has_raw & has_target_order & has_promo_demand, raw_order, 0),
+        ),
+        index=frame.index,
+        dtype=int,
+    )
+    order_basis = pd.Series(
+        np.where(
+            commercial > raw_order,
+            "target_stock_policy_lift",
+            np.where(commercial > 0, "raw_model_order", "none"),
+        ),
+        index=frame.index,
+    )
+    op_low = raw_order.clip(lower=0).astype(int)
+    op_high = target_order.astype(int)
 
-    projected_after = (projected_before + recommended).round(3)
+    projected_after = (projected_before + commercial).round(3)
     remaining_shortfall = (target_day_one - projected_after).clip(lower=0).round(0).astype(int)
     with np.errstate(divide="ignore", invalid="ignore"):
-        coverage_num = (recommended / target_order.replace(0, np.nan)).round(3)
-    coverage = coverage_num.where(target_order > 0, np.where(recommended > 0, 1.0, np.nan)).fillna("")
+        commercial_cov_num = (commercial / target_order.replace(0, np.nan)).round(3)
+    commercial_cov = commercial_cov_num.where(target_order > 0, np.where(commercial > 0, 1.0, np.nan)).fillna("")
+    coverage_num = commercial_cov_num
+    coverage = commercial_cov
 
-    low_cov_buy = (decision == "BUY") & (coverage_num < 0.5) & (remaining_shortfall > 10)
+    material_gap = target_order > HOLD_TARGET_TOLERANCE
+    major_conflict = stock_target_conflict & (remaining_shortfall > 10)
+    credible_need = has_promo_demand & (target_order > 0)
+    low_demand = (~has_promo_demand) | (promo_sales <= 0.5)
+
+    buy_ok = (
+        (commercial > 0)
+        & ((commercial_cov_num >= 0.5) | (remaining_shortfall <= 5))
+        & (dq_pre >= 70)
+        & (conf >= 45)
+        & (~promo_quality.eq("VERY_LOW"))
+        & (~major_conflict)
+    )
+
+    dnb_mask = (
+        low_demand
+        & (target_order <= HOLD_TARGET_TOLERANCE)
+        & ((conf < 45) | (dq_pre < 50))
+        & ~material_gap
+    )
+    hold_mask = (
+        (target_order <= HOLD_TARGET_TOLERANCE)
+        & (commercial == 0)
+        & ~dnb_mask
+        & ~review_flag
+        & ~risk_flag
+        & ~material_gap
+    )
+    review_mask = (
+        material_gap
+        | stock_target_conflict
+        | best_seller
+        | review_flag
+        | risk_flag
+        | unsafe_demand
+        | unsafe_pre_promo
+        | orig_action.isin(["REVIEW", "MONITOR"])
+        | ((commercial > 0) & ~buy_ok)
+    ) & ~dnb_mask
+
+    decision = pd.Series("DO_NOT_BUY", index=frame.index)
+    decision = decision.where(~dnb_mask, "DO_NOT_BUY")
+    decision = decision.where(~hold_mask, "HOLD")
+    decision = decision.where(~review_mask, "REVIEW")
+    decision = decision.where(~buy_ok, "BUY")
+    decision = decision.where(~((decision == "HOLD") & material_gap), "REVIEW")
+    decision = decision.where(~((decision == "BUY") & (commercial <= 0)), "REVIEW")
+
+    commercial = commercial.where(~decision.isin(["HOLD", "DO_NOT_BUY"]), 0).astype(int)
+    recommended = commercial
+    projected_after = (projected_before + commercial).round(3)
+    remaining_shortfall = (target_day_one - projected_after).clip(lower=0).round(0).astype(int)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        commercial_cov_num = (commercial / target_order.replace(0, np.nan)).round(3)
+    commercial_cov = commercial_cov_num.where(target_order > 0, np.where(commercial > 0, 1.0, np.nan)).fillna("")
+    coverage_num = commercial_cov_num
+    coverage = commercial_cov
+
+    low_cov_buy = (decision == "BUY") & (commercial_cov_num < 0.5) & (remaining_shortfall > 10)
     decision = decision.where(~low_cov_buy, "REVIEW")
 
     rec_type = pd.Series(
@@ -480,98 +558,158 @@ def assemble_commercial_order_rows(
             [
                 decision.eq("DO_NOT_BUY"),
                 decision.eq("HOLD"),
-                decision.eq("REVIEW") & (recommended > 0),
+                decision.eq("REVIEW") & stock_target_conflict,
+                decision.eq("REVIEW") & (commercial > 0),
+                decision.eq("BUY") & order_basis.eq("target_stock_policy_lift") & (remaining_shortfall <= 0),
+                decision.eq("BUY") & order_basis.eq("target_stock_policy_lift"),
                 decision.eq("BUY") & (remaining_shortfall <= 0),
-                decision.eq("BUY") & (recommended > 0),
+                decision.eq("BUY") & (commercial > 0),
             ],
             [
                 "DO_NOT_BUY",
                 "NO_ORDER_REQUIRED",
+                "TARGET_STOCK_REVIEW_RANGE",
                 "REVIEW_ONLY_ORDER_QUANTITY",
                 "FULL_TARGET_ORDER",
-                "PARTIAL_CONSTRAINED_ORDER",
+                "TARGET_STOCK_POLICY_LIFT",
+                "FULL_TARGET_ORDER",
+                "RAW_MODEL_CONSTRAINED_ORDER",
             ],
-            default="NO_ORDER_REQUIRED",
+            default="TARGET_STOCK_REVIEW_RANGE",
         ),
         index=frame.index,
     )
+    rec_type = rec_type.where(
+        ~(decision.eq("REVIEW") & material_gap & rec_type.eq("NO_ORDER_REQUIRED")),
+        "TARGET_STOCK_REVIEW_RANGE",
+    )
 
-    capital = _num(frame.get("capital_at_risk_adjusted_dollars"), index=frame.index).round(2)
-    constraint = np.where(
-        best_seller,
-        "best_seller_underorder_review",
+    conflict_reason = pd.Series(
         np.where(
-            low_cov_buy | (decision.eq("REVIEW") & (recommended > 0)),
-            "review_required",
+            stock_target_conflict,
+            "target_stock_requires_more_than_model_order",
             np.where(
-                remaining_shortfall <= 0,
-                "none_gap_closed",
-                np.where(unsafe_demand, "insufficient_demand_evidence", "model_conservative_raw_order"),
+                best_seller,
+                "best_seller_underorder_review",
+                "",
             ),
         ),
+        index=frame.index,
     )
-    constraint = pd.Series(constraint, index=frame.index)
+    constraint = conflict_reason.where(conflict_reason.ne(""), np.where(unsafe_demand, "insufficient_demand_evidence", "none"))
+
+    capital = _num(frame.get("capital_at_risk_adjusted_dollars"), index=frame.index).round(2)
     end_soh = (projected_after - promo_sales).round(3)
     dq = dq_pre
 
     review_parts = pd.DataFrame({
         "risk_or_review_flag": np.where(risk_flag | review_flag, "risk_or_review_flag", ""),
-        "low_confidence_buy": np.where((conf < 45) & (recommended > 0), "low_confidence_buy", ""),
+        "low_confidence_buy": np.where((conf < 45) & (commercial > 0), "low_confidence_buy", ""),
         "missing_baseline_daily": np.where(baseline_daily <= 0, "missing_baseline_daily", ""),
         "target_end_floor_2": np.where(target_used_floor, "missing_sku_specific_30_day_cover_used_floor_2", ""),
         "unsafe_pre_promo_rejected": np.where(unsafe_pre_promo, "unsafe_pre_promo_source_rejected", ""),
         "promo_demand_fallback": np.where(promo_fallback.eq("YES"), "promo_period_demand_fallback", ""),
         "projected_start_floored": np.where(floored, "projected_start_stock_floored_flag", ""),
         "formula_reconciliation_failure": np.where(~formula_ok, "formula_reconciliation_failure", ""),
+        "stock_target_conflict": np.where(stock_target_conflict, "stock_target_conflict", ""),
     }, index=frame.index)
     review_reason = review_parts.apply(lambda r: "; ".join(x for x in r if x), axis=1)
     review_reason = review_reason.where(review_reason.ne(""), dq_penalties)
-    human_review = np.where(decision.eq("REVIEW") | review_reason.ne("") | decision.eq("BUY"), "YES", "NO")
+
+    buy_risk = risk_flag | review_flag | unsafe_demand | major_conflict | low_cov_buy
+    human_review = np.where(
+        decision.eq("REVIEW"),
+        "YES",
+        np.where(decision.eq("BUY"), np.where(buy_risk, "YES", "NO"), "NO"),
+    )
+
+    decision_quality = pd.Series(
+        np.select(
+            [
+                decision.eq("BUY") & ~buy_risk,
+                decision.eq("BUY"),
+                decision.eq("REVIEW") & stock_target_conflict,
+                decision.eq("REVIEW") & unsafe_demand,
+                decision.eq("REVIEW") & ((conf < 45) | (dq_pre < 70)),
+                decision.eq("REVIEW"),
+                decision.eq("HOLD"),
+            ],
+            [
+                "EXECUTION_READY",
+                "REVIEW_LOW_CONFIDENCE",
+                "REVIEW_STOCK_GAP",
+                "REVIEW_DEMAND_EVIDENCE",
+                "REVIEW_LOW_CONFIDENCE",
+                "REVIEW_STOCK_GAP",
+                "HOLD_NO_ORDER_NEEDED",
+            ],
+            default="DO_NOT_BUY_LOW_EVIDENCE",
+        ),
+        index=frame.index,
+    )
 
     gp = (
         _num(frame.get("feature_expected_gp_on_trust_floor_units"))
         + _num(frame.get("feature_expected_gp_on_speculative_units"))
     ).round(2)
 
-    reason_order = np.where(
-        decision.eq("DO_NOT_BUY"),
-        "Do not buy; insufficient demand or stock need",
-        np.where(
-            decision.eq("HOLD"),
-            "No order required; projected stock likely covers target",
+    reason_order = (
+        "Target order to hit day-one SOH: "
+        + target_order.astype(str)
+        + " units; raw model order: "
+        + raw_order.astype(str)
+        + " units; commercial recommended order: "
+        + commercial.astype(str)
+        + " units; operator review range "
+        + op_low.astype(str)
+        + "-"
+        + op_high.astype(str)
+        + ". "
+        + np.where(
+            remaining_shortfall <= 0,
+            "Commercial recommendation fully covers target day-one stock.",
             np.where(
-                decision.eq("REVIEW") & (recommended > 0),
-                "Model order only partially covers target stock requirement; buyer review required before ordering",
+                commercial > 0,
+                "Commercial recommendation partially covers target; remaining shortfall "
+                + remaining_shortfall.astype(str)
+                + " units.",
                 np.where(
-                    remaining_shortfall <= 0,
-                    "Recommended order reaches target day-one stock",
-                    "Recommended order partially covers target; remaining shortfall shown explicitly",
+                    stock_target_conflict,
+                    "Target stock requires more units than the model order; buyer must review the gap before ordering.",
+                    "No commercial order recommended; buyer review required for target stock gap.",
                 ),
             ),
-        ),
+        )
     )
     reason_stock = (
-        "Current SOH "
+        "Projected day-one SOH before order "
+        + projected_before.round(1).astype(str)
+        + "; target day-one SOH "
+        + target_day_one.round(1).astype(str)
+        + "; target order requirement "
+        + target_order.astype(str)
+        + " units (current SOH "
         + soh.round(1).astype(str)
         + ", on-order "
         + on_order.round(1).astype(str)
         + ", pre-promo demand "
         + pre_promo.round(1).astype(str)
-        + " => projected day-one before order "
-        + projected_before.round(1).astype(str)
-        + "; target day-one SOH "
-        + target_day_one.round(1).astype(str)
+        + ")"
     )
     reason_risk = np.where(
-        unsafe_demand,
-        "Unsafe or fallback promo demand source; do not treat as high-confidence BUY",
+        stock_target_conflict,
+        "Stock target conflict: model order far below target stock requirement",
         np.where(
-            coverage_num < 0.5,
-            "Low recommendation coverage ratio versus target order",
+            unsafe_demand,
+            "Unsafe or fallback promo demand source",
             np.where(
-                remaining_shortfall > 10,
-                "Large remaining day-one shortfall after recommended order",
-                "Shadow commercial pack; human review required before any order",
+                commercial_cov_num < 0.5,
+                "Low commercial coverage ratio versus target order",
+                np.where(
+                    remaining_shortfall > 10,
+                    "Large remaining day-one shortfall after commercial recommendation",
+                    "Shadow commercial pack; governed order policy applied",
+                ),
             ),
         ),
     )
@@ -589,10 +727,19 @@ def assemble_commercial_order_rows(
             "sku_description": frame["sku_description"],
             "decision": decision,
             "recommendation_type": rec_type,
+            "recommended_order_basis": order_basis,
+            "raw_model_order_units": raw_order,
             "target_order_units_to_hit_day_one_soh": target_order,
+            "commercial_recommended_order_units": commercial,
             "recommended_order_units": recommended,
+            "operator_review_order_low_units": op_low,
+            "operator_review_order_high_units": op_high,
+            "remaining_shortfall_after_commercial_recommendation_units": remaining_shortfall,
             "remaining_day_one_shortfall_units": remaining_shortfall,
+            "commercial_coverage_ratio": commercial_cov,
             "recommendation_coverage_ratio": coverage,
+            "stock_target_conflict_flag": stock_target_conflict.astype(int),
+            "stock_target_conflict_reason": conflict_reason,
             "target_day_one_soh_units": target_day_one,
             "projected_day_one_soh_before_order_units": projected_before,
             "projected_day_one_soh_after_recommended_order_units": projected_after,
@@ -613,7 +760,7 @@ def assemble_commercial_order_rows(
     )
     out["confidence_label"] = out["confidence_score"].map(_label)
     out["data_quality_label"] = out["data_quality_score"].map(_label)
-    out["decision_quality_label"] = np.where(out["decision"] == "BUY", out["confidence_label"], "N_A")
+    out["decision_quality_label"] = decision_quality
     out["reason_demand"] = np.select(
         [
             promo_source.str.contains("fallback", na=False),
@@ -639,8 +786,10 @@ def assemble_commercial_order_rows(
         out["decision"].isin(["HOLD", "DO_NOT_BUY"]),
         np.where(
             out["decision"] == "DO_NOT_BUY",
-            "Low promo demand and/or no stock gap; model rejects order",
-            "Visible SKU with no immediate order; stock may cover promo start",
+            "Low promo demand and/or poor evidence; no commercial order need",
+            "No order required; target day-one gap is within tolerance (<= "
+            + str(HOLD_TARGET_TOLERANCE)
+            + " units)",
         ),
         "",
     )
@@ -666,10 +815,19 @@ def assemble_commercial_order_rows(
             "order_units_source": "raw_model_order_units",
             "confidence_source": "model_confidence_percent",
             "raw_model_order_units": raw_order,
+            "commercial_recommended_order_units": commercial,
             "target_order_units_to_hit_day_one_soh": target_order,
             "remaining_day_one_shortfall_units": remaining_shortfall,
             "recommendation_type": rec_type,
+            "recommended_order_basis": order_basis,
             "recommendation_constraint_reason": constraint,
+            "stock_target_conflict_flag": stock_target_conflict.astype(int),
+            "raw_model_to_target_ratio": raw_to_target,
+            "proposed_order_policy": np.where(
+                policy_b,
+                "target_stock_policy_lift",
+                np.where(stock_target_conflict, "target_stock_review_range", "raw_model_constrained"),
+            ),
             "raw_projected_start_stock_before_floor_units": projected_before_raw,
             "projected_start_stock_floor_units_removed": floor_removed,
             "projected_start_stock_floored_flag": floored.map({True: "YES", False: "NO"}),
@@ -697,9 +855,17 @@ def _sort_order_plan(df: pd.DataFrame) -> pd.DataFrame:
 
 def build_review_exceptions(order_plan: pd.DataFrame) -> pd.DataFrame:
     capital = _num(order_plan.get("capital_at_risk_dollars"), index=order_plan.index)
-    remaining = _num(order_plan.get("remaining_day_one_shortfall_units", order_plan.get("remaining_gap_after_recommended_order_units")), index=order_plan.index)
+    remaining = _num(
+        order_plan.get(
+            "remaining_shortfall_after_commercial_recommendation_units",
+            order_plan.get("remaining_day_one_shortfall_units", order_plan.get("remaining_gap_after_recommended_order_units")),
+        ),
+        index=order_plan.index,
+    )
+    conflict = _num(order_plan.get("stock_target_conflict_flag"), index=order_plan.index).astype(bool)
     return order_plan[
         (order_plan["decision"] == "REVIEW")
+        | conflict
         | (order_plan["confidence_score"] < 45)
         | (order_plan["data_quality_score"] < 50)
         | (order_plan["recommended_order_units"] >= 10)
@@ -751,9 +917,28 @@ def build_manager_summary(order_plan: pd.DataFrame, exceptions: pd.DataFrame) ->
                 pd.to_numeric(order_plan["recommendation_coverage_ratio"], errors="coerce").dropna().mean() or 0
             ),
             "buy_count_full_target_order": int((order_plan["recommendation_type"] == "FULL_TARGET_ORDER").sum()),
-            "buy_count_partial_constrained_order": int((order_plan["recommendation_type"] == "PARTIAL_CONSTRAINED_ORDER").sum()),
+            "buy_count_partial_constrained_order": int((order_plan["recommendation_type"] == "RAW_MODEL_CONSTRAINED_ORDER").sum()),
             "review_count_due_to_underorder": 0,
             "best_seller_underorder_review_count": 0,
+            "hold_rows_with_target_order_gt_10": int(
+                ((order_plan["decision"] == "HOLD") & (order_plan["target_order_units_to_hit_day_one_soh"] > 10)).sum()
+            ),
+            "hold_rows_with_target_order_gt_20": int(
+                ((order_plan["decision"] == "HOLD") & (order_plan["target_order_units_to_hit_day_one_soh"] > 20)).sum()
+            ),
+            "review_rows_with_no_order_required_conflict": int(
+                (
+                    (order_plan["decision"] == "REVIEW")
+                    & (order_plan["recommendation_type"] == "NO_ORDER_REQUIRED")
+                    & (order_plan["target_order_units_to_hit_day_one_soh"] > 10)
+                ).sum()
+            ),
+            "stock_target_conflict_count": int(_num(order_plan.get("stock_target_conflict_flag")).astype(bool).sum()),
+            "target_stock_policy_lift_count": int((order_plan["recommendation_type"] == "TARGET_STOCK_POLICY_LIFT").sum()),
+            "target_stock_review_range_count": int((order_plan["recommendation_type"] == "TARGET_STOCK_REVIEW_RANGE").sum()),
+            "execution_ready_buy_count": int((order_plan["decision_quality_label"] == "EXECUTION_READY").sum()),
+            "commercial_recommended_order_units_total": float(order_plan["commercial_recommended_order_units"].sum()),
+            "operator_review_order_high_units_total": float(order_plan["operator_review_order_high_units"].sum()),
             "promo_period_demand_fallback_count": 0,
             "unsafe_promo_period_demand_count": 0,
             "commercial_release_score": 0,
@@ -771,7 +956,10 @@ def quality_scorecard(order_plan: pd.DataFrame, summary: pd.DataFrame, exception
     hold_pos = int(((order_plan["decision"].isin(["HOLD", "DO_NOT_BUY"])) & (order_plan["recommended_order_units"] > 0)).sum())
     reconciles = abs(float(summary["total_recommended_order_units"].iloc[0]) - float(order_plan["recommended_order_units"].sum())) < 0.01
     exc_reconciles = int(summary["review_exception_count"].iloc[0]) == len(exceptions)
-    cov = pd.to_numeric(order_plan["recommendation_coverage_ratio"], errors="coerce")
+    cov = pd.to_numeric(
+        order_plan.get("commercial_coverage_ratio", order_plan.get("recommendation_coverage_ratio")),
+        errors="coerce",
+    )
     remaining = _num(order_plan.get("remaining_day_one_shortfall_units"), index=order_plan.index)
     target_order = _num(order_plan.get("target_order_units_to_hit_day_one_soh"), index=order_plan.index)
     target_day_one = _num(order_plan.get("target_day_one_soh_units"), index=order_plan.index)
@@ -788,19 +976,34 @@ def quality_scorecard(order_plan: pd.DataFrame, summary: pd.DataFrame, exception
     buy_partial = int(((order_plan["decision"] == "BUY") & (remaining > 0)).sum())
     review_pos = int(((order_plan["decision"] == "REVIEW") & (order_plan["recommended_order_units"] > 0)).sum())
     promo_flat = int((order_plan["predicted_promo_period_sales_units"] <= 1).sum())
-    has_target_cols = "target_order_units_to_hit_day_one_soh" in order_plan.columns
+    hold_gt_20 = int(((order_plan["decision"] == "HOLD") & (target_order > 20)).sum())
+    hold_gt_10 = int(((order_plan["decision"] == "HOLD") & (target_order > 10)).sum())
+    review_no_order_conflict = int(
+        (
+            (order_plan["decision"] == "REVIEW")
+            & (order_plan["recommendation_type"] == "NO_ORDER_REQUIRED")
+            & (target_order > 10)
+        ).sum()
+    )
+    dql_na = int((order_plan["decision_quality_label"].astype(str).str.upper() == "N_A").sum())
+    all_human_review = bool((order_plan["human_review_required"] == "YES").all())
+    has_commercial_cols = "commercial_recommended_order_units" in order_plan.columns
     scores = {
         "all_skus_included": 1 if len(order_plan) >= 3000 else 0,
         "one_row_per_sku": 1 if dup == 0 else 0,
         "decision_enum_valid": 1 if non_std == 0 else 0,
         "buy_positive_units": 1 if zero_buy == 0 else 0,
         "hold_dnb_zero_units": 1 if hold_pos == 0 else 0,
+        "hold_large_target_gap_blocked": 1 if hold_gt_20 == 0 else 0,
+        "review_no_order_label_blocked": 1 if review_no_order_conflict == 0 else 0,
+        "decision_quality_populated": 1 if dql_na == 0 else 0,
+        "human_review_discriminating": 1 if not all_human_review else 0,
         "target_day_one_reconciles": 1 if optimal_fail == 0 else 0,
         "target_order_reconciles": 1 if target_order_fail == 0 else 0,
         "projected_day_one_reconciles": 1 if projected_mismatch == 0 and after_mismatch == 0 else 0,
         "shortfall_reconciles": 1 if shortfall_fail == 0 else 0,
         "buy_low_coverage_blocked": 1 if buy_low_cov == 0 else 0,
-        "target_order_fields_present": 1 if has_target_cols else 0,
+        "commercial_order_fields_present": 1 if has_commercial_cols else 0,
         "review_positive_labelled": 1,
         "manager_reconciles": 1 if reconciles else 0,
         "exceptions_reconcile": 1 if exc_reconciles else 0,
@@ -810,7 +1013,8 @@ def quality_scorecard(order_plan: pd.DataFrame, summary: pd.DataFrame, exception
     }
     core_ok = all(v == 1 for k, v in scores.items() if k in {
         "target_day_one_reconciles", "target_order_reconciles", "projected_day_one_reconciles",
-        "shortfall_reconciles", "buy_low_coverage_blocked",
+        "shortfall_reconciles", "buy_low_coverage_blocked", "hold_large_target_gap_blocked",
+        "review_no_order_label_blocked", "decision_quality_populated",
     })
     score = int(round(sum(scores.values()) / len(scores) * 100))
     if not core_ok:
@@ -1092,6 +1296,112 @@ def _write_phase5b6_diagnostics(
     )
 
 
+def _write_phase5b7_diagnostics(
+    *,
+    diagnostics_dir: Path,
+    order_plan: pd.DataFrame,
+    calc: pd.DataFrame,
+    summary: pd.DataFrame,
+    score: int,
+    before_plan: pd.DataFrame | None = None,
+) -> None:
+    diagnostics_dir.mkdir(parents=True, exist_ok=True)
+    hold_gap = order_plan[
+        (order_plan["decision"] == "HOLD") & (order_plan["target_order_units_to_hit_day_one_soh"] > 0)
+    ].copy()
+    hold_gap["proposed_decision"] = "REVIEW"
+    hold_gap[
+        [
+            "sku_number", "sku_description", "decision", "current_soh_units", "on_order_units",
+            "estimated_demand_before_promo_start_units", "predicted_promo_period_sales_units",
+            "target_stock_on_hand_at_promo_end_units", "target_day_one_soh_units",
+            "target_order_units_to_hit_day_one_soh", "recommended_order_units",
+            "remaining_day_one_shortfall_units", "confidence_score", "data_quality_score",
+            "reason_stock", "reason_order", "review_reason", "proposed_decision",
+        ]
+    ].to_csv(diagnostics_dir / "se01_hold_with_stock_gap_conflicts.csv", index=False)
+
+    review_conflict = order_plan[
+        (order_plan["decision"] == "REVIEW")
+        & (order_plan["recommendation_type"] == "NO_ORDER_REQUIRED")
+        & (order_plan["target_order_units_to_hit_day_one_soh"] > 0)
+    ]
+    review_conflict.to_csv(diagnostics_dir / "se01_review_no_order_required_conflicts.csv", index=False)
+
+    cmp_df = order_plan.merge(
+        calc[[
+            "sku_number", "raw_model_order_units", "commercial_recommended_order_units",
+            "promo_period_demand_source", "raw_model_to_target_ratio", "proposed_order_policy",
+        ]],
+        on="sku_number",
+        how="left",
+        suffixes=("_plan", ""),
+    )
+    cmp_df.rename(columns={"recommended_order_units": "current_recommended_order_units"}, inplace=True)
+    cmp_df["proposed_commercial_recommended_order_units"] = cmp_df["commercial_recommended_order_units"]
+    cmp_df[
+        [
+            "sku_number", "raw_model_order_units", "target_order_units_to_hit_day_one_soh",
+            "current_recommended_order_units", "proposed_commercial_recommended_order_units",
+            "raw_model_to_target_ratio", "confidence_score", "data_quality_score",
+            "promo_period_demand_source", "proposed_order_policy",
+        ]
+    ].to_csv(diagnostics_dir / "se01_raw_model_vs_target_order_comparison.csv", index=False)
+
+    merged = order_plan.merge(calc, on="sku_number", how="left", suffixes=("", "_calc"))
+    candidates = merged[
+        (merged["avg_promo_demand_same_discount_units"] >= merged["avg_promo_demand_same_discount_units"].quantile(0.75))
+        | (merged["target_order_units_to_hit_day_one_soh"] >= 20)
+    ].sort_values(
+        ["target_order_units_to_hit_day_one_soh", "avg_promo_demand_same_discount_units", "current_soh_units"],
+        ascending=[False, False, True],
+    ).head(100)
+    candidates.to_csv(diagnostics_dir / "se01_best_seller_policy_candidates.csv", index=False)
+
+    before_hold_gt20 = 0
+    before_review_no_order = 0
+    before_decisions: dict[str, int] = {}
+    if before_plan is not None:
+        before_hold_gt20 = int(
+            ((before_plan["decision"] == "HOLD") & (before_plan["target_order_units_to_hit_day_one_soh"] > 20)).sum()
+        )
+        if "recommendation_type" in before_plan.columns:
+            before_review_no_order = int(
+                (
+                    (before_plan["decision"] == "REVIEW")
+                    & (before_plan["recommendation_type"] == "NO_ORDER_REQUIRED")
+                    & (before_plan["target_order_units_to_hit_day_one_soh"] > 10)
+                ).sum()
+            )
+        before_decisions = before_plan["decision"].value_counts().to_dict()
+
+    (diagnostics_dir / "phase5b7_commercial_order_policy_memo.md").write_text(
+        f"# Phase 5B.7 commercial order policy review\n\n"
+        f"## Summary\n"
+        f"- Report quality score: {score}/100\n"
+        f"- Decisions before: {before_decisions}\n"
+        f"- Decisions after: {order_plan['decision'].value_counts().to_dict()}\n"
+        f"- HOLD with target order >20 before/after: {before_hold_gt20} / {int(summary['hold_rows_with_target_order_gt_20'].iloc[0])}\n"
+        f"- REVIEW+NO_ORDER_REQUIRED conflicts before/after: {before_review_no_order} / {int(summary['review_rows_with_no_order_required_conflict'].iloc[0])}\n"
+        f"- Stock target conflicts: {int(summary['stock_target_conflict_count'].iloc[0])}\n"
+        f"- Target stock policy lifts: {int(summary['target_stock_policy_lift_count'].iloc[0])}\n\n"
+        f"## Target SOH vs raw model order\n"
+        f"Target day-one SOH logic is more commercially credible as a **stock objective** because it ties promo demand "
+        f"and end-stock cover together. Raw model orders remain valuable as **conservative lower-bound evidence** but "
+        f"often under-cover target stock (avg commercial coverage ~{float(summary['average_recommendation_coverage_ratio'].iloc[0]):.1%}).\n\n"
+        f"## When to trust raw model order\n"
+        f"Trust raw model order as the commercial recommendation when data quality >=70, confidence >=45, promo demand "
+        f"quality is not VERY_LOW, and raw order covers >=50% of target or leaves <=5 unit shortfall.\n\n"
+        f"## When target stock policy should override or escalate\n"
+        f"Escalate to REVIEW with TARGET_STOCK_REVIEW_RANGE when target order >=20 and raw model <50% of target. "
+        f"Apply TARGET_STOCK_POLICY_LIFT only for high-confidence best sellers with MEDIUM+ promo demand evidence.\n\n"
+        f"## Recommended policy before production\n"
+        f"Use operator review range (raw model low, target order high), never HOLD on material stock gaps, and do not "
+        f"release customer report while promo demand remains predominantly fallback/unsafe.\n",
+        encoding="utf-8",
+    )
+
+
 def _legacy_planning_snapshot(frame: pd.DataFrame, prediction_date: str) -> pd.DataFrame:
     """Phase 5B.3 planning formulas retained for before/after diagnostics only."""
     promo_days = _num(_first_col(frame, ("promotion_period_days_feat", "promotion_period_days")), 7, index=frame.index).replace(0, 7)
@@ -1140,6 +1450,9 @@ def build_se01_commercial_pack(
 
     source = load_se01_scored_sources(prediction_dir)
 
+    prev_plan_path = output_dir / "se01_skincare_sales_event_order_plan.csv"
+    before_plan = pd.read_csv(prev_plan_path) if prev_plan_path.exists() else None
+
     rows, calc = assemble_commercial_order_rows(
         source,
         store_number=store_number,
@@ -1164,7 +1477,7 @@ def build_se01_commercial_pack(
         "expected_units_per_day", "historical_units_same_discount_avg",
     ]].copy()
     audit = audit.merge(calc, on="sku_number", how="left")
-    audit["pack_id"] = "se01_commercial_5b6"
+    audit["pack_id"] = "se01_commercial_5b7"
     audit["model_status"] = META_STATUS
 
     scorecard, score = quality_scorecard(order_plan, summary, exceptions)
@@ -1192,7 +1505,7 @@ Use **`se01_skincare_sales_event_operator_decision_sheet.csv`** to record ACCEPT
 - Customer report release approved: NO
 - Pre-promo demand: baseline daily rate x days until promotion start (not multi-week period totals)
 - Promo-period demand: rejects flat model placeholders; uses historical or baseline evidence when needed
-- Order evidence: raw model units with optimal vs recommended gap explained
+- Order evidence: commercial policy layer separates target order, raw model order, and governed recommendation
 """
     (output_dir / "read_me_first.md").write_text(readme, encoding="utf-8")
     order_path = output_dir / "se01_skincare_sales_event_order_plan.csv"
@@ -1203,7 +1516,16 @@ Use **`se01_skincare_sales_event_operator_decision_sheet.csv`** to record ACCEPT
     audit.to_csv(output_dir / "se01_skincare_sales_event_audit_trail.csv", index=False)
 
     if diagnostics_dir:
-        if "phase5b6" in diagnostics_dir.name:
+        if "phase5b7" in diagnostics_dir.name:
+            _write_phase5b7_diagnostics(
+                diagnostics_dir=diagnostics_dir,
+                order_plan=order_plan,
+                calc=calc,
+                summary=summary,
+                score=score,
+                before_plan=before_plan,
+            )
+        elif "phase5b6" in diagnostics_dir.name:
             decisions_before: dict[str, int] | None = None
             p55_check = Path("Diagnostics/phase5b5_se01_promo_demand_and_order_reconciliation/se01_optimal_vs_recommended_order_check.csv")
             if p55_check.exists():

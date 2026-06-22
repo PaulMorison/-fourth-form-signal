@@ -55,6 +55,9 @@ def test_assemble_commercial_order_rows_basic_contract() -> None:
     assert set(out.columns).issuperset(set(ORDER_PLAN_COLUMNS) - {"priority_rank"})
     assert set(out["decision"]).issubset(ALLOWED_DECISIONS)
     assert "target_order_units_to_hit_day_one_soh" in out.columns
+    assert "commercial_recommended_order_units" in out.columns
+    assert out.loc[0, "recommended_order_units"] == out.loc[0, "commercial_recommended_order_units"]
+    assert out["decision_quality_label"].ne("N_A").all()
     assert out.loc[0, "projected_day_one_soh_after_recommended_order_units"] == pytest.approx(
         out.loc[0, "projected_day_one_soh_before_order_units"] + out.loc[0, "recommended_order_units"],
         abs=FORMULA_TOLERANCE,
@@ -80,6 +83,8 @@ def test_quality_scorecard_flags_zero_buy() -> None:
         "recommended_order_units": [0],
         "remaining_day_one_shortfall_units": [0],
         "recommendation_type": ["FULL_TARGET_ORDER"],
+        "commercial_recommended_order_units": [0],
+        "commercial_coverage_ratio": [0],
         "target_order_units_to_hit_day_one_soh": [0],
         "estimated_demand_before_promo_start_units": [1],
         "predicted_promo_period_sales_units": [2],
@@ -96,6 +101,7 @@ def test_quality_scorecard_flags_zero_buy() -> None:
         "confidence_score": [50],
         "data_quality_score": [50],
         "human_review_required": ["YES"],
+        "decision_quality_label": ["REVIEW_LOW_CONFIDENCE"],
     })
     summary = pd.DataFrame([{"total_recommended_order_units": 0, "review_exception_count": 0}])
     exceptions = build_review_exceptions(plan)
@@ -111,7 +117,7 @@ def test_build_se01_integration() -> None:
     from surfaces.promotions.reporting.commercial_report_builder import build_se01_commercial_pack
 
     pred = Path("/Users/paulmorison/promotions_runtime_governed/promotions/priceline/772/prediction/2026-07-23")
-    out = Path("/tmp/se01_commercial_test_pack_5b6")
+    out = Path("/tmp/se01_commercial_test_pack_5b7")
     art = build_se01_commercial_pack(prediction_dir=pred, output_dir=out, diagnostics_dir=None)
     assert art.row_count == 3531
     assert art.decision_counts.get("BUY", 0) >= 0
