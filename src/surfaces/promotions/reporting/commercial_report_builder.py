@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from models.promotions.promo_period_demand_forecast import attach_promo_period_demand_forecast
+from models.promotions.promo_demand_bias_repair import apply_underforecast_bias_adjustments, load_bias_repair_artifacts
 from models.promotions.promo_demand_calibration import apply_promo_demand_calibration, load_calibration_artifacts
 
 import numpy as np
@@ -145,6 +146,11 @@ ORDER_PLAN_COLUMNS: tuple[str, ...] = (
     "calibration_quality",
     "calibration_release_ready_flag",
     "calibration_allowed_in_release_decision",
+    "underforecast_bias_factor",
+    "underforecast_bias_factor_source",
+    "underforecast_bias_quality",
+    "bias_adjusted_expected_units_total_promo",
+    "bias_adjusted_forecast_allowed_flag",
     "stock_target_conflict_flag",
     "reason_demand",
     "reason_stock",
@@ -368,6 +374,19 @@ def load_se01_scored_sources(prediction_dir: Path) -> pd.DataFrame:
         ):
             if col not in out.columns:
                 out[col] = default
+    bias_factors, _bias_gate, bias_recommendation = load_bias_repair_artifacts()
+    if not bias_factors.empty:
+        out = apply_underforecast_bias_adjustments(out, bias_factors, gate_recommendation=bias_recommendation)
+    else:
+        for col, default in (
+            ("underforecast_bias_factor", 1.0),
+            ("underforecast_bias_factor_source", "none"),
+            ("underforecast_bias_quality", "LOW"),
+            ("bias_adjusted_expected_units_total_promo", out.get("model_expected_units_total_promo_calibrated", out.get("model_expected_units_total_promo", 0.0))),
+            ("bias_adjusted_forecast_allowed_flag", "NO"),
+        ):
+            if col not in out.columns:
+                out[col] = default
     return out
 
 
@@ -476,10 +495,23 @@ def select_governed_promo_demand(
     baseline_period = (baseline_daily * promo_days).round(3)
     model_forecast, model_flat, model_source_field = _extract_model_promo_forecast(frame, promo_days)
 
+    bias_allowed = (
+        frame.get("bias_adjusted_forecast_allowed_flag", pd.Series("NO", index=idx)).astype(str).str.upper().eq("YES")
+    )
+    bias_forecast = _field_series(frame, ("bias_adjusted_expected_units_total_promo",), idx)
+    if bias_allowed.any() and not _is_flat_placeholder(bias_forecast):
+        take_bias = bias_allowed & bias_forecast.gt(1.01) & (~model_flat | model_forecast.le(1.01))
+        model_forecast = model_forecast.where(~take_bias, bias_forecast)
+        model_source_field = model_source_field.where(
+            ~take_bias,
+            "models.promo_demand_bias_repair:bias_adjusted_expected_units_total_promo",
+        )
+        model_flat = model_flat & ~take_bias
+
     cal_allowed = frame.get("calibration_allowed_in_release_decision", pd.Series("NO", index=idx)).astype(str).str.upper().eq("YES")
     cal_forecast = _field_series(frame, ("model_expected_units_total_promo_calibrated",), idx)
     if cal_allowed.any() and not _is_flat_placeholder(cal_forecast):
-        take_cal = cal_allowed & cal_forecast.gt(1.01) & (~model_flat | model_forecast.le(1.01))
+        take_cal = cal_allowed & cal_forecast.gt(1.01) & (~model_flat | model_forecast.le(1.01)) & ~bias_allowed
         model_forecast = model_forecast.where(~take_cal, cal_forecast)
         model_source_field = model_source_field.where(
             ~take_cal,
