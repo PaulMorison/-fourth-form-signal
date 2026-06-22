@@ -1,0 +1,20 @@
+gate,description,pass_condition
+all_skus_included,Every SKU in promotion packet appears,row count matches source SKU universe
+one_row_per_sku,No unexplained duplicate sku_number,duplicate count = 0
+action_enum,decision in BUY/REVIEW/HOLD/DO_NOT_BUY,invalid action count = 0
+buy_positive_units,BUY implies recommended_order_units > 0,zero_order_buy = 0
+hold_zero_units,HOLD/DO_NOT_BUY default to 0 units,exceptions documented
+pre_promo_demand_present,estimated_demand_before_promo_start_units not null,>95% populated
+promo_demand_present,predicted_promo_period_sales_units not null,>95% populated
+total_demand_present,total_expected_demand_to_promo_end_units,equals sum check
+optimal_day_one_present,optimal_stock_on_hand_day_one_units,not null on BUY
+target_end_present,target_stock_on_hand_at_promo_end_units,>= 2
+current_soh_present,current_soh_units on all rows,not null
+confidence_present,confidence_score 0-100,not null on BUY/REVIEW
+data_quality_present,data_quality_score 0-100,not null
+split_reasons,reason_demand/stock/order/risk/rejection,non-blank where required
+no_contradictions,order/demand/stock consistent,contradiction checks pass
+manager_reconciles,sums match manager_summary,order and demand totals
+shadow_labelled,model_status = SHADOW_NOT_PRODUCTION,all rows
+production_ordering_no,production_ordering_approved = NO,all rows
+customer_release_no,customer_report_release_approved = NO,all rows
