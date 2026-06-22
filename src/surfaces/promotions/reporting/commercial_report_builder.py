@@ -7,6 +7,7 @@ from pathlib import Path
 from models.promotions.promo_period_demand_forecast import attach_promo_period_demand_forecast
 from models.promotions.promo_demand_bias_repair import apply_underforecast_bias_adjustments, load_bias_repair_artifacts
 from models.promotions.promo_demand_calibration import apply_promo_demand_calibration, load_calibration_artifacts
+from models.promotions.promo_stock_outcome_optimisation import apply_stock_outcome_optimisation, load_stock_outcome_artifacts
 
 import numpy as np
 import pandas as pd
@@ -151,6 +152,19 @@ ORDER_PLAN_COLUMNS: tuple[str, ...] = (
     "underforecast_bias_quality",
     "bias_adjusted_expected_units_total_promo",
     "bias_adjusted_forecast_allowed_flag",
+    "promo_start_soh",
+    "target_promo_start_soh",
+    "promo_start_soh_gap",
+    "supplier_lead_time_days",
+    "supplier_replenishment_class",
+    "supplier_reorder_flexibility",
+    "forecast_demand_units",
+    "target_end_soh_units",
+    "target_order_units_stock_outcome",
+    "order_units_stock_outcome_adjustment",
+    "promo_end_days_cover",
+    "stock_outcome_label",
+    "stock_outcome_order_reason",
     "stock_target_conflict_flag",
     "reason_demand",
     "reason_stock",
@@ -387,6 +401,8 @@ def load_se01_scored_sources(prediction_dir: Path) -> pd.DataFrame:
         ):
             if col not in out.columns:
                 out[col] = default
+    _stock_summary, _stock_gate, stock_recommendation = load_stock_outcome_artifacts()
+    out = apply_stock_outcome_optimisation(out, gate_recommendation=stock_recommendation)
     return out
 
 
@@ -1256,6 +1272,28 @@ def assemble_commercial_order_rows(
         "calibration_allowed_in_release_decision", pd.Series("NO", index=frame.index)
     ).astype(str)
 
+    stock_cols = (
+        "promo_start_soh",
+        "target_promo_start_soh",
+        "promo_start_soh_gap",
+        "supplier_lead_time_days",
+        "supplier_replenishment_class",
+        "supplier_reorder_flexibility",
+        "forecast_demand_units",
+        "target_end_soh_units",
+        "target_order_units_stock_outcome",
+        "order_units_stock_outcome_adjustment",
+        "promo_end_days_cover",
+        "stock_outcome_label",
+        "stock_outcome_order_reason",
+    )
+    for col in stock_cols:
+        out[col] = _field_series(frame, (col,), frame.index)
+        if col in ("promo_start_soh", "target_promo_start_soh", "promo_start_soh_gap", "forecast_demand_units", "target_end_soh_units", "target_order_units_stock_outcome", "order_units_stock_outcome_adjustment", "promo_end_days_cover"):
+            out[col] = _num(out[col], index=frame.index).round(3)
+        else:
+            out[col] = out[col].astype(str)
+
     calc = pd.DataFrame(
         {
             "sku_number": frame["sku_number"],
@@ -1802,6 +1840,25 @@ def build_manager_summary(order_plan: pd.DataFrame, exceptions: pd.DataFrame) ->
             "promo_period_demand_fallback_count": 0,
             "unsafe_promo_period_demand_count": 0,
             "commercial_release_score": 0,
+            "start_soh_compliance_rate": float(
+                (
+                    _num(order_plan.get("promo_start_soh")).ge(2)
+                    | _num(order_plan.get("promo_start_soh_gap")).le(0)
+                ).mean() * 100.0
+            ) if "promo_start_soh" in order_plan.columns else 0.0,
+            "projected_clean_exit_count": int(order_plan.get("stock_outcome_label", pd.Series("", index=order_plan.index)).eq("CLEAN_EXIT").sum()),
+            "projected_controlled_residual_count": int(order_plan.get("stock_outcome_label", pd.Series("", index=order_plan.index)).eq("CONTROLLED_RESIDUAL").sum()),
+            "projected_missed_demand_risk_count": int(order_plan.get("stock_outcome_label", pd.Series("", index=order_plan.index)).eq("MISSED_DEMAND_RISK").sum()),
+            "projected_overstock_count": int(order_plan.get("stock_outcome_label", pd.Series("", index=order_plan.index)).eq("OVERSTOCKED").sum()),
+            "projected_cash_tied_up_proxy": float(
+                (_num(order_plan.get("target_end_soh_units")) * _num(order_plan.get("capital_at_risk_dollars")) / _num(order_plan.get("recommended_order_units"), 1).replace(0, 1)).sum()
+            ) if "target_end_soh_units" in order_plan.columns else 0.0,
+            "supplier_99999_recommendation_count": int(
+                order_plan.get("supplier_replenishment_class", pd.Series("", index=order_plan.index)).eq("DAILY_REPLENISHMENT").sum()
+            ),
+            "long_lead_supplier_recommendation_count": int(
+                order_plan.get("supplier_replenishment_class", pd.Series("", index=order_plan.index)).eq("LONG_LEAD_TIME").sum()
+            ),
             "model_status": META_STATUS,
             "production_ordering_approved": PRODUCTION_ORDERING,
             "customer_report_release_approved": CUSTOMER_RELEASE,
