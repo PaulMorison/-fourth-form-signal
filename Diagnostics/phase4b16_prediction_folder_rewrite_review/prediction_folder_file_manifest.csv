@@ -1,0 +1,8 @@
+file,rows,path
+MANAGER_SUMMARY_SHADOW.csv,20,/Users/paulmorison/promotions_runtime_governed/promotions/772/prediction/MANAGER_SUMMARY_SHADOW.csv
+STORE_ACTIONS_SHADOW.csv,2140,/Users/paulmorison/promotions_runtime_governed/promotions/772/prediction/STORE_ACTIONS_SHADOW.csv
+OPERATOR_DECISION_SHEET_SHADOW.csv,714,/Users/paulmorison/promotions_runtime_governed/promotions/772/prediction/OPERATOR_DECISION_SHEET_SHADOW.csv
+ACTION_CAP_AUDIT_SHADOW.csv,2140,/Users/paulmorison/promotions_runtime_governed/promotions/772/prediction/ACTION_CAP_AUDIT_SHADOW.csv
+ADDED_BUYS_REVIEW_SHADOW.csv,462,/Users/paulmorison/promotions_runtime_governed/promotions/772/prediction/ADDED_BUYS_REVIEW_SHADOW.csv
+TINY_DEMAND_BUYS_REVIEW_SHADOW.csv,295,/Users/paulmorison/promotions_runtime_governed/promotions/772/prediction/TINY_DEMAND_BUYS_REVIEW_SHADOW.csv
+STOCK_BASIS_REVIEW_SHADOW.csv,60,/Users/paulmorison/promotions_runtime_governed/promotions/772/prediction/STOCK_BASIS_REVIEW_SHADOW.csv

@@ -1,0 +1,5 @@
+check,pass,values
+blank_operator_decision,True,
+blank_operator_recommended_units,True,
+blank_operator_notes,True,
+approved_values_documented,True,"ACCEPT,NEEDS_MORE_EVIDENCE,REDUCE,REJECT"
