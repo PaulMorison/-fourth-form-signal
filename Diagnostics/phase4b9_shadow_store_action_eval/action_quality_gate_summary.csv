@@ -1,0 +1,9 @@
+gate,pass,detail
+tiny_demand_buy_actions_materially_reduced,False,legacy=456 shadow=341
+total_order_units_not_excessive,False,legacy=2193 shadow=4064
+p99_max_order_controlled,True,p99=10.0 max=55.0
+order_over_stock_basis_reduced,False,legacy=250 shadow=550
+order_over_2x_demand_controlled,False,legacy=103 shadow=106
+shadow_buy_actions_explainable,True,added_buys=466
+no_production_artifact_change,True,isolated tmp/phase4b9 only
+formal_overall,False,FAIL
