@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from models.promotions.promo_period_demand_forecast import attach_promo_period_demand_forecast
+from models.promotions.promo_demand_calibration import apply_promo_demand_calibration, load_calibration_artifacts
 
 import numpy as np
 import pandas as pd
@@ -138,6 +139,12 @@ ORDER_PLAN_COLUMNS: tuple[str, ...] = (
     "promo_demand_source_quality",
     "promo_demand_selection_method",
     "promo_demand_release_ready_flag",
+    "model_expected_units_total_promo_raw",
+    "promo_demand_calibration_factor",
+    "model_expected_units_total_promo_calibrated",
+    "calibration_quality",
+    "calibration_release_ready_flag",
+    "calibration_allowed_in_release_decision",
     "stock_target_conflict_flag",
     "reason_demand",
     "reason_stock",
@@ -337,7 +344,31 @@ def load_se01_scored_sources(prediction_dir: Path) -> pd.DataFrame:
     audit_keep = [c for c in audit_keep if c in audit.columns]
     out = main.merge(audit[audit_keep], on="sku_number", how="left", suffixes=("", "_audit"))
     out = out.merge(feature, on="sku_number", how="left", suffixes=("", "_feat"))
-    return attach_promo_period_demand_forecast(out)
+    out = attach_promo_period_demand_forecast(out)
+    factors, _gate, recommendation = load_calibration_artifacts()
+    if "model_expected_units_total_promo" in out.columns:
+        out["model_expected_units_total_promo_raw"] = pd.to_numeric(
+            out["model_expected_units_total_promo"], errors="coerce"
+        ).fillna(0.0)
+    if not factors.empty:
+        out = apply_promo_demand_calibration(out, factors)
+        limited_ok = recommendation == "LIMITED_RELEASE_HIGH_CONFIDENCE_ONLY"
+        out["calibration_allowed_in_release_decision"] = (
+            limited_ok
+            & out.get("calibration_release_ready_flag", pd.Series("NO", index=out.index)).eq("YES")
+            & out.get("calibration_quality", pd.Series("LOW", index=out.index)).isin(["HIGH", "MEDIUM"])
+        ).map({True: "YES", False: "NO"})
+    else:
+        for col, default in (
+            ("promo_demand_calibration_factor", 1.0),
+            ("model_expected_units_total_promo_calibrated", out.get("model_expected_units_total_promo", 0.0)),
+            ("calibration_quality", "LOW"),
+            ("calibration_release_ready_flag", "NO"),
+            ("calibration_allowed_in_release_decision", "NO"),
+        ):
+            if col not in out.columns:
+                out[col] = default
+    return out
 
 
 def _baseline_daily_rate(frame: pd.DataFrame) -> tuple[pd.Series, pd.Series, pd.Series]:
@@ -444,6 +475,17 @@ def select_governed_promo_demand(
     same_or_better = _field_series(frame, ("historical_units_same_or_better_discount_avg",), idx).round(3)
     baseline_period = (baseline_daily * promo_days).round(3)
     model_forecast, model_flat, model_source_field = _extract_model_promo_forecast(frame, promo_days)
+
+    cal_allowed = frame.get("calibration_allowed_in_release_decision", pd.Series("NO", index=idx)).astype(str).str.upper().eq("YES")
+    cal_forecast = _field_series(frame, ("model_expected_units_total_promo_calibrated",), idx)
+    if cal_allowed.any() and not _is_flat_placeholder(cal_forecast):
+        take_cal = cal_allowed & cal_forecast.gt(1.01) & (~model_flat | model_forecast.le(1.01))
+        model_forecast = model_forecast.where(~take_cal, cal_forecast)
+        model_source_field = model_source_field.where(
+            ~take_cal,
+            "models.promo_demand_calibration:model_expected_units_total_promo_calibrated",
+        )
+        model_flat = model_flat & ~take_cal
 
     credible_baseline = (baseline_daily > 0) & (source_days >= 28)
     same_discount_suppressed = credible_baseline & (same_discount > 0) & (baseline_period > same_discount + 1)
@@ -1173,6 +1215,14 @@ def assemble_commercial_order_rows(
     out["promo_demand_source_quality"] = promo_demand_source_quality
     out["promo_demand_selection_method"] = promo_demand_selection_method
     out["promo_demand_release_ready_flag"] = promo_demand_release_ready_flag
+    out["model_expected_units_total_promo_raw"] = _field_series(frame, ("model_expected_units_total_promo_raw", "model_expected_units_total_promo"), frame.index).round(3)
+    out["promo_demand_calibration_factor"] = _field_series(frame, ("promo_demand_calibration_factor",), frame.index).round(6)
+    out["model_expected_units_total_promo_calibrated"] = _field_series(frame, ("model_expected_units_total_promo_calibrated",), frame.index).round(3)
+    out["calibration_quality"] = frame.get("calibration_quality", pd.Series("LOW", index=frame.index)).astype(str)
+    out["calibration_release_ready_flag"] = frame.get("calibration_release_ready_flag", pd.Series("NO", index=frame.index)).astype(str)
+    out["calibration_allowed_in_release_decision"] = frame.get(
+        "calibration_allowed_in_release_decision", pd.Series("NO", index=frame.index)
+    ).astype(str)
 
     calc = pd.DataFrame(
         {
