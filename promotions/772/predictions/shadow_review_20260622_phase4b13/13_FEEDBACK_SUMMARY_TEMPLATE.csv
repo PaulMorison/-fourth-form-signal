@@ -1,0 +1,15 @@
+metric,value,notes
+total_rows_reviewed,0,Fill after operator completes 08_OPERATOR_DECISION_SHEET.csv
+accepted_count,0,
+rejected_count,0,
+reduced_count,0,
+needs_more_evidence_count,0,
+acceptance_rate,0.0,accepted / reviewed
+rejection_rate,0.0,rejected / reviewed
+reduction_rate,0.0,reduced / reviewed
+average_reduction_units,0.0,Mean (shadow_order_units - operator_recommended_units) for REDUCE rows
+added_buy_acceptance_rate,0.0,Added BUY queue only
+tiny_demand_buy_acceptance_rate,0.0,Tiny-demand BUY queue only
+stock_basis_review_acceptance_rate,0.0,Stock-basis overrun queue only
+top_rejection_reasons,,Comma-separated after review
+top_reduction_reasons,,Comma-separated after review
