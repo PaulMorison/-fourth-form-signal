@@ -1,0 +1,7 @@
+file,rows,path,columns
+00_READ_ME_FIRST.md,0,/Users/paulmorison/promotions_runtime_governed/promotions/772/prediction/store_action_pack_shadow_20260622/00_READ_ME_FIRST.md,
+01_STORE_ACTIONS.csv,2140,/Users/paulmorison/promotions_runtime_governed/promotions/772/prediction/store_action_pack_shadow_20260622/01_STORE_ACTIONS.csv,19.0
+02_MANAGER_SUMMARY.csv,1,/Users/paulmorison/promotions_runtime_governed/promotions/772/prediction/store_action_pack_shadow_20260622/02_MANAGER_SUMMARY.csv,20.0
+03_REVIEW_EXCEPTIONS.csv,591,/Users/paulmorison/promotions_runtime_governed/promotions/772/prediction/store_action_pack_shadow_20260622/03_REVIEW_EXCEPTIONS.csv,13.0
+04_OPERATOR_DECISION_SHEET.csv,714,/Users/paulmorison/promotions_runtime_governed/promotions/772/prediction/store_action_pack_shadow_20260622/04_OPERATOR_DECISION_SHEET.csv,21.0
+05_AUDIT_TRAIL.csv,2140,/Users/paulmorison/promotions_runtime_governed/promotions/772/prediction/store_action_pack_shadow_20260622/05_AUDIT_TRAIL.csv,32.0
