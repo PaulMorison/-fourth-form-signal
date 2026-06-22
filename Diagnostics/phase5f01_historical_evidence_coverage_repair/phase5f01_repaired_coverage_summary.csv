@@ -1,0 +1,3 @@
+stage,total_rows,unsafe_rows,unsafe_pct,calibration_eligible_rows,calibration_eligible_pct,high_source_quality_rows,medium_source_quality_rows,low_source_quality_rows,release_ready_rows,limited_release_candidate_rows
+before_repair,52285,45168,86.3881,5672,10.8482,0,0,7117,0,0
+after_repair,52285,46728,89.3717,3658,6.9963,5046,283,228,4624,4624
