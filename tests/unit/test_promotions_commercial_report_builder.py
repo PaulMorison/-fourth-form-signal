@@ -54,8 +54,9 @@ def test_assemble_commercial_order_rows_basic_contract() -> None:
     )
     assert set(out.columns).issuperset(set(ORDER_PLAN_COLUMNS) - {"priority_rank"})
     assert set(out["decision"]).issubset(ALLOWED_DECISIONS)
-    assert "target_order_units_to_hit_day_one_soh" in out.columns
+    assert "full_target_order_units" in out.columns
     assert "commercial_recommended_order_units" in out.columns
+    assert "order_needed_to_cover_promo_sales" in out.columns
     assert out.loc[0, "recommended_order_units"] == out.loc[0, "commercial_recommended_order_units"]
     assert out["decision_quality_label"].ne("N_A").all()
     assert out.loc[0, "projected_day_one_soh_after_recommended_order_units"] == pytest.approx(
@@ -82,7 +83,16 @@ def test_quality_scorecard_flags_zero_buy() -> None:
         "decision": ["BUY"],
         "recommended_order_units": [0],
         "remaining_day_one_shortfall_units": [0],
-        "recommendation_type": ["FULL_TARGET_ORDER"],
+        "remaining_promo_sales_stock_gap": [0],
+        "remaining_end_stock_gap": [0],
+        "order_strategy": ["FULL_TARGET_ORDER"],
+        "full_target_order_units": [0],
+        "order_needed_to_cover_promo_sales": [0],
+        "order_needed_to_reach_full_stock_target": [0],
+        "recommended_promo_cover_order_units": [0],
+        "recommended_base_stock_order_units": [0],
+        "promo_units_expected_to_sell": [2],
+        "stock_needed_to_finish_with_target_cover": [2],
         "commercial_recommended_order_units": [0],
         "commercial_coverage_ratio": [0],
         "target_order_units_to_hit_day_one_soh": [0],
@@ -117,7 +127,7 @@ def test_build_se01_integration() -> None:
     from surfaces.promotions.reporting.commercial_report_builder import build_se01_commercial_pack
 
     pred = Path("/Users/paulmorison/promotions_runtime_governed/promotions/priceline/772/prediction/2026-07-23")
-    out = Path("/tmp/se01_commercial_test_pack_5b7")
+    out = Path("/tmp/se01_commercial_test_pack_5b8")
     art = build_se01_commercial_pack(prediction_dir=pred, output_dir=out, diagnostics_dir=None)
     assert art.row_count == 3531
     assert art.decision_counts.get("BUY", 0) >= 0
