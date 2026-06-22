@@ -1,0 +1,2 @@
+total_skus,release_ready_count,release_ready_percentage,unsafe_count,unsafe_percentage,model_forecast_median,model_forecast_p95,historical_proxy_count,baseline_fallback_count,missing_demand_count,flat_placeholder_detected,commercial_release_score_estimate,primary_blocker
+3531,307,8.69,936,26.51,0.56,4.274,2287,1,936,NO,92,customer_release_not_approved

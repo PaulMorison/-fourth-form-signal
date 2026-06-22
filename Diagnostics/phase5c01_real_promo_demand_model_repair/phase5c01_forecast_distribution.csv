@@ -1,0 +1,11 @@
+column,row_count,non_null_count,zero_count,one_count,unique_count,min,p05,p25,median,mean,p75,p95,max,top_value,top_value_share,flat_placeholder_flag,flat_placeholder_reason
+expected_units_total_promo,3531,3531,4,3527,2,0.0,1.0,1.0,1.0,0.9988671764372699,1.0,1.0,1.0,1.0,0.9988671764372699,True,binary_0_1; top_value_share_0.999; low_unique_ratio
+expected_promo_demand,3531,3531,4,3527,2,0.0,1.0,1.0,1.0,0.9988671764372699,1.0,1.0,1.0,1.0,0.9988671764372699,True,binary_0_1; top_value_share_0.999; low_unique_ratio
+projected_promotional_units,3531,3531,4,3527,2,0.0,1.0,1.0,1.0,0.9988671764372699,1.0,1.0,1.0,1.0,0.9988671764372699,True,binary_0_1; top_value_share_0.999; low_unique_ratio
+expected_units_per_day,3531,3531,4,0,2,0.0,0.1429,0.1429,0.1429,0.14273811951288587,0.1429,0.1429,0.1429,0.1429,0.9988671764372699,True,top_value_share_0.999; low_unique_ratio; constant_per_day_artifact
+model_expected_units_total_promo,3531,3531,1174,0,1518,0.0,0.0,0.0,0.56,1.2491045029736618,1.663,4.274,32.57,0.0,0.33248371566128576,False,
+historical_proxy_expected_units_total_promo,3531,3531,1007,225,481,0.0,0.0,0.0,0.556,1.451997451146984,1.5,5.0,113.0,0.0,0.28518833191730386,False,
+baseline_expected_units_total_promo,3531,3531,1174,202,426,0.0,0.0,0.0,0.556,1.7465695270461625,1.9,7.0,35.0,0.0,0.33248371566128576,False,
+selected_promo_period_demand,3531,3531,936,212,657,0.0,0.0,0.0,0.75,1.5748493344661567,1.857,5.0,113.0,0.0,0.2650807136788445,False,
+model_expected_units_total_promo,3531,3531,1174,0,1518,0.0,0.0,0.0,0.56,1.2491045029736618,1.663,4.274,32.57,0.0,0.33248371566128576,False,
+selected_promo_period_demand,3531,3531,936,212,657,0.0,0.0,0.0,0.75,1.5748493344661567,1.857,5.0,113.0,0.0,0.2650807136788445,False,

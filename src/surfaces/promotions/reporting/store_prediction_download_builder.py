@@ -23,6 +23,10 @@ from models.promotions.allocation_demand_forecast_contract import (
     validate_demand_forecast_contract_frame,
 )
 from models.promotions.order_policy_adjustments import build_order_policy_adjustments
+from models.promotions.promo_period_demand_forecast import (
+    PROMO_FORECAST_OUTPUT_COLUMNS,
+    attach_promo_period_demand_forecast,
+)
 from state.promotions.feature_engineering.demand.ft_order_decision_diagnostics import (
     build_live_order_decision_diagnostics,
 )
@@ -9822,7 +9826,7 @@ def _build_store_facing_frame(
     sku_backtest_summary: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
     """Derive the operator-friendly Stage 11/12 store-facing CSV from the commercial frame."""
-    frame = commercial_frame
+    frame = attach_promo_period_demand_forecast(commercial_frame)
     out = pd.DataFrame(index=frame.index)
 
     # ---- Identity -------------------------------------------------------
@@ -9888,6 +9892,12 @@ def _build_store_facing_frame(
     out["expected_units_first_7_days"] = _store_int(frame["predicted_units_first_7_days_of_promo"])
     out["expected_units_total_promo"] = _store_int(frame["predicted_units_total_promo"])
     out["expected_promo_demand"] = out["expected_units_total_promo"]
+    for column in PROMO_FORECAST_OUTPUT_COLUMNS:
+        if column in {"model_expected_units_total_promo", "historical_proxy_expected_units_total_promo",
+                      "baseline_expected_units_total_promo", "selected_promo_period_demand"}:
+            out[column] = pd.to_numeric(frame[column], errors="coerce").fillna(0.0).round(3)
+        else:
+            out[column] = frame[column]
     feature_period_days = _optional_numeric_series(frame, "feature_promo_period_days")
     promotion_period_days = feature_period_days.replace(0.0, pd.NA)
     source_period_days = _numeric_series(frame, ("live_promo_window_days", "promo_days")).replace(0.0, pd.NA)

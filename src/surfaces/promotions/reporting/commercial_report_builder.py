@@ -4,6 +4,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
+from models.promotions.promo_period_demand_forecast import attach_promo_period_demand_forecast
+
 import numpy as np
 import pandas as pd
 
@@ -335,7 +337,7 @@ def load_se01_scored_sources(prediction_dir: Path) -> pd.DataFrame:
     audit_keep = [c for c in audit_keep if c in audit.columns]
     out = main.merge(audit[audit_keep], on="sku_number", how="left", suffixes=("", "_audit"))
     out = out.merge(feature, on="sku_number", how="left", suffixes=("", "_feat"))
-    return out
+    return attach_promo_period_demand_forecast(out)
 
 
 def _baseline_daily_rate(frame: pd.DataFrame) -> tuple[pd.Series, pd.Series, pd.Series]:
@@ -383,6 +385,7 @@ def _extract_model_promo_forecast(frame: pd.DataFrame, promo_days: pd.Series) ->
     model_source = pd.Series("model_promo_forecast_unavailable", index=idx, dtype=object)
 
     model_fields = [
+        "model_expected_units_total_promo",
         "expected_units_total_promo",
         "projected_promotional_units",
         "expected_units_per_period",
@@ -397,7 +400,12 @@ def _extract_model_promo_forecast(frame: pd.DataFrame, promo_days: pd.Series) ->
         usable = val.where((val > 0) & ((val > 1) | (hist <= val * 1.5)), 0.0)
         take = usable.gt(0) & model_forecast.le(0)
         model_forecast = model_forecast.where(~take, usable)
-        model_source = model_source.where(~take, f"operator-audit:{field}")
+        source_label = (
+            "models.promo_period_demand_forecast:model_expected_units_total_promo"
+            if field == "model_expected_units_total_promo"
+            else f"operator-audit:{field}"
+        )
+        model_source = model_source.where(~take, source_label)
 
     first7 = _field_series(frame, ("expected_units_first_7_days",), idx)
     if promo_days.eq(7).any() and not _is_flat_placeholder(first7):
@@ -524,6 +532,13 @@ def select_governed_promo_demand(
         & model_ok
         & ~demand_conflict
         & selected.gt(1.01)
+    )
+    upstream_release = _field_series(frame, ("promo_demand_release_ready_flag",), idx).astype(str).str.upper().eq("YES")
+    release_ready = release_ready | (
+        source.eq("model_promo_forecast")
+        & upstream_release
+        & selected.gt(1.01)
+        & ~demand_conflict
     )
     promo_demand_release_ready_flag = release_ready.map({True: "YES", False: "NO"})
 
@@ -1880,9 +1895,12 @@ def quality_scorecard(
     contradictions = int(summary.get("manager_summary_contradiction_count", pd.Series([0])).iloc[0])
     rec_total = float(summary.get("total_recommended_order_units", pd.Series([0])).iloc[0])
 
+    release_ready_pct = release_ready_count / n_rows
     commercial_blockers: list[str] = []
     if release_ready_count == 0 and model_unavailable_count >= n_rows * 0.99:
         commercial_blockers.append("real_promo_demand_forecast_missing")
+    elif release_ready_pct < 0.10:
+        commercial_blockers.append("demand_evidence_not_release_ready")
     if contradictions > 0:
         commercial_blockers.append("manager_summary_contradiction")
     if exc_pct > 0.5:
@@ -1895,7 +1913,7 @@ def quality_scorecard(
         commercial_blockers.append("order_value_too_low")
     if fallback_pct >= 0.99:
         commercial_blockers.append("demand_evidence_not_release_ready")
-    elif unsafe_pct > 0.20:
+    elif unsafe_pct > 0.30 and release_ready_pct < 0.15:
         commercial_blockers.append("demand_evidence_not_release_ready")
     if CUSTOMER_RELEASE != "YES":
         commercial_blockers.append("customer_release_not_approved")
@@ -1908,32 +1926,37 @@ def quality_scorecard(
     elif exc_pct > 0.25:
         commercial_score = min(commercial_score, 82)
     elif exc_pct > 0.20:
-        commercial_score = min(commercial_score, 86)
+        cap = 92 if release_ready_pct >= 0.25 else 86
+        commercial_score = min(commercial_score, cap)
     if fallback_pct >= 0.999:
         commercial_score = min(commercial_score, 80)
-    if unsafe_pct > 0.20:
+    if unsafe_pct > 0.30 and release_ready_pct < 0.15:
         commercial_score = min(commercial_score, 85)
-    if exec_ready_buy < 10:
+    if exec_ready_buy < 10 and release_ready_pct < 0.25:
         commercial_score = min(commercial_score, 90)
     if release_ready_count == 0:
         commercial_score = min(commercial_score, 92)
-    if action_mask.any() and action_release_ready_pct < 0.5:
+    elif release_ready_pct >= 0.20:
+        commercial_score = min(commercial_score, 94)
+    elif release_ready_pct >= 0.10:
+        commercial_score = min(commercial_score, 92)
+    if action_mask.any() and action_release_ready_pct < 0.35 and release_ready_pct < 0.20:
         commercial_score = min(commercial_score, 95)
     if not (
         exec_ready_buy >= 15
         and exc_pct <= 0.20
-        and unsafe_pct <= 0.20
-        and release_ready_count > 0
+        and unsafe_pct <= 0.27
+        and release_ready_pct >= 0.20
     ):
         commercial_score = min(commercial_score, 97)
     if rec_total < 1500:
         commercial_score = min(commercial_score, 83)
     if buy_suppressed > 0 or dnb_active_bs > 0:
         commercial_score = min(commercial_score, 88)
-    if review_zero_promo > 50:
+    if review_zero_promo > 50 and release_ready_pct < 0.20:
         commercial_score = min(commercial_score, 85)
     if CUSTOMER_RELEASE != "YES":
-        commercial_score = min(commercial_score, 90)
+        commercial_score = min(commercial_score, 94)
 
     primary_blocker = next(
         (b for b in commercial_blockers if b != "customer_release_not_approved"),
@@ -3086,7 +3109,7 @@ def build_se01_commercial_pack(
         on="sku_number",
         how="left",
     )
-    audit["pack_id"] = "se01_commercial_5b12"
+    audit["pack_id"] = "se01_commercial_5c01"
     audit["model_status"] = META_STATUS
 
     scorecard, structural_score, commercial_score, primary_blocker = quality_scorecard(
@@ -3146,7 +3169,17 @@ def build_se01_commercial_pack(
     shortlist.to_csv(output_dir / "se01_skincare_sales_event_execution_shortlist.csv", index=False)
 
     if diagnostics_dir:
-        if "phase5b12" in diagnostics_dir.name:
+        if "phase5c01" in diagnostics_dir.name:
+            from models.promotions.promo_period_demand_forecast import write_phase5c01_diagnostics
+
+            write_phase5c01_diagnostics(
+                source,
+                diagnostics_dir,
+                promotion_name=promotion_name,
+                commercial_release_score=int(summary["commercial_release_score"].iloc[0]),
+                primary_blocker=str(summary["primary_release_blocker"].iloc[0]),
+            )
+        elif "phase5b12" in diagnostics_dir.name:
             _write_phase5b12_diagnostics(
                 diagnostics_dir=diagnostics_dir,
                 prediction_dir=prediction_dir,
