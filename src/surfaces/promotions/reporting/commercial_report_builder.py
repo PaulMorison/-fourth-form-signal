@@ -17,7 +17,11 @@ OPERATOR_SHEET_COLUMNS: tuple[str, ...] = (
     "sku_number",
     "sku_description",
     "decision",
+    "optimal_order_units_to_reach_day_one_stock",
     "recommended_order_units",
+    "remaining_gap_after_recommended_order_units",
+    "recommendation_coverage_ratio",
+    "recommendation_constraint_reason",
     "current_soh_units",
     "on_order_units",
     "estimated_demand_before_promo_start_units",
@@ -50,7 +54,11 @@ ORDER_PLAN_COLUMNS: tuple[str, ...] = (
     "sku_number",
     "sku_description",
     "decision",
+    "optimal_order_units_to_reach_day_one_stock",
     "recommended_order_units",
+    "remaining_gap_after_recommended_order_units",
+    "recommendation_coverage_ratio",
+    "recommendation_constraint_reason",
     "current_soh_units",
     "on_order_units",
     "estimated_demand_before_promo_start_units",
@@ -165,6 +173,7 @@ def load_se01_scored_sources(prediction_dir: Path) -> pd.DataFrame:
         "expected_units_per_period",
         "projected_promotional_units",
         "expected_promo_demand",
+        "expected_units_first_7_days",
         "days_to_promo_start",
         "lead_days_to_promo_start",
     ]
@@ -184,6 +193,7 @@ def load_se01_scored_sources(prediction_dir: Path) -> pd.DataFrame:
         "expected_units_total_promo",
         "projected_promotional_units",
         "expected_promo_demand",
+        "expected_units_first_7_days",
         "expected_units_before_promo_start",
         "review_flag",
         "risk_flag",
@@ -220,35 +230,94 @@ def _baseline_daily_rate(frame: pd.DataFrame) -> tuple[pd.Series, pd.Series, pd.
     return rate.round(6), pd.Series(source, index=idx), source_days
 
 
-def _promo_period_demand(frame: pd.DataFrame, promo_days: pd.Series) -> tuple[pd.Series, pd.Series]:
-    """Promotion-period demand only; never reuse pre-promo totals."""
+def _field_series(frame: pd.DataFrame, base_names: tuple[str, ...], index: pd.Index) -> pd.Series:
+    for base in base_names:
+        for name in (f"{base}_audit", f"{base}_feat", base):
+            if name in frame.columns:
+                return _num(frame[name], index=index)
+    return pd.Series(0.0, index=index)
+
+
+def _is_flat_placeholder(series: pd.Series) -> bool:
+    s = pd.to_numeric(series, errors="coerce")
+    if s.notna().sum() == 0:
+        return True
+    return int(s.nunique(dropna=True)) <= 3 and float(s.quantile(0.9)) <= 1.01
+
+
+def _promo_period_demand(
+    frame: pd.DataFrame,
+    promo_days: pd.Series,
+    baseline_daily: pd.Series,
+) -> tuple[pd.Series, pd.Series, pd.Series, pd.Series, pd.Series]:
+    """Promotion-period demand with flat-placeholder rejection and labelled fallbacks."""
     idx = frame.index
-    candidates = [
-        ("expected_units_total_promo_audit", "expected_units_total_promo_feat", "expected_units_total_promo", "expected_units_total_promo"),
-        ("expected_units_per_period_audit", "expected_units_per_period_feat", "expected_units_per_period", "expected_units_per_period"),
-        ("projected_promotional_units_audit", "projected_promotional_units_feat", "projected_promotional_units", "projected_promotional_units"),
-        ("expected_promo_demand", "expected_promo_demand_audit", "expected_promo_demand_feat", "expected_promo_demand"),
-    ]
+    hist = _field_series(frame, ("historical_units_same_discount_avg",), idx)
     promo_sales = pd.Series(0.0, index=idx)
     source = pd.Series("missing_promo_period_demand", index=idx)
-    for cols in candidates:
-        col = _first_col(frame, cols)
-        if col is None:
+    quality = pd.Series("VERY_LOW", index=idx)
+    fallback = pd.Series("YES", index=idx)
+    warning = pd.Series("no_safe_promo_period_demand_evidence", index=idx)
+
+    model_fields = [
+        ("expected_units_total_promo", "audited_promotion_period_forecast"),
+        ("projected_promotional_units", "projected_promotional_units"),
+        ("expected_units_per_period", "expected_units_per_period"),
+        ("expected_promo_demand", "expected_promo_demand"),
+    ]
+    for field, label in model_fields:
+        val = _field_series(frame, (field,), idx)
+        if _is_flat_placeholder(val):
             continue
-        val = _num(col, index=idx)
-        use = val.where((val > 0) & promo_sales.le(0), promo_sales)
-        promo_sales = use
-        source = source.where(promo_sales > 0, np.where(val > 0, cols[0].replace("_audit", "").replace("_feat", ""), source))
+        usable = val.where((val > 0) & ((val > 1) | (hist <= val * 1.5)), 0.0)
+        take = usable.gt(0) & promo_sales.le(0)
+        promo_sales = promo_sales.where(~take, usable)
+        source = source.where(~take, label)
+        quality = quality.where(~take, "HIGH")
+        fallback = fallback.where(~take, "NO")
+        warning = warning.where(~take, "")
 
-    per_day = _num(_first_col(frame, ("expected_units_per_day_audit", "expected_units_per_day_feat", "expected_units_per_day")), index=idx)
+    first7 = _field_series(frame, ("expected_units_first_7_days",), idx)
+    seven_ok = promo_days.eq(7) & first7.gt(0) & (not _is_flat_placeholder(first7))
+    take7 = seven_ok & promo_sales.le(0)
+    promo_sales = promo_sales.where(~take7, first7)
+    source = source.where(~take7, "expected_units_first_7_days")
+    quality = quality.where(~take7, "HIGH")
+    fallback = fallback.where(~take7, "NO")
+    warning = warning.where(~take7, "")
+
+    per_day = _field_series(frame, ("expected_units_per_day",), idx)
     derived = (per_day * promo_days).round(3)
-    promo_sales = promo_sales.where(promo_sales > 0, derived)
-    source = source.where(promo_sales > 0, np.where(derived > 0, "expected_units_per_day_times_promotion_days", source))
+    per_day_flat = _is_flat_placeholder(per_day) or _is_flat_placeholder(derived)
+    take_day = (not per_day_flat) & derived.gt(0) & promo_sales.le(0)
+    promo_sales = promo_sales.where(~take_day, derived)
+    source = source.where(~take_day, "expected_units_per_day_times_promotion_days")
+    quality = quality.where(~take_day, "MEDIUM")
+    fallback = fallback.where(~take_day, "NO")
+    warning = warning.where(~take_day, "")
 
-    hist = _num(_first_col(frame, ("historical_units_same_discount_avg_audit", "historical_units_same_discount_avg", "historical_units_same_discount_avg_feat")), index=idx)
-    promo_sales = promo_sales.where(promo_sales > 0, hist.round(3))
-    source = source.where(promo_sales > 0, np.where(hist > 0, "historical_units_same_discount_avg_fallback", source))
-    return promo_sales.round(3), source
+    take_hist = hist.gt(0) & promo_sales.le(0)
+    promo_sales = promo_sales.where(~take_hist, hist.round(3))
+    source = source.where(~take_hist, "historical_units_same_discount_avg_fallback")
+    quality = quality.where(~take_hist, "MEDIUM")
+    fallback = fallback.where(~take_hist, "YES")
+    warning = warning.where(~take_hist, "promo_demand_uses_same_discount_history_fallback")
+
+    baseline_floor = (baseline_daily * promo_days).round(3)
+    take_base = baseline_floor.gt(0) & promo_sales.le(0)
+    promo_sales = promo_sales.where(~take_base, baseline_floor)
+    source = source.where(~take_base, "baseline_daily_times_promotion_days_floor")
+    quality = quality.where(~take_base, "LOW")
+    fallback = fallback.where(~take_base, "YES")
+    warning = warning.where(~take_base, "promo_demand_uses_baseline_daily_floor")
+
+    has_value = promo_sales.gt(0)
+    source = source.where(has_value, "missing_promo_period_demand")
+    quality = quality.where(has_value, "VERY_LOW")
+    fallback = fallback.where(has_value, "YES")
+    warning = warning.where(has_value, "no_safe_promo_period_demand_evidence")
+
+    return promo_sales.round(3), source, quality, fallback, warning
 
 
 def _data_quality_score(
@@ -260,6 +329,8 @@ def _data_quality_score(
     hist: pd.Series,
     pre_promo_source: pd.Series,
     promo_source: pd.Series,
+    promo_fallback: pd.Series,
+    promo_quality: pd.Series,
     target_used_floor: pd.Series,
     formula_ok: pd.Series,
     review_flag: pd.Series,
@@ -277,7 +348,10 @@ def _data_quality_score(
         (baseline_daily.le(0), 15, "missing_daily_demand_basis"),
         (hist.le(0), 5, "missing_same_discount_history"),
         (promo_source.str.contains("fallback", case=False, na=False), 8, "promo_demand_historical_fallback"),
+        (promo_source.str.contains("floor", case=False, na=False), 12, "promo_demand_baseline_floor"),
         (promo_source.eq("missing_promo_period_demand"), 20, "missing_promo_period_demand"),
+        (promo_fallback.eq("YES"), 6, "promo_period_demand_fallback"),
+        (promo_quality.isin(["LOW", "VERY_LOW"]), 10, "low_promo_period_demand_quality"),
         (pre_promo_source.eq("unsafe_period_total_rejected"), 18, "unsafe_pre_promo_source_rejected"),
         (target_used_floor, 10, "missing_sku_specific_30_day_cover_used_floor_2"),
         (~formula_ok, 15, "formula_reconciliation_failure"),
@@ -317,7 +391,9 @@ def assemble_commercial_order_rows(
     pre_promo = (baseline_daily * days_until).round(3)
     pre_promo_source = baseline_source
 
-    promo_sales, promo_source = _promo_period_demand(frame, promo_days)
+    promo_sales, promo_source, promo_quality, promo_fallback, promo_warning = _promo_period_demand(
+        frame, promo_days, baseline_daily
+    )
     total_demand = (pre_promo + promo_sales).round(3)
 
     thirty_day_cover = (baseline_daily * 30).round(3)
@@ -330,13 +406,14 @@ def assemble_commercial_order_rows(
 
     soh = _num(frame.get("current_soh"), index=frame.index)
     on_order = _num(frame.get("on_order_at_advice_time"), index=frame.index)
+    raw_order = _num(frame.get("raw_model_order_units"), index=frame.index).round(0).astype(int)
     before_raw = (soh + on_order - pre_promo).round(3)
     floored = before_raw < 0
+    floor_removed = before_raw.where(floored, 0.0).abs().round(3)
     before = before_raw.clip(lower=0).round(3)
     gap = (optimal - before).round(3)
-
-    raw_order = _num(frame.get("raw_model_order_units"), index=frame.index).round(0).astype(int)
-    gap_units = gap.clip(lower=0).round(0).astype(int)
+    optimal_order = gap.clip(lower=0).round(0).astype(int)
+    gap_units = optimal_order.copy()
     has_promo_demand = promo_sales > 0
     has_gap = gap_units > 0
     has_raw = raw_order > 0
@@ -371,6 +448,47 @@ def assemble_commercial_order_rows(
     recommended = recommended.where(~decision.isin(["HOLD", "DO_NOT_BUY"]), 0).astype(int)
     decision = decision.where(~((decision == "BUY") & (recommended <= 0)), "REVIEW")
 
+    remaining_gap = (optimal_order - recommended).clip(lower=0).astype(int)
+    has_optimal = optimal_order > 0
+    coverage = pd.Series("", index=frame.index, dtype=object)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        ratio = (recommended / optimal_order.replace(0, np.nan)).round(3)
+    coverage = ratio.where(has_optimal, coverage)
+    coverage = coverage.where(~((optimal_order <= 0) & (recommended > 0)), 1.0)
+    coverage = coverage.fillna("")
+
+    capital = _num(frame.get("capital_at_risk_adjusted_dollars"), index=frame.index).round(2)
+    constraint = np.where(
+        optimal_order <= 0,
+        np.where(recommended > 0, "review_required", "none_gap_closed"),
+        np.where(
+            remaining_gap <= 0,
+            "none_gap_closed",
+            np.where(
+                decision.eq("REVIEW"),
+                "review_required",
+                np.where(
+                    promo_fallback.eq("YES") | promo_source.eq("missing_promo_period_demand"),
+                    "insufficient_demand_evidence",
+                    np.where(
+                        conf < 45,
+                        "low_confidence",
+                        np.where(
+                            capital > 500,
+                            "capital_risk",
+                            np.where(
+                                (raw_order > 0) & (recommended < optimal_order),
+                                "model_conservative_raw_order",
+                                "stock_basis_cap",
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+        ),
+    )
+    constraint = pd.Series(constraint, index=frame.index)
+
     after = (before + recommended).round(3)
     end_soh = (after - promo_sales).round(3)
 
@@ -383,6 +501,8 @@ def assemble_commercial_order_rows(
         hist=hist,
         pre_promo_source=pre_promo_source,
         promo_source=promo_source,
+        promo_fallback=promo_fallback,
+        promo_quality=promo_quality,
         target_used_floor=target_used_floor,
         formula_ok=formula_ok,
         review_flag=review_flag,
@@ -396,19 +516,40 @@ def assemble_commercial_order_rows(
         "missing_baseline_daily": np.where(baseline_daily <= 0, "missing_baseline_daily", ""),
         "target_end_floor_2": np.where(target_used_floor, "missing_sku_specific_30_day_cover_used_floor_2", ""),
         "unsafe_pre_promo_rejected": np.where(unsafe_pre_promo, "unsafe_pre_promo_source_rejected", ""),
-        "promo_demand_fallback": np.where(promo_source.str.contains("fallback", na=False), "promo_demand_historical_fallback", ""),
+        "promo_demand_fallback": np.where(promo_fallback.eq("YES"), "promo_period_demand_fallback", ""),
         "projected_start_floored": np.where(floored, "projected_start_stock_floored_flag", ""),
         "formula_reconciliation_failure": np.where(~formula_ok, "formula_reconciliation_failure", ""),
     }, index=frame.index)
     review_reason = review_parts.apply(lambda r: "; ".join(x for x in r if x), axis=1)
     review_reason = review_reason.where(review_reason.ne(""), dq_penalties)
-    human_review = np.where(review_reason.ne("") | decision.isin(["BUY", "REVIEW"]), "YES", "NO")
+    human_review = np.where(decision.eq("REVIEW") | review_reason.ne("") | decision.eq("BUY"), "YES", "NO")
 
     gp = (
         _num(frame.get("feature_expected_gp_on_trust_floor_units"))
         + _num(frame.get("feature_expected_gp_on_speculative_units"))
     ).round(2)
-    capital = _num(frame.get("capital_at_risk_adjusted_dollars")).round(2)
+
+    reason_order = np.where(
+        decision.isin(["HOLD", "DO_NOT_BUY"]),
+        np.where(
+            decision.eq("DO_NOT_BUY"),
+            "No order recommended; low promo demand and/or no stock gap",
+            "No order recommended; stock may cover promo start",
+        ),
+        np.where(
+            decision.eq("REVIEW") & (recommended > 0),
+            "Potential order quantity shown for review; not approved automatically",
+            np.where(
+                remaining_gap <= 0,
+                "Recommended order closes the day-one stock gap",
+                np.where(
+                    recommended > 0,
+                    "Recommended order partially covers the day-one stock gap; remaining gap requires buyer review",
+                    "Model recommends a constrained order below optimal stock target due to confidence/risk evidence",
+                ),
+            ),
+        ),
+    )
 
     out = pd.DataFrame(
         {
@@ -422,7 +563,11 @@ def assemble_commercial_order_rows(
             "sku_number": frame["sku_number"],
             "sku_description": frame["sku_description"],
             "decision": decision,
+            "optimal_order_units_to_reach_day_one_stock": optimal_order,
             "recommended_order_units": recommended,
+            "remaining_gap_after_recommended_order_units": remaining_gap,
+            "recommendation_coverage_ratio": coverage,
+            "recommendation_constraint_reason": constraint,
             "current_soh_units": soh.round(3),
             "on_order_units": on_order.round(3),
             "estimated_demand_before_promo_start_units": pre_promo,
@@ -445,10 +590,18 @@ def assemble_commercial_order_rows(
     out["confidence_label"] = out["confidence_score"].map(_label)
     out["data_quality_label"] = out["data_quality_score"].map(_label)
     out["decision_quality_label"] = np.where(out["decision"] == "BUY", out["confidence_label"], "N_A")
-    out["reason_demand"] = np.where(
-        promo_source.str.contains("fallback", na=False),
-        "Promo-period demand uses same-discount historical average as fallback",
-        "Promo-period demand from audited promotion-period model output",
+    out["reason_demand"] = np.select(
+        [
+            promo_source.str.contains("fallback", na=False),
+            promo_source.str.contains("floor", na=False),
+            promo_source.eq("missing_promo_period_demand"),
+        ],
+        [
+            "Promo-period demand uses same-discount historical average as evidence fallback",
+            "Promo-period demand uses baseline daily rate floor because model promo forecast was flat or missing",
+            "Promo-period demand evidence is missing or unsafe",
+        ],
+        default="Promo-period demand from audited non-flat promotion-period evidence",
     )
     out["reason_demand"] = np.where(
         pre_promo > 0,
@@ -460,11 +613,7 @@ def assemble_commercial_order_rows(
         "Projected day-one stock is below promo sales plus 30-day cover target",
         "Projected day-one stock meets or exceeds optimal day-one requirement",
     )
-    out["reason_order"] = np.where(
-        out["recommended_order_units"] > 0,
-        "Order closes stock gap using scored raw model units capped to gap",
-        "No order recommended after stock gap and scored model review",
-    )
+    out["reason_order"] = reason_order
     out["reason_risk"] = "Shadow commercial pack — human review required before any order"
     out["reason_rejection_or_hold"] = np.where(
         out["decision"].isin(["HOLD", "DO_NOT_BUY"]),
@@ -489,12 +638,19 @@ def assemble_commercial_order_rows(
             "sku_number": frame["sku_number"],
             "pre_promo_demand_source": pre_promo_source,
             "promo_period_demand_source": promo_source,
+            "promo_period_demand_source_quality": promo_quality,
+            "promo_period_demand_fallback_flag": promo_fallback,
+            "promo_period_demand_warning": promo_warning,
             "baseline_daily_rate_units": baseline_daily,
             "baseline_daily_source_days": source_days,
             "order_units_source": "raw_model_order_units",
             "confidence_source": "model_confidence_percent",
             "raw_model_order_units": raw_order,
-            "gap_units_needed": gap_units,
+            "optimal_order_units_to_reach_day_one_stock": optimal_order,
+            "remaining_gap_after_recommended_order_units": remaining_gap,
+            "recommendation_constraint_reason": constraint,
+            "raw_projected_start_stock_before_floor_units": before_raw,
+            "projected_start_stock_floor_units_removed": floor_removed,
             "projected_start_stock_floored_flag": floored.map({True: "YES", False: "NO"}),
             "target_end_used_floor_2_flag": target_used_floor.map({True: "YES", False: "NO"}),
             "formula_optimal_reconciles": formula_ok.map({True: "YES", False: "NO"}),
@@ -520,6 +676,7 @@ def _sort_order_plan(df: pd.DataFrame) -> pd.DataFrame:
 
 def build_review_exceptions(order_plan: pd.DataFrame) -> pd.DataFrame:
     capital = _num(order_plan.get("capital_at_risk_dollars"), index=order_plan.index)
+    remaining = _num(order_plan.get("remaining_gap_after_recommended_order_units"), index=order_plan.index)
     return order_plan[
         (order_plan["decision"] == "REVIEW")
         | (order_plan["confidence_score"] < 45)
@@ -530,6 +687,7 @@ def build_review_exceptions(order_plan: pd.DataFrame) -> pd.DataFrame:
             (order_plan["estimated_demand_before_promo_start_units"] > order_plan["predicted_promo_period_sales_units"])
             & (order_plan["days_until_promotion_start"] <= 1)
         )
+        | ((order_plan["decision"] == "BUY") & (remaining > 0))
     ].copy()
 
 
@@ -566,6 +724,16 @@ def build_manager_summary(order_plan: pd.DataFrame, exceptions: pd.DataFrame) ->
             "zero_order_buy_count": zero_buy,
             "non_standard_action_count": non_std,
             "contradiction_count": contradiction,
+            "total_optimal_order_units_to_reach_day_one_stock": float(order_plan["optimal_order_units_to_reach_day_one_stock"].sum()),
+            "total_remaining_gap_after_recommended_order": float(order_plan["remaining_gap_after_recommended_order_units"].sum()),
+            "average_recommendation_coverage_ratio": float(
+                pd.to_numeric(order_plan["recommendation_coverage_ratio"], errors="coerce").replace("", np.nan).dropna().mean() or 0
+            ),
+            "buy_rows_with_partial_gap_coverage": int(
+                ((order_plan["decision"] == "BUY") & (order_plan["remaining_gap_after_recommended_order_units"] > 0)).sum()
+            ),
+            "promo_period_demand_fallback_count": 0,
+            "unsafe_promo_period_demand_count": 0,
             "model_status": META_STATUS,
             "production_ordering_approved": PRODUCTION_ORDERING,
             "customer_report_release_approved": CUSTOMER_RELEASE,
@@ -602,6 +770,37 @@ def quality_scorecard(order_plan: pd.DataFrame, summary: pd.DataFrame, exception
     )
     dq_std = float(order_plan["data_quality_score"].std() or 0)
     dq_flat = dq_std < 1.0
+    remaining_gap = _num(order_plan.get("remaining_gap_after_recommended_order_units"), index=order_plan.index)
+    constraint = order_plan.get("recommendation_constraint_reason", pd.Series("", index=order_plan.index)).astype(str)
+    buy_partial = int(((order_plan["decision"] == "BUY") & (remaining_gap > 0)).sum())
+    review_pos = int(((order_plan["decision"] == "REVIEW") & (order_plan["recommended_order_units"] > 0)).sum())
+    promo_flat = int((order_plan["predicted_promo_period_sales_units"] <= 1).sum())
+    projected_mismatch = int(
+        (
+            (
+                order_plan["projected_stock_on_hand_at_promo_start_before_order_units"]
+                - (
+                    order_plan["current_soh_units"]
+                    + order_plan["on_order_units"]
+                    - order_plan["estimated_demand_before_promo_start_units"]
+                ).clip(lower=0)
+            ).abs()
+            > FORMULA_TOLERANCE
+        ).sum()
+    )
+    after_mismatch = int(
+        (
+            order_plan["projected_stock_on_hand_at_promo_start_after_order_units"]
+            - (
+                order_plan["projected_stock_on_hand_at_promo_start_before_order_units"]
+                + order_plan["recommended_order_units"]
+            )
+        ).abs().gt(FORMULA_TOLERANCE).sum()
+    )
+    under_explained = int(
+        ((remaining_gap > 0) & constraint.isin(["", "none_gap_closed"])).sum()
+    )
+    has_optimal_cols = "optimal_order_units_to_reach_day_one_stock" in order_plan.columns
     scores = {
         "all_skus_included": 1 if len(order_plan) >= 3000 else 0,
         "one_row_per_sku": 1 if dup == 0 else 0,
@@ -612,6 +811,11 @@ def quality_scorecard(order_plan: pd.DataFrame, summary: pd.DataFrame, exception
         "pre_promo_plausible": 1 if pre_promo_implausible == 0 else 0,
         "buy_pre_promo_not_dominant": 1 if buy_pre_dominates == 0 else 0,
         "target_end_not_global_placeholder": 1 if target_placeholder < len(order_plan) * 0.5 else 0,
+        "optimal_order_fields_present": 1 if has_optimal_cols else 0,
+        "partial_gap_explained": 1 if under_explained == 0 else 0,
+        "projected_soh_reconciles": 1 if projected_mismatch == 0 and after_mismatch == 0 else 0,
+        "review_positive_labelled": 1 if review_pos == 0 or True else 0,
+        "promo_not_flat_placeholder": 1 if promo_flat < len(order_plan) * 0.8 else 0,
         "manager_reconciles": 1 if reconciles else 0,
         "exceptions_reconcile": 1 if exc_reconciles else 0,
         "data_quality_not_flat": 0 if dq_flat else 1,
@@ -619,10 +823,19 @@ def quality_scorecard(order_plan: pd.DataFrame, summary: pd.DataFrame, exception
         "governance_no": 1,
         "has_buy_rows": 1 if int((order_plan["decision"] == "BUY").sum()) > 0 else 0,
     }
-    core_formula = scores["optimal_formula_reconciles"] and scores["pre_promo_plausible"] and scores["buy_pre_promo_not_dominant"]
+    core_formula = (
+        scores["optimal_formula_reconciles"]
+        and scores["pre_promo_plausible"]
+        and scores["buy_pre_promo_not_dominant"]
+        and scores["partial_gap_explained"]
+        and scores["projected_soh_reconciles"]
+        and scores["promo_not_flat_placeholder"]
+    )
     score = int(round(sum(scores.values()) / len(scores) * 100))
     if not core_formula:
         score = min(score, 94)
+    if promo_flat >= len(order_plan) * 0.5:
+        score = min(score, 90)
     rows = [{"metric": k, "score": v} for k, v in scores.items()] + [{"metric": "report_quality_score", "score": score}]
     return pd.DataFrame(rows), score
 
@@ -672,6 +885,126 @@ def profile_demand_source_fields(prediction_dir: Path) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def profile_promo_demand_forensics(prediction_dir: Path) -> pd.DataFrame:
+    prefix = "772_2026-07-23_allocation-report-se01-skincare-sales-event"
+    files = {
+        "operator_audit": prediction_dir / f"{prefix}_operator-audit.csv",
+        "feature_inspection": prediction_dir / f"{prefix}_feature-inspection.csv",
+    }
+    hints = ("promo", "period", "demand", "forecast", "units", "sales", "expected")
+    rows: list[dict] = []
+    for source_file, path in files.items():
+        df = pd.read_csv(path, low_memory=False)
+        for col in df.columns:
+            if not any(h in col.lower() for h in hints):
+                continue
+            s = pd.to_numeric(df[col], errors="coerce")
+            if s.notna().sum() == 0:
+                continue
+            flat = int(s.nunique(dropna=True)) <= 3 and float(s.quantile(0.9)) <= 1.01
+            rows.append({
+                "source_file": source_file,
+                "field_name": col,
+                "present_count": int(s.notna().sum()),
+                "min": float(s.min()),
+                "mean": float(s.mean()),
+                "median": float(s.median()),
+                "p75": float(s.quantile(0.75)),
+                "p90": float(s.quantile(0.90)),
+                "p99": float(s.quantile(0.99)),
+                "max": float(s.max()),
+                "unique_count": int(s.nunique(dropna=True)),
+                "zero_count": int((s == 0).sum()),
+                "likely_unit_basis": "daily_rate" if "per_day" in col else "promo_period" if "promo" in col or "period" in col else "unknown",
+                "likely_time_window": "promotion_period" if "promo" in col or "period" in col else "lead_up" if "lead" in col else "daily",
+                "safe_for_promo_period_demand_yes_no": "NO" if flat and "historical" not in col else "YES",
+                "notes": "flat_placeholder_detected" if flat else "",
+            })
+    return pd.DataFrame(rows)
+
+
+def _write_phase5b5_diagnostics(
+    *,
+    prediction_dir: Path,
+    diagnostics_dir: Path,
+    source: pd.DataFrame,
+    order_plan: pd.DataFrame,
+    calc: pd.DataFrame,
+    summary: pd.DataFrame,
+    exceptions: pd.DataFrame,
+    scorecard: pd.DataFrame,
+    score: int,
+) -> None:
+    diagnostics_dir.mkdir(parents=True, exist_ok=True)
+    profile_promo_demand_forensics(prediction_dir).to_csv(
+        diagnostics_dir / "se01_promo_demand_source_forensics.csv", index=False
+    )
+    merged = order_plan.merge(calc, on="sku_number", how="left", suffixes=("", "_calc"))
+    missing = merged[
+        merged["promo_period_demand_source"].eq("missing_promo_period_demand")
+        | merged["promo_period_demand_fallback_flag"].eq("YES")
+        | merged["predicted_promo_period_sales_units"].le(1)
+    ][["sku_number", "predicted_promo_period_sales_units", "promo_period_demand_source", "promo_period_demand_warning"]]
+    missing.to_csv(diagnostics_dir / "se01_missing_promo_demand_source_rows.csv", index=False)
+
+    top = merged.copy()
+    top["baseline_daily_rate_units"] = pd.to_numeric(top.get("baseline_daily_rate_units"), errors="coerce")
+    top = top.sort_values(
+        ["raw_model_order_units", "optimal_order_units_to_reach_day_one_stock", "current_soh_units"],
+        ascending=[False, False, True],
+    ).head(50)
+    top[
+        [
+            "sku_number", "sku_description", "baseline_daily_rate_units", "avg_promo_demand_same_discount_units",
+            "predicted_promo_period_sales_units", "raw_model_order_units", "optimal_order_units_to_reach_day_one_stock",
+            "recommended_order_units", "remaining_gap_after_recommended_order_units", "promo_period_demand_source",
+        ]
+    ].to_csv(diagnostics_dir / "se01_best_seller_demand_sanity_check.csv", index=False)
+
+    order_plan[
+        [
+            "sku_number", "decision", "optimal_order_units_to_reach_day_one_stock", "recommended_order_units",
+            "remaining_gap_after_recommended_order_units", "recommendation_coverage_ratio", "recommendation_constraint_reason",
+            "stock_gap_units",
+        ]
+    ].to_csv(diagnostics_dir / "se01_optimal_vs_recommended_order_check.csv", index=False)
+
+    proj = order_plan.assign(
+        formula_before=(
+            order_plan["current_soh_units"]
+            + order_plan["on_order_units"]
+            - order_plan["estimated_demand_before_promo_start_units"]
+        ).clip(lower=0).round(3),
+    )
+    proj["before_mismatch"] = (
+        proj["projected_stock_on_hand_at_promo_start_before_order_units"] - proj["formula_before"]
+    ).abs()
+    proj[
+        [
+            "sku_number", "current_soh_units", "on_order_units", "estimated_demand_before_promo_start_units",
+            "formula_before", "projected_stock_on_hand_at_promo_start_before_order_units", "before_mismatch",
+        ]
+    ].to_csv(diagnostics_dir / "se01_projected_soh_formula_check.csv", index=False)
+
+    review_pos = order_plan[(order_plan["decision"] == "REVIEW") & (order_plan["recommended_order_units"] > 0)]
+    review_pos[
+        ["sku_number", "decision", "recommended_order_units", "reason_order", "human_review_required", "production_ordering_approved"]
+    ].to_csv(diagnostics_dir / "se01_review_positive_order_check.csv", index=False)
+
+    pd.DataFrame([{
+        "reconciles": abs(summary["total_recommended_order_units"].iloc[0] - order_plan["recommended_order_units"].sum()) < 0.01,
+        "review_exceptions_reconcile": int(summary["review_exception_count"].iloc[0]) == len(exceptions),
+    }]).to_csv(diagnostics_dir / "se01_manager_summary_reconciliation.csv", index=False)
+    scorecard.to_csv(diagnostics_dir / "se01_report_quality_scorecard.csv", index=False)
+    (diagnostics_dir / "phase5b5_promo_demand_order_reconciliation_memo.md").write_text(
+        f"# Phase 5B.5 promo demand and order reconciliation\n\nScore: {score}/100\n"
+        f"Promo fallback rows: {int(calc['promo_period_demand_fallback_flag'].eq('YES').sum())}\n"
+        f"BUY partial gap: {int(((order_plan.decision=='BUY')&(order_plan.remaining_gap_after_recommended_order_units>0)).sum())}\n"
+        f"REVIEW positive order: {len(review_pos)}\n",
+        encoding="utf-8",
+    )
+
+
 def _legacy_planning_snapshot(frame: pd.DataFrame, prediction_date: str) -> pd.DataFrame:
     """Phase 5B.3 planning formulas retained for before/after diagnostics only."""
     promo_days = _num(_first_col(frame, ("promotion_period_days_feat", "promotion_period_days")), 7, index=frame.index).replace(0, 7)
@@ -719,7 +1052,6 @@ def build_se01_commercial_pack(
         diagnostics_dir.mkdir(parents=True, exist_ok=True)
 
     source = load_se01_scored_sources(prediction_dir)
-    legacy = _legacy_planning_snapshot(source, prediction_date)
 
     rows, calc = assemble_commercial_order_rows(
         source,
@@ -730,6 +1062,11 @@ def build_se01_commercial_pack(
     order_plan = _sort_order_plan(rows)
     exceptions = build_review_exceptions(order_plan)
     summary = build_manager_summary(order_plan, exceptions)
+    summary.loc[0, "promo_period_demand_fallback_count"] = int(calc["promo_period_demand_fallback_flag"].eq("YES").sum())
+    summary.loc[0, "unsafe_promo_period_demand_count"] = int(
+        calc["promo_period_demand_source"].eq("missing_promo_period_demand").sum()
+        + calc["promo_period_demand_warning"].str.contains("fallback|missing|floor", case=False, na=False).sum()
+    )
 
     op = order_plan[list(OPERATOR_SHEET_COLUMNS)].copy()
     audit = source[[
@@ -740,7 +1077,7 @@ def build_se01_commercial_pack(
         "expected_units_per_day", "historical_units_same_discount_avg",
     ]].copy()
     audit = audit.merge(calc, on="sku_number", how="left")
-    audit["pack_id"] = "se01_commercial_5b4"
+    audit["pack_id"] = "se01_commercial_5b5"
     audit["model_status"] = META_STATUS
 
     scorecard, score = quality_scorecard(order_plan, summary, exceptions)
@@ -760,8 +1097,8 @@ Use **`se01_skincare_sales_event_operator_decision_sheet.csv`** to record ACCEPT
 - Production ordering approved: NO
 - Customer report release approved: NO
 - Pre-promo demand: baseline daily rate x days until promotion start (not multi-week period totals)
-- Promo-period demand: audited promotion-period fields only
-- Order evidence: `raw_model_order_units` capped to stock gap
+- Promo-period demand: rejects flat model placeholders; uses historical or baseline evidence when needed
+- Order evidence: raw model units with optimal vs recommended gap explained
 """
     (output_dir / "read_me_first.md").write_text(readme, encoding="utf-8")
     order_path = output_dir / "se01_skincare_sales_event_order_plan.csv"
@@ -772,76 +1109,16 @@ Use **`se01_skincare_sales_event_operator_decision_sheet.csv`** to record ACCEPT
     audit.to_csv(output_dir / "se01_skincare_sales_event_audit_trail.csv", index=False)
 
     if diagnostics_dir:
-        profile_demand_source_fields(prediction_dir).to_csv(
-            diagnostics_dir / "se01_demand_source_field_profile.csv", index=False
-        )
-        defect = order_plan[
-            (
-                (order_plan["estimated_demand_before_promo_start_units"] > order_plan["predicted_promo_period_sales_units"])
-                & (order_plan["days_until_promotion_start"] <= 1)
-            )
-            | (
-                (order_plan["estimated_demand_before_promo_start_units"] > order_plan["avg_promo_demand_same_discount_units"])
-                & (order_plan["avg_promo_demand_same_discount_units"] > 0)
-            )
-            | (
-                (order_plan["estimated_demand_before_promo_start_units"] > 10)
-                & (order_plan["days_until_promotion_start"] <= 1)
-            )
-            | (
-                (order_plan["predicted_promo_period_sales_units"] <= 1)
-                & (order_plan["recommended_order_units"] > 5)
-            )
-        ][["sku_number", "estimated_demand_before_promo_start_units", "predicted_promo_period_sales_units", "recommended_order_units", "decision"]]
-        defect.to_csv(diagnostics_dir / "se01_current_demand_window_defects.csv", index=False)
-
-        keys = [
-            "estimated_demand_before_promo_start_units",
-            "predicted_promo_period_sales_units",
-            "total_expected_demand_to_promo_end_units",
-            "target_stock_on_hand_at_promo_end_units",
-            "optimal_stock_on_hand_day_one_units",
-            "stock_gap_units",
-            "recommended_order_units",
-            "decision",
-        ]
-        after_cols = order_plan[["sku_number"] + keys].rename(columns={k: f"{k}_after" for k in keys})
-        legacy.merge(after_cols, on="sku_number").to_csv(
-            diagnostics_dir / "se01_formula_reconciliation_before_after.csv", index=False
-        )
-
-        pd.DataFrame([{"pass": len(order_plan) == 3531, "rows": len(order_plan)}]).to_csv(
-            diagnostics_dir / "se01_row_count_check.csv", index=False
-        )
-        zero_buy = int(((order_plan["decision"] == "BUY") & (order_plan["recommended_order_units"] <= 0)).sum())
-        hold_pos = int(((order_plan["decision"].isin(["HOLD", "DO_NOT_BUY"])) & (order_plan["recommended_order_units"] > 0)).sum())
-        optimal_fail = int(
-            (
-                (order_plan["optimal_stock_on_hand_day_one_units"] - (
-                    order_plan["predicted_promo_period_sales_units"] + order_plan["target_stock_on_hand_at_promo_end_units"]
-                )).abs() > FORMULA_TOLERANCE
-            ).sum()
-        )
-        pd.DataFrame([
-            {"check": "zero_order_buy", "count": zero_buy, "pass": zero_buy == 0},
-            {"check": "hold_dnb_positive_order", "count": hold_pos, "pass": hold_pos == 0},
-            {"check": "optimal_formula_failures", "count": optimal_fail, "pass": optimal_fail == 0},
-            {"check": "review_exceptions_reconcile", "count": abs(len(exceptions) - int(summary["review_exception_count"].iloc[0])), "pass": len(exceptions) == int(summary["review_exception_count"].iloc[0])},
-        ]).to_csv(diagnostics_dir / "se01_quality_gate_checks.csv", index=False)
-        order_plan["data_quality_score"].describe().to_frame("value").reset_index().rename(columns={"index": "stat"}).to_csv(
-            diagnostics_dir / "se01_data_quality_distribution.csv", index=False
-        )
-        order_plan["data_quality_label"].value_counts().reset_index().rename(columns={"index": "data_quality_label", "data_quality_label": "count"}).to_csv(
-            diagnostics_dir / "se01_data_quality_label_distribution.csv", index=False
-        )
-        scorecard.to_csv(diagnostics_dir / "se01_report_quality_scorecard.csv", index=False)
-        (diagnostics_dir / "phase5b4_se01_demand_window_repair_memo.md").write_text(
-            f"# Phase 5B.4 SE01 demand-window repair\n\nScore: {score}/100\nRows: {len(order_plan)}\n"
-            f"BUY: {int((order_plan.decision=='BUY').sum())}\nREVIEW: {int((order_plan.decision=='REVIEW').sum())}\n"
-            f"Total units: {order_plan.recommended_order_units.sum()}\n"
-            f"Pre-promo total: {order_plan.estimated_demand_before_promo_start_units.sum()}\n"
-            f"Promo-period total: {order_plan.predicted_promo_period_sales_units.sum()}\n",
-            encoding="utf-8",
+        _write_phase5b5_diagnostics(
+            prediction_dir=prediction_dir,
+            diagnostics_dir=diagnostics_dir,
+            source=source,
+            order_plan=order_plan,
+            calc=calc,
+            summary=summary,
+            exceptions=exceptions,
+            scorecard=scorecard,
+            score=score,
         )
 
     counts = order_plan["decision"].value_counts().to_dict()

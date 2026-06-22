@@ -1,0 +1,51 @@
+sku_number,sku_description,baseline_daily_rate_units,avg_promo_demand_same_discount_units,predicted_promo_period_sales_units,raw_model_order_units,optimal_order_units_to_reach_day_one_stock,recommended_order_units,remaining_gap_after_recommended_order_units,promo_period_demand_source
+92632,Avene Cica+ Mlt P&R Crm Spf50+,4.285714,5.0,5.0,24,130,24,106,historical_units_same_discount_avg_fallback
+52115,Rexona W Apd Adv Shwr/F 220Ml,3.5,2.091,2.091,22,106,22,84,historical_units_same_discount_avg_fallback
+195518,Mf Fcefnty Cmpct 001,3.0,0.364,0.364,18,90,18,72,historical_units_same_discount_avg_fallback
+195412,Npmu Pro Fix Stick Cocoa,3.0,0.235,0.235,18,90,18,72,historical_units_same_discount_avg_fallback
+91149,Col Tp Adv Wht Baking Soda 180,3.0,0.0,21.0,16,111,16,95,baseline_daily_times_promotion_days_floor
+88414,Es Lashes To Impress 03,2.5,0.0,17.5,15,92,15,77,baseline_daily_times_promotion_days_floor
+799718,Rosehip By Essano Oil 45Ml,2.0,1.0,1.0,13,61,13,48,historical_units_same_discount_avg_fallback
+91058,Catr Allround Masc Ult Blk 010,2.0,0.0,14.0,12,74,12,62,baseline_daily_times_promotion_days_floor
+389404,Nivea Men Apd C/Kick 250Ml,2.0,0.0,14.0,12,72,12,60,baseline_daily_times_promotion_days_floor
+192936,May Eye Makeup Remover 70Ml,2.0,8.318,8.318,12,67,12,55,historical_units_same_discount_avg_fallback
+96617,Npmu Make Em Wndr Fdn Medium,2.0,0.0,14.0,12,66,12,54,baseline_daily_times_promotion_days_floor
+199053,Npmu Wondr Stck Dual Medium,2.0,1.625,1.625,12,61,12,49,historical_units_same_discount_avg_fallback
+88458,Mf Divine Lashes Rich Blk,2.0,0.636,0.636,12,60,12,48,historical_units_same_discount_avg_fallback
+67690,Rim Btw Pro Pncl Ash Brown,2.0,0.562,0.562,12,60,12,48,historical_units_same_discount_avg_fallback
+478354,Es Long Lasting Eye Pencil 01,1.821429,0.0,12.75,12,59,12,47,baseline_daily_times_promotion_days_floor
+90990,Catr Slmmtc Wp Brow Pen 050,1.5,0.0,10.5,10,54,10,44,baseline_daily_times_promotion_days_floor
+55245,Garn Micellar Water Rose 400Ml,1.714286,3.0,3.0,10,51,10,41,historical_units_same_discount_avg_fallback
+93993,May Face Lift Stix 65 Nu Int,1.5,0.909,0.909,10,46,10,36,historical_units_same_discount_avg_fallback
+90432,Rim Wonder'Ink Liner Chestnut,1.5,0.429,0.429,10,45,10,35,historical_units_same_discount_avg_fallback
+192118,Olay Hyaluron Cream 50G,1.5,0.423,0.423,10,45,10,35,historical_units_same_discount_avg_fallback
+90934,Cetaphil Gen Ex Sa Lot 236M,1.714286,1.5,1.5,9,53,9,44,historical_units_same_discount_avg_fallback
+323608,Cetaphil Eczema Bdy Mst 295Ml,1.714286,0.4,0.4,9,52,9,43,historical_units_same_discount_avg_fallback
+90462,Mf Mp Wow Liner Emerald Green,1.5,0.667,0.667,9,46,9,37,historical_units_same_discount_avg_fallback
+67700,Rim Lst Fin L/L Epic Brgnd,1.321429,1.125,1.125,9,40,9,31,historical_units_same_discount_avg_fallback
+193696,Mf 2000 Cal Pro Masc Black,1.321429,0.667,0.667,9,39,9,30,historical_units_same_discount_avg_fallback
+94071,Npmu Smushy Mte Lb Swipe 2 Sm,1.321429,1.143,1.143,9,38,9,29,historical_units_same_discount_avg_fallback
+365033,Palmol Lhw Foam Pump Lime 250,1.410714,0.0,9.875,8,48,8,40,baseline_daily_times_promotion_days_floor
+194014,Csc Dly Clarifying Soln 100Ml,1.321429,0.0,9.25,8,46,8,38,baseline_daily_times_promotion_days_floor
+16527,Loreal R/Lift Eye/Fl Tub 15Ml,1.428571,1.25,1.25,8,43,8,35,historical_units_same_discount_avg_fallback
+73263,Thayers Rose Petal Toner 355Ml,1.428571,1.0,1.0,8,42,8,34,historical_units_same_discount_avg_fallback
+96608,Npmu Make Em Wndr Fdn Nude,1.25,1.5,1.5,8,37,8,29,historical_units_same_discount_avg_fallback
+193213,May Ls Sky High Primer,1.196429,1.636,1.636,8,36,8,28,historical_units_same_discount_avg_fallback
+189518,Npmu Butter Lg Bit Of Honey,1.178571,1.647,1.647,8,35,8,27,historical_units_same_discount_avg_fallback
+90933,Cetaphil Pro S&Rep Crm 226G,1.142857,0.0,8.0,7,41,7,34,baseline_daily_times_promotion_days_floor
+91067,Catr Hd Liquid Covrge Fndn 010,1.0,0.0,7.0,7,37,7,30,baseline_daily_times_promotion_days_floor
+91874,Catr Shaper Con&Glow Stick 020,1.0,0.0,7.0,7,37,7,30,baseline_daily_times_promotion_days_floor
+91903,Catr M&S Lip Blm 010,1.0,0.0,7.0,7,37,7,30,baseline_daily_times_promotion_days_floor
+91952,Catr Arblsh Matt 150,1.0,0.0,7.0,7,37,7,30,baseline_daily_times_promotion_days_floor
+21964,Es Coverstick 30 Matt Honey,1.0,0.0,7.0,7,37,7,30,baseline_daily_times_promotion_days_floor
+91912,Catr Glw Eye&Chk Pal,1.0,0.0,7.0,7,36,7,29,baseline_daily_times_promotion_days_floor
+96487,May Face Lifter Fdn 325,1.0,0.0,7.0,7,36,7,29,baseline_daily_times_promotion_days_floor
+96624,Npmu Make Em Wndr Fdn Warm Ric,1.0,0.0,7.0,7,36,7,29,baseline_daily_times_promotion_days_floor
+96604,Npmu Make Em Wndr Fdn Fair Ivo,1.0,0.0,7.0,7,36,7,29,baseline_daily_times_promotion_days_floor
+91068,Catr Hd Liquid Covrge Fndn 020,1.0,0.0,7.0,7,36,7,29,baseline_daily_times_promotion_days_floor
+91051,Catr Big Bold 24H Lsh Eff Masc,1.0,0.0,7.0,7,36,7,29,baseline_daily_times_promotion_days_floor
+91011,Catr Big Bold Dp Blk Vol Masc,1.0,0.0,7.0,7,36,7,29,baseline_daily_times_promotion_days_floor
+91056,Catr Glam&Doll Volume Masc 010,1.0,0.0,7.0,7,36,7,29,baseline_daily_times_promotion_days_floor
+91900,Catr Liq Blsh 030,1.0,0.0,7.0,7,36,7,29,baseline_daily_times_promotion_days_floor
+91882,Catr Glsn Glw Tint Lip Oil 020,1.0,0.0,7.0,7,36,7,29,baseline_daily_times_promotion_days_floor
+91866,Catr Clr&Fix Brow Gel Masc 030,1.0,0.0,7.0,7,36,7,29,baseline_daily_times_promotion_days_floor
