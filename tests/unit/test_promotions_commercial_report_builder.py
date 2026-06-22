@@ -54,6 +54,8 @@ def test_assemble_commercial_order_rows_basic_contract() -> None:
     )
     workflow_cols = {
         "action_tier", "execution_ready_flag", "execution_blocker", "review_subtype",
+        "review_burden_class", "commercial_action_value_score", "review_priority_score",
+        "no_buy_trust_score", "overall_row_priority_score",
         "commercial_value_score", "commercial_value_label", "operator_priority_group",
     }
     assert set(out.columns).issuperset(set(ORDER_PLAN_COLUMNS) - {"priority_rank"} - workflow_cols)
@@ -119,7 +121,7 @@ def test_quality_scorecard_flags_zero_buy() -> None:
     })
     summary = pd.DataFrame([{"total_recommended_order_units": 0, "review_exception_count": 0}])
     exceptions = build_review_exceptions(plan)
-    scorecard, structural_score, commercial_score = quality_scorecard(plan, summary, exceptions)
+    scorecard, structural_score, commercial_score, primary_blocker = quality_scorecard(plan, summary, exceptions)
     assert int(scorecard.loc[scorecard["metric"] == "buy_positive_units", "score"].iloc[0]) == 0
 
 

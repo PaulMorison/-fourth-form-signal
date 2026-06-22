@@ -1,0 +1,5 @@
+review_burden_class,count,total_recommended_order_units,avg_commercial_action_value_score
+no_review_required,8,16.0,40.625
+optional_review,228,0.0,29.00657894736842
+must_review,674,2510.0,67.86008902077151
+audit_only,2621,0.0,1.1033956505150706

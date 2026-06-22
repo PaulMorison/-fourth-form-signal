@@ -1,0 +1,5 @@
+score_name,intended_meaning,current_problem,proposed_replacement,store_facing_yes_no,audit_only_yes_no
+commercial_action_value_score,Value of a possible ordering action,Previously mixed with no-buy trust,commercial_action_value_score,YES,NO
+no_buy_trust_score,Confidence rejection is correct,Missing before 5B.11,no_buy_trust_score,YES,NO
+review_priority_score,Buyer attention priority for REVIEW rows,Previously buried in generic commercial_value_score,review_priority_score,YES,NO
+overall_row_priority_score,Shortlist sort key,commercial_value_score overloaded,overall_row_priority_score,YES,NO
