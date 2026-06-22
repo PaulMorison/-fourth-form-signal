@@ -52,7 +52,11 @@ def test_assemble_commercial_order_rows_basic_contract() -> None:
         promotion_name="SE01 skincare sales event",
         prediction_date="2026-07-22",
     )
-    assert set(out.columns).issuperset(set(ORDER_PLAN_COLUMNS) - {"priority_rank"})
+    workflow_cols = {
+        "action_tier", "execution_ready_flag", "execution_blocker", "review_subtype",
+        "commercial_value_score", "commercial_value_label", "operator_priority_group",
+    }
+    assert set(out.columns).issuperset(set(ORDER_PLAN_COLUMNS) - {"priority_rank"} - workflow_cols)
     assert set(out["decision"]).issubset(ALLOWED_DECISIONS)
     assert "full_target_order_units" in out.columns
     assert "commercial_recommended_order_units" in out.columns
@@ -115,7 +119,7 @@ def test_quality_scorecard_flags_zero_buy() -> None:
     })
     summary = pd.DataFrame([{"total_recommended_order_units": 0, "review_exception_count": 0}])
     exceptions = build_review_exceptions(plan)
-    scorecard, score = quality_scorecard(plan, summary, exceptions)
+    scorecard, structural_score, commercial_score = quality_scorecard(plan, summary, exceptions)
     assert int(scorecard.loc[scorecard["metric"] == "buy_positive_units", "score"].iloc[0]) == 0
 
 

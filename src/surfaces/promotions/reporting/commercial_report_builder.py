@@ -18,6 +18,13 @@ OPERATOR_SHEET_COLUMNS: tuple[str, ...] = (
     "sku_description",
     "decision",
     "order_strategy",
+    "action_tier",
+    "operator_priority_group",
+    "execution_ready_flag",
+    "execution_blocker",
+    "review_subtype",
+    "commercial_value_score",
+    "commercial_value_label",
     "selected_promo_period_demand_units",
     "baseline_period_demand_units",
     "demand_evidence_strength",
@@ -105,6 +112,13 @@ ORDER_PLAN_COLUMNS: tuple[str, ...] = (
     "data_quality_score",
     "data_quality_label",
     "decision_quality_label",
+    "action_tier",
+    "execution_ready_flag",
+    "execution_blocker",
+    "review_subtype",
+    "commercial_value_score",
+    "commercial_value_label",
+    "operator_priority_group",
     "stock_target_conflict_flag",
     "reason_demand",
     "reason_stock",
@@ -122,6 +136,62 @@ ORDER_PLAN_COLUMNS: tuple[str, ...] = (
 )
 
 HOLD_TARGET_TOLERANCE = 2
+
+ACTION_TIERS = frozenset({
+    "tier_1_execute",
+    "tier_2_review_high_value",
+    "tier_3_review_evidence_gap",
+    "tier_4_hold_monitor",
+    "tier_5_do_not_buy",
+})
+
+OPERATOR_PRIORITY_GROUPS = frozenset({
+    "order_now_candidate",
+    "review_before_order",
+    "check_stock_position",
+    "no_order_needed",
+    "rejected_poor_seller",
+})
+
+REVIEW_SUBTYPES = frozenset({
+    "review_demand_evidence",
+    "review_stock_gap",
+    "review_order_range",
+    "review_high_value",
+    "review_low_confidence",
+    "review_base_stock_gap",
+    "review_data_quality",
+    "none",
+})
+
+EXECUTION_SHORTLIST_COLUMNS: tuple[str, ...] = (
+    "operator_priority_group",
+    "action_tier",
+    "priority_rank",
+    "sku_number",
+    "sku_description",
+    "decision",
+    "recommended_order_units",
+    "operator_review_order_low_units",
+    "operator_review_order_high_units",
+    "promo_units_expected_to_sell",
+    "current_soh_units",
+    "on_order_units",
+    "remaining_promo_sales_stock_gap",
+    "remaining_end_stock_gap",
+    "confidence_score",
+    "data_quality_score",
+    "commercial_value_score",
+    "review_subtype",
+    "execution_blocker",
+    "reason_demand",
+    "reason_stock",
+    "reason_order",
+    "reason_risk",
+    "operator_decision",
+    "operator_recommended_units",
+    "operator_notes",
+)
 
 DEMAND_FIELD_HINTS = (
     "demand",
@@ -1064,7 +1134,237 @@ def _sort_order_plan(df: pd.DataFrame) -> pd.DataFrame:
     )
     out = out.drop(columns=["_rank"])
     out.insert(0, "priority_rank", range(1, len(out) + 1))
-    return out[list(ORDER_PLAN_COLUMNS)]
+    cols = [c for c in ORDER_PLAN_COLUMNS if c in out.columns]
+    return out[cols]
+
+
+def _assign_review_subtype(plan: pd.DataFrame, calc: pd.DataFrame) -> pd.Series:
+    """Assign exactly one primary review subtype per REVIEW row."""
+    idx = plan.index
+    promo_source = calc.set_index("sku_number")["promo_period_demand_source"].reindex(plan["sku_number"]).reset_index(drop=True)
+    promo_fallback = calc.set_index("sku_number")["promo_period_demand_fallback_flag"].reindex(plan["sku_number"]).reset_index(drop=True)
+    promo_sales = _num(plan["promo_units_expected_to_sell"], index=idx)
+    rem_promo = _num(plan["remaining_promo_sales_stock_gap"], index=idx)
+    rem_base = _num(plan["remaining_end_stock_gap"], index=idx)
+    conf = _num(plan["confidence_score"], index=idx)
+    dq = _num(plan["data_quality_score"], index=idx)
+    strength = plan["demand_evidence_strength"].astype(str)
+    raw = _num(plan["raw_model_order_units"], index=idx)
+    op_low = _num(plan["operator_review_order_low_units"], index=idx)
+    op_high = _num(plan["operator_review_order_high_units"], index=idx)
+    gp = _num(plan.get("expected_gp_dollars"), index=idx)
+    promo_gap = _num(plan["order_needed_to_cover_promo_sales"], index=idx)
+    stock_conflict = _num(plan.get("stock_target_conflict_flag"), index=idx).astype(bool)
+
+    unsafe_demand = (
+        promo_source.eq("missing_promo_period_demand")
+        | strength.eq("CONFLICTING")
+        | plan.get("demand_conflict_flag", pd.Series("NO", index=idx)).eq("YES")
+    )
+    wide_range = (op_high >= 20) & (raw < op_high * 0.5)
+    wide_range = wide_range | ((op_high - op_low) > np.maximum(op_high * 0.5, 5))
+    high_value = (promo_sales >= 5) | (gp >= 50) | (promo_gap >= 10) | (rem_promo + rem_base >= 15)
+
+    subtype = pd.Series("none", index=idx)
+    is_review = plan["decision"].eq("REVIEW")
+    subtype = subtype.where(
+        ~(is_review & unsafe_demand),
+        "review_demand_evidence",
+    )
+    subtype = subtype.where(
+        ~(is_review & (conf < 45) & subtype.eq("none")),
+        "review_low_confidence",
+    )
+    subtype = subtype.where(
+        ~(is_review & (dq < 50) & subtype.eq("none")),
+        "review_data_quality",
+    )
+    subtype = subtype.where(
+        ~(is_review & ((rem_promo > HOLD_TARGET_TOLERANCE) | (promo_gap > HOLD_TARGET_TOLERANCE)) & subtype.eq("none")),
+        "review_stock_gap",
+    )
+    subtype = subtype.where(
+        ~(is_review & (rem_promo <= HOLD_TARGET_TOLERANCE) & (rem_base > 10) & subtype.eq("none")),
+        "review_base_stock_gap",
+    )
+    subtype = subtype.where(
+        ~(is_review & wide_range & stock_conflict & subtype.eq("none")),
+        "review_order_range",
+    )
+    subtype = subtype.where(
+        ~(is_review & high_value & subtype.eq("none")),
+        "review_high_value",
+    )
+    subtype = subtype.where(~(is_review & subtype.eq("none")), "review_stock_gap")
+    return subtype.where(is_review, "none")
+
+
+def _compute_commercial_value_score(plan: pd.DataFrame, review_subtype: pd.Series) -> tuple[pd.Series, pd.Series]:
+    idx = plan.index
+    promo = _num(plan["promo_units_expected_to_sell"], index=idx)
+    rec = _num(plan["recommended_order_units"], index=idx)
+    rem_promo = _num(plan["remaining_promo_sales_stock_gap"], index=idx)
+    rem_base = _num(plan["remaining_end_stock_gap"], index=idx)
+    conf = _num(plan["confidence_score"], index=idx)
+    dq = _num(plan["data_quality_score"], index=idx)
+    gp = _num(plan.get("expected_gp_dollars"), index=idx)
+    capital = _num(plan.get("capital_at_risk_dollars"), index=idx)
+    strength = plan["demand_evidence_strength"].astype(str)
+
+    promo_p75 = float(promo[promo > 0].quantile(0.75)) if (promo > 0).any() else 1.0
+    promo_norm = (promo / max(promo_p75, 1.0) * 35).clip(0, 35)
+    order_norm = (rec / max(float(rec[rec > 0].quantile(0.75)) if (rec > 0).any() else 1.0, 1.0) * 20).clip(0, 20)
+    gap_risk = ((rem_promo + rem_base) / 20 * 15).clip(0, 15)
+    gp_norm = (gp / max(float(gp[gp > 0].quantile(0.75)) if (gp > 0).any() else 1.0, 1.0) * 10).clip(0, 10)
+
+    score = promo_norm + order_norm + gap_risk + gp_norm + conf * 0.15 + dq * 0.15
+    score = score.where(~strength.eq("STRONG"), score + 5)
+    score = score.where(~strength.eq("MODERATE"), score + 2)
+    score = score.where(~strength.isin(["WEAK", "CONFLICTING"]), score - 10)
+    score = score.where(
+        ~review_subtype.isin(["review_demand_evidence", "review_low_confidence", "review_data_quality"]),
+        score - 8,
+    )
+    score = score.where(~review_subtype.eq("review_high_value"), score + 5)
+    score = score.where(plan["decision"].ne("DO_NOT_BUY"), score * 0.35)
+    score = score.where(plan["decision"].ne("HOLD"), score)
+    out = score.clip(0, 100).round(1)
+    return out, out.map(_label)
+
+
+def _assign_action_workflow_fields(
+    plan: pd.DataFrame,
+    calc: pd.DataFrame,
+) -> pd.DataFrame:
+    """Add action tiers, execution readiness, and operator priority groups."""
+    out = plan.copy()
+    review_subtype = _assign_review_subtype(out, calc)
+    cv_score, cv_label = _compute_commercial_value_score(out, review_subtype)
+
+    promo_source = calc.set_index("sku_number")["promo_period_demand_source"].reindex(out["sku_number"]).reset_index(drop=True)
+    promo_fallback = calc.set_index("sku_number")["promo_period_demand_fallback_flag"].reindex(out["sku_number"]).reset_index(drop=True)
+    strength = out["demand_evidence_strength"].astype(str)
+    conf = _num(out["confidence_score"], index=out.index)
+    dq = _num(out["data_quality_score"], index=out.index)
+    rec = _num(out["recommended_order_units"], index=out.index)
+    rem_promo = _num(out["remaining_promo_sales_stock_gap"], index=out.index)
+    cov = pd.to_numeric(out["commercial_coverage_ratio"], errors="coerce").fillna(0)
+    stock_conflict = _num(out.get("stock_target_conflict_flag"), index=out.index).astype(bool)
+
+    unsafe_demand = (
+        promo_source.eq("missing_promo_period_demand")
+        | strength.eq("CONFLICTING")
+        | out.get("demand_conflict_flag", pd.Series("NO", index=out.index)).eq("YES")
+    )
+    promo_covered = (rem_promo <= HOLD_TARGET_TOLERANCE) | (cov >= 0.85)
+
+    exec_ready = (
+        out["decision"].eq("BUY")
+        & strength.isin(["MODERATE", "STRONG"])
+        & (dq >= 75)
+        & (conf >= 50)
+        & (rec > 0)
+        & promo_covered
+        & ~stock_conflict
+        & ~unsafe_demand
+    )
+
+    blocker_codes = [
+        (out["decision"].ne("BUY"), "not_buy_decision"),
+        (strength.eq("CONFLICTING"), "weak_or_conflicting_demand_evidence"),
+        (dq < 75, "data_quality_below_75"),
+        (conf < 50, "confidence_below_50"),
+        (rec <= 0, "zero_recommended_order"),
+        (~promo_covered, "promo_cover_gap_remains"),
+        (stock_conflict, "stock_target_conflict"),
+        (unsafe_demand, "unsafe_promo_demand"),
+    ]
+    execution_blocker = pd.Series("", index=out.index)
+    for mask, code in blocker_codes:
+        execution_blocker = execution_blocker.where(~(out["decision"].eq("BUY") & mask), code)
+
+    tier = pd.Series("tier_5_do_not_buy", index=out.index)
+    tier = tier.where(~out["decision"].eq("HOLD"), "tier_4_hold_monitor")
+    tier = tier.where(~exec_ready, "tier_1_execute")
+    tier = tier.where(
+        ~(
+            out["decision"].eq("REVIEW")
+            & (
+                review_subtype.eq("review_high_value")
+                | cv_label.isin(["HIGH", "VERY_HIGH"])
+            )
+        ),
+        "tier_2_review_high_value",
+    )
+    tier = tier.where(~out["decision"].eq("REVIEW"), "tier_3_review_evidence_gap")
+    tier = tier.where(~(out["decision"].eq("BUY") & ~exec_ready), "tier_3_review_evidence_gap")
+
+    priority = pd.Series("rejected_poor_seller", index=out.index)
+    priority = priority.where(~out["decision"].eq("HOLD"), "no_order_needed")
+    priority = priority.where(
+        ~(out["decision"].eq("HOLD") & (rem_promo + _num(out["remaining_end_stock_gap"], index=out.index) > HOLD_TARGET_TOLERANCE)),
+        "check_stock_position",
+    )
+    priority = priority.where(
+        ~(out["decision"].eq("REVIEW") & review_subtype.isin(["review_stock_gap", "review_base_stock_gap"])),
+        "check_stock_position",
+    )
+    priority = priority.where(~out["decision"].eq("REVIEW"), "review_before_order")
+    priority = priority.where(~exec_ready, "order_now_candidate")
+
+    out["review_subtype"] = review_subtype
+    out["commercial_value_score"] = cv_score
+    out["commercial_value_label"] = cv_label
+    out["execution_ready_flag"] = np.where(exec_ready, "YES", "NO")
+    out["execution_blocker"] = execution_blocker.where(out["decision"].eq("BUY"), "")
+    out["action_tier"] = tier
+    out["operator_priority_group"] = priority
+    return out
+
+
+def build_execution_shortlist(order_plan: pd.DataFrame) -> pd.DataFrame:
+    """Buyer-first shortlist: execute, high-value review, and trust-building no-buys."""
+    tier_rank = {
+        "tier_1_execute": 0,
+        "tier_2_review_high_value": 1,
+        "tier_3_review_evidence_gap": 2,
+        "tier_5_do_not_buy": 3,
+    }
+    trust_dnb = order_plan[
+        (order_plan["decision"] == "DO_NOT_BUY")
+        & (order_plan["operator_priority_group"] == "rejected_poor_seller")
+        & (_num(order_plan["promo_units_expected_to_sell"]) <= 1)
+        & (_num(order_plan["data_quality_score"]) >= 50)
+    ].sort_values(["commercial_value_score", "promo_units_expected_to_sell"], ascending=[False, False])
+
+    parts: list[pd.DataFrame] = []
+    for tier in ("tier_1_execute", "tier_2_review_high_value", "tier_3_review_evidence_gap"):
+        chunk = order_plan[order_plan["action_tier"] == tier].sort_values(
+            ["commercial_value_score", "promo_units_expected_to_sell"],
+            ascending=[False, False],
+        )
+        if tier == "tier_1_execute":
+            parts.append(chunk)
+        elif tier == "tier_2_review_high_value":
+            parts.append(chunk.head(40))
+        else:
+            parts.append(chunk.head(25))
+    parts.append(trust_dnb.head(20))
+
+    shortlist = pd.concat(parts, ignore_index=True).drop_duplicates(subset=["sku_number"], keep="first")
+    shortlist = shortlist.assign(
+        _tier_rank=shortlist["action_tier"].map(tier_rank).fillna(9),
+    ).sort_values(
+        ["_tier_rank", "commercial_value_score", "promo_units_expected_to_sell"],
+        ascending=[True, False, False],
+        kind="mergesort",
+    ).drop(columns=["_tier_rank"])
+    shortlist = shortlist.head(100).reset_index(drop=True)
+    if "priority_rank" in shortlist.columns:
+        shortlist = shortlist.drop(columns=["priority_rank"])
+    shortlist.insert(2, "priority_rank", range(1, len(shortlist) + 1))
+    cols = [c for c in EXECUTION_SHORTLIST_COLUMNS if c in shortlist.columns]
+    return shortlist[cols]
 
 
 def build_review_exceptions(order_plan: pd.DataFrame) -> pd.DataFrame:
@@ -1171,6 +1471,15 @@ def build_manager_summary(order_plan: pd.DataFrame, exceptions: pd.DataFrame) ->
             "target_stock_policy_lift_count": int((order_plan["recommended_order_basis"] == "target_stock_policy_lift").sum()),
             "target_stock_review_range_count": int((order_plan["order_strategy"] == "PARTIAL_PROMO_COVER_REVIEW").sum()),
             "execution_ready_buy_count": int((order_plan["decision_quality_label"] == "EXECUTION_READY").sum()),
+            "execution_ready_count": 0,
+            "tier_1_execute_count": 0,
+            "tier_2_review_high_value_count": 0,
+            "tier_3_review_evidence_gap_count": 0,
+            "rejected_poor_seller_count": 0,
+            "review_subtype_counts": "",
+            "structural_report_score": 0,
+            "primary_release_blocker": "",
+            "recommended_next_action": "",
             "commercial_recommended_order_units_total": float(order_plan["commercial_recommended_order_units"].sum()),
             "operator_review_order_high_units_total": float(order_plan["operator_review_order_high_units"].sum()),
             "promo_period_demand_fallback_count": 0,
@@ -1183,7 +1492,12 @@ def build_manager_summary(order_plan: pd.DataFrame, exceptions: pd.DataFrame) ->
     )
 
 
-def quality_scorecard(order_plan: pd.DataFrame, summary: pd.DataFrame, exceptions: pd.DataFrame) -> tuple[pd.DataFrame, int]:
+def quality_scorecard(
+    order_plan: pd.DataFrame,
+    summary: pd.DataFrame,
+    exceptions: pd.DataFrame,
+    calc: pd.DataFrame | None = None,
+) -> tuple[pd.DataFrame, int, int]:
     zero_buy = int(((order_plan["decision"] == "BUY") & (order_plan["recommended_order_units"] <= 0)).sum())
     non_std = int((~order_plan["decision"].isin(ALLOWED_DECISIONS)).sum())
     dup = int(order_plan["sku_number"].duplicated().sum())
@@ -1294,23 +1608,71 @@ def quality_scorecard(order_plan: pd.DataFrame, summary: pd.DataFrame, exception
         "dnb_active_best_seller_blocked": 1 if dnb_active_bs == 0 else 0,
         "demand_evidence_fields_present": 1 if "demand_evidence_strength" in order_plan.columns else 0,
         "best_seller_escalation_populated": 1 if "best_seller_escalation_flag" in order_plan.columns else 0,
+        "action_tier_populated": 1 if "action_tier" in order_plan.columns and order_plan["action_tier"].ne("").all() else 0,
+        "review_subtype_on_review_rows": 1 if (
+            order_plan.loc[order_plan["decision"] == "REVIEW", "review_subtype"].ne("none").all()
+            if "review_subtype" in order_plan.columns and (order_plan["decision"] == "REVIEW").any()
+            else 1
+        ) else 0,
+        "commercial_value_populated": 1 if "commercial_value_score" in order_plan.columns else 0,
     }
-    core_ok = all(v == 1 for k, v in scores.items() if k in {
+    structural_core = {
         "target_day_one_reconciles", "target_order_reconciles", "projected_day_one_reconciles",
         "shortfall_reconciles", "buy_low_coverage_blocked", "hold_promo_gap_blocked",
         "order_decomposition_reconciles", "recommended_alloc_reconciles", "promo_base_split_present",
-    })
-    score = int(round(sum(scores.values()) / len(scores) * 100))
+        "one_row_per_sku", "decision_enum_valid", "manager_reconciles",
+    }
+    core_ok = all(v == 1 for k, v in scores.items() if k in structural_core)
+    structural_score = int(round(sum(scores.values()) / len(scores) * 100))
     if not core_ok:
-        score = min(score, 84)
-    if buy_suppressed > 0 or dnb_active_bs > 0:
-        score = min(score, 88)
-    if review_zero_promo > 50:
-        score = min(score, 90)
+        structural_score = min(structural_score, 84)
     if not has_split_cols or decomp_fail > 0:
-        score = min(score, 90)
-    rows = [{"metric": k, "score": v} for k, v in scores.items()] + [{"metric": "report_quality_score", "score": score}]
-    return pd.DataFrame(rows), score
+        structural_score = min(structural_score, 90)
+
+    exec_ready = int((order_plan.get("execution_ready_flag", pd.Series("NO", index=order_plan.index)) == "YES").sum())
+    unsafe_promo = int(summary.get("unsafe_promo_period_demand_count", pd.Series([0])).iloc[0])
+    fallback_count = int(summary.get("promo_period_demand_fallback_count", pd.Series([0])).iloc[0])
+    exc_pct = len(exceptions) / max(len(order_plan), 1)
+    actionable = order_plan[order_plan["decision"].isin(["BUY", "REVIEW"])]
+    actionable_review_pct = (
+        float((actionable.get("human_review_required", pd.Series("NO", index=actionable.index)) == "YES").mean())
+        if len(actionable) > 0 else 0.0
+    )
+    release_blockers: list[str] = []
+    if CUSTOMER_RELEASE != "YES":
+        release_blockers.append("customer_report_release_not_approved")
+    if exec_ready == 0:
+        release_blockers.append("no_execution_ready_rows")
+    if unsafe_promo > 0:
+        release_blockers.append("unsafe_promo_demand_present")
+    if exc_pct > 0.5:
+        release_blockers.append("review_exceptions_over_half_of_skus")
+    if fallback_count > len(order_plan) * 0.25:
+        release_blockers.append("fallback_heavy_promo_demand")
+    if actionable_review_pct > 0.8:
+        release_blockers.append("human_review_on_most_actionable_rows")
+
+    commercial_score = structural_score
+    if release_blockers:
+        commercial_score = min(commercial_score, 85)
+    if exec_ready == 0:
+        commercial_score = min(commercial_score, 82)
+    if unsafe_promo > 500:
+        commercial_score = min(commercial_score, 80)
+    if exc_pct > 0.5:
+        commercial_score = min(commercial_score, 78)
+    if buy_suppressed > 0 or dnb_active_bs > 0:
+        commercial_score = min(commercial_score, 88)
+    if review_zero_promo > 50:
+        commercial_score = min(commercial_score, 85)
+
+    rows = (
+        [{"metric": k, "score": v, "score_type": "structural"} for k, v in scores.items()]
+        + [{"metric": "structural_report_score", "score": structural_score, "score_type": "structural"}]
+        + [{"metric": "commercial_release_score", "score": commercial_score, "score_type": "commercial"}]
+        + [{"metric": f"release_blocker_{i}", "score": blocker, "score_type": "blocker"} for i, blocker in enumerate(release_blockers)]
+    )
+    return pd.DataFrame(rows), structural_score, commercial_score
 
 
 def profile_demand_source_fields(prediction_dir: Path) -> pd.DataFrame:
@@ -1957,6 +2319,83 @@ def _write_phase5b9_diagnostics(
     )
 
 
+def _write_phase5b10_diagnostics(
+    *,
+    diagnostics_dir: Path,
+    order_plan: pd.DataFrame,
+    calc: pd.DataFrame,
+    summary: pd.DataFrame,
+    scorecard: pd.DataFrame,
+    structural_score: int,
+    commercial_score: int,
+    shortlist: pd.DataFrame,
+) -> None:
+    diagnostics_dir.mkdir(parents=True, exist_ok=True)
+    merged = order_plan.merge(
+        calc[["sku_number", "promo_period_demand_source"]],
+        on="sku_number",
+        how="left",
+    )
+    merged[
+        [
+            "sku_number", "sku_description", "decision", "decision_quality_label",
+            "confidence_score", "data_quality_score", "demand_evidence_strength",
+            "promo_period_demand_source", "promo_units_expected_to_sell",
+            "recommended_order_units", "commercial_coverage_ratio",
+            "remaining_promo_sales_stock_gap", "remaining_end_stock_gap",
+            "execution_ready_flag", "execution_blocker", "action_tier",
+        ]
+    ].rename(columns={"action_tier": "proposed_action_tier"}).to_csv(
+        diagnostics_dir / "se01_execution_readiness_review.csv",
+        index=False,
+    )
+
+    review = order_plan[order_plan["decision"] == "REVIEW"]
+    subtype_rows = []
+    for subtype in REVIEW_SUBTYPES - {"none"}:
+        chunk = review[review["review_subtype"] == subtype]
+        subtype_rows.append({
+            "review_subtype": subtype,
+            "count": len(chunk),
+            "total_recommended_order_units": float(chunk["recommended_order_units"].sum()),
+        })
+    pd.DataFrame(subtype_rows).to_csv(diagnostics_dir / "se01_review_subtype_distribution.csv", index=False)
+
+    shortlist.to_csv(diagnostics_dir / "se01_top_action_shortlist.csv", index=False)
+
+    trust = order_plan[
+        (order_plan["decision"] == "DO_NOT_BUY")
+        & (order_plan["operator_priority_group"] == "rejected_poor_seller")
+        & (_num(order_plan["promo_units_expected_to_sell"]) <= 1)
+        & (_num(order_plan["data_quality_score"]) >= 50)
+        & (_num(order_plan["full_target_order_units"]) <= HOLD_TARGET_TOLERANCE)
+    ].sort_values("commercial_value_score", ascending=False).head(100)
+    trust.to_csv(diagnostics_dir / "se01_no_buy_trust_review.csv", index=False)
+
+    scorecard.to_csv(diagnostics_dir / "se01_scorecard_honesty_check.csv", index=False)
+
+    exec_ready = int(summary.get("execution_ready_count", pd.Series([0])).iloc[0])
+    tier1 = int(summary.get("tier_1_execute_count", pd.Series([0])).iloc[0])
+    (diagnostics_dir / "phase5b10_confidence_commercial_value_memo.md").write_text(
+        f"# Phase 5B.10 confidence and commercial value\n\n"
+        f"- Structural report score: {structural_score}/100\n"
+        f"- Commercial release score: {commercial_score}/100\n"
+        f"- Execution-ready rows: {exec_ready}\n"
+        f"- Tier 1 execute candidates: {tier1}\n"
+        f"- Execution shortlist rows: {len(shortlist)}\n"
+        f"- Primary release blocker: {summary.get('primary_release_blocker', pd.Series([''])).iloc[0]}\n\n"
+        f"## Is the report easier to act from?\n"
+        f"Buyers should open the execution shortlist first ({len(shortlist)} rows) rather than all "
+        f"{len(order_plan)} SKUs. Action tiers and review subtypes separate execute-now from investigate.\n\n"
+        f"## What still blocks 98+\n"
+        f"Commercial release remains capped while customer release is NO, unsafe promo demand persists, "
+        f"and review exceptions cover a large share of SKUs.\n\n"
+        f"## Recommended next action\n"
+        f"{summary.get('recommended_next_action', pd.Series(['Hold shadow; improve demand evidence before release'])).iloc[0]}\n",
+        encoding="utf-8",
+    )
+
+
 def build_se01_commercial_pack(
     *,
     prediction_dir: Path,
@@ -1983,7 +2422,13 @@ def build_se01_commercial_pack(
         prediction_date=prediction_date,
     )
     order_plan = _sort_order_plan(rows)
+    order_plan = _assign_action_workflow_fields(order_plan, calc)
+    for col in ORDER_PLAN_COLUMNS:
+        if col not in order_plan.columns:
+            order_plan[col] = ""
+    order_plan = order_plan[list(ORDER_PLAN_COLUMNS)]
     exceptions = build_review_exceptions(order_plan)
+    shortlist = build_execution_shortlist(order_plan)
     summary = build_manager_summary(order_plan, exceptions)
     summary.loc[0, "promo_period_demand_fallback_count"] = int(calc["promo_period_demand_fallback_flag"].eq("YES").sum())
     summary.loc[0, "unsafe_promo_period_demand_count"] = int(
@@ -2044,12 +2489,37 @@ def build_se01_commercial_pack(
         "expected_units_per_day", "historical_units_same_discount_avg",
     ]].copy()
     audit = audit.merge(calc, on="sku_number", how="left")
-    audit["pack_id"] = "se01_commercial_5b9"
+    audit = audit.merge(
+        order_plan[[
+            "sku_number", "action_tier", "execution_ready_flag", "execution_blocker",
+            "review_subtype", "commercial_value_score", "commercial_value_label",
+            "operator_priority_group",
+        ]],
+        on="sku_number",
+        how="left",
+    )
+    audit["pack_id"] = "se01_commercial_5b10"
     audit["model_status"] = META_STATUS
 
-    scorecard, score = quality_scorecard(order_plan, summary, exceptions)
-    summary.loc[0, "report_quality_score"] = score
-    summary.loc[0, "commercial_release_score"] = score
+    scorecard, structural_score, commercial_score = quality_scorecard(order_plan, summary, exceptions, calc=calc)
+    summary.loc[0, "report_quality_score"] = structural_score
+    summary.loc[0, "structural_report_score"] = structural_score
+    summary.loc[0, "commercial_release_score"] = commercial_score
+    summary.loc[0, "execution_ready_count"] = int((order_plan["execution_ready_flag"] == "YES").sum())
+    summary.loc[0, "tier_1_execute_count"] = int((order_plan["action_tier"] == "tier_1_execute").sum())
+    summary.loc[0, "tier_2_review_high_value_count"] = int((order_plan["action_tier"] == "tier_2_review_high_value").sum())
+    summary.loc[0, "tier_3_review_evidence_gap_count"] = int((order_plan["action_tier"] == "tier_3_review_evidence_gap").sum())
+    summary.loc[0, "rejected_poor_seller_count"] = int((order_plan["operator_priority_group"] == "rejected_poor_seller").sum())
+    subtype_counts = order_plan.loc[order_plan["decision"] == "REVIEW", "review_subtype"].value_counts().to_dict()
+    summary.loc[0, "review_subtype_counts"] = "; ".join(f"{k}={v}" for k, v in sorted(subtype_counts.items()))
+    blockers = scorecard.loc[scorecard["score_type"] == "blocker", "score"].tolist()
+    summary.loc[0, "primary_release_blocker"] = blockers[0] if blockers else ""
+    if commercial_score < 98:
+        summary.loc[0, "recommended_next_action"] = (
+            "Use execution shortlist for buyer workflow; resolve primary release blocker before customer release"
+        )
+    else:
+        summary.loc[0, "recommended_next_action"] = "Shadow gates passed; proceed to controlled customer pilot"
     summary.loc[0, "review_count_due_to_underorder"] = int(
         calc["recommendation_constraint_reason"].isin(["review_required", "best_seller_underorder_review"]).sum()
     )
@@ -2061,18 +2531,23 @@ def build_se01_commercial_pack(
 
 **SHADOW_NOT_PRODUCTION** — no automatic ordering.
 
-Open **`se01_skincare_sales_event_order_plan.csv`** first.
-
-Use **`se01_skincare_sales_event_operator_decision_sheet.csv`** to record ACCEPT / REJECT / REDUCE / NEEDS_MORE_EVIDENCE.
+## Store workflow
+1. Open **`se01_skincare_sales_event_execution_shortlist.csv`** first (buyer action list).
+2. Use **`se01_skincare_sales_event_order_plan.csv`** for all-SKU detail.
+3. Fill **`se01_skincare_sales_event_operator_decision_sheet.csv`** with ACCEPT / REJECT / REDUCE / NEEDS_MORE_EVIDENCE.
+4. Use **`se01_skincare_sales_event_review_exceptions.csv`** only for risk investigation.
+5. Use **`se01_skincare_sales_event_audit_trail.csv`** only for traceability.
 
 - Store: {store_number}
 - Prediction date: {prediction_date}
 - Promotion: {summary.iloc[0]['promotion_start_date']} to {summary.iloc[0]['promotion_end_date']}
 - Production ordering approved: NO
 - Customer report release approved: NO
-- Pre-promo demand: baseline daily rate x days until promotion start (not multi-week period totals)
+- Structural report score: {structural_score}/100
+- Commercial release score: {commercial_score}/100
+- Execution-ready rows: {int(summary.iloc[0]['execution_ready_count'])}
+- Pre-promo demand: baseline daily rate x days until promotion start
 - Promo-period demand: evidence-weighted selection across model, same-discount, and baseline floors
-- Order evidence: promo cover and base-stock replenishment split; best-seller demand repair when baseline exceeds weaker sources
 """
     (output_dir / "read_me_first.md").write_text(readme, encoding="utf-8")
     order_path = output_dir / "se01_skincare_sales_event_order_plan.csv"
@@ -2081,15 +2556,27 @@ Use **`se01_skincare_sales_event_operator_decision_sheet.csv`** to record ACCEPT
     exceptions.to_csv(output_dir / "se01_skincare_sales_event_review_exceptions.csv", index=False)
     op.to_csv(output_dir / "se01_skincare_sales_event_operator_decision_sheet.csv", index=False)
     audit.to_csv(output_dir / "se01_skincare_sales_event_audit_trail.csv", index=False)
+    shortlist.to_csv(output_dir / "se01_skincare_sales_event_execution_shortlist.csv", index=False)
 
     if diagnostics_dir:
-        if "phase5b9" in diagnostics_dir.name:
+        if "phase5b10" in diagnostics_dir.name:
+            _write_phase5b10_diagnostics(
+                diagnostics_dir=diagnostics_dir,
+                order_plan=order_plan,
+                calc=calc,
+                summary=summary,
+                scorecard=scorecard,
+                structural_score=structural_score,
+                commercial_score=commercial_score,
+                shortlist=shortlist,
+            )
+        elif "phase5b9" in diagnostics_dir.name:
             _write_phase5b9_diagnostics(
                 diagnostics_dir=diagnostics_dir,
                 order_plan=order_plan,
                 calc=calc,
                 summary=summary,
-                score=score,
+                score=commercial_score,
                 before_plan=before_plan,
             )
         elif "phase5b8" in diagnostics_dir.name:
@@ -2098,7 +2585,7 @@ Use **`se01_skincare_sales_event_operator_decision_sheet.csv`** to record ACCEPT
                 order_plan=order_plan,
                 calc=calc,
                 summary=summary,
-                score=score,
+                score=commercial_score,
                 before_plan=before_plan,
             )
         elif "phase5b7" in diagnostics_dir.name:
@@ -2107,7 +2594,7 @@ Use **`se01_skincare_sales_event_operator_decision_sheet.csv`** to record ACCEPT
                 order_plan=order_plan,
                 calc=calc,
                 summary=summary,
-                score=score,
+                score=commercial_score,
                 before_plan=before_plan,
             )
         elif "phase5b6" in diagnostics_dir.name:
@@ -2120,7 +2607,7 @@ Use **`se01_skincare_sales_event_operator_decision_sheet.csv`** to record ACCEPT
                 order_plan=order_plan,
                 calc=calc,
                 summary=summary,
-                score=score,
+                score=commercial_score,
                 decisions_before=decisions_before,
             )
         else:
@@ -2133,7 +2620,7 @@ Use **`se01_skincare_sales_event_operator_decision_sheet.csv`** to record ACCEPT
                 summary=summary,
                 exceptions=exceptions,
                 scorecard=scorecard,
-                score=score,
+                score=commercial_score,
             )
 
     counts = order_plan["decision"].value_counts().to_dict()
@@ -2143,5 +2630,5 @@ Use **`se01_skincare_sales_event_operator_decision_sheet.csv`** to record ACCEPT
         row_count=len(order_plan),
         decision_counts=counts,
         total_recommended_order_units=float(order_plan["recommended_order_units"].sum()),
-        report_quality_score=score,
+        report_quality_score=commercial_score,
     )
