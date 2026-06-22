@@ -125,6 +125,22 @@ def test_quality_scorecard_flags_zero_buy() -> None:
     assert int(scorecard.loc[scorecard["metric"] == "buy_positive_units", "score"].iloc[0]) == 0
 
 
+def test_governed_same_discount_not_row_level_fallback() -> None:
+    frame = _test_frame()
+    frame.loc[1, "expected_units_total_promo"] = 1.0
+    frame.loc[1, "expected_promo_demand"] = 1.0
+    _out, calc = assemble_commercial_order_rows(
+        frame,
+        store_number=772,
+        promotion_name="SE01 skincare sales event",
+        prediction_date="2026-07-22",
+    )
+    governed = calc.loc[calc["promo_period_demand_source"] == "same_discount_history"]
+    if not governed.empty:
+        assert governed["promo_period_demand_fallback_flag"].eq("NO").all()
+        assert governed["promo_demand_release_ready_flag"].eq("NO").all()
+
+
 @pytest.mark.skipif(
     not Path("/Users/paulmorison/promotions_runtime_governed/promotions/priceline/772/prediction/2026-07-23").exists(),
     reason="runtime SE01 folder not present",
