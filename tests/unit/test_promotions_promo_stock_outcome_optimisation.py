@@ -115,6 +115,7 @@ class PromoStockOutcomeOptimisationTests(unittest.TestCase):
             forecast_demand_units=[4.0, 4.0, 4.0, 4.0],
             on_order_units=[1.0, 1.0, 1.0, 1.0],
         )
+        frame = frame.assign(promo_start_soh_source_quality="HIGH")
         out = compute_stock_outcome_order_target(frame)
         row = out.iloc[2]
         expected = max(

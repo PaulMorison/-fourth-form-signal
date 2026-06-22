@@ -99,6 +99,22 @@ def _baseline_daily(frame: pd.DataFrame) -> pd.Series:
 def assign_supplier_lead_time(frame: pd.DataFrame) -> pd.DataFrame:
     """Map supplier number to lead-time and replenishment class."""
     out = frame.copy()
+    if "supplier_number_resolved" in out.columns:
+        supplier = _numeric(out, "supplier_number_resolved")
+        out["supplier_number"] = supplier.round(0).astype(int)
+        out["supplier_lead_time_days"] = _numeric(out, "supplier_lead_time_days_repaired", DEFAULT_LONG_LEAD_DAYS)
+        out["supplier_replenishment_class"] = out.get(
+            "supplier_replenishment_class_repaired", pd.Series("LONG_LEAD_TIME", index=out.index)
+        ).astype(str)
+        out["supplier_reorder_flexibility"] = out.get(
+            "supplier_reorder_flexibility_repaired", pd.Series("LOW", index=out.index)
+        ).astype(str)
+        out["supplier_stock_risk_multiplier"] = np.where(
+            out["supplier_replenishment_class"].eq("DAILY_REPLENISHMENT"),
+            0.85,
+            LONG_LEAD_RISK_MULTIPLIER,
+        ).astype(float)
+        return out
     supplier = _first_col(out, SUPPLIER_COLUMN_CANDIDATES, default=np.nan)
     supplier = supplier.fillna(0).round(0).astype(int)
     out["supplier_number"] = supplier
@@ -220,14 +236,24 @@ def compute_stock_outcome_order_target(
     out["forecast_demand_units"] = forecast.round(3)
 
     out["promo_start_soh"] = estimate_promo_start_soh(out)
+    if "promo_start_soh_resolved" in out.columns:
+        out["promo_start_soh"] = _numeric(out, "promo_start_soh_resolved")
     probe = _expected_low_volume_probe_units(out, forecast)
     out["min_start_soh_rule"] = 2.0
     out["target_promo_start_soh"] = np.maximum(out["min_start_soh_rule"], probe).round(3)
-    out["promo_start_soh_gap"] = (out["target_promo_start_soh"] - out["promo_start_soh"]).clip(lower=0.0).round(3)
+    soh_quality = out.get("promo_start_soh_source_quality", pd.Series("UNKNOWN", index=out.index)).astype(str)
+    confirmed = soh_quality.isin(["HIGH", "MEDIUM", "LOW", "TRUE_ZERO"])
+    out["promo_start_soh_gap"] = np.where(
+        confirmed,
+        (out["target_promo_start_soh"] - out["promo_start_soh"]).clip(lower=0.0),
+        0.0,
+    ).round(3)
 
     baseline_daily = _baseline_daily(out)
     out["target_end_soh_units"] = compute_target_end_soh_units(out, baseline_daily=baseline_daily)
     inbound = _first_col(out, INBOUND_COLUMN_CANDIDATES).clip(lower=0.0)
+    if "reliable_inbound_units_before_or_during_promo" in out.columns:
+        inbound = _numeric(out, "reliable_inbound_units_before_or_during_promo")
 
     raw_target = (
         out["promo_start_soh_gap"]
@@ -236,6 +262,19 @@ def compute_stock_outcome_order_target(
         - out["promo_start_soh"]
         - inbound
     ).clip(lower=0.0)
+
+    demand_floor = (forecast + out["target_end_soh_units"] - out["promo_start_soh"] - inbound).clip(lower=0.0)
+    raw_target = np.maximum(raw_target, demand_floor)
+    raw_target = np.where(
+        soh_quality.eq("UNKNOWN"),
+        np.minimum(raw_target, forecast.clip(lower=0.0)),
+        raw_target,
+    )
+    raw_target = np.where(
+        soh_quality.eq("LOW"),
+        np.minimum(raw_target, (forecast + 2.0).clip(lower=0.0)),
+        raw_target,
+    )
 
     unit_cost = _first_col(out, UNIT_COST_CANDIDATES, default=DEFAULT_UNIT_COST_PROXY).clip(lower=0.01)
     if capital_cap is not None and capital_cap > 0:

@@ -8,6 +8,7 @@ from models.promotions.promo_period_demand_forecast import attach_promo_period_d
 from models.promotions.promo_demand_bias_repair import apply_underforecast_bias_adjustments, load_bias_repair_artifacts
 from models.promotions.promo_demand_calibration import apply_promo_demand_calibration, load_calibration_artifacts
 from models.promotions.promo_stock_outcome_optimisation import apply_stock_outcome_optimisation, load_stock_outcome_artifacts
+from models.promotions.promo_stock_truth_repair import apply_stock_truth_repair, load_stock_truth_artifacts
 
 import numpy as np
 import pandas as pd
@@ -165,6 +166,19 @@ ORDER_PLAN_COLUMNS: tuple[str, ...] = (
     "promo_end_days_cover",
     "stock_outcome_label",
     "stock_outcome_order_reason",
+    "promo_start_soh_resolved",
+    "promo_start_soh_source",
+    "promo_start_soh_source_quality",
+    "promo_start_soh_confidence_score",
+    "inbound_units_before_promo",
+    "inbound_units_during_promo",
+    "reliable_inbound_units_before_or_during_promo",
+    "inbound_stock_source_quality",
+    "supplier_number_resolved",
+    "supplier_number_source_quality",
+    "supplier_replenishment_class_repaired",
+    "supplier_lead_time_days_repaired",
+    "supplier_reorder_flexibility_repaired",
     "stock_target_conflict_flag",
     "reason_demand",
     "reason_stock",
@@ -402,9 +416,9 @@ def load_se01_scored_sources(prediction_dir: Path) -> pd.DataFrame:
             if col not in out.columns:
                 out[col] = default
     _stock_summary, _stock_gate, stock_recommendation = load_stock_outcome_artifacts()
+    out = apply_stock_truth_repair(out)
     out = apply_stock_outcome_optimisation(out, gate_recommendation=stock_recommendation)
     return out
-
 
 def _baseline_daily_rate(frame: pd.DataFrame) -> tuple[pd.Series, pd.Series, pd.Series]:
     """Derive SKU-specific baseline daily rate and source label."""
@@ -1289,10 +1303,32 @@ def assemble_commercial_order_rows(
     )
     for col in stock_cols:
         out[col] = _field_series(frame, (col,), frame.index)
-        if col in ("promo_start_soh", "target_promo_start_soh", "promo_start_soh_gap", "forecast_demand_units", "target_end_soh_units", "target_order_units_stock_outcome", "order_units_stock_outcome_adjustment", "promo_end_days_cover"):
+        if col in ("promo_start_soh", "target_promo_start_soh", "promo_start_soh_gap", "forecast_demand_units", "target_end_soh_units", "target_order_units_stock_outcome", "order_units_stock_outcome_adjustment", "promo_end_days_cover", "promo_start_soh_resolved", "promo_start_soh_confidence_score", "inbound_units_before_promo", "inbound_units_during_promo", "reliable_inbound_units_before_or_during_promo"):
             out[col] = _num(out[col], index=frame.index).round(3)
         else:
             out[col] = out[col].astype(str)
+
+    truth_cols = (
+        "promo_start_soh_resolved",
+        "promo_start_soh_source",
+        "promo_start_soh_source_quality",
+        "promo_start_soh_confidence_score",
+        "inbound_units_before_promo",
+        "inbound_units_during_promo",
+        "reliable_inbound_units_before_or_during_promo",
+        "inbound_stock_source_quality",
+        "supplier_number_resolved",
+        "supplier_number_source_quality",
+        "supplier_replenishment_class_repaired",
+        "supplier_lead_time_days_repaired",
+        "supplier_reorder_flexibility_repaired",
+    )
+    for col in truth_cols:
+        if col not in out.columns:
+            if col in ("promo_start_soh_resolved", "promo_start_soh_confidence_score", "inbound_units_before_promo", "inbound_units_during_promo", "reliable_inbound_units_before_or_during_promo", "supplier_lead_time_days_repaired"):
+                out[col] = _num(_field_series(frame, (col,), frame.index), index=frame.index).round(3)
+            else:
+                out[col] = _field_series(frame, (col,), frame.index).astype(str)
 
     calc = pd.DataFrame(
         {
@@ -1739,6 +1775,7 @@ def build_review_exceptions(order_plan: pd.DataFrame) -> pd.DataFrame:
 
 def build_manager_summary(order_plan: pd.DataFrame, exceptions: pd.DataFrame) -> pd.DataFrame:
     counts = order_plan["decision"].value_counts()
+    _stock_truth_gate, stock_truth_rec = load_stock_truth_artifacts()
     hold_pos = int(((order_plan["decision"].isin(["HOLD", "DO_NOT_BUY"])) & (order_plan["recommended_order_units"] > 0)).sum())
     zero_buy = int(((order_plan["decision"] == "BUY") & (order_plan["recommended_order_units"] <= 0)).sum())
     non_std = int((~order_plan["decision"].isin(ALLOWED_DECISIONS)).sum())
@@ -1859,6 +1896,28 @@ def build_manager_summary(order_plan: pd.DataFrame, exceptions: pd.DataFrame) ->
             "long_lead_supplier_recommendation_count": int(
                 order_plan.get("supplier_replenishment_class", pd.Series("", index=order_plan.index)).eq("LONG_LEAD_TIME").sum()
             ),
+            "promo_start_soh_coverage_pct": float(
+                order_plan.get("promo_start_soh_source_quality", pd.Series("UNKNOWN", index=order_plan.index))
+                .isin(["HIGH", "MEDIUM", "LOW", "TRUE_ZERO"]).mean() * 100.0
+            ) if "promo_start_soh_source_quality" in order_plan.columns else 0.0,
+            "supplier_number_coverage_pct": float(
+                order_plan.get("supplier_number_source_quality", pd.Series("UNKNOWN", index=order_plan.index)).ne("UNKNOWN").mean() * 100.0
+            ) if "supplier_number_source_quality" in order_plan.columns else 0.0,
+            "inbound_stock_coverage_pct": float(
+                order_plan.get("inbound_stock_source_quality", pd.Series("UNKNOWN", index=order_plan.index)).ne("UNKNOWN").mean() * 100.0
+            ) if "inbound_stock_source_quality" in order_plan.columns else 0.0,
+            "true_zero_soh_count": int(order_plan.get("promo_start_soh_source_quality", pd.Series("", index=order_plan.index)).eq("TRUE_ZERO").sum()),
+            "unknown_soh_count": int(order_plan.get("promo_start_soh_source_quality", pd.Series("", index=order_plan.index)).eq("UNKNOWN").sum()),
+            "stock_truth_confidence_average": float(
+                _num(order_plan.get("promo_start_soh_confidence_score")).mean() or 0.0
+            ) if "promo_start_soh_confidence_score" in order_plan.columns else 0.0,
+            "repaired_cash_tied_up_proxy": float(
+                (_num(order_plan.get("target_end_soh_units")) * 4.82).sum()
+            ) if "target_end_soh_units" in order_plan.columns else 0.0,
+            "repaired_missed_sales_proxy": float(
+                order_plan.get("stock_outcome_label", pd.Series("", index=order_plan.index)).eq("MISSED_DEMAND_RISK").sum()
+            ),
+            "stock_truth_release_recommendation": stock_truth_rec,
             "model_status": META_STATUS,
             "production_ordering_approved": PRODUCTION_ORDERING,
             "customer_report_release_approved": CUSTOMER_RELEASE,
