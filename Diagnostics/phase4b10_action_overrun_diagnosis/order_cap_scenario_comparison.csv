@@ -1,0 +1,11 @@
+scenario,buy_count,total_order_units,order_over_stock_basis,order_over_demand_reference,order_over_2x_demand_reference,tiny_demand_buy,p99_order,max_order
+1_current_shadow,1263,4064.0,550,119,106,341,10.0,55.0
+2_clip_stock_basis,1263,2929.0,0,112,102,341,6.0,24.0
+3_clip_demand_reference,1161,3818.0,515,11,0,284,10.0,55.0
+4_clip_min_stock_demand,1172,2893.0,60,21,11,295,6.0,24.0
+5_clip_projected_gap,1263,2782.0,332,115,106,341,6.0,55.0
+6_no_buy_tiny_unless_strong,1053,3668.0,492,68,59,131,10.0,55.0
+7_no_buy_low_weight,1037,3344.0,500,105,95,220,9.0,55.0
+8_buy_min_commercial_threshold,1081,3882.0,550,70,62,225,10.0,55.0
+9_buy_repaired_evidence_complete,842,2920.0,418,21,15,106,9.0,55.0
+10_combined_conservative_cap,1172,2893.0,60,21,11,295,6.0,24.0
