@@ -1,0 +1,2 @@
+promotion_slug,sku_universe_source,order_units_source,demand_source,confidence_source,notes
+2026-07-23_se01_skincare_sales_event,/Users/paulmorison/promotions_runtime_governed/promotions/priceline/772/prediction/2026-07-23/772_2026-07-23_allocation-report-se01-skincare-sales-event.csv,operator-audit.raw_model_order_units,feature-inspection.expected_units_per_day + historical_units_same_discount_avg,operator-audit.model_confidence_percent,Did not use final order_units from allocation report (all zero).
