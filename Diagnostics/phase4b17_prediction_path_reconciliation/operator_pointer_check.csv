@@ -1,0 +1,12 @@
+check,pass
+pointer_file_exists,True
+shadow_subfolder_exists,True
+shadow_mirror_file_count,True
+all_required_phrases_present,True
+phrase:Production prediction files in this folder were not overwritten,True
+phrase:/Users/paulmorison/promotions_runtime_governed/promotions/772/prediction,True
+phrase:README_SHADOW_NOT_PRODUCTION.md,True
+phrase:STORE_ACTIONS_SHADOW.csv,True
+phrase:OPERATOR_DECISION_SHEET_SHADOW.csv,True
+phrase:SHADOW_NOT_PRODUCTION,True
+phrase:Human review required,True
