@@ -1,0 +1,39 @@
+segment_name,segment_value,row_count,predicted_units_total,actual_units_total,bias_pct,WAPE,excess_units,cash_drag_proxy,overstock_rows,weak_promo_rows,likely_root_cause,recommended_fix,release_impact
+promo_convexity_regime,UNKNOWN,1540,3462.47,1646.0,110.3566,1.1036,1816.47,0.0,366,97,SUPPLIER_OR_RANGE_CONSTRAINT,Apply supplier constraint caps,MEDIUM
+department,SKINCARE,379,1006.28,422.0,138.454,1.3845,584.28,0.0,100,34,SUPPLIER_OR_RANGE_CONSTRAINT,Apply supplier constraint caps,MEDIUM
+department,COLOUR COSMETICS,384,710.18,346.0,105.2535,1.0525,364.18,0.0,81,35,SUPPLIER_OR_RANGE_CONSTRAINT,Apply supplier constraint caps,MEDIUM
+department,BEAUTY ACCESSORIES,142,291.3,148.0,96.823,0.9682,143.3,0.0,24,7,SUPPLIER_OR_RANGE_CONSTRAINT,Apply supplier constraint caps,MEDIUM
+department,HAIRCARE,144,310.55,169.0,83.7592,0.8376,141.55,0.0,23,4,SUPPLIER_OR_RANGE_CONSTRAINT,Apply supplier constraint caps,MEDIUM
+department,ORAL HEALTH,61,156.22,60.0,160.365,1.6037,96.22,0.0,19,3,OVERSTOCK_ALREADY_HIGH,Reduce orders where overstock cash drag is high,MEDIUM
+department,BATH TOILETRIES,24,92.6,30.0,208.6667,2.0867,62.6,0.0,4,2,OVERSTOCK_ALREADY_HIGH,Reduce orders where overstock cash drag is high,MEDIUM
+department,HAIR ACC BRUSHES,52,114.82,60.0,91.3717,0.9137,54.82,0.0,20,1,SUPPLIER_OR_RANGE_CONSTRAINT,Apply supplier constraint caps,MEDIUM
+department,VITAMIN SUPPLEMENT,51,102.78,51.0,101.5216,1.0152,51.78,0.0,14,2,SUPPLIER_OR_RANGE_CONSTRAINT,Apply supplier constraint caps,MEDIUM
+department,SUNCARE,42,94.46,44.0,114.6727,1.1467,50.46,0.0,15,2,OVERSTOCK_ALREADY_HIGH,Reduce orders where overstock cash drag is high,MEDIUM
+department,DEODORANTS,34,69.38,39.0,77.8872,0.7789,30.38,0.0,13,0,SUPPLIER_OR_RANGE_CONSTRAINT,Apply supplier constraint caps,MEDIUM
+department,FEMININE CARE,23,51.42,26.0,97.7846,0.9778,25.42,0.0,5,0,SUPPLIER_OR_RANGE_CONSTRAINT,Apply supplier constraint caps,MEDIUM
+department,HAIR REMOVAL,24,45.69,24.0,90.3625,0.9036,21.69,0.0,8,0,SUPPLIER_OR_RANGE_CONSTRAINT,Apply supplier constraint caps,MEDIUM
+department,FIRSTAID WOUNDCARE,16,44.24,23.0,92.3652,0.9237,21.24,0.0,4,0,SUPPLIER_OR_RANGE_CONSTRAINT,Apply supplier constraint caps,MEDIUM
+department,DIGESTIVE CARE,23,43.43,24.0,80.9625,0.8096,19.43,0.0,3,0,SUPPLIER_OR_RANGE_CONSTRAINT,Apply supplier constraint caps,MEDIUM
+department,PAPER COTTON,11,55.22,38.0,45.3184,0.4532,17.22,0.0,7,1,OVERSTOCK_ALREADY_HIGH,Reduce orders where overstock cash drag is high,MEDIUM
+department,TANNING,19,29.6,13.0,127.7231,1.2772,16.6,0.0,2,2,SUPPLIER_OR_RANGE_CONSTRAINT,Apply supplier constraint caps,MEDIUM
+department,ANALGESICS,12,32.98,17.0,93.9824,0.9398,15.98,0.0,3,0,SUPPLIER_OR_RANGE_CONSTRAINT,Apply supplier constraint caps,MEDIUM
+department,COUGH COLD,17,32.91,17.0,93.5588,0.9356,15.9,0.0,1,0,SUPPLIER_OR_RANGE_CONSTRAINT,Apply supplier constraint caps,MEDIUM
+department,MENS GROOMING,16,28.98,16.0,81.1,0.811,12.98,0.0,5,0,SUPPLIER_OR_RANGE_CONSTRAINT,Apply supplier constraint caps,MEDIUM
+department,ACHE PAIN SUPPORT,7,18.74,7.0,167.7143,1.6771,11.74,0.0,3,2,OVERSTOCK_ALREADY_HIGH,Reduce orders where overstock cash drag is high,MEDIUM
+department,FOOTCARE,10,19.45,10.0,94.51,0.9451,9.45,0.0,3,0,SUPPLIER_OR_RANGE_CONSTRAINT,Apply supplier constraint caps,MEDIUM
+department,FRAGRANCE,12,18.09,9.0,100.9778,1.0098,9.09,0.0,2,1,SUPPLIER_OR_RANGE_CONSTRAINT,Apply supplier constraint caps,MEDIUM
+department,SNACKS BEVERAGES,4,22.57,15.0,50.4533,0.5045,7.57,0.0,0,0,SUPPLIER_OR_RANGE_CONSTRAINT,Apply supplier constraint caps,MEDIUM
+department,INCONTINENCE,9,17.14,10.0,71.4,0.714,7.14,0.0,2,0,SUPPLIER_OR_RANGE_CONSTRAINT,Apply supplier constraint caps,MEDIUM
+department,ALLERGY,5,18.06,11.0,64.1636,0.6416,7.06,0.0,1,0,OVERSTOCK_ALREADY_HIGH,Reduce orders where overstock cash drag is high,MEDIUM
+department,EYES EARS,7,12.11,6.0,101.8667,1.0187,6.11,0.0,1,0,SUPPLIER_OR_RANGE_CONSTRAINT,Apply supplier constraint caps,MEDIUM
+decision_triage_class,STANDARD_BUY_REVIEW,5,8.35,4.0,108.75,1.0875,4.35,0.0,0,1,SUPPLIER_OR_RANGE_CONSTRAINT,Apply supplier constraint caps,MEDIUM
+basket_attachment_source_quality,MEDIUM,4,6.38,3.0,112.7333,1.1273,3.38,0.0,0,1,SUPPLIER_OR_RANGE_CONSTRAINT,Apply supplier constraint caps,MEDIUM
+department,BABY CARE,2,5.12,2.0,156.05,1.5605,3.12,0.0,1,0,OVERSTOCK_ALREADY_HIGH,Reduce orders where overstock cash drag is high,MEDIUM
+department,FAMILY PLANNING,4,5.98,3.0,99.3667,0.9937,2.98,0.0,0,1,SUPPLIER_OR_RANGE_CONSTRAINT,Apply supplier constraint caps,MEDIUM
+department,BEAUTY ELECTRICAL,2,3.94,2.0,97.2,0.972,1.94,0.0,0,0,SUPPLIER_OR_RANGE_CONSTRAINT,Apply supplier constraint caps,MEDIUM
+department,SMOKING CESSATION,2,3.76,2.0,87.9,0.879,1.76,0.0,1,0,SUPPLIER_OR_RANGE_CONSTRAINT,Apply supplier constraint caps,MEDIUM
+department,INSOMNIA,1,2.32,1.0,131.9,1.319,1.32,0.0,1,0,SUPPLIER_OR_RANGE_CONSTRAINT,Apply supplier constraint caps,MEDIUM
+department,NUTRITION WELLBEIN,1,2.17,1.0,116.7,1.167,1.17,0.0,0,0,SUPPLIER_OR_RANGE_CONSTRAINT,Apply supplier constraint caps,MEDIUM
+basket_attachment_source_quality,LOW,2,3.14,2.0,56.85,0.5685,1.14,0.0,0,0,SUPPLIER_OR_RANGE_CONSTRAINT,Apply supplier constraint caps,MEDIUM
+decision_triage_class,HIGH_PRIORITY_BUY_REVIEW,2,3.14,2.0,56.85,0.5685,1.14,0.0,0,0,SUPPLIER_OR_RANGE_CONSTRAINT,Apply supplier constraint caps,MEDIUM
+basket_attachment_source_quality,HIGH,1,1.97,1.0,96.8,0.968,0.97,0.0,0,0,SUPPLIER_OR_RANGE_CONSTRAINT,Apply supplier constraint caps,MEDIUM

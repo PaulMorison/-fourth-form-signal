@@ -2773,6 +2773,67 @@ def build_manager_summary(order_plan: pd.DataFrame, exceptions: pd.DataFrame) ->
                 if Path("Diagnostics/phase5y01_reporting_export_error_rates/phase5y01_release_gate_summary.csv").exists()
                 else "Complete shadow human review and reduce model bias"
             ),
+            "bias_root_cause_generated_flag": (
+                "YES"
+                if Path("Diagnostics/phase5z01_bias_root_cause_review/phase5z01_bias_root_cause_summary.csv").exists()
+                else "NO"
+            ),
+            "top_underforecast_driver": (
+                str(pd.read_csv("Diagnostics/phase5z01_bias_root_cause_review/phase5z01_underforecast_driver_review.csv")["likely_root_cause"].iloc[0])
+                if Path("Diagnostics/phase5z01_bias_root_cause_review/phase5z01_underforecast_driver_review.csv").exists()
+                else ""
+            ),
+            "top_overforecast_driver": (
+                str(pd.read_csv("Diagnostics/phase5z01_bias_root_cause_review/phase5z01_overforecast_driver_review.csv")["likely_root_cause"].iloc[0])
+                if Path("Diagnostics/phase5z01_bias_root_cause_review/phase5z01_overforecast_driver_review.csv").exists()
+                else ""
+            ),
+            "largest_dangerous_bias_segment": (
+                (
+                    lambda df: (
+                        str(row["segment_name"]) + "=" + str(row["segment_value"])
+                        if (row := df.sort_values("missed_units_estimate", ascending=False).iloc[0]) is not None
+                        else ""
+                    )
+                )(
+                    pd.read_csv("Diagnostics/phase5z01_bias_root_cause_review/phase5z01_bias_root_cause_summary.csv")
+                    .loc[
+                        lambda d: d["release_blocker_status"].eq("model_bias_dangerously_negative")
+                        & d["segment_name"].ne("total")
+                    ]
+                )
+                if Path("Diagnostics/phase5z01_bias_root_cause_review/phase5z01_bias_root_cause_summary.csv").exists()
+                and not pd.read_csv("Diagnostics/phase5z01_bias_root_cause_review/phase5z01_bias_root_cause_summary.csv")
+                .loc[
+                    lambda d: d["release_blocker_status"].eq("model_bias_dangerously_negative")
+                    & d["segment_name"].ne("total")
+                ].empty
+                else ""
+            ),
+            "estimated_missed_units": (
+                float(
+                    pd.read_csv("Diagnostics/phase5z01_bias_root_cause_review/phase5z01_bias_root_cause_summary.csv")
+                    .loc[lambda d: d["segment_name"].eq("total"), "missed_units_estimate"]
+                    .iloc[0]
+                )
+                if Path("Diagnostics/phase5z01_bias_root_cause_review/phase5z01_bias_root_cause_summary.csv").exists()
+                else 0.0
+            ),
+            "estimated_cash_drag": (
+                float(pd.read_csv("Diagnostics/phase5z01_bias_root_cause_review/phase5z01_overforecast_driver_review.csv")["cash_drag_proxy"].sum())
+                if Path("Diagnostics/phase5z01_bias_root_cause_review/phase5z01_overforecast_driver_review.csv").exists()
+                else 0.0
+            ),
+            "top_repair_recommendation": (
+                str(pd.read_csv("Diagnostics/phase5z01_bias_root_cause_review/phase5z01_bias_repair_plan.csv")["recommended_action"].iloc[0])
+                if Path("Diagnostics/phase5z01_bias_root_cause_review/phase5z01_bias_repair_plan.csv").exists()
+                else ""
+            ),
+            "release_blocker_explanation": (
+                str(pd.read_csv("Diagnostics/phase5z01_bias_root_cause_review/phase5z01_release_blocker_evidence_pack.csv")["blocker_description"].iloc[0])
+                if Path("Diagnostics/phase5z01_bias_root_cause_review/phase5z01_release_blocker_evidence_pack.csv").exists()
+                else "Calibrated model bias remains too negative for customer release"
+            ),
             "total_overstock_cash_release_value": float(_num(order_plan.get("overstock_cash_release_value")).sum()) if "overstock_cash_release_value" in order_plan.columns else 0.0,
             "total_review_effort_cost": float(
                 _num(order_plan.get("review_effort_cost"))[
