@@ -166,7 +166,7 @@ class TestPhase6eFeatureMergeCalibrationAts(unittest.TestCase):
                 phase6c_dir=Path(tmp) / "phase6c",
                 phase6b_dir=Path(tmp) / "phase6b",
             )
-            self.assertIn("phase6f_feature_quality_operating_pack", result["export_folder"])
+            self.assertIn("phase6g_dynamic_feature_registry_pack", result["export_folder"])
 
     def test_governed_actions_not_overwritten(self) -> None:
         core = pd.DataFrame([_row()])

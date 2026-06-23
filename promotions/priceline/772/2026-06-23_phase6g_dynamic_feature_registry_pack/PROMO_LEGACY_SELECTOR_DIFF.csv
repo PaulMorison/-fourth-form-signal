@@ -1,0 +1,5 @@
+selector_name,old_feature_count,dynamic_feature_count,features_added_by_dynamic,features_removed_by_dynamic,blocked_leakage_count,blocked_quality_count,risk_level,recommended_action
+brain_feature_learning_all_features,62,406,405,55,6,229,MEDIUM,USE_DYNAMIC_FOR_ADVISORY_SHADOW
+brain_feature_families_union,62,406,405,55,6,229,MEDIUM,USE_DYNAMIC_FOR_ADVISORY_SHADOW
+core_feature_merge_priority,24,406,406,24,0,229,MEDIUM,USE_DYNAMIC_FOR_ADVISORY_SHADOW
+leakage_force_excluded,7,0,0,7,7,0,INFO,KEEP_EXCLUDED

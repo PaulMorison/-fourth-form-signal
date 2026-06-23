@@ -1,0 +1,6 @@
+model_name,raw_feature_count,encoded_feature_count,missingness_flags_created,features_blocked,transform_count,matrix_rows,matrix_columns,matrix_status
+uplift_model,406,483,77,0,20,500,483,READY
+economic_value_model,406,483,77,0,20,500,483,READY
+stock_exit_model,406,483,77,0,20,500,483,READY
+action_classifier,406,483,77,0,20,500,483,READY
+active_learning_model,406,483,77,0,20,500,483,READY

@@ -27,6 +27,7 @@ PHASE6C_DIR = Path("Diagnostics/phase6c01_active_learning_graph_validation")
 PHASE6D_DIR = Path("Diagnostics/phase6d01_dag_active_learning_adjacent_calibration")
 PHASE6E_DIR = Path("Diagnostics/phase6e01_feature_merge_calibration_ats")
 PHASE6F_DIR = Path("Diagnostics/phase6f01_feature_universe_quality_gate")
+PHASE6G_DIR = Path("Diagnostics/phase6g01_dynamic_feature_registry")
 
 STORE_772_EXTENDED_EXPORTS = (
     "PROMO_FEATURE_VISIBILITY_AUDIT.csv",
@@ -62,6 +63,17 @@ STORE_772_EXTENDED_EXPORTS = (
     "PROMO_LEAK_SAFE_MODEL_INPUT_FEATURE_SET.csv",
     "PROMO_SHADOW_MODEL_PERFORMANCE.csv",
     "PROMO_PHASE6F_RELEASE_GATE.csv",
+    "PROMO_DYNAMIC_FEATURE_REGISTRY.csv",
+    "PROMO_LEGACY_SELECTOR_DIFF.csv",
+    "PROMO_BRAIN_VISIBILITY_AFTER_REGISTRY.csv",
+    "PROMO_UPLIFT_MODEL_FEATURE_SET.csv",
+    "PROMO_ECONOMIC_VALUE_MODEL_FEATURE_SET.csv",
+    "PROMO_STOCK_EXIT_MODEL_FEATURE_SET.csv",
+    "PROMO_ACTION_CLASSIFIER_FEATURE_SET.csv",
+    "PROMO_ACTIVE_LEARNING_MODEL_FEATURE_SET.csv",
+    "PROMO_MODEL_MATRIX_MANIFEST.csv",
+    "PROMO_SHADOW_MATRIX_READINESS.csv",
+    "PROMO_PHASE6G_RELEASE_GATE.csv",
 )
 
 REQUIRED_EXPORT_FILES = (
@@ -761,17 +773,22 @@ def run_store_772_reporting_export(
     phase6d_dir: Path = PHASE6D_DIR,
     phase6e_dir: Path = PHASE6E_DIR,
     phase6f_dir: Path = PHASE6F_DIR,
+    phase6g_dir: Path = PHASE6G_DIR,
     store_number: int = 772,
-    phase_or_run_id: str = "phase6f01",
+    phase_or_run_id: str = "phase6g01",
     feature_inspection_path: Path | str | None = None,
 ) -> dict[str, Any]:
-    """Export store 772 operating pack on every major run, including Phase 6B–6F audits."""
+    """Export store 772 operating pack on every major run, including Phase 6B–6G audits."""
     from models.promotions.promo_phase6c_active_learning_graph_validation import write_phase6c_diagnostics
     from models.promotions.promo_phase6d_orchestrator import write_phase6d_diagnostics
     from models.promotions.promo_phase6e_orchestrator import write_phase6e_diagnostics
     from models.promotions.promo_phase6f_orchestrator import (
         run_phase6f01_feature_universe_quality_gate,
         write_phase6f_store_export_status,
+    )
+    from models.promotions.promo_phase6g_orchestrator import (
+        run_phase6g01_dynamic_feature_registry,
+        write_phase6g_store_export_status,
     )
 
     write_phase6c_diagnostics(diagnostics_dir=phase6c_dir)
@@ -780,12 +797,17 @@ def run_store_772_reporting_export(
         export_root=export_root,
         diagnostics_dir=diagnostics_dir,
         store_number=store_number,
-        pack_suffix="phase6f_feature_quality_operating_pack",
+        pack_suffix="phase6g_dynamic_feature_registry_pack",
     )
     export_folder = Path(y_result["export_folder"])
     phase6e = write_phase6e_diagnostics(diagnostics_dir=phase6e_dir)
     phase6f = run_phase6f01_feature_universe_quality_gate(
         diagnostics_dir=phase6f_dir,
+        feature_inspection_path=feature_inspection_path,
+    )
+    phase6g = run_phase6g01_dynamic_feature_registry(
+        diagnostics_dir=phase6g_dir,
+        phase6f_dir=phase6f_dir,
         feature_inspection_path=feature_inspection_path,
     )
     exported = list(y_result.get("reports_exported", []))
@@ -833,7 +855,20 @@ def run_store_772_reporting_export(
         "PROMO_SHADOW_MODEL_PERFORMANCE.csv": phase6f_dir / "phase6f01_shadow_model_performance.csv",
         "PROMO_PHASE6F_RELEASE_GATE.csv": phase6f_dir / "phase6f01_release_gate.csv",
     }
-    for out_name, src in {**phase6b_copies, **phase6c_copies, **phase6d_copies, **phase6e_copies, **phase6f_copies}.items():
+    phase6g_copies = {
+        "PROMO_DYNAMIC_FEATURE_REGISTRY.csv": phase6g_dir / "phase6g01_dynamic_feature_registry.csv",
+        "PROMO_LEGACY_SELECTOR_DIFF.csv": phase6g_dir / "phase6g01_legacy_selector_diff.csv",
+        "PROMO_BRAIN_VISIBILITY_AFTER_REGISTRY.csv": phase6g_dir / "phase6g01_brain_visibility_after_registry.csv",
+        "PROMO_UPLIFT_MODEL_FEATURE_SET.csv": phase6g_dir / "phase6g01_uplift_model_feature_set.csv",
+        "PROMO_ECONOMIC_VALUE_MODEL_FEATURE_SET.csv": phase6g_dir / "phase6g01_economic_value_model_feature_set.csv",
+        "PROMO_STOCK_EXIT_MODEL_FEATURE_SET.csv": phase6g_dir / "phase6g01_stock_exit_model_feature_set.csv",
+        "PROMO_ACTION_CLASSIFIER_FEATURE_SET.csv": phase6g_dir / "phase6g01_action_classifier_feature_set.csv",
+        "PROMO_ACTIVE_LEARNING_MODEL_FEATURE_SET.csv": phase6g_dir / "phase6g01_active_learning_model_feature_set.csv",
+        "PROMO_MODEL_MATRIX_MANIFEST.csv": phase6g_dir / "phase6g01_model_matrix_manifest.csv",
+        "PROMO_SHADOW_MATRIX_READINESS.csv": phase6g_dir / "phase6g01_shadow_matrix_readiness.csv",
+        "PROMO_PHASE6G_RELEASE_GATE.csv": phase6g_dir / "phase6g01_release_gate.csv",
+    }
+    for out_name, src in {**phase6b_copies, **phase6c_copies, **phase6d_copies, **phase6e_copies, **phase6f_copies, **phase6g_copies}.items():
         if src.exists():
             dst = export_folder / out_name
             dst.write_bytes(src.read_bytes())
@@ -861,8 +896,13 @@ def run_store_772_reporting_export(
         "phase6f_brain_visibility_score": phase6f.get("brain_feature_visibility_score", 0),
         "phase6f_visibility_status": phase6f.get("visibility_status", ""),
         "phase6f_shadow_training_status": phase6f.get("shadow_training_status", ""),
+        "phase6g_dynamic_registry_active_features": phase6g.get("dynamic_registry_active_model_input_features", 0),
+        "phase6g_brain_visibility_score_after": phase6g.get("brain_visibility_score_after", 0),
+        "phase6g_visibility_status_after": phase6g.get("visibility_status_after", ""),
+        "phase6g_models_ready_for_phase6h": phase6g.get("models_ready_for_phase6h_shadow_training", 0),
     }])
     write_phase6f_store_export_status(str(export_folder), phase6f, diagnostics_dir=phase6f_dir)
+    write_phase6g_store_export_status(str(export_folder), phase6g, diagnostics_dir=phase6g_dir)
     status.to_csv(phase6e_dir / "phase6e01_store_reporting_export_status.csv", index=False)
     phase6d_dir.mkdir(parents=True, exist_ok=True)
     status.to_csv(phase6d_dir / "phase6d01_store_reporting_export_status.csv", index=False)
@@ -882,8 +922,9 @@ def run_store_772_reporting_export(
         **y_result,
         **{k: v for k, v in phase6e.items()},
         **{k: v for k, v in phase6f.items()},
+        **{k: v for k, v in phase6g.items()},
         "export_folder": str(export_folder),
         "reports_exported": exported,
         "missing_reports": missing,
-        "store_reporting_export_status": str(phase6f_dir / "phase6f01_store_reporting_export_status.csv"),
+        "store_reporting_export_status": str(phase6g_dir / "phase6g01_store_reporting_export_status.csv"),
     }

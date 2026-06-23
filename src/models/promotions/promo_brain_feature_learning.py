@@ -204,6 +204,25 @@ def _all_feature_names() -> list[str]:
     return list(dict.fromkeys(names))
 
 
+def resolve_brain_feature_names(
+    *,
+    use_dynamic_registry: bool = False,
+    model_name: str | None = None,
+    diagnostics_dir: str | Path = "Diagnostics/phase6g01_dynamic_feature_registry",
+) -> list[str]:
+    """Resolve brain feature names; dynamic registry used only when explicitly enabled."""
+    if use_dynamic_registry:
+        try:
+            from models.promotions.promo_dynamic_feature_registry import load_dynamic_model_feature_names
+
+            names = load_dynamic_model_feature_names(model_name, diagnostics_dir=Path(diagnostics_dir))
+            if names:
+                return names
+        except Exception:
+            pass
+    return _all_feature_names()
+
+
 def _ensure_columns(frame: pd.DataFrame) -> pd.DataFrame:
     out = frame.copy()
     if "expected_total_promo_demand_units" not in out.columns:
@@ -369,7 +388,15 @@ def train_brain_value_models(training_df: pd.DataFrame, config: dict[str, Any] |
     """Train first-pass brain models on full feature frame."""
     cfg = config or {}
     frame = build_brain_training_frame(training_df)
-    feature_names = list(cfg.get("feature_names") or _all_feature_names())
+    use_dynamic = bool(cfg.get("use_dynamic_registry", False))
+    feature_names = list(
+        cfg.get("feature_names")
+        or resolve_brain_feature_names(
+            use_dynamic_registry=use_dynamic,
+            model_name=cfg.get("model_name"),
+            diagnostics_dir=cfg.get("dynamic_registry_dir", "Diagnostics/phase6g01_dynamic_feature_registry"),
+        )
+    )
     x_df, used_features = _encode_matrix(frame, feature_names)
     if x_df.empty:
         return {"models": {}, "used_features": [], "metrics": {}, "train_rows": 0, "test_rows": 0, "sklearn_available": False}

@@ -1,0 +1,2 @@
+dag_state_coverage_score_v2,dag_repairable_nodes_populated_count,dag_unpopulated_repairable_nodes_count,dag_unrepairable_without_new_data_count,dag_decision_path_quality_v2,dag_state_missingness_risk_score,total_rows
+0.25375704445835945,10,6,0,FRACTURED,0.7478460864120227,1597

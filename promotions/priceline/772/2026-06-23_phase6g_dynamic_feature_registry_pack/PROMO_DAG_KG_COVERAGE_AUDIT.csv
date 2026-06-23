@@ -1,0 +1,17 @@
+node_name,populated_flag,edge_count,kg_edge_count,kg_sku_count
+raw_transaction_history,YES,1,6570,1482
+raw_stock_position,NO,1,6570,1482
+raw_supplier_history,NO,1,6570,1482
+raw_promo_advice,NO,1,6570,1482
+basket_attachment,NO,1,6570,1482
+mission_sku_role,NO,2,6570,1482
+available_to_sell_confidence,NO,2,6570,1482
+promo_uplift_estimate,NO,4,6570,1482
+optimal_stock_target,NO,1,6570,1482
+adjacent_path_simulation,YES,2,6570,1482
+brain_forecast,YES,5,6570,1482
+bias_calibration,NO,2,6570,1482
+governance_constraints,YES,4,6570,1482
+human_review,YES,2,6570,1482
+realised_outcome,YES,2,6570,1482
+lesson_update,YES,1,6570,1482
