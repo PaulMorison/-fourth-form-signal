@@ -2834,6 +2834,93 @@ def build_manager_summary(order_plan: pd.DataFrame, exceptions: pd.DataFrame) ->
                 if Path("Diagnostics/phase5z01_bias_root_cause_review/phase5z01_release_blocker_evidence_pack.csv").exists()
                 else "Calibrated model bias remains too negative for customer release"
             ),
+            "brain_feature_visibility_audit_generated_flag": (
+                "YES"
+                if Path("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting/phase6b01_feature_visibility_audit.csv").exists()
+                else "NO"
+            ),
+            "total_available_features": (
+                int(pd.read_csv("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting/phase6b01_feature_visibility_audit.csv").shape[0])
+                if Path("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting/phase6b01_feature_visibility_audit.csv").exists()
+                else 0
+            ),
+            "features_used_by_brain": (
+                int(
+                    pd.read_csv("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting/phase6b01_feature_visibility_audit.csv")
+                    ["used_by_brain_model_flag"].eq("YES").sum()
+                )
+                if Path("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting/phase6b01_feature_visibility_audit.csv").exists()
+                else 0
+            ),
+            "features_excluded_by_legacy_limits": (
+                int(
+                    pd.read_csv("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting/phase6b01_feature_visibility_audit.csv")
+                    ["legacy_hardcoded_limit_flag"].eq("YES").sum()
+                )
+                if Path("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting/phase6b01_feature_visibility_audit.csv").exists()
+                else 0
+            ),
+            "adjacent_simulation_generated_flag": (
+                "YES"
+                if Path("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting/phase6b01_adjacent_path_simulation.csv").exists()
+                else "NO"
+            ),
+            "new_line_rows": (
+                int(
+                    pd.read_csv("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting/phase6b01_new_line_weak_history_review.csv")
+                    ["new_line_flag"].eq("YES").sum()
+                )
+                if Path("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting/phase6b01_new_line_weak_history_review.csv").exists()
+                else 0
+            ),
+            "weak_history_rows": (
+                int(
+                    pd.read_csv("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting/phase6b01_new_line_weak_history_review.csv")
+                    ["weak_history_flag"].eq("YES").sum()
+                )
+                if Path("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting/phase6b01_new_line_weak_history_review.csv").exists()
+                else 0
+            ),
+            "adjacent_path_confidence_average": (
+                float(
+                    pd.read_csv("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting/phase6b01_adjacent_path_simulation.csv")
+                    ["adjacent_confidence_score"].mean()
+                )
+                if Path("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting/phase6b01_adjacent_path_simulation.csv").exists()
+                and "adjacent_confidence_score" in pd.read_csv("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting/phase6b01_adjacent_path_simulation.csv", nrows=0).columns
+                else float("nan")
+            ),
+            "dag_kg_coverage_score": (
+                float(pd.read_csv("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting/phase6b01_release_gate.csv")["dag_coverage_score"].iloc[0])
+                if Path("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting/phase6b01_release_gate.csv").exists()
+                else 0.0
+            ),
+            "available_to_sell_confidence_average": (
+                float(
+                    pd.read_csv("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting/phase6b01_available_to_sell_confidence.csv")
+                    ["available_to_sell_confidence_score"].mean()
+                )
+                if Path("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting/phase6b01_available_to_sell_confidence.csv").exists()
+                else float("nan")
+            ),
+            "false_zero_demand_risk_count": (
+                int(
+                    pd.read_csv("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting/phase6b01_available_to_sell_confidence.csv")
+                    ["ats_false_zero_demand_risk"].eq("YES").sum()
+                )
+                if Path("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting/phase6b01_available_to_sell_confidence.csv").exists()
+                else 0
+            ),
+            "store_reporting_export_folder": (
+                str(pd.read_csv("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting/phase6b01_store_reporting_export_status.csv")["export_folder"].iloc[0])
+                if Path("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting/phase6b01_store_reporting_export_status.csv").exists()
+                else ""
+            ),
+            "ml_innovation_top_recommendation": (
+                str(pd.read_csv("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting/phase6b01_ml_innovation_audit.csv").sort_values("implementation_priority").iloc[0]["method_name"])
+                if Path("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting/phase6b01_ml_innovation_audit.csv").exists()
+                else ""
+            ),
             "total_overstock_cash_release_value": float(_num(order_plan.get("overstock_cash_release_value")).sum()) if "overstock_cash_release_value" in order_plan.columns else 0.0,
             "total_review_effort_cost": float(
                 _num(order_plan.get("review_effort_cost"))[

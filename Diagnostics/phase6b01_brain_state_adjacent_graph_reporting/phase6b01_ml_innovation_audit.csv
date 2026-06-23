@@ -1,0 +1,14 @@
+method_name,use_case,current_readiness,data_required,risk,recommended_status,implementation_priority,next_safe_step
+adjacent_path_simulation,new-line and weak-history SKU reasoning,READY,existing promo-SKU frame,LOW,IMPLEMENT_NOW,1,Phase 6B adjacent path module
+available_to_sell_confidence,false-zero-demand blind spot,READY,SOH and stockout flags,LOW,IMPLEMENT_NOW,1,Phase 6B ATS score
+active_learning_human_review,prioritise shadow review queue,READY,shadow journal + human feedback,LOW,IMPLEMENT_NOW,2,Use economic + learning value ranking
+bayesian_hierarchical_shrinkage,segment bias repair,PARTIAL,backtest segments,MEDIUM,IMPLEMENT_NOW,2,Extend Phase 6A with hierarchical priors
+contextual_bandit_shadow,shadow action learning,PARTIAL,shadow scored outcomes,MEDIUM,PROTOTYPE_NEXT,3,Offline policy eval first
+doubly_robust_policy_eval,human vs brain comparison,PARTIAL,human review records,MEDIUM,PROTOTYPE_NEXT,3,Need more completed reviews
+uplift_modelling,promo incrementality,PARTIAL,backtest actuals,MEDIUM,PROTOTYPE_NEXT,4,Segment uplift after ATS repair
+quantile_regression_conformal,forecast intervals,PARTIAL,backtest residuals,LOW,DEFER,5,After bias stabilises
+causal_forests_hte,heterogeneous promo effects,LOW,large labelled set,HIGH,DEFER,6,Need cleaner causal labels
+graph_neural_network,KG feature learning,LOW,stable KG coverage,HIGH,DEFER,7,After DAG/KG coverage stable
+offline_reinforcement_learning,order policy learning,LOW,live decision records,HIGH,DEFER,8,Need human-reviewed outcomes
+meta_learning_sparse_sku,new-line generalisation,PARTIAL,adjacent path refs,MEDIUM,PROTOTYPE_NEXT,4,Build on adjacent simulation
+counterfactual_simulation,what-if order paths,PARTIAL,stock simulation,MEDIUM,PROTOTYPE_NEXT,5,Extend adjacent paths

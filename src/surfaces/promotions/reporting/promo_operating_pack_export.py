@@ -22,6 +22,13 @@ PHASE5U_SCORED = Path("Diagnostics/phase5u01_shadow_outcome_learning/phase5u01_s
 PHASE5W_WORKBOOK = Path("Diagnostics/phase5w01_human_review_capture/SHADOW_TOP_100_BUYER_REVIEW_WORKBOOK.xlsx")
 PHASE5X_STATUS = Path("Diagnostics/phase5x01_filled_human_review_learning/SHADOW_TOP_100_BUYER_REVIEW_STATUS.xlsx")
 PHASE5X_SCORECARD = Path("Diagnostics/phase5x01_filled_human_review_learning/phase5x01_decision_quality_scorecard.csv")
+PHASE6B_DIR = Path("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting")
+
+STORE_772_EXTENDED_EXPORTS = (
+    "PROMO_FEATURE_VISIBILITY_AUDIT.csv",
+    "PROMO_ADJACENT_PATH_REVIEW.csv",
+    "PROMO_DAG_KG_COVERAGE_AUDIT.csv",
+)
 
 REQUIRED_EXPORT_FILES = (
     "PROMO_MANAGER_SUMMARY.csv",
@@ -707,3 +714,68 @@ def run_phase5y01_operating_pack_export(
     store_number: int = 772,
 ) -> dict[str, Any]:
     return write_phase5y_diagnostics(export_root=export_root, diagnostics_dir=diagnostics_dir, store_number=store_number)
+
+
+def run_store_772_reporting_export(
+    *,
+    export_root: Path | None = None,
+    diagnostics_dir: Path = DEFAULT_DIAGNOSTICS_DIR,
+    phase6b_dir: Path = PHASE6B_DIR,
+    store_number: int = 772,
+    phase_or_run_id: str = "phase6b01",
+) -> dict[str, Any]:
+    """Export store 772 operating pack on every major run, including Phase 6B audits."""
+    from models.promotions.promo_phase6b_orchestrator import write_phase6b_diagnostics
+
+    phase6b = write_phase6b_diagnostics(diagnostics_dir=phase6b_dir)
+    y_result = write_phase5y_diagnostics(export_root=export_root, diagnostics_dir=diagnostics_dir, store_number=store_number)
+
+    export_folder = Path(y_result["export_folder"])
+    exported = list(y_result.get("reports_exported", []))
+
+    phase6b_copies = {
+        "PROMO_FEATURE_VISIBILITY_AUDIT.csv": phase6b_dir / "phase6b01_feature_visibility_audit.csv",
+        "PROMO_ADJACENT_PATH_REVIEW.csv": phase6b_dir / "phase6b01_adjacent_path_simulation.csv",
+        "PROMO_DAG_KG_COVERAGE_AUDIT.csv": phase6b_dir / "phase6b01_graph_coverage_audit.csv",
+    }
+    for out_name, src in phase6b_copies.items():
+        if src.exists():
+            dst = export_folder / out_name
+            dst.write_bytes(src.read_bytes())
+            exported.append(out_name)
+
+    required = list(REQUIRED_EXPORT_FILES) + list(STORE_772_EXTENDED_EXPORTS)
+    missing = [r for r in required if not (export_folder / r).exists()]
+
+    qa_blockers = int(y_result.get("qa_blocker_count", 0))
+    qa_warnings = int(y_result.get("qa_warning_count", 0))
+    run_id = f"{date.today().isoformat()}_{phase_or_run_id}_operating_pack"
+    status = pd.DataFrame([{
+        "run_id": run_id,
+        "export_folder": str(export_folder),
+        "reports_exported": ";".join(exported),
+        "missing_reports": ";".join(missing) if missing else "",
+        "qa_blockers": qa_blockers,
+        "qa_warnings": qa_warnings,
+        "release_recommendation": phase6b.get("release_recommendation", RELEASE_RECOMMENDATION),
+        "primary_blocker": phase6b.get("primary_blocker", PRIMARY_BLOCKER),
+        "phase6b_dag_coverage_score": phase6b.get("dag_coverage_score", 0.0),
+        "phase6b_adjacent_path_avg_confidence": phase6b.get("adjacent_path_avg_confidence", 0.0),
+    }])
+    status.to_csv(phase6b_dir / "phase6b01_store_reporting_export_status.csv", index=False)
+    status.to_csv(export_folder / "PROMO_STORE_REPORTING_EXPORT_STATUS.csv", index=False)
+    exported.append("PROMO_STORE_REPORTING_EXPORT_STATUS.csv")
+
+    gate6b = _read_csv(phase6b_dir / "phase6b01_release_gate.csv")
+    if not gate6b.empty:
+        gate6b.to_csv(export_folder / "PROMO_PHASE6B_RELEASE_GATE.csv", index=False)
+        exported.append("PROMO_PHASE6B_RELEASE_GATE.csv")
+
+    return {
+        **y_result,
+        **{k: v for k, v in phase6b.items() if k not in {"visibility_df", "legacy_df", "contract_df", "ml_audit_df"}},
+        "export_folder": str(export_folder),
+        "reports_exported": exported,
+        "missing_reports": missing,
+        "store_reporting_export_status": str(export_folder / "PROMO_STORE_REPORTING_EXPORT_STATUS.csv"),
+    }
