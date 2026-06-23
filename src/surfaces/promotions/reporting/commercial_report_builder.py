@@ -2912,12 +2912,16 @@ def build_manager_summary(order_plan: pd.DataFrame, exceptions: pd.DataFrame) ->
                 else 0
             ),
             "store_reporting_export_folder": (
-                str(pd.read_csv("Diagnostics/phase6c01_active_learning_graph_validation/phase6c01_store_reporting_export_status.csv")["export_folder"].iloc[0])
-                if Path("Diagnostics/phase6c01_active_learning_graph_validation/phase6c01_store_reporting_export_status.csv").exists()
+                str(pd.read_csv("Diagnostics/phase6d01_dag_active_learning_adjacent_calibration/phase6d01_store_reporting_export_status.csv")["export_folder"].iloc[0])
+                if Path("Diagnostics/phase6d01_dag_active_learning_adjacent_calibration/phase6d01_store_reporting_export_status.csv").exists()
                 else (
-                    str(pd.read_csv("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting/phase6b01_store_reporting_export_status.csv")["export_folder"].iloc[0])
-                    if Path("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting/phase6b01_store_reporting_export_status.csv").exists()
-                    else ""
+                    str(pd.read_csv("Diagnostics/phase6c01_active_learning_graph_validation/phase6c01_store_reporting_export_status.csv")["export_folder"].iloc[0])
+                    if Path("Diagnostics/phase6c01_active_learning_graph_validation/phase6c01_store_reporting_export_status.csv").exists()
+                    else (
+                        str(pd.read_csv("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting/phase6b01_store_reporting_export_status.csv")["export_folder"].iloc[0])
+                        if Path("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting/phase6b01_store_reporting_export_status.csv").exists()
+                        else ""
+                    )
                 )
             ),
             "ml_innovation_top_recommendation": (
@@ -2979,6 +2983,51 @@ def build_manager_summary(order_plan: pd.DataFrame, exceptions: pd.DataFrame) ->
             "top_ml_next_action": (
                 str(pd.read_csv("Diagnostics/phase6c01_active_learning_graph_validation/phase6c01_ml_innovation_implementation_roadmap.csv")["next_action"].iloc[0])
                 if Path("Diagnostics/phase6c01_active_learning_graph_validation/phase6c01_ml_innovation_implementation_roadmap.csv").exists()
+                else ""
+            ),
+            "dag_state_coverage_score_v2": (
+                float(pd.read_csv("Diagnostics/phase6d01_dag_active_learning_adjacent_calibration/phase6d01_release_gate.csv")["dag_state_coverage_score_v2"].iloc[0])
+                if Path("Diagnostics/phase6d01_dag_active_learning_adjacent_calibration/phase6d01_release_gate.csv").exists()
+                else float("nan")
+            ),
+            "dag_repairable_nodes_populated": (
+                int(pd.read_csv("Diagnostics/phase6d01_dag_active_learning_adjacent_calibration/phase6d01_release_gate.csv")["dag_repairable_nodes_populated_count"].iloc[0])
+                if Path("Diagnostics/phase6d01_dag_active_learning_adjacent_calibration/phase6d01_release_gate.csv").exists()
+                else 0
+            ),
+            "dag_unpopulated_repairable_nodes": (
+                int(pd.read_csv("Diagnostics/phase6d01_dag_active_learning_adjacent_calibration/phase6d01_release_gate.csv")["dag_unpopulated_repairable_nodes_count"].iloc[0])
+                if Path("Diagnostics/phase6d01_dag_active_learning_adjacent_calibration/phase6d01_release_gate.csv").exists()
+                else 0
+            ),
+            "adjacent_confidence_raw_avg": (
+                float(pd.read_csv("Diagnostics/phase6d01_dag_active_learning_adjacent_calibration/phase6d01_release_gate.csv")["adjacent_confidence_raw_avg"].iloc[0])
+                if Path("Diagnostics/phase6d01_dag_active_learning_adjacent_calibration/phase6d01_release_gate.csv").exists()
+                else float("nan")
+            ),
+            "adjacent_confidence_calibrated_avg": (
+                float(pd.read_csv("Diagnostics/phase6d01_dag_active_learning_adjacent_calibration/phase6d01_release_gate.csv")["adjacent_confidence_calibrated_avg"].iloc[0])
+                if Path("Diagnostics/phase6d01_dag_active_learning_adjacent_calibration/phase6d01_release_gate.csv").exists()
+                else float("nan")
+            ),
+            "adjacent_policy_dominant_label": (
+                str(pd.read_csv("Diagnostics/phase6d01_dag_active_learning_adjacent_calibration/phase6d01_release_gate.csv")["adjacent_path_use_policy_dominant"].iloc[0])
+                if Path("Diagnostics/phase6d01_dag_active_learning_adjacent_calibration/phase6d01_release_gate.csv").exists()
+                else ""
+            ),
+            "active_learning_review_rows": (
+                int(pd.read_csv("Diagnostics/phase6d01_dag_active_learning_adjacent_calibration/phase6d01_release_gate.csv")["active_learning_review_rows"].iloc[0])
+                if Path("Diagnostics/phase6d01_dag_active_learning_adjacent_calibration/phase6d01_release_gate.csv").exists()
+                else 0
+            ),
+            "feature_merge_high_priority_count": (
+                int(pd.read_csv("Diagnostics/phase6d01_dag_active_learning_adjacent_calibration/phase6d01_release_gate.csv")["feature_merge_high_priority_count"].iloc[0])
+                if Path("Diagnostics/phase6d01_dag_active_learning_adjacent_calibration/phase6d01_release_gate.csv").exists()
+                else 0
+            ),
+            "segment_calibration_eligibility_blockers": (
+                str(pd.read_csv("Diagnostics/phase6d01_dag_active_learning_adjacent_calibration/phase6d01_release_gate.csv")["segment_calibration_eligibility_top_blocker"].iloc[0])
+                if Path("Diagnostics/phase6d01_dag_active_learning_adjacent_calibration/phase6d01_release_gate.csv").exists()
                 else ""
             ),
             "total_overstock_cash_release_value": float(_num(order_plan.get("overstock_cash_release_value")).sum()) if "overstock_cash_release_value" in order_plan.columns else 0.0,

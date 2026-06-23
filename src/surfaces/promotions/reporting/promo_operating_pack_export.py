@@ -24,6 +24,7 @@ PHASE5X_STATUS = Path("Diagnostics/phase5x01_filled_human_review_learning/SHADOW
 PHASE5X_SCORECARD = Path("Diagnostics/phase5x01_filled_human_review_learning/phase5x01_decision_quality_scorecard.csv")
 PHASE6B_DIR = Path("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting")
 PHASE6C_DIR = Path("Diagnostics/phase6c01_active_learning_graph_validation")
+PHASE6D_DIR = Path("Diagnostics/phase6d01_dag_active_learning_adjacent_calibration")
 
 STORE_772_EXTENDED_EXPORTS = (
     "PROMO_FEATURE_VISIBILITY_AUDIT.csv",
@@ -36,6 +37,14 @@ STORE_772_EXTENDED_EXPORTS = (
     "PROMO_ATS_VALIDATION.csv",
     "PROMO_ML_INNOVATION_ROADMAP.csv",
     "PROMO_PHASE6C_RELEASE_GATE.csv",
+    "PROMO_DAG_STATE_POPULATION.csv",
+    "PROMO_DAG_STATE_COVERAGE_SUMMARY.csv",
+    "PROMO_ADJACENT_CONFIDENCE_CALIBRATION.csv",
+    "PROMO_ADJACENT_POLICY_REVIEW.csv",
+    "ACTIVE_LEARNING_TOP_100_REVIEW.xlsx",
+    "PROMO_FEATURE_MERGE_OPPORTUNITY_REVIEW.csv",
+    "PROMO_SEGMENT_CALIBRATION_ELIGIBILITY_REPAIR.csv",
+    "PROMO_PHASE6D_RELEASE_GATE.csv",
 )
 
 REQUIRED_EXPORT_FILES = (
@@ -107,9 +116,9 @@ def _export_root(configured: Path | None) -> Path:
     return FALLBACK_EXPORT_ROOT
 
 
-def _make_run_folder(export_root: Path, run_date: date | None = None) -> Path:
+def _make_run_folder(export_root: Path, run_date: date | None = None, pack_suffix: str = "phase5y_operating_pack") -> Path:
     d = run_date or date.today()
-    return export_root / f"{d.isoformat()}_phase5y_operating_pack"
+    return export_root / f"{d.isoformat()}_{pack_suffix}"
 
 
 def _make_run_id(store_number: int = 772) -> str:
@@ -417,10 +426,11 @@ def build_promo_operating_pack(
     store_number: int = 772,
     export_root: Path | None = None,
     run_date: date | None = None,
+    pack_suffix: str = "phase5y_operating_pack",
 ) -> dict[str, Any]:
     """Collect current best outputs into an operating pack."""
     root = _export_root(export_root)
-    run_folder = _make_run_folder(root, run_date=run_date)
+    run_folder = _make_run_folder(root, run_date=run_date, pack_suffix=pack_suffix)
     run_id = _make_run_id(store_number=store_number)
 
     backtest = _read_csv(PHASE5D_DIR / "phase5d01_backtest_frame.csv")
@@ -673,9 +683,10 @@ def write_phase5y_diagnostics(
     export_root: Path | None = None,
     diagnostics_dir: Path = DEFAULT_DIAGNOSTICS_DIR,
     store_number: int = 772,
+    pack_suffix: str = "phase5y_operating_pack",
 ) -> dict[str, Any]:
     diagnostics_dir.mkdir(parents=True, exist_ok=True)
-    pack = build_promo_operating_pack(store_number=store_number, export_root=export_root)
+    pack = build_promo_operating_pack(store_number=store_number, export_root=export_root, pack_suffix=pack_suffix)
     exported = export_promo_operating_pack(pack)
     qa = pack["pack_frames"]["PROMO_REPORT_QA_SUMMARY.csv"]
 
@@ -730,16 +741,23 @@ def run_store_772_reporting_export(
     diagnostics_dir: Path = DEFAULT_DIAGNOSTICS_DIR,
     phase6b_dir: Path = PHASE6B_DIR,
     phase6c_dir: Path = PHASE6C_DIR,
+    phase6d_dir: Path = PHASE6D_DIR,
     store_number: int = 772,
-    phase_or_run_id: str = "phase6c01",
+    phase_or_run_id: str = "phase6d01",
 ) -> dict[str, Any]:
-    """Export store 772 operating pack on every major run, including Phase 6B/6C audits."""
+    """Export store 772 operating pack on every major run, including Phase 6B/6C/6D audits."""
     from models.promotions.promo_phase6c_active_learning_graph_validation import write_phase6c_diagnostics
+    from models.promotions.promo_phase6d_orchestrator import write_phase6d_diagnostics
 
-    phase6c = write_phase6c_diagnostics(diagnostics_dir=phase6c_dir)
-    y_result = write_phase5y_diagnostics(export_root=export_root, diagnostics_dir=diagnostics_dir, store_number=store_number)
-
+    write_phase6c_diagnostics(diagnostics_dir=phase6c_dir)
+    y_result = write_phase5y_diagnostics(
+        export_root=export_root,
+        diagnostics_dir=diagnostics_dir,
+        store_number=store_number,
+        pack_suffix="phase6d_operating_pack",
+    )
     export_folder = Path(y_result["export_folder"])
+    phase6d = write_phase6d_diagnostics(diagnostics_dir=phase6d_dir, export_dir=export_folder)
     exported = list(y_result.get("reports_exported", []))
 
     phase6b_copies = {
@@ -756,7 +774,17 @@ def run_store_772_reporting_export(
         "PROMO_ML_INNOVATION_ROADMAP.csv": phase6c_dir / "phase6c01_ml_innovation_implementation_roadmap.csv",
         "PROMO_PHASE6C_RELEASE_GATE.csv": phase6c_dir / "phase6c01_release_gate.csv",
     }
-    for out_name, src in {**phase6b_copies, **phase6c_copies}.items():
+    phase6d_copies = {
+        "PROMO_DAG_STATE_POPULATION.csv": phase6d_dir / "phase6d01_dag_state_population.csv",
+        "PROMO_DAG_STATE_COVERAGE_SUMMARY.csv": phase6d_dir / "phase6d01_dag_state_coverage_summary.csv",
+        "PROMO_ADJACENT_CONFIDENCE_CALIBRATION.csv": phase6d_dir / "phase6d01_adjacent_confidence_calibration.csv",
+        "PROMO_ADJACENT_POLICY_REVIEW.csv": phase6d_dir / "phase6d01_adjacent_policy_review.csv",
+        "ACTIVE_LEARNING_TOP_100_REVIEW.xlsx": phase6d_dir / "ACTIVE_LEARNING_TOP_100_REVIEW.xlsx",
+        "PROMO_FEATURE_MERGE_OPPORTUNITY_REVIEW.csv": phase6d_dir / "phase6d01_feature_merge_opportunity_review.csv",
+        "PROMO_SEGMENT_CALIBRATION_ELIGIBILITY_REPAIR.csv": phase6d_dir / "phase6d01_segment_calibration_eligibility_repair.csv",
+        "PROMO_PHASE6D_RELEASE_GATE.csv": phase6d_dir / "phase6d01_release_gate.csv",
+    }
+    for out_name, src in {**phase6b_copies, **phase6c_copies, **phase6d_copies}.items():
         if src.exists():
             dst = export_folder / out_name
             dst.write_bytes(src.read_bytes())
@@ -775,12 +803,14 @@ def run_store_772_reporting_export(
         "missing_reports": ";".join(missing) if missing else "",
         "qa_blockers": qa_blockers,
         "qa_warnings": qa_warnings,
-        "release_recommendation": phase6c.get("release_recommendation", RELEASE_RECOMMENDATION),
-        "primary_blocker": phase6c.get("primary_blocker", PRIMARY_BLOCKER),
-        "phase6c_dag_coverage_score": phase6c.get("dag_current_coverage_score", 0.0),
-        "phase6c_adjacent_path_wape": phase6c.get("adjacent_path_wape", 0.0),
-        "phase6c_active_learning_candidates": phase6c.get("active_learning_candidate_count", 0),
+        "release_recommendation": phase6d.get("release_recommendation", RELEASE_RECOMMENDATION),
+        "primary_blocker": phase6d.get("primary_blocker", PRIMARY_BLOCKER),
+        "phase6d_dag_coverage_score_v2": phase6d.get("dag_state_coverage_score_v2", 0.0),
+        "phase6d_adjacent_confidence_calibrated_avg": phase6d.get("adjacent_confidence_calibrated_avg", 0.0),
+        "phase6d_active_learning_review_rows": phase6d.get("active_learning_review_rows", 0),
     }])
+    status.to_csv(phase6d_dir / "phase6d01_store_reporting_export_status.csv", index=False)
+    phase6c_dir.mkdir(parents=True, exist_ok=True)
     status.to_csv(phase6c_dir / "phase6c01_store_reporting_export_status.csv", index=False)
     phase6b_dir.mkdir(parents=True, exist_ok=True)
     status.to_csv(phase6b_dir / "phase6b01_store_reporting_export_status.csv", index=False)
@@ -794,7 +824,7 @@ def run_store_772_reporting_export(
 
     return {
         **y_result,
-        **{k: v for k, v in phase6c.items()},
+        **{k: v for k, v in phase6d.items()},
         "export_folder": str(export_folder),
         "reports_exported": exported,
         "missing_reports": missing,

@@ -239,3 +239,139 @@ def write_phase6b_adjacent_path_diagnostics(
         "ats_avg_confidence": float(_numeric(sim.get("available_to_sell_confidence_score", 0)).mean()),
         "simulation_df": sim,
     }
+
+
+PHASE6D_DIAGNOSTICS_DIR = Path("Diagnostics/phase6d01_dag_active_learning_adjacent_calibration")
+
+# Phase 6C validation benchmarks — used to recalibrate overconfident adjacent paths.
+ADJACENT_VALIDATION_WAPE = 0.629
+ADJACENT_VALIDATION_BIAS_PCT = -47.6
+ADJACENT_BEAT_MODEL_RATE = 0.403
+
+ADJACENT_USE_POLICIES = (
+    "ADVISORY_SIGNAL_ONLY",
+    "USE_FOR_HUMAN_REVIEW_PRIORITY",
+    "USE_FOR_NEW_LINE_CONTEXT_ONLY",
+    "DO_NOT_USE_FOR_FORECAST",
+    "DATA_REPAIR_REQUIRED",
+)
+
+
+def calibrate_adjacent_path_confidence(
+    frame: pd.DataFrame,
+    *,
+    validation_wape: float = ADJACENT_VALIDATION_WAPE,
+    validation_bias_pct: float = ADJACENT_VALIDATION_BIAS_PCT,
+    beat_model_rate: float = ADJACENT_BEAT_MODEL_RATE,
+) -> pd.DataFrame:
+    """Down-calibrate adjacent confidence using Phase 6C validation evidence."""
+    out = frame.copy()
+    if "adjacent_confidence_score" not in out.columns:
+        out = score_adjacent_path_confidence(simulate_adjacent_outcome_paths(out))
+    raw = _numeric(out.get("adjacent_confidence_score", 0.5))
+    out["adjacent_confidence_raw"] = raw.round(4)
+
+    global_penalty = min(0.55, validation_wape * 0.45 + (1.0 - beat_model_rate) * 0.25)
+    bias_penalty = np.where(validation_bias_pct < -20, 0.12, 0.05)
+    model = _numeric(out.get("model_expected_units_total_promo", 0))
+    adjacent = _numeric(out.get("adjacent_expected_units", model))
+    actual = _numeric(out.get("actual_units_sold_promo", 0))
+    row_err = (adjacent - actual).abs() / actual.replace(0, np.nan)
+    row_penalty = np.clip(row_err.fillna(validation_wape), 0, 1) * 0.15
+
+    factor = np.clip(1.0 - global_penalty - bias_penalty - row_penalty, 0.25, 0.95)
+    out["adjacent_confidence_calibration_factor"] = factor.round(4)
+    calibrated = (raw * factor).clip(0.05, 0.85)
+    out["adjacent_confidence_calibrated"] = calibrated.round(4)
+    out["adjacent_confidence_reliability_bucket"] = np.where(
+        calibrated >= 0.65, "MEDIUM_RELIABILITY",
+        np.where(calibrated >= 0.4, "LOW_RELIABILITY", "UNRELIABLE"),
+    )
+    return out
+
+
+def _assign_adjacent_path_use_policy(row: pd.Series) -> tuple[str, str]:
+    raw = float(_numeric(pd.Series([row.get("adjacent_confidence_raw", 0.5)])).iloc[0])
+    cal = float(_numeric(pd.Series([row.get("adjacent_confidence_calibrated", 0.5)])).iloc[0])
+    new_line = str(row.get("new_line_flag", "NO")) == "YES"
+    weak = str(row.get("weak_history_flag", "NO")) == "YES"
+    basket = str(row.get("basket_attachment_source_quality", "HIGH"))
+    model = float(_numeric(pd.Series([row.get("model_expected_units_total_promo", 0)])).iloc[0])
+    adjacent = float(_numeric(pd.Series([row.get("adjacent_expected_units", 0)])).iloc[0])
+    disagree = abs(model - adjacent)
+
+    if basket in {"LOW", "UNKNOWN", "UNSAFE"}:
+        return "DATA_REPAIR_REQUIRED", "Basket attachment quality too weak for adjacent trust"
+    if raw >= 0.85 and cal < 0.5:
+        return "DO_NOT_USE_FOR_FORECAST", "Raw confidence overstated; Phase 6C validation underperformed model"
+    if new_line or weak:
+        return "USE_FOR_NEW_LINE_CONTEXT_ONLY", "Adjacent path provides analogy context only, not order quantity"
+    if disagree > 1.0 and cal >= 0.35:
+        return "USE_FOR_HUMAN_REVIEW_PRIORITY", "Model/adjacent disagreement warrants human review"
+    if cal < 0.35:
+        return "ADVISORY_SIGNAL_ONLY", "Calibrated confidence too low for operational use"
+    return "ADVISORY_SIGNAL_ONLY", "Advisory signal only; must not replace forecast"
+
+
+def assign_adjacent_path_policies(frame: pd.DataFrame) -> pd.DataFrame:
+    out = calibrate_adjacent_path_confidence(frame)
+    policies, reasons = zip(*out.apply(_assign_adjacent_path_use_policy, axis=1))
+    out["adjacent_path_use_policy"] = list(policies)
+    out["adjacent_path_use_reason"] = list(reasons)
+    out["adjacent_path_warning"] = "ADVISORY_SIMULATION_NOT_DEPLOYED"
+    return out
+
+
+def evaluate_adjacent_path_confidence_calibration(frame: pd.DataFrame) -> pd.DataFrame:
+    """Summarise raw vs calibrated confidence and reliability distribution."""
+    out = assign_adjacent_path_policies(frame)
+    actual = _numeric(out.get("actual_units_sold_promo", 0))
+    adjacent = _numeric(out.get("adjacent_expected_units", 0))
+    has_actual = actual.gt(0)
+    rows = [{
+        "metric": "adjacent_confidence_raw_avg",
+        "value": float(_numeric(out.get("adjacent_confidence_raw", 0)).mean()),
+    }, {
+        "metric": "adjacent_confidence_calibrated_avg",
+        "value": float(_numeric(out.get("adjacent_confidence_calibrated", 0)).mean()),
+    }, {
+        "metric": "confidence_reduction_pct",
+        "value": round((1.0 - _numeric(out.get("adjacent_confidence_calibrated", 0)).mean()
+                        / max(_numeric(out.get("adjacent_confidence_raw", 0)).mean(), 0.01)) * 100.0, 2),
+    }, {
+        "metric": "do_not_use_for_forecast_rate",
+        "value": float(out.get("adjacent_path_use_policy", pd.Series("", index=out.index)).astype(str).eq("DO_NOT_USE_FOR_FORECAST").mean() * 100.0),
+    }]
+    if has_actual.any():
+        raw_err = (adjacent[has_actual] - actual[has_actual]).abs().mean()
+        rows.append({"metric": "adjacent_mae_on_actuals", "value": float(raw_err)})
+    return pd.DataFrame(rows)
+
+
+def write_phase6d_adjacent_calibration_diagnostics(
+    frame: pd.DataFrame,
+    *,
+    diagnostics_dir: Path = PHASE6D_DIAGNOSTICS_DIR,
+) -> dict[str, Any]:
+    diagnostics_dir.mkdir(parents=True, exist_ok=True)
+    calibrated = assign_adjacent_path_policies(frame)
+    eval_df = evaluate_adjacent_path_confidence_calibration(calibrated)
+    key = [c for c in ("store_number", "promotion_id", "sku_number", "department") if c in calibrated.columns]
+    cal_cols = key + [c for c in calibrated.columns if c.startswith("adjacent_confidence") or c.startswith("adjacent_path_use")]
+    calibrated[cal_cols].head(2000).to_csv(diagnostics_dir / "phase6d01_adjacent_confidence_calibration.csv", index=False)
+    policy_cols = key + [
+        "adjacent_confidence_raw", "adjacent_confidence_calibrated", "adjacent_path_use_policy",
+        "adjacent_path_use_reason", "new_line_flag", "weak_history_flag",
+        "model_expected_units_total_promo", "adjacent_expected_units", "actual_units_sold_promo",
+    ]
+    calibrated[[c for c in policy_cols if c in calibrated.columns]].head(500).to_csv(
+        diagnostics_dir / "phase6d01_adjacent_policy_review.csv", index=False,
+    )
+    dominant = str(calibrated["adjacent_path_use_policy"].value_counts().idxmax()) if not calibrated.empty else "ADVISORY_SIGNAL_ONLY"
+    return {
+        "adjacent_confidence_raw_avg": float(_numeric(calibrated.get("adjacent_confidence_raw", 0)).mean()),
+        "adjacent_confidence_calibrated_avg": float(_numeric(calibrated.get("adjacent_confidence_calibrated", 0)).mean()),
+        "adjacent_path_use_policy_dominant": dominant,
+        "calibrated_df": calibrated,
+        "evaluation_df": eval_df,
+    }
