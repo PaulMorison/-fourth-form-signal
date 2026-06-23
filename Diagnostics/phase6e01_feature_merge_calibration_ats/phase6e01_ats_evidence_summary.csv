@@ -1,0 +1,9 @@
+metric,value
+rows_with_strong_ats_evidence,0
+rows_with_weak_ats_evidence,1597
+rows_zero_sales_learnable,640
+rows_zero_sales_not_learnable,957
+stockout_censored_rows,1597
+ats_supported_calibration_rows,0
+false_zero_risk_rows,0
+top_ats_blocker,SOH_QUALITY_UNKNOWN

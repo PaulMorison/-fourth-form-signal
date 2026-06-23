@@ -1,0 +1,7 @@
+method_name,phase6b_recommendation,phase6c_validation_result,implementation_status,next_action,risk,expected_value,recommended_phase
+adjacent_path_simulation,IMPLEMENT_NOW,UNDERPERFORMS_MODEL,ADVISORY_VALIDATED,Continue advisory use; do not replace forecast,LOW,MEDIUM,6C
+available_to_sell_confidence,IMPLEMENT_NOW,VALIDATED,ADVISORY_ACTIVE,Use ATS to flag false-zero-demand,LOW,HIGH,6C
+active_learning_human_review,IMPLEMENT_NOW,IMPLEMENTED,REVIEW_QUEUE_ACTIVE,Route TOP_100 to shadow human review,LOW,HIGH,6C
+bayesian_hierarchical_shrinkage,IMPLEMENT_NOW,BLOCKED,WAIT_SEGMENT_ELIGIBILITY,Deploy after segment_calibration_allowed_rows > 0,MEDIUM,HIGH,6D
+contextual_bandit_shadow,PROTOTYPE_NEXT,DEFER,WAIT_HUMAN_REVIEWS,Need completed human reviews,MEDIUM,MEDIUM,6E
+offline_reinforcement_learning,DEFER,DEFER,INSUFFICIENT_RECORDS,Need live decision records,HIGH,LOW,7+

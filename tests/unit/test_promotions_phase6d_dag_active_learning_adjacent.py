@@ -177,7 +177,7 @@ class TestPhase6dDagActiveLearningAdjacent(unittest.TestCase):
                 phase6b_dir=Path(tmp) / "phase6b",
             )
             self.assertTrue((diag6d / "phase6d01_store_reporting_export_status.csv").exists())
-            self.assertIn("phase6d_operating_pack", result["export_folder"])
+            self.assertIn("phase6e_operating_pack", result["export_folder"])
 
     def test_governed_actions_not_overwritten(self) -> None:
         frame = pd.DataFrame([_row()])
