@@ -7,6 +7,7 @@ from pathlib import Path
 from models.promotions.promo_period_demand_forecast import attach_promo_period_demand_forecast
 from models.promotions.promo_demand_bias_repair import apply_underforecast_bias_adjustments, load_bias_repair_artifacts
 from models.promotions.promo_demand_calibration import apply_promo_demand_calibration, load_calibration_artifacts
+from models.promotions.promo_optimal_stock_learning import apply_optimal_stock_learning, load_optimal_stock_artifacts
 from models.promotions.promo_stock_outcome_optimisation import apply_stock_outcome_optimisation, load_stock_outcome_artifacts
 from models.promotions.promo_stock_truth_repair import apply_stock_truth_repair, load_stock_truth_artifacts
 
@@ -179,6 +180,23 @@ ORDER_PLAN_COLUMNS: tuple[str, ...] = (
     "supplier_replenishment_class_repaired",
     "supplier_lead_time_days_repaired",
     "supplier_reorder_flexibility_repaired",
+    "optimal_base_soh_units",
+    "current_days_cover",
+    "current_stock_position_label",
+    "days_until_promo_start",
+    "expected_units_until_promo_start",
+    "expected_soh_at_promo_start_before_order",
+    "expected_normal_units_during_promo",
+    "expected_promo_uplift_units",
+    "promo_convexity_score",
+    "target_day_one_promo_soh",
+    "target_end_promo_soh",
+    "optimal_stock_position_order_units",
+    "distance_to_optimal_end_soh",
+    "promo_exit_success_flag",
+    "stock_position_order_reason",
+    "replenishment_lead_time_days",
+    "replenishment_risk_class",
     "stock_target_conflict_flag",
     "reason_demand",
     "reason_stock",
@@ -418,6 +436,8 @@ def load_se01_scored_sources(prediction_dir: Path) -> pd.DataFrame:
     _stock_summary, _stock_gate, stock_recommendation = load_stock_outcome_artifacts()
     out = apply_stock_truth_repair(out)
     out = apply_stock_outcome_optimisation(out, gate_recommendation=stock_recommendation)
+    _opt_gate, opt_rec = load_optimal_stock_artifacts()
+    out = apply_optimal_stock_learning(out, gate_recommendation=opt_rec)
     return out
 
 def _baseline_daily_rate(frame: pd.DataFrame) -> tuple[pd.Series, pd.Series, pd.Series]:
@@ -1330,6 +1350,39 @@ def assemble_commercial_order_rows(
             else:
                 out[col] = _field_series(frame, (col,), frame.index).astype(str)
 
+    position_cols = (
+        "optimal_base_soh_units",
+        "current_days_cover",
+        "current_stock_position_label",
+        "days_until_promo_start",
+        "expected_units_until_promo_start",
+        "expected_soh_at_promo_start_before_order",
+        "expected_normal_units_during_promo",
+        "expected_promo_uplift_units",
+        "promo_convexity_score",
+        "target_day_one_promo_soh",
+        "target_end_promo_soh",
+        "optimal_stock_position_order_units",
+        "distance_to_optimal_end_soh",
+        "promo_exit_success_flag",
+        "stock_position_order_reason",
+        "replenishment_lead_time_days",
+        "replenishment_risk_class",
+    )
+    numeric_position = {
+        "optimal_base_soh_units", "current_days_cover", "expected_units_until_promo_start",
+        "expected_soh_at_promo_start_before_order", "expected_normal_units_during_promo",
+        "expected_promo_uplift_units", "promo_convexity_score", "target_day_one_promo_soh",
+        "target_end_promo_soh", "optimal_stock_position_order_units", "distance_to_optimal_end_soh",
+        "replenishment_lead_time_days",
+    }
+    for col in position_cols:
+        out[col] = _field_series(frame, (col,), frame.index)
+        if col in numeric_position:
+            out[col] = _num(out[col], index=frame.index).round(3)
+        else:
+            out[col] = out[col].astype(str)
+
     calc = pd.DataFrame(
         {
             "sku_number": frame["sku_number"],
@@ -1776,6 +1829,7 @@ def build_review_exceptions(order_plan: pd.DataFrame) -> pd.DataFrame:
 def build_manager_summary(order_plan: pd.DataFrame, exceptions: pd.DataFrame) -> pd.DataFrame:
     counts = order_plan["decision"].value_counts()
     _stock_truth_gate, stock_truth_rec = load_stock_truth_artifacts()
+    _opt_gate, optimal_stock_rec = load_optimal_stock_artifacts()
     hold_pos = int(((order_plan["decision"].isin(["HOLD", "DO_NOT_BUY"])) & (order_plan["recommended_order_units"] > 0)).sum())
     zero_buy = int(((order_plan["decision"] == "BUY") & (order_plan["recommended_order_units"] <= 0)).sum())
     non_std = int((~order_plan["decision"].isin(ALLOWED_DECISIONS)).sum())
@@ -1918,6 +1972,25 @@ def build_manager_summary(order_plan: pd.DataFrame, exceptions: pd.DataFrame) ->
                 order_plan.get("stock_outcome_label", pd.Series("", index=order_plan.index)).eq("MISSED_DEMAND_RISK").sum()
             ),
             "stock_truth_release_recommendation": stock_truth_rec,
+            "understocked_sku_count": int(order_plan.get("current_stock_position_label", pd.Series("", index=order_plan.index)).eq("UNDERSTOCKED").sum()),
+            "overstocked_sku_count": int(order_plan.get("current_stock_position_label", pd.Series("", index=order_plan.index)).isin(["OVERSTOCKED", "SEVERELY_OVERSTOCKED"]).sum()),
+            "buy_to_reach_day_one_optimal_count": int((_num(order_plan.get("optimal_stock_position_order_units")) > 0).sum()) if "optimal_stock_position_order_units" in order_plan.columns else 0,
+            "no_buy_run_down_overstock_count": int(
+                (
+                    order_plan.get("current_stock_position_label", pd.Series("", index=order_plan.index)).isin(["OVERSTOCKED", "SEVERELY_OVERSTOCKED"])
+                    & _num(order_plan.get("optimal_stock_position_order_units")).eq(0)
+                ).sum()
+            ) if "optimal_stock_position_order_units" in order_plan.columns else 0,
+            "expected_cash_released_from_overstock": float(
+                (_num(order_plan.get("current_soh")) - _num(order_plan.get("optimal_base_soh_units"))).clip(lower=0).sum() * 4.82
+            ) if "optimal_base_soh_units" in order_plan.columns else 0.0,
+            "expected_cash_tied_above_optimal": float(
+                (_num(order_plan.get("distance_to_optimal_end_soh")) * 4.82).sum()
+            ) if "distance_to_optimal_end_soh" in order_plan.columns else 0.0,
+            "promo_uplift_units_total": float(_num(order_plan.get("expected_promo_uplift_units")).sum()) if "expected_promo_uplift_units" in order_plan.columns else 0.0,
+            "promo_convexity_estimate": float(_num(order_plan.get("promo_convexity_score")).mean() or 0.0) if "promo_convexity_score" in order_plan.columns else 0.0,
+            "promo_exit_success_rate": float(order_plan.get("promo_exit_success_flag", pd.Series("NO", index=order_plan.index)).eq("YES").mean() * 100.0) if "promo_exit_success_flag" in order_plan.columns else 0.0,
+            "optimal_stock_release_recommendation": optimal_stock_rec,
             "model_status": META_STATUS,
             "production_ordering_approved": PRODUCTION_ORDERING,
             "customer_report_release_approved": CUSTOMER_RELEASE,
