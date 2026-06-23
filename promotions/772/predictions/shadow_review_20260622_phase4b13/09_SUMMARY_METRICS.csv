@@ -1,0 +1,10 @@
+store_number,model_status,production_ordering_approved,customer_report_release_approved,human_review_required,generated_from_phase,live_model_changed,metric,value
+772,SHADOW_NOT_PRODUCTION,NO,NO,YES,4B.13,NO,total_rows,2140
+772,SHADOW_NOT_PRODUCTION,NO,NO,YES,4B.13,NO,added_buy_review_rows,462
+772,SHADOW_NOT_PRODUCTION,NO,NO,YES,4B.13,NO,removed_buy_review_rows,92
+772,SHADOW_NOT_PRODUCTION,NO,NO,YES,4B.13,NO,tiny_demand_buy_review_rows,295
+772,SHADOW_NOT_PRODUCTION,NO,NO,YES,4B.13,NO,stock_basis_overrun_review_rows,60
+772,SHADOW_NOT_PRODUCTION,NO,NO,YES,4B.13,NO,high_confidence_buy_rows,50
+772,SHADOW_NOT_PRODUCTION,NO,NO,YES,4B.13,NO,low_confidence_buy_rows,50
+772,SHADOW_NOT_PRODUCTION,NO,NO,YES,4B.13,NO,shadow_buy_count,1172
+772,SHADOW_NOT_PRODUCTION,NO,NO,YES,4B.13,NO,caps_applied,552

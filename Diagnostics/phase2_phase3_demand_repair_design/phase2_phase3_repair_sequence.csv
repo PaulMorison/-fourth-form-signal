@@ -1,0 +1,5 @@
+phase,status,commit,primary_target,change_summary,customer_release,observed_se01_effect
+1,DONE,5365c3f,scoring_service.py,predicted_units_sold = calibrated_predicted_units_sold,NO,selected_demand=1 unchanged at 3506/3531; promo_window total 3527 unchanged
+2,RECOMMENDED_NEXT,,trainer.py L1495,predicted_units_total_promo = calibrated_predicted_units_total_promo in backtest export,NO,Export/backtest alignment only; no customer output change alone
+3,AFTER_PHASE_2,,allocation_calibration.py + store_prediction_download_builder.py,Remove allocation cap from demand path; remove Stage 11 order cap on forecast total; caps on order path only,NO,Expected to raise fractional demand before integerize; may still collapse at integerize until 3B/4
+3B,WITH_PHASE_3,,_integerize_forecast_total_units + demand contract,Fractional canonical demand; MODEL_DEMAND_COLLAPSED warning instead of floor-to-1,NO,Exposes flat model; stops uniform 1-unit mask

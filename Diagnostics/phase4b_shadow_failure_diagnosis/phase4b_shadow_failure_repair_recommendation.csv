@@ -1,0 +1,2 @@
+recommendation_id,recommended_scenario,patch_target_module,patch_trainer,rationale,do_not_production_retrain,do_not_live_swap
+phase4b7_target_repair_ceiling,clean_only_shadow,sufficient_stock_demand_target.py,optional lower repaired weights after target fix,Repaired targets exceed stock_basis on many rows; underallocation repair sets target near 0.85*demand_reference with low stock_basis,True,True

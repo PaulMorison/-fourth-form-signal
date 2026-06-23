@@ -1,0 +1,501 @@
+SKU,description,department,decision_triage_class,brain_learned_action_label,brain_expected_economic_value,economic_net_value_score,brain_value_gap_vs_current,brain_top_feature_1,brain_top_feature_2,constraint_block_flag,promo_demand_source_quality,buyer_check,governance_block_reason
+508241,0.0,SKINCARE,WATCHLIST_ONLY,BUYER_REVIEW_REQUIRED,184.764,65.029,119.735,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+606421,0.0,VITAMIN SUPPLEMENT,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,197.639,78.127,119.512,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+199841,0.0,SKINCARE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,203.608,109.054,94.554,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+94457,0.0,SKINCARE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,148.121,56.194,91.927,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+91438,0.0,HAIRCARE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,273.776,203.362,70.414,current_soh,promo_start_soh_resolved,NO,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+63361,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-85.735,-155.14,69.405,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+35193,0.0,VITAMIN SUPPLEMENT,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-85.735,-154.359,68.624,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+192033,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-86.084,-153.246,67.162,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+185219,0.0,FRAGRANCE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,107.731,45.493,62.238,current_soh,promo_start_soh_resolved,NO,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+91536,0.0,HAIRCARE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,91.844,31.091,60.753,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+186282,0.0,SKINCARE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,210.536,152.132,58.404,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+94563,0.0,SKINCARE,WATCHLIST_ONLY,HOLD_FOR_REPLENISHMENT,123.55,65.716,57.834,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+42784,0.0,SKINCARE,HIGH_PRIORITY_BUY_REVIEW,BUYER_REVIEW_REQUIRED,98.82,43.522,55.298,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+92849,0.0,SKINCARE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,117.656,64.75,52.906,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+192046,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-75.09,-122.724,47.634,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+194048,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-75.09,-122.289,47.199,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+87547,0.0,VITAMIN SUPPLEMENT,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,101.459,54.676,46.783,current_soh,promo_start_soh_resolved,NO,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+93914,0.0,HAIR ACC BRUSHES,WATCHLIST_ONLY,BUYER_REVIEW_REQUIRED,128.841,82.705,46.136,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+195051,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-74.88,-119.802,44.922,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+643181,0.0,SKINCARE,WATCHLIST_ONLY,BUYER_REVIEW_REQUIRED,170.915,127.001,43.914,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+4759,0.0,FRAGRANCE,HIGH_PRIORITY_BUY_REVIEW,BUYER_REVIEW_REQUIRED,91.844,48.105,43.739,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+91533,0.0,HAIRCARE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,95.609,54.615,40.994,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+92848,0.0,SKINCARE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,154.734,114.086,40.648,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+192046,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-83.458,-122.837,39.379,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+93336,0.0,SUNCARE,WATCHLIST_ONLY,BUYER_REVIEW_REQUIRED,151.255,112.65,38.605,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+32861,0.0,SKINCARE,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-88.739,-125.844,37.105,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+69756,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-88.066,-124.948,36.882,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+698520,0.0,SKINCARE,AUTO_BLOCK_CAPITAL_RISK,BUYER_REVIEW_REQUIRED,68.793,32.539,36.254,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+90155,0.0,COLOUR COSMETICS,WATCHLIST_ONLY,HOLD_FOR_REPLENISHMENT,67.26,31.02,36.24,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+91534,0.0,HAIRCARE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,95.609,59.768,35.841,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+23268,0.0,BABY CARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-85.582,-120.947,35.365,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+91438,0.0,HAIRCARE,STANDARD_RUN_DOWN_REVIEW,BUYER_REVIEW_REQUIRED,97.821,62.488,35.333,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+199848,0.0,SKINCARE,HIGH_PRIORITY_BUY_REVIEW,BUYER_REVIEW_REQUIRED,103.459,68.393,35.066,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+189553,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-75.09,-110.003,34.913,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+93951,0.0,HAIR ACC BRUSHES,WATCHLIST_ONLY,BUYER_REVIEW_REQUIRED,112.902,80.455,32.447,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+197473,0.0,SKINCARE,WATCHLIST_ONLY,BUYER_REVIEW_REQUIRED,97.93,66.19,31.74,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+193713,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-87.717,-117.269,29.552,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+48513,0.0,HAIRCARE,WATCHLIST_ONLY,HOLD_FOR_REPLENISHMENT,65.682,36.773,28.909,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+58669,0.0,COLOUR COSMETICS,WATCHLIST_ONLY,BUYER_REVIEW_REQUIRED,54.121,25.256,28.865,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+18512,0.0,SUNCARE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,95.549,66.774,28.775,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+94663,0.0,SKINCARE,WATCHLIST_ONLY,BUYER_REVIEW_REQUIRED,72.122,44.684,27.438,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+87753,0.0,SKINCARE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,116.924,90.238,26.686,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+91442,0.0,HAIRCARE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,198.966,172.413,26.553,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+340014,0.0,BATH TOILETRIES,AUTO_BLOCK_CAPITAL_RISK,HOLD_FOR_REPLENISHMENT,73.291,46.783,26.508,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+91441,0.0,HAIRCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,47.153,20.772,26.381,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+193125,0.0,COLOUR COSMETICS,WATCHLIST_ONLY,HOLD_FOR_REPLENISHMENT,71.268,45.075,26.193,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+94509,0.0,FRAGRANCE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-69.154,-95.13,25.976,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+27193,0.0,SUNCARE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,140.003,115.644,24.359,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+199846,0.0,SKINCARE,HIGH_PRIORITY_BUY_REVIEW,BUYER_REVIEW_REQUIRED,52.325,28.522,23.803,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+94903,0.0,SKINCARE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,276.111,253.28,22.831,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+195051,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-88.066,-109.779,21.713,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+195051,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-72.189,-93.391,21.202,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+194048,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-75.262,-96.381,21.119,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+65560,0.0,SKINCARE,WATCHLIST_ONLY,BUYER_REVIEW_REQUIRED,98.905,77.807,21.098,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+94904,0.0,SKINCARE,STANDARD_RUN_DOWN_REVIEW,BUYER_REVIEW_REQUIRED,50.471,29.489,20.982,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+195051,0.0,SKINCARE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,52.864,32.226,20.638,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+65635,0.0,SKINCARE,WATCHLIST_ONLY,BUYER_REVIEW_REQUIRED,55.68,35.113,20.567,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+195051,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-72.189,-92.689,20.5,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+654921,0.0,SUNCARE,WATCHLIST_ONLY,BLOCKED_UNSAFE,31.633,11.724,19.909,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+698520,0.0,SKINCARE,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-83.979,-103.801,19.822,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+50722,0.0,VITAMIN SUPPLEMENT,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,69.28,49.728,19.552,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+193268,0.0,ORAL HEALTH,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,47.385,27.935,19.45,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+195299,0.0,BEAUTY ACCESSORIES,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,32.424,14.238,18.186,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+65610,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,HOLD_FOR_REPLENISHMENT,43.937,25.794,18.143,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+195102,0.0,SKINCARE,STANDARD_RUN_DOWN_REVIEW,BUYER_REVIEW_REQUIRED,45.936,27.938,17.998,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+188706,0.0,SKINCARE,AUTO_BLOCK_CAPITAL_RISK,BUYER_REVIEW_REQUIRED,77.309,59.36,17.949,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+188705,0.0,SKINCARE,AUTO_BLOCK_CAPITAL_RISK,BLOCKED_UNSAFE,34.813,16.875,17.938,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+87452,0.0,SKINCARE,WATCHLIST_ONLY,BUYER_REVIEW_REQUIRED,113.101,95.241,17.86,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+194029,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,40.822,23.192,17.63,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+88081,0.0,SKINCARE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,73.214,55.654,17.56,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+184707,0.0,SUNCARE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,59.372,41.965,17.407,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+91439,0.0,HAIRCARE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,252.086,234.914,17.172,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+387770,0.0,COUGH COLD,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-82.056,-99.101,17.045,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+841250,0.0,ORAL HEALTH,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-89.829,-106.726,16.897,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+65591,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,HOLD_FOR_REPLENISHMENT,42.067,25.962,16.105,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+64816,0.0,FRAGRANCE,AUTO_BLOCK_UNSAFE,BUYER_REVIEW_REQUIRED,46.031,30.113,15.918,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+330442,0.0,HAIRCARE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,61.442,45.663,15.779,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+65559,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,50.499,34.952,15.547,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+199957,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,13.809,-1.153,14.962,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+304565,0.0,VITAMIN SUPPLEMENT,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,31.328,16.524,14.804,current_soh,promo_start_soh_resolved,NO,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+192046,0.0,SKINCARE,WATCHLIST_ONLY,BLOCKED_UNSAFE,11.426,-3.31,14.736,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+189272,0.0,SKINCARE,WATCHLIST_ONLY,BUYER_REVIEW_REQUIRED,42.653,27.973,14.68,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+39545,0.0,FRAGRANCE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,40.211,25.747,14.464,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+94457,0.0,SKINCARE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,45.383,30.989,14.394,current_soh,promo_start_soh_resolved,NO,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+68327,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,39.317,24.928,14.389,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+591904,0.0,SKINCARE,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-80.61,-94.97,14.36,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+65560,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,40.394,26.146,14.248,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+88080,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,22.299,8.379,13.92,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+194019,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,HOLD_FOR_REPLENISHMENT,37.349,23.546,13.803,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+44022,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,38.261,24.459,13.802,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+195074,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,42.718,29.138,13.58,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+194049,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,39.467,26.113,13.354,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+199901,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,38.537,25.218,13.319,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+92334,0.0,SKINCARE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,65.524,52.251,13.273,current_soh,promo_start_soh_resolved,NO,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+7682,0.0,SKINCARE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,50.0,37.348,12.652,current_soh,promo_start_soh_resolved,NO,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+91439,0.0,HAIRCARE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,165.074,152.45,12.624,current_soh,promo_start_soh_resolved,NO,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+88081,0.0,SKINCARE,WATCHLIST_ONLY,BLOCKED_UNSAFE,25.058,12.633,12.425,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+188707,0.0,SKINCARE,AUTO_BLOCK_CAPITAL_RISK,BLOCKED_UNSAFE,27.044,14.76,12.284,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+194048,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-75.09,-86.946,11.856,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+59210,0.0,COLOUR COSMETICS,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-72.571,-84.292,11.721,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+199841,0.0,SKINCARE,WATCHLIST_ONLY,BUYER_REVIEW_REQUIRED,81.975,70.432,11.543,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+185219,0.0,FRAGRANCE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-72.189,-83.725,11.536,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+88081,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,HOLD_FOR_REPLENISHMENT,52.734,41.362,11.372,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+95116,0.0,VITAMIN SUPPLEMENT,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,40.856,29.49,11.366,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+668680,0.0,SKINCARE,WATCHLIST_ONLY,BLOCKED_UNSAFE,16.525,5.24,11.285,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+188715,0.0,SKINCARE,WATCHLIST_ONLY,BUYER_REVIEW_REQUIRED,146.162,134.923,11.239,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+94039,0.0,SKINCARE,WATCHLIST_ONLY,BLOCKED_UNSAFE,56.942,45.708,11.234,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+199846,0.0,SKINCARE,STANDARD_RUN_DOWN_REVIEW,BLOCKED_UNSAFE,14.964,3.943,11.021,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+445650,0.0,SKINCARE,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-88.739,-99.248,10.509,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+90152,0.0,COLOUR COSMETICS,WATCHLIST_ONLY,BUYER_REVIEW_REQUIRED,28.392,17.989,10.403,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+90015,0.0,SKINCARE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,66.382,56.226,10.156,current_soh,promo_start_soh_resolved,NO,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+73699,0.0,ORAL HEALTH,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,54.16,44.048,10.112,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+11494,0.0,ORAL HEALTH,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,103.912,94.003,9.909,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+65606,0.0,SKINCARE,HIGH_PRIORITY_BUY_REVIEW,BUYER_REVIEW_REQUIRED,35.191,25.299,9.892,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+26780,0.0,SUNCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,11.829,1.958,9.871,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+65560,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,41.982,32.15,9.832,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+63392,0.0,SKINCARE,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-84.921,-94.637,9.716,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+192181,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,43.078,33.484,9.594,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+196288,0.0,HAIRCARE,WATCHLIST_ONLY,BUYER_REVIEW_REQUIRED,192.725,183.215,9.51,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+688223,0.0,SKINCARE,WATCHLIST_ONLY,BUYER_REVIEW_REQUIRED,20.801,11.301,9.5,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+195639,0.0,ORAL HEALTH,AUTO_BLOCK_UNSAFE,HOLD_FOR_REPLENISHMENT,41.193,31.927,9.266,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+38449,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,19.571,10.355,9.216,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+94996,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,22.879,13.669,9.21,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+195106,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-83.458,-92.648,9.19,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+196227,0.0,NUTRITION WELLBEIN,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-73.19,-81.891,8.701,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+199803,0.0,BEAUTY ACCESSORIES,WATCHLIST_ONLY,BUYER_REVIEW_REQUIRED,28.541,19.888,8.653,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+11494,0.0,ORAL HEALTH,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,67.175,58.57,8.605,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+91442,0.0,HAIRCARE,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-2.831,-11.345,8.514,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+91155,0.0,ORAL HEALTH,WATCHLIST_ONLY,HOLD_FOR_REPLENISHMENT,34.398,26.339,8.059,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+192215,0.0,ALLERGY,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,29.491,21.693,7.798,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+92332,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BUYER_REVIEW_REQUIRED,34.338,26.543,7.795,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+44021,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,41.791,34.387,7.404,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+194021,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,22.263,14.886,7.377,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+195445,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-75.09,-82.383,7.293,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+97775,0.0,HAIRCARE,AUTO_BLOCK_UNSAFE,BUYER_REVIEW_REQUIRED,96.614,89.337,7.277,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+195446,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,62.9,55.638,7.262,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+65557,0.0,SKINCARE,STANDARD_RUN_DOWN_REVIEW,BLOCKED_UNSAFE,10.801,3.68,7.121,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+307831,0.0,SKINCARE,WATCHLIST_ONLY,BUYER_REVIEW_REQUIRED,118.637,111.568,7.069,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+367011,0.0,SKINCARE,WATCHLIST_ONLY,BLOCKED_UNSAFE,10.059,3.125,6.934,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+195445,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-74.226,-80.888,6.662,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+199844,0.0,SKINCARE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,39.679,33.17,6.509,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+60948,0.0,SKINCARE,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-74.202,-80.654,6.452,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+65583,0.0,SKINCARE,HIGH_PRIORITY_BUY_REVIEW,BUYER_REVIEW_REQUIRED,43.887,37.44,6.447,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+198463,0.0,SKINCARE,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-4.143,-10.515,6.372,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+188811,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,8.376,2.009,6.367,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+190283,0.0,HAIR ACC BRUSHES,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-68.217,-74.492,6.275,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+94565,0.0,COLOUR COSMETICS,WATCHLIST_ONLY,HOLD_FOR_REPLENISHMENT,29.578,23.315,6.263,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+55494,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,39.39,33.278,6.112,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+369403,0.0,INCONTINENCE,WATCHLIST_ONLY,BUYER_REVIEW_REQUIRED,31.84,25.738,6.102,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+775126,0.0,MENS GROOMING,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-74.132,-80.175,6.043,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+385395,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,5.292,-0.713,6.005,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+87452,0.0,SKINCARE,WATCHLIST_ONLY,BLOCKED_UNSAFE,7.387,1.55,5.837,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+65465,0.0,SKINCARE,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-68.288,-74.114,5.826,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+522252,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,39.56,33.788,5.772,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+90142,0.0,COLOUR COSMETICS,WATCHLIST_ONLY,BUYER_REVIEW_REQUIRED,32.533,26.871,5.662,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+74028,0.0,SKINCARE,WATCHLIST_ONLY,BUYER_REVIEW_REQUIRED,273.322,267.688,5.634,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+87550,0.0,SUNCARE,HIGH_PRIORITY_BUY_REVIEW,BLOCKED_UNSAFE,10.645,5.139,5.506,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+36999,0.0,SUNCARE,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-78.513,-83.922,5.409,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+194018,0.0,SKINCARE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,53.093,47.761,5.332,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+198463,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,20.721,15.411,5.31,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+87439,0.0,SKINCARE,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-60.276,-65.536,5.26,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+190284,0.0,HAIR ACC BRUSHES,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-68.217,-73.427,5.21,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+90014,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-1.18,-6.326,5.146,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+195143,0.0,SKINCARE,STANDARD_RUN_DOWN_REVIEW,BUYER_REVIEW_REQUIRED,-60.42,-65.507,5.087,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+92214,0.0,SKINCARE,WATCHLIST_ONLY,HOLD_FOR_REPLENISHMENT,11.632,6.565,5.067,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+198636,0.0,SUNCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,19.293,14.311,4.982,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+20525,0.0,ORAL HEALTH,WATCHLIST_ONLY,HOLD_FOR_REPLENISHMENT,-1.325,-6.226,4.901,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+199738,0.0,SKINCARE,STANDARD_BUY_REVIEW,BLOCKED_UNSAFE,25.78,20.904,4.876,current_soh,promo_start_soh_resolved,NO,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+93582,0.0,FRAGRANCE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,12.049,7.18,4.869,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+192760,0.0,SUNCARE,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-60.857,-65.702,4.845,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+94054,0.0,COLOUR COSMETICS,WATCHLIST_ONLY,HOLD_FOR_REPLENISHMENT,31.226,26.414,4.812,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+94508,0.0,FRAGRANCE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,4.175,-0.567,4.742,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+93580,0.0,FRAGRANCE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-69.154,-73.871,4.717,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+40898,0.0,COLOUR COSMETICS,AUTO_BLOCK_UNSAFE,BUYER_REVIEW_REQUIRED,-9.582,-14.264,4.682,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+73378,0.0,ORAL HEALTH,STANDARD_RUN_DOWN_REVIEW,BLOCKED_UNSAFE,0.383,-4.235,4.618,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+195698,0.0,COLOUR COSMETICS,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-35.409,-40.007,4.598,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+67890,0.0,SUNCARE,WATCHLIST_ONLY,BLOCKED_UNSAFE,-7.106,-11.703,4.597,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+87748,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-1.51,-6.048,4.538,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+192034,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-53.672,4.509,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+665877,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BUYER_REVIEW_REQUIRED,10.853,6.353,4.5,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+289140,0.0,MENS GROOMING,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-53.644,4.481,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+189553,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-83.458,-87.926,4.468,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+192981,0.0,ORAL HEALTH,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-9.772,-14.201,4.429,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+90322,0.0,HAIRCARE,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-53.585,4.422,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+417216,0.0,COLOUR COSMETICS,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-16.722,-21.138,4.416,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+193726,0.0,VITAMIN SUPPLEMENT,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-16.277,-20.652,4.375,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+92332,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BUYER_REVIEW_REQUIRED,17.38,13.013,4.367,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+90349,0.0,SKINCARE,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-53.478,4.315,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+90346,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,9.142,4.839,4.303,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+71203,0.0,HAIRCARE,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-39.682,-43.983,4.301,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+195639,0.0,ORAL HEALTH,AUTO_BLOCK_UNSAFE,HOLD_FOR_REPLENISHMENT,43.313,39.035,4.278,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+58219,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.167,-53.443,4.276,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+16316,0.0,SKINCARE,WATCHLIST_ONLY,BUYER_REVIEW_REQUIRED,45.384,41.151,4.233,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+71228,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-53.375,4.212,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+94453,0.0,FRAGRANCE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,0.869,-3.333,4.202,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+66258,0.0,COLOUR COSMETICS,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-74.202,-78.394,4.192,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+24553,0.0,SKINCARE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,31.207,27.021,4.186,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+41313,0.0,DEODORANTS,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-49.467,-53.652,4.185,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+195446,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-53.344,4.181,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+91439,0.0,HAIRCARE,HIGH_PRIORITY_BUY_REVIEW,BLOCKED_UNSAFE,12.401,8.227,4.174,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+42784,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,1.325,-2.838,4.163,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+335444,0.0,VITAMIN SUPPLEMENT,AUTO_BLOCK_UNSAFE,BUYER_REVIEW_REQUIRED,-9.582,-13.684,4.102,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+66937,0.0,VITAMIN SUPPLEMENT,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,0.493,-3.606,4.099,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+43328,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-53.255,4.092,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+43328,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-53.255,4.092,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+597575,0.0,COLOUR COSMETICS,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-16.722,-20.794,4.072,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+90014,0.0,SKINCARE,HIGH_PRIORITY_BUY_REVIEW,BLOCKED_UNSAFE,14.45,10.393,4.057,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+88144,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-0.5,-4.504,4.004,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+606421,0.0,VITAMIN SUPPLEMENT,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,8.86,4.885,3.975,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+445185,0.0,SMOKING CESSATION,WATCHLIST_ONLY,BLOCKED_UNSAFE,-7.106,-11.051,3.945,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+55681,0.0,HAIRCARE,AUTO_BLOCK_UNSAFE,HOLD_FOR_REPLENISHMENT,-1.061,-4.989,3.928,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+341835,0.0,HAIRCARE,WATCHLIST_ONLY,BLOCKED_UNSAFE,-10.839,-14.764,3.925,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+190871,0.0,COLOUR COSMETICS,WATCHLIST_ONLY,BLOCKED_UNSAFE,-7.106,-11.016,3.91,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+247596,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-60.648,-64.544,3.896,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+94039,0.0,SKINCARE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,51.177,47.284,3.893,current_soh,promo_start_soh_resolved,NO,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+613398,0.0,DEODORANTS,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-60.857,-64.728,3.871,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+195560,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-52.999,3.836,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+948829,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,21.086,17.271,3.815,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+196549,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,17.753,14.065,3.688,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+54088,0.0,FRAGRANCE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-25.696,-29.324,3.628,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+194040,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,19.379,15.756,3.623,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+193713,0.0,SKINCARE,HIGH_PRIORITY_BUY_REVIEW,BLOCKED_UNSAFE,15.433,11.849,3.584,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+192751,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-49.466,-53.038,3.572,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+93339,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-10.289,-13.827,3.538,current_soh,promo_start_soh_resolved,NO,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+87755,0.0,SKINCARE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,27.6,24.062,3.538,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+27875,0.0,COLOUR COSMETICS,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-52.679,3.516,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+94277,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,15.273,11.779,3.494,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+655035,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,2.037,-1.436,3.473,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+194018,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-68.66,-72.122,3.462,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+51690,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-52.617,3.454,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+91593,0.0,ORAL HEALTH,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,6.876,3.437,3.439,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+212849,0.0,ORAL HEALTH,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-52.565,3.402,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+199955,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-49.815,-53.215,3.4,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+92899,0.0,HAIRCARE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,50.9,47.502,3.398,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+26169,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.167,-52.543,3.376,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+57420,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-52.513,3.35,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+192748,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-49.466,-52.772,3.306,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+186358,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-52.416,3.253,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+336629,0.0,ORAL HEALTH,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-69.23,-72.442,3.212,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+57419,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,0.864,-2.332,3.196,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+386359,0.0,SUNCARE,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-60.857,-64.048,3.191,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+194048,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-75.09,-78.271,3.181,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+195445,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-61.512,-64.683,3.171,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+188851,0.0,SKINCARE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,31.975,28.816,3.159,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+194901,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-52.313,3.15,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+75453,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-52.308,3.145,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+72013,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,41.093,37.982,3.111,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+189553,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-72.426,-75.502,3.076,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+63836,0.0,HAIRCARE,WATCHLIST_ONLY,HOLD_FOR_REPLENISHMENT,-4.08,-7.136,3.056,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+72934,0.0,FRAGRANCE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,39.165,36.139,3.026,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+31685,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,15.713,12.69,3.023,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+59860,0.0,SKINCARE,STANDARD_BUY_REVIEW,BLOCKED_UNSAFE,6.661,3.662,2.999,current_soh,promo_start_soh_resolved,NO,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+188833,0.0,SKINCARE,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-2.294,-5.285,2.991,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+948829,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-28.41,-31.401,2.991,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+72934,0.0,FRAGRANCE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,33.669,30.697,2.972,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+44199,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,13.572,10.618,2.954,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+26169,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.167,-52.115,2.948,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+50394,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,13.814,10.951,2.863,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+655084,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-60.648,-63.504,2.856,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+39545,0.0,FRAGRANCE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,12.775,9.924,2.851,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+94920,0.0,ORAL HEALTH,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,8.994,6.166,2.828,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+199903,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,12.775,9.957,2.818,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+195639,0.0,ORAL HEALTH,AUTO_BLOCK_UNSAFE,HOLD_FOR_REPLENISHMENT,43.313,40.548,2.765,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+11189,0.0,ORAL HEALTH,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.467,-52.228,2.761,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+42514,0.0,ORAL HEALTH,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-49.896,-52.604,2.708,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+191317,0.0,HAIRCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,12.775,10.082,2.693,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+188698,0.0,SKINCARE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,8.547,5.901,2.646,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+88139,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-51.807,2.644,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+62854,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,13.814,11.176,2.638,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+192047,0.0,SKINCARE,AUTO_BLOCK_CAPITAL_RISK,BUYER_REVIEW_REQUIRED,7.785,5.17,2.615,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+88139,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,1.255,-1.343,2.598,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+94668,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,38.266,35.692,2.574,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+46535,0.0,FEMININE CARE,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-51.737,2.574,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+195102,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-49.466,-52.026,2.56,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+59972,0.0,SKINCARE,WATCHLIST_ONLY,BUYER_REVIEW_REQUIRED,13.228,10.695,2.533,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+88080,0.0,SKINCARE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,30.46,27.945,2.515,current_soh,promo_start_soh_resolved,NO,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+193456,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,13.358,10.852,2.506,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+87418,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-10.837,-13.34,2.503,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+193454,0.0,SKINCARE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,31.514,29.011,2.503,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+31874,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-51.66,2.497,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+65617,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,12.664,10.197,2.467,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+966436,0.0,HAIRCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-7.236,-9.672,2.436,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+95632,0.0,COLOUR COSMETICS,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.167,-51.603,2.436,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+60949,0.0,SKINCARE,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-68.288,-70.723,2.435,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+185219,0.0,FRAGRANCE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-49.555,-51.989,2.434,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+187203,0.0,HAIRCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,12.775,10.359,2.416,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+189900,0.0,COLOUR COSMETICS,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-51.573,2.41,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+65557,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-6.89,-9.294,2.404,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+90330,0.0,SKINCARE,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-75.144,-77.519,2.375,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+87462,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,12.775,10.404,2.371,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+192421,0.0,FRAGRANCE,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-51.528,2.365,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+41543,0.0,ORAL HEALTH,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-69.23,-71.584,2.354,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+186538,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-51.508,2.345,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+190137,0.0,HAIRCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,12.775,10.449,2.326,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+65610,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,12.664,10.348,2.316,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+194822,0.0,HAIRCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,12.775,10.469,2.306,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+65585,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,10.102,7.804,2.298,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+69756,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-49.904,-52.157,2.253,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+92333,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,12.775,10.523,2.252,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+65557,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,12.775,10.531,2.244,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+298557,0.0,HAIR REMOVAL,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-49.078,-51.309,2.231,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+91147,0.0,ORAL HEALTH,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.467,-51.684,2.217,current_soh,promo_start_soh_resolved,NO,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+195101,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,12.775,10.604,2.171,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+90140,0.0,COLOUR COSMETICS,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-7.976,-10.143,2.167,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+188636,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,9.519,7.36,2.159,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+87758,0.0,SKINCARE,WATCHLIST_ONLY,BUYER_REVIEW_REQUIRED,76.062,73.93,2.132,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+90811,0.0,SKINCARE,WATCHLIST_ONLY,BLOCKED_UNSAFE,10.102,7.995,2.107,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+51690,0.0,SKINCARE,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-61.218,-63.32,2.102,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+24552,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-12.136,-14.227,2.091,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+87452,0.0,SKINCARE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,54.034,51.943,2.091,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+922706,0.0,COLOUR COSMETICS,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-51.207,2.044,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+187119,0.0,HAIRCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,12.775,10.76,2.015,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+64711,0.0,SKINCARE,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-51.172,2.009,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+192032,0.0,SKINCARE,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-60.857,-62.864,2.007,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+184836,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,12.775,10.785,1.99,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+188992,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-51.124,-53.109,1.985,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+195287,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-49.904,-51.888,1.984,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+40356,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-51.145,1.982,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+69284,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,15.205,13.239,1.966,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+94903,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-15.062,-17.024,1.962,current_soh,promo_start_soh_resolved,NO,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+190840,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-51.116,1.953,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+698571,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.167,-51.114,1.947,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+55228,0.0,ORAL HEALTH,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,4.152,2.214,1.938,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+89304,0.0,FRAGRANCE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-6.413,-8.341,1.928,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+267575,0.0,FRAGRANCE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,51.152,49.226,1.926,current_soh,promo_start_soh_resolved,NO,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+188520,0.0,BEAUTY ACCESSORIES,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-51.084,1.921,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+195978,0.0,HAIRCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,12.775,10.887,1.888,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+94040,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,12.664,10.777,1.887,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+89753,0.0,TANNING,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,25.901,24.024,1.877,current_soh,promo_start_soh_resolved,NO,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+655118,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-51.036,1.873,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+52586,0.0,DEODORANTS,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-49.467,-51.328,1.861,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+91439,0.0,HAIRCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-8.268,-10.115,1.847,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+199535,0.0,FRAGRANCE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-0.63,-2.449,1.819,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+188716,0.0,SKINCARE,WATCHLIST_ONLY,BUYER_REVIEW_REQUIRED,30.577,28.762,1.815,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+60548,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,12.775,10.961,1.814,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+188359,0.0,COLOUR COSMETICS,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.167,-50.969,1.802,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+826074,0.0,HAIR ACC BRUSHES,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.467,-51.235,1.768,current_soh,promo_start_soh_resolved,NO,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+95645,0.0,COLOUR COSMETICS,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-50.914,1.751,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+90773,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,14.939,13.19,1.749,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+688711,0.0,SUNCARE,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-75.144,-76.889,1.745,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+20312,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,13.814,12.072,1.742,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+95602,0.0,FIRSTAID WOUNDCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-71.302,-73.02,1.718,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+16525,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,8.643,6.946,1.697,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+94902,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-31.117,-32.814,1.697,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+94039,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,15.252,13.575,1.677,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+26169,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.167,-50.832,1.665,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+90349,0.0,SKINCARE,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-50.796,1.633,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+193713,0.0,SKINCARE,HIGH_PRIORITY_BUY_REVIEW,BLOCKED_UNSAFE,7.596,5.983,1.613,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+587220,0.0,COLOUR COSMETICS,STANDARD_BUY_REVIEW,BLOCKED_UNSAFE,-24.755,-26.347,1.592,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+188705,0.0,SKINCARE,WATCHLIST_ONLY,BLOCKED_UNSAFE,-10.415,-12.007,1.592,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+188810,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,12.775,11.185,1.59,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+67891,0.0,SUNCARE,WATCHLIST_ONLY,BLOCKED_UNSAFE,14.699,13.112,1.587,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+62471,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,12.775,11.207,1.568,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+87452,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,12.775,11.216,1.559,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+63823,0.0,PAPER COTTON,WATCHLIST_ONLY,BLOCKED_UNSAFE,-13.799,-15.35,1.551,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+30845,0.0,ORAL HEALTH,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-71.302,-72.847,1.545,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+735078,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-7.976,-9.504,1.528,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+192210,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,8.643,7.16,1.483,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+186538,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-50.633,1.47,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+198652,0.0,SUNCARE,WATCHLIST_ONLY,BLOCKED_UNSAFE,11.654,10.194,1.46,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+188736,0.0,SKINCARE,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-75.144,-76.591,1.447,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+12005,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-21.19,-22.63,1.44,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+87651,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,13.814,12.378,1.436,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+188698,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-46.725,-48.16,1.435,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+199849,0.0,SKINCARE,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-8.92,-10.354,1.434,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+196613,0.0,BEAUTY ACCESSORIES,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-50.595,1.432,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+187272,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,13.814,12.383,1.431,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+342491,0.0,DEODORANTS,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-46.725,-48.155,1.43,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+43839,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-51.986,-53.416,1.43,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+195074,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,12.775,11.346,1.429,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+196470,0.0,BEAUTY ACCESSORIES,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-49.467,-50.895,1.428,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+194041,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-8.731,-10.156,1.425,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+94120,0.0,ORAL HEALTH,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,13.906,12.481,1.425,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+11838,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-34.68,-36.102,1.422,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+712124,0.0,DIGESTIVE CARE,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-46.725,-48.143,1.418,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+90914,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-50.572,1.409,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+70978,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-8.731,-10.136,1.405,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+58637,0.0,HAIRCARE,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-50.568,1.405,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+96228,0.0,COLOUR COSMETICS,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-46.725,-48.121,1.396,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+90804,0.0,HAIR REMOVAL,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-46.725,-48.115,1.39,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+94496,0.0,SKINCARE,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-8.632,-10.022,1.39,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+51409,0.0,TANNING,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-8.731,-10.12,1.389,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+89753,0.0,TANNING,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-8.731,-10.117,1.386,current_soh,promo_start_soh_resolved,NO,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+188711,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-46.729,-48.11,1.381,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+22488,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-8.731,-10.107,1.376,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+188979,0.0,VITAMIN SUPPLEMENT,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-46.725,-48.099,1.374,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+566748,0.0,COLOUR COSMETICS,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-46.725,-48.097,1.372,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+90374,0.0,SKINCARE,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-61.195,-62.566,1.371,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+67326,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,15.4,14.031,1.369,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+626171,0.0,ORAL HEALTH,WATCHLIST_ONLY,BUYER_REVIEW_REQUIRED,-9.749,-11.105,1.356,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+46889,0.0,COLOUR COSMETICS,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-51.124,-52.476,1.352,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+88131,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-2.061,-3.412,1.351,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+88129,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-29.041,-30.391,1.35,current_soh,promo_start_soh_resolved,NO,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+92186,0.0,COLOUR COSMETICS,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-46.725,-48.072,1.347,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+483796,0.0,SKINCARE,STANDARD_BUY_REVIEW,BLOCKED_UNSAFE,3.919,2.573,1.346,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+96594,0.0,COLOUR COSMETICS,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-46.725,-48.069,1.344,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+96595,0.0,COLOUR COSMETICS,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-46.725,-48.069,1.344,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+188710,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-46.725,-48.067,1.342,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+195258,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,6.262,4.927,1.335,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+43531,0.0,HAIRCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,12.775,11.446,1.329,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+94217,0.0,SKINCARE,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-11.201,-12.529,1.328,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+11838,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-68.66,-69.987,1.327,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+63109,0.0,COLOUR COSMETICS,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-50.477,1.314,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+96259,0.0,SUNCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-46.644,-47.953,1.309,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+188712,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-46.725,-48.031,1.306,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+2295,0.0,ALLERGY,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-46.725,-48.031,1.306,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+193712,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-46.733,-48.037,1.304,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+49692,0.0,SKINCARE,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-17.037,-18.339,1.302,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+96594,0.0,COLOUR COSMETICS,WATCHLIST_ONLY,HOLD_FOR_REPLENISHMENT,12.709,11.41,1.299,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+92901,0.0,HAIRCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-8.875,-10.172,1.297,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+93976,0.0,COLOUR COSMETICS,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,-5.355,-6.651,1.296,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+57316,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,14.407,13.118,1.289,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+10045,0.0,HAIRCARE,STANDARD_BUY_REVIEW,BUYER_REVIEW_REQUIRED,60.093,58.809,1.284,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+95583,0.0,GIFTING,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-71.302,-72.585,1.283,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+33087,0.0,HAIRCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-5.821,-7.103,1.282,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+193212,0.0,COLOUR COSMETICS,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-46.725,-48.007,1.282,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+90903,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-46.294,-47.57,1.276,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+92184,0.0,COLOUR COSMETICS,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-46.725,-47.997,1.272,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+91147,0.0,ORAL HEALTH,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.467,-50.738,1.271,current_soh,promo_start_soh_resolved,NO,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+46889,0.0,COLOUR COSMETICS,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-46.729,-47.998,1.269,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+65557,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-11.3,-12.566,1.266,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+192244,0.0,HAIRCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-11.3,-12.566,1.266,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+189774,0.0,ORAL HEALTH,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-11.3,-12.566,1.266,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+24924,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-11.3,-12.561,1.261,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+668038,0.0,COLOUR COSMETICS,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-8.731,-9.986,1.255,current_soh,promo_start_soh_resolved,NO,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+668988,0.0,COLOUR COSMETICS,STANDARD_BUY_REVIEW,BLOCKED_UNSAFE,-8.731,-9.986,1.255,current_soh,promo_start_soh_resolved,NO,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+55498,0.0,SKINCARE,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-50.412,1.249,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+92209,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-11.3,-12.547,1.247,current_soh,promo_start_soh_resolved,NO,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+95387,0.0,FRAGRANCE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-8.767,-10.014,1.247,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+186457,0.0,SKINCARE,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-8.632,-9.871,1.239,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+70977,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-8.731,-9.968,1.237,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+198633,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-3.968,-5.203,1.235,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+198633,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-3.968,-5.203,1.235,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+73683,0.0,ORAL HEALTH,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-50.397,1.234,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+91170,0.0,COLOUR COSMETICS,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-50.396,1.233,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+188861,0.0,SKINCARE,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-46.725,-47.958,1.233,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+195098,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-8.731,-9.964,1.233,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+75790,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-8.731,-9.96,1.229,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+200239,0.0,SUNCARE,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-46.725,-47.953,1.228,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+188990,0.0,SKINCARE,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-11.201,-12.426,1.225,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+190277,0.0,HAIR ACC BRUSHES,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-60.857,-62.081,1.224,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+37039,0.0,SUNCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-8.731,-9.95,1.219,current_soh,promo_start_soh_resolved,NO,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+192807,0.0,ORAL HEALTH,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.356,-50.573,1.217,current_soh,promo_start_soh_resolved,NO,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+199580,0.0,COLOUR COSMETICS,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-46.725,-47.939,1.214,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+192181,0.0,SKINCARE,HIGH_PRIORITY_BUY_REVIEW,BLOCKED_UNSAFE,-1.795,-3.008,1.213,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+193458,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-8.731,-9.943,1.212,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+94640,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-11.3,-12.512,1.212,current_soh,promo_start_soh_resolved,NO,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+958816,0.0,HAIRCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-8.731,-9.938,1.207,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+192035,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-44.991,-46.197,1.206,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+87822,0.0,ORAL HEALTH,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-44.991,-46.194,1.203,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+34860,0.0,BATH TOILETRIES,WATCHLIST_ONLY,BLOCKED_UNSAFE,12.775,11.577,1.198,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+107213,0.0,COLOUR COSMETICS,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-46.725,-47.923,1.198,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+194018,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-50.36,1.197,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+908150,0.0,COLOUR COSMETICS,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-8.731,-9.927,1.196,current_soh,promo_start_soh_resolved,NO,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+75495,0.0,HAIRCARE,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-50.359,1.196,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+68163,0.0,SUNCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-11.3,-12.492,1.192,current_soh,promo_start_soh_resolved,NO,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+67603,0.0,INCONTINENCE,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-50.35,1.187,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+190711,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-44.991,-46.178,1.187,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+67621,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-32.673,-33.857,1.184,current_soh,promo_start_soh_resolved,NO,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+654988,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-44.991,-46.168,1.177,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+184856,0.0,ORAL HEALTH,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-17.919,-19.094,1.175,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+188805,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,7.097,5.925,1.172,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+94903,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-49.904,-51.067,1.163,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+55533,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-49.555,-50.71,1.155,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+189356,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-8.731,-9.882,1.151,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+23677,0.0,ORAL HEALTH,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-17.526,-18.671,1.145,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+22455,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-44.991,-46.136,1.145,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+604887,0.0,DIGESTIVE CARE,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-44.991,-46.131,1.14,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+188992,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-49.466,-50.603,1.137,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+564834,0.0,VITAMIN SUPPLEMENT,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-44.991,-46.128,1.137,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+43837,0.0,HAIRCARE,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-46.918,-48.055,1.137,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+91533,0.0,HAIRCARE,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-46.918,-48.055,1.137,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+87757,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,12.775,11.645,1.13,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+94467,0.0,FRAGRANCE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-8.731,-9.858,1.127,current_soh,promo_start_soh_resolved,NO,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+49692,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-46.725,-47.847,1.122,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+92899,0.0,HAIRCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-11.445,-12.564,1.119,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+190266,0.0,HAIR ACC BRUSHES,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-44.991,-46.11,1.119,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+94276,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-11.3,-12.419,1.119,current_soh,promo_start_soh_resolved,NO,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+187763,0.0,HAIRCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-8.875,-9.993,1.118,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+372102,0.0,FRAGRANCE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-8.731,-9.835,1.104,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+10433,0.0,HAIRCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-8.731,-9.834,1.103,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+33550,0.0,HAIRCARE,STANDARD_RUN_DOWN_REVIEW,HOLD_FOR_REPLENISHMENT,-44.991,-46.093,1.102,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+185448,0.0,COLOUR COSMETICS,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-44.991,-46.088,1.097,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+195389,0.0,COLOUR COSMETICS,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-44.991,-46.088,1.097,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+63051,0.0,COLOUR COSMETICS,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-44.991,-46.088,1.097,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+91439,0.0,HAIRCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-11.445,-12.541,1.096,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+37849,0.0,SKINCARE,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-44.991,-46.086,1.095,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+69723,0.0,HAIRCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-8.875,-9.969,1.094,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+186808,0.0,DIGESTIVE CARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-49.815,-50.908,1.093,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+68454,0.0,HAIRCARE,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-46.725,-47.814,1.089,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+656089,0.0,FIRSTAID WOUNDCARE,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-46.725,-47.813,1.088,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+714836,0.0,HAIR REMOVAL,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-46.725,-47.813,1.088,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+46535,0.0,FEMININE CARE,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-46.725,-47.811,1.086,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+195445,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-49.163,-50.248,1.085,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+24359,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,14.539,13.456,1.083,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+191996,0.0,SKINCARE,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,12.775,11.693,1.082,current_soh,promo_start_soh_resolved,YES,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+195738,0.0,VITAMIN SUPPLEMENT,AUTO_BLOCK_UNSAFE,BLOCKED_UNSAFE,-11.445,-12.526,1.081,current_soh,promo_start_soh_resolved,YES,LOW,Review brain vs economic queue gap,constraint_blocked
+185438,0.0,COLOUR COSMETICS,HIGH_PRIORITY_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-44.991,-46.066,1.075,current_soh,promo_start_soh_resolved,NO,LOW,Review brain vs economic queue gap,
+102088,0.0,COLOUR COSMETICS,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-11.3,-12.37,1.07,current_soh,promo_start_soh_resolved,NO,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked
+199406,0.0,SKINCARE,STANDARD_BUY_REVIEW,HOLD_FOR_REPLENISHMENT,-11.3,-12.365,1.065,current_soh,promo_start_soh_resolved,NO,UNSAFE,Review brain vs economic queue gap,UNSAFE_blocked

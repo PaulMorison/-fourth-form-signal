@@ -17,6 +17,10 @@ from runtime.promotions.run_promotions_operational_cycle import (
     PromotionOperationalCycleArtifacts,
     run_operational_cycle,
 )
+from runtime.promotions.operator_progress import (
+    configure_operator_console_quiet,
+    resolve_operator_display_mode,
+)
 from runtime.promotions.smoke_support import (
     build_smoke_extraction_provider,
     smoke_synthetic_default_as_of_date,
@@ -29,7 +33,10 @@ LOGGER = logging.getLogger(__name__)
 def main(argv: list[str] | None = None) -> None:
     parser = _build_parser()
     args = parser.parse_args(argv)
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s %(message)s")
+    if resolve_operator_display_mode() == "operator":
+        configure_operator_console_quiet()
+    else:
+        logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s %(message)s")
     artifacts = run_system_smoke(
         settings=_build_settings(args),
         run_id=args.run_id,

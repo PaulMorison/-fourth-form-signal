@@ -1,0 +1,20 @@
+slice_dimension,slice_value,overrun_count,row_count,overrun_share
+promo_type,normal catalogue,267,1074,0.48545454545454547
+promo_type,sales event,125,546,0.22727272727272727
+promo_type,online promotion,105,358,0.19090909090909092
+promo_type,newlines,53,162,0.09636363636363636
+inferred_supplier_number,0.0,282,1351,0.5127272727272727
+inferred_supplier_number,99999.0,195,477,0.35454545454545455
+inferred_supplier_number,11764.0,22,35,0.04
+inferred_supplier_number,3707.0,8,94,0.014545454545454545
+inferred_supplier_number,4689.0,8,14,0.014545454545454545
+inferred_supplier_number,11813.0,7,26,0.012727272727272728
+inferred_supplier_number,12067.0,7,22,0.012727272727272728
+inferred_supplier_number,10865.0,6,24,0.01090909090909091
+inferred_supplier_number,12738.0,3,3,0.005454545454545455
+inferred_supplier_number,1099.0,2,8,0.0036363636363636364
+inferred_supplier_number,1248.0,2,24,0.0036363636363636364
+inferred_supplier_number,67454.0,2,6,0.0036363636363636364
+inferred_supplier_number,1345.0,1,30,0.0018181818181818182
+inferred_supplier_number,2808.0,1,1,0.0018181818181818182
+inferred_supplier_number,3152.0,1,4,0.0018181818181818182

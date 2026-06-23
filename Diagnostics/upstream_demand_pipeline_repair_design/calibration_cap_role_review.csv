@@ -1,0 +1,8 @@
+question,answer
+What does apply_allocation_aware_units_cap do today?,Caps raw model demand to probability/allocation upper bound when discipline/confidence thresholds met
+Is it demand calibration or order cap?,Behaves as ORDER/ALLOCATION RISK CAP using feature probability bounds — not statistical demand calibration
+Should it remain on demand path?,NO — split output: keep raw demand; emit allocation_cap_units separately
+Recommended disposition,Phase 3: rename output to allocation_cap_units; stop writing result to calibrated_predicted_units_sold unless recast as demand-only statistical calibration (separate future work)
+Interim demand field for Stage 11,raw_predicted_units_sold until flat-model fixed; then demand_repaired; never allocation cap
+Keep as diagnostic?,YES — allocation_cap_units + allocation_cap_applied_flag already partially exists in trainer replay
+Risk if removed immediately,Orders may increase where cap was suppressing over-allocation — acceptable if cap moves to order path only

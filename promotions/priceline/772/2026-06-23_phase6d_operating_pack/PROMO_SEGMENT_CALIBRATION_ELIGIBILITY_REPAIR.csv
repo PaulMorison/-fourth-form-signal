@@ -1,0 +1,9 @@
+block_reason,row_count,bias_pct,wape,calibration_factor_proposed,why_not_eligible,data_quality_fix_required,human_approval_required_flag,path_to_eligibility,expected_bias_impact_if_repaired
+not_segment_calibration_eligible,1597,-97.4782,1.002987,0.0,not segment calibration eligible,MAYBE,YES,Review segment factor bounds and sample size,29.24
+low_segment_factor_quality,1597,-97.4782,1.002987,0.0,low segment factor quality,MAYBE,YES,Review segment factor bounds and sample size,29.24
+calibration_eligible_flag_no,1597,-97.4782,1.002987,0.0,calibration eligible flag no,MAYBE,YES,Improve promo_demand_source_quality and demand_observation_quality to HIGH; clear stockout flags,29.24
+demand_quality_unsafe,1597,-97.4782,1.002987,0.0,demand quality unsafe,YES,YES,Improve promo_demand_source_quality and demand_observation_quality to HIGH; clear stockout flags,29.24
+observation_quality_low,1597,-97.4782,1.002987,0.0,observation quality low,YES,YES,Improve promo_demand_source_quality and demand_observation_quality to HIGH; clear stockout flags,29.24
+factor_out_of_bounds,1584,-100.0,1.0,0.0,factor out of bounds,MAYBE,YES,Review segment factor bounds and sample size,30.0
+zero_segment_adjusted_forecast,1584,-100.0,1.0,0.0,zero segment adjusted forecast,MAYBE,YES,Review segment factor bounds and sample size,30.0
+stockout_censored,64,-100.0,1.0,0.0,stockout censored,YES,YES,Improve promo_demand_source_quality and demand_observation_quality to HIGH; clear stockout flags,30.0

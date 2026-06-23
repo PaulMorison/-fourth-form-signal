@@ -1,0 +1,148 @@
+segment_key,segment_level,row_count,actual_units_total,forecast_units_total,raw_factor,shrunk_factor,factor_applied,sample_size_ok_flag,bias_before_pct,estimated_bias_after_pct,notes
+total,total,5672,14638.0,9873.315,1.482582,1.482582,1.4825820912226542,YES,-32.5501,0.0,
+ACHE PAIN SUPPORT|0-10|long,department+discount+promo_duration,4,11.0,5.467,2.012072,1.553181,1.5531808036739863,NO,-50.3,-22.8069,insufficient_sample_or_zero_totals
+ACHE PAIN SUPPORT|0-10|standard,department+discount+promo_duration,9,12.0,14.194999999999999,0.845368,1.291418,1.2914178900622686,NO,18.2917,52.764,insufficient_sample_or_zero_totals
+ALLERGY|0-10|long,department+discount+promo_duration,2,6.0,4.5440000000000005,1.320423,1.471771,1.4717714541552285,NO,-24.2667,11.4622,insufficient_sample_or_zero_totals
+ALLERGY|0-10|standard,department+discount+promo_duration,12,39.0,31.585999999999995,1.234724,1.383439,1.3834389527010464,NO,-19.0103,12.0444,insufficient_sample_or_zero_totals
+ANALGESICS|0-10|long,department+discount+promo_duration,5,6.0,9.247,0.648859,1.343628,1.3436282575912804,NO,54.1167,107.0755,insufficient_sample_or_zero_totals
+ANALGESICS|0-10|standard,department+discount+promo_duration,13,27.0,24.854,1.086344,1.310879,1.3108790268759065,NO,-7.9481,20.6688,insufficient_sample_or_zero_totals
+ANALGESICS|0-10|week,department+discount+promo_duration,2,3.0,8.176,0.366928,1.408205,1.4082051246714766,NO,172.5333,283.7828,insufficient_sample_or_zero_totals
+ANTI FUNGAL VIRAL|0-10|standard,department+discount+promo_duration,4,6.0,5.606999999999999,1.070091,1.427583,1.4275832734238212,NO,-6.55,33.4077,insufficient_sample_or_zero_totals
+BABY CARE|0-10|long,department+discount+promo_duration,5,10.0,8.519,1.173847,1.431126,1.4311261919558038,NO,-14.81,21.9176,insufficient_sample_or_zero_totals
+BABY CARE|0-10|standard,department+discount+promo_duration,8,10.0,12.36,0.809061,1.302977,1.3029765972094502,NO,23.6,61.0479,insufficient_sample_or_zero_totals
+BABY CARE|0-10|week,department+discount+promo_duration,1,1.0,1.4,0.714286,1.456972,1.4569722119914228,NO,40.0,103.9761,insufficient_sample_or_zero_totals
+BATH TOILETRIES|0-10|long,department+discount+promo_duration,14,31.0,22.851,1.356615,1.423797,1.4237972573985995,NO,-26.2871,4.9522,insufficient_sample_or_zero_totals
+BATH TOILETRIES|0-10|standard,department+discount+promo_duration,57,140.0,123.00200000000001,1.138193,1.138193,1.138192874912603,YES,-12.1414,0.0,
+BATH TOILETRIES|0-10|week,department+discount+promo_duration,1,1.0,1.394,0.71736,1.457075,1.4570746920078197,NO,39.4,103.1162,insufficient_sample_or_zero_totals
+BEAUTY ACCESSORIES|0-10|long,department+discount+promo_duration,86,205.0,154.34500000000003,1.328193,1.328193,1.3281933331173668,YES,-24.7098,0.0,
+BEAUTY ACCESSORIES|0-10|standard,department+discount+promo_duration,320,605.0,545.777,1.108511,1.108511,1.1085113517059164,YES,-9.7889,0.0,
+BEAUTY ACCESSORIES|0-10|week,department+discount+promo_duration,37,78.0,53.989999999999995,1.444712,1.444712,1.4447119837006854,YES,-30.7821,0.0,
+BEAUTY ELECTRICAL|0-10|long,department+discount+promo_duration,5,7.0,7.4,0.945946,1.393143,1.393142733676536,NO,5.7143,47.2751,insufficient_sample_or_zero_totals
+BEAUTY ELECTRICAL|0-10|standard,department+discount+promo_duration,15,23.0,22.003999999999994,1.045264,1.263923,1.263923294293385,NO,-4.3304,20.919,insufficient_sample_or_zero_totals
+COLOUR COSMETICS|0-10|long,department+discount+promo_duration,276,495.0,448.899,1.102698,1.102698,1.1026979342792032,YES,-9.3133,0.0,
+COLOUR COSMETICS|0-10|standard,department+discount+promo_duration,1269,2350.0,2026.7040000000002,1.159518,1.159518,1.1595181141400026,YES,-13.7573,0.0,
+COLOUR COSMETICS|0-10|week,department+discount+promo_duration,112,217.0,154.805,1.401764,1.401764,1.40176350893059,YES,-28.6613,0.0,
+COUGH COLD|0-10|long,department+discount+promo_duration,3,9.0,7.276,1.236943,1.458018,1.4580182196484923,NO,-19.1556,17.8727,insufficient_sample_or_zero_totals
+COUGH COLD|0-10|standard,department+discount+promo_duration,39,78.0,61.36999999999998,1.270979,1.270979,1.270979305849764,YES,-21.3205,0.0,
+DEODORANTS|0-10|long,department+discount+promo_duration,24,77.0,42.132,1.827589,1.758588,1.7585880027883456,NO,-45.2831,-3.7755,insufficient_sample_or_zero_totals
+DEODORANTS|0-10|standard,department+discount+promo_duration,111,305.0,182.68700000000004,1.669522,1.669522,1.6695221882235733,YES,-40.1026,0.0,
+DEODORANTS|0-10|week,department+discount+promo_duration,2,10.0,2.2750000000000004,4.395604,1.676784,1.6767835781814369,NO,-77.25,-61.8532,insufficient_sample_or_zero_totals
+DIGESTIVE CARE|0-10|long,department+discount+promo_duration,23,37.0,37.313,0.991612,1.106171,1.1061713066835832,NO,0.8459,11.5529,insufficient_sample_or_zero_totals
+DIGESTIVE CARE|0-10|standard,department+discount+promo_duration,53,92.0,83.55200000000002,1.101111,1.101111,1.1011106855610875,YES,-9.1826,0.0,
+EYES EARS|0-10|standard,department+discount+promo_duration,15,25.0,24.969000000000005,1.001242,1.241912,1.2419118153658224,NO,-0.124,24.0372,insufficient_sample_or_zero_totals
+FAMILY PLANNING|0-10|long,department+discount+promo_duration,3,4.0,5.193,0.770268,1.411351,1.4113506489018524,NO,29.825,83.2286,insufficient_sample_or_zero_totals
+FAMILY PLANNING|0-10|standard,department+discount+promo_duration,11,14.0,15.972,0.876534,1.260364,1.2603644337155782,NO,14.0857,43.7896,insufficient_sample_or_zero_totals
+FEMININE CARE|0-10|long,department+discount+promo_duration,21,76.0,46.406,1.637719,1.591178,1.5911781096751183,NO,-38.9395,-2.8418,insufficient_sample_or_zero_totals
+FEMININE CARE|0-10|standard,department+discount+promo_duration,96,324.0,181.278,1.78731,1.78731,1.7873100983020556,YES,-44.05,0.0,
+FEMININE CARE|0-10|week,department+discount+promo_duration,5,20.0,8.345999999999998,2.396358,1.634878,1.6348779987762874,NO,-58.27,-31.7765,insufficient_sample_or_zero_totals
+FIRSTAID WOUNDCARE|0-10|long,department+discount+promo_duration,6,24.0,10.485,2.288984,1.643863,1.6438625256247614,NO,-56.3125,-28.1838,insufficient_sample_or_zero_totals
+FIRSTAID WOUNDCARE|0-10|standard,department+discount+promo_duration,45,125.0,104.01400000000002,1.201761,1.201761,1.2017613013632777,YES,-16.7888,0.0,
+FIRSTAID WOUNDCARE|0-10|week,department+discount+promo_duration,1,1.0,1.167,0.856898,1.461726,1.4617259558197169,NO,16.7,70.5834,insufficient_sample_or_zero_totals
+FOOTCARE|0-10|long,department+discount+promo_duration,3,9.0,4.824,1.865672,1.520891,1.5208910462794933,NO,-46.4,-18.4802,insufficient_sample_or_zero_totals
+FOOTCARE|0-10|standard,department+discount+promo_duration,34,54.0,54.515,0.990553,0.990553,0.9905530587911584,YES,0.9537,0.0,
+FRAGRANCE|0-10|long,department+discount+promo_duration,4,10.0,6.328,1.580278,1.495608,1.4956082295863928,NO,-36.72,-5.3579,insufficient_sample_or_zero_totals
+FRAGRANCE|0-10|standard,department+discount+promo_duration,21,40.0,31.787000000000003,1.258376,1.325638,1.3256378733478575,NO,-20.5325,5.3451,insufficient_sample_or_zero_totals
+FRAGRANCE|0-10|week,department+discount+promo_duration,2,4.0,3.013,1.32758,1.472249,1.4722486507789359,NO,-24.675,10.8971,insufficient_sample_or_zero_totals
+GIFTING|0-10|standard,department+discount+promo_duration,5,16.0,6.959,2.299181,1.618682,1.6186818954852769,NO,-56.5063,-29.5975,insufficient_sample_or_zero_totals
+GIFTING|0-10|week,department+discount+promo_duration,1,1.0,1.324,0.755287,1.458339,1.4583389218173473,NO,32.4,93.0841,insufficient_sample_or_zero_totals
+HAIR ACC BRUSHES|0-10|long,department+discount+promo_duration,33,86.0,70.312,1.22312,1.22312,1.2231198088519741,YES,-18.2419,0.0,
+HAIR ACC BRUSHES|0-10|standard,department+discount+promo_duration,122,279.0,214.20000000000002,1.302521,1.302521,1.3025210084033612,YES,-23.2258,0.0,
+HAIR ACC BRUSHES|0-10|week,department+discount+promo_duration,6,9.0,7.234999999999999,1.243953,1.434856,1.4348562742220765,NO,-19.6111,15.3465,insufficient_sample_or_zero_totals
+HAIR REMOVAL|0-10|long,department+discount+promo_duration,16,28.0,23.973,1.167981,1.314795,1.3147946531797294,NO,-14.3821,12.5699,insufficient_sample_or_zero_totals
+HAIR REMOVAL|0-10|standard,department+discount+promo_duration,42,87.0,62.955,1.381939,1.381939,1.3819394805813676,YES,-27.6379,0.0,
+HAIR REMOVAL|0-10|week,department+discount+promo_duration,3,4.0,3.979,1.005278,1.434852,1.4348516528970714,NO,-0.525,42.7319,insufficient_sample_or_zero_totals
+HAIRCARE|0-10|long,department+discount+promo_duration,57,101.0,89.175,1.132604,1.132604,1.1326044294925708,YES,-11.7079,0.0,
+HAIRCARE|0-10|standard,department+discount+promo_duration,497,1222.0,794.8509999999999,1.537395,1.537395,1.5373950589481553,YES,-34.9549,0.0,
+HAIRCARE|0-10|week,department+discount+promo_duration,13,26.0,17.131999999999998,1.517628,1.497769,1.4977685784420007,NO,-34.1077,-1.3086,insufficient_sample_or_zero_totals
+INCONTINENCE|0-10|long,department+discount+promo_duration,7,17.0,13.718,1.239248,1.425804,1.425804067478312,NO,-19.3059,15.054,insufficient_sample_or_zero_totals
+INCONTINENCE|0-10|standard,department+discount+promo_duration,24,73.0,39.38999999999999,1.853262,1.779126,1.7791262176860136,NO,-46.0411,-4.0003,insufficient_sample_or_zero_totals
+INCONTINENCE|0-10|week,department+discount+promo_duration,1,2.0,2.007,0.996512,1.46638,1.466379761757717,NO,0.35,47.1512,insufficient_sample_or_zero_totals
+MENS GROOMING|0-10|long,department+discount+promo_duration,3,3.0,4.16,0.721154,1.406439,1.4064392667157735,NO,38.6667,95.0262,insufficient_sample_or_zero_totals
+MENS GROOMING|0-10|standard,department+discount+promo_duration,37,55.0,53.903,1.020351,1.020351,1.020351371908799,YES,-1.9945,0.0,
+NUTRITION WELLBEIN|0-10|long,department+discount+promo_duration,9,45.0,12.113,3.715017,2.152313,2.152312541045654,NO,-73.0822,-42.0645,insufficient_sample_or_zero_totals
+NUTRITION WELLBEIN|0-10|standard,department+discount+promo_duration,1,1.0,2.167,0.461467,1.448545,1.448544937066686,NO,116.7,213.8997,insufficient_sample_or_zero_totals
+ORAL HEALTH|0-10|long,department+discount+promo_duration,46,121.0,86.05499999999999,1.406078,1.406078,1.4060775085701007,YES,-28.8802,0.0,
+ORAL HEALTH|0-10|standard,department+discount+promo_duration,181,898.0,315.44,2.846817,2.846817,2.5,YES,-64.8731,-12.1826,
+ORAL HEALTH|0-10|week,department+discount+promo_duration,6,15.0,8.014000000000001,1.871724,1.560411,1.5604105694093686,NO,-46.5733,-16.6325,insufficient_sample_or_zero_totals
+PAPER COTTON|0-10|long,department+discount+promo_duration,3,8.0,5.116,1.563722,1.490696,1.4906960478548845,NO,-36.05,-4.67,insufficient_sample_or_zero_totals
+PAPER COTTON|0-10|standard,department+discount+promo_duration,15,95.0,48.414,1.962242,1.722412,1.7224122089111988,NO,-49.0379,-12.2222,insufficient_sample_or_zero_totals
+PAPER COTTON|0-10|week,department+discount+promo_duration,3,26.0,16.841,1.543851,1.488709,1.4887090136246452,NO,-35.2269,-3.5717,insufficient_sample_or_zero_totals
+SKINCARE|0-10|long,department+discount+promo_duration,121,362.0,268.868,1.346386,1.346386,1.3463855869794843,YES,-25.7271,0.0,
+SKINCARE|0-10|standard,department+discount+promo_duration,1090,3783.0,2179.9750000000004,1.735341,1.735341,1.7353410016169908,YES,-42.3744,0.0,
+SKINCARE|0-10|week,department+discount+promo_duration,111,490.0,181.183,2.704448,2.704448,2.5,YES,-63.0239,-7.5597,
+SMOKING CESSATION|0-10|standard,department+discount+promo_duration,4,5.0,6.619,0.755401,1.385625,1.3856246281254543,NO,32.38,83.429,insufficient_sample_or_zero_totals
+SNACKS BEVERAGES|0-10|standard,department+discount+promo_duration,8,25.0,28.866999999999997,0.866041,1.318171,1.3181710823213773,NO,15.468,52.2066,insufficient_sample_or_zero_totals
+SUNCARE|0-10|long,department+discount+promo_duration,43,106.0,66.47900000000001,1.594488,1.594488,1.5944884850855154,YES,-37.284,0.0,
+SUNCARE|0-10|standard,department+discount+promo_duration,107,423.0,194.419,2.175713,2.175713,2.1757132790519442,YES,-54.0381,-0.0,
+SUNCARE|0-10|week,department+discount+promo_duration,5,7.0,6.999,1.000143,1.402176,1.4021755556112012,NO,-0.0143,40.1975,insufficient_sample_or_zero_totals
+TANNING|0-10|long,department+discount+promo_duration,29,50.0,43.578,1.147368,1.158542,1.158541743059419,NO,-12.844,0.9739,insufficient_sample_or_zero_totals
+TANNING|0-10|standard,department+discount+promo_duration,52,114.0,88.93,1.281907,1.281907,1.2819071179579444,YES,-21.9912,0.0,
+TANNING|0-10|week,department+discount+promo_duration,3,14.0,4.667,2.999786,1.634302,1.6343024550594634,NO,-66.6643,-45.5194,insufficient_sample_or_zero_totals
+VITAMIN SUPPLEMENT|0-10|long,department+discount+promo_duration,24,58.0,40.826,1.420663,1.433047,1.4330470604823204,NO,-29.6103,0.8717,insufficient_sample_or_zero_totals
+VITAMIN SUPPLEMENT|0-10|standard,department+discount+promo_duration,165,362.0,260.444,1.389934,1.389934,1.3899341125155502,YES,-28.0541,0.0,
+ACHE PAIN SUPPORT|0-10,department+discount,13,23.0,19.662,1.169769,1.34703,1.3470297940520413,NO,-14.513,15.1535,insufficient_sample_or_zero_totals
+ALLERGY|0-10,department+discount,14,45.0,36.129999999999995,1.245502,1.371945,1.3719448798726745,NO,-19.7111,10.1519,insufficient_sample_or_zero_totals
+ANALGESICS|0-10,department+discount,20,36.0,42.276999999999994,0.851527,1.061879,1.0618785870222591,NO,17.4361,24.7029,insufficient_sample_or_zero_totals
+ANTI FUNGAL VIRAL|0-10,department+discount,4,6.0,5.606999999999999,1.070091,1.427583,1.4275832734238212,NO,-6.55,33.4077,insufficient_sample_or_zero_totals
+BABY CARE|0-10,department+discount,14,21.0,22.279,0.942592,1.230587,1.2305865651743677,NO,6.0905,30.5535,insufficient_sample_or_zero_totals
+BATH TOILETRIES|0-10,department+discount,72,172.0,147.247,1.168105,1.168105,1.1681052924677582,YES,-14.3913,0.0,
+BEAUTY ACCESSORIES|0-10,department+discount,443,888.0,754.112,1.177544,1.177544,1.1775439192056354,YES,-15.0775,0.0,
+BEAUTY ELECTRICAL|0-10,department+discount,20,30.0,29.403999999999993,1.020269,1.174374,1.1743735978133467,NO,-1.9867,15.1043,insufficient_sample_or_zero_totals
+COLOUR COSMETICS|0-10,department+discount,1657,3062.0,2630.4080000000004,1.164078,1.164078,1.1640779681327003,YES,-14.0951,0.0,
+COUGH COLD|0-10,department+discount,42,87.0,68.646,1.267372,1.267372,1.2673717332401013,YES,-21.0966,0.0,
+DEODORANTS|0-10,department+discount,137,392.0,227.094,1.726157,1.726157,1.7261574502188521,YES,-42.0679,0.0,
+DIGESTIVE CARE|0-10,department+discount,76,129.0,120.86500000000002,1.067306,1.067306,1.0673064989864722,YES,-6.3062,0.0,
+EYES EARS|0-10,department+discount,15,25.0,24.969000000000005,1.001242,1.241912,1.2419118153658224,NO,-0.124,24.0372,insufficient_sample_or_zero_totals
+FAMILY PLANNING|0-10,department+discount,14,18.0,21.164999999999996,0.850461,1.187592,1.1875920928760368,NO,17.5833,39.641,insufficient_sample_or_zero_totals
+FEMININE CARE|0-10,department+discount,122,420.0,236.03,1.779435,1.779435,1.779434817607931,YES,-43.8024,0.0,
+FIRSTAID WOUNDCARE|0-10,department+discount,52,150.0,115.666,1.296837,1.296837,1.2968374457489669,YES,-22.8893,0.0,
+FOOTCARE|0-10,department+discount,37,63.0,59.33899999999999,1.061696,1.061696,1.0616963548425151,YES,-5.8111,-0.0,
+FRAGRANCE|0-10,department+discount,27,54.0,41.12799999999999,1.312974,1.329935,1.3299349257143684,NO,-23.837,1.2918,insufficient_sample_or_zero_totals
+GIFTING|0-10,department+discount,6,17.0,8.283,2.052396,1.596545,1.5965449679195698,NO,-51.2765,-22.2107,insufficient_sample_or_zero_totals
+HAIR ACC BRUSHES|0-10,department+discount,161,374.0,291.74699999999996,1.281933,1.281933,1.2819326334118262,YES,-21.9928,0.0,
+HAIR REMOVAL|0-10,department+discount,61,119.0,90.90700000000001,1.30903,1.30903,1.3090301076924769,YES,-23.6076,0.0,
+HAIRCARE|0-10,department+discount,567,1349.0,901.158,1.496963,1.496963,1.4969627967570613,YES,-33.1981,0.0,
+INCONTINENCE|0-10,department+discount,32,92.0,55.114999999999995,1.669237,1.669237,1.6692370498049534,YES,-40.0924,0.0,
+MENS GROOMING|0-10,department+discount,40,58.0,58.063,0.998915,0.998915,0.9989149716687047,YES,0.1086,0.0,
+NUTRITION WELLBEIN|0-10,department+discount,10,46.0,14.28,3.221289,2.062151,2.062150899283824,NO,-68.9565,-35.9837,insufficient_sample_or_zero_totals
+ORAL HEALTH|0-10,department+discount,233,1034.0,409.509,2.524975,2.524975,2.5,YES,-60.3956,-0.9891,
+PAPER COTTON|0-10,department+discount,21,129.0,70.37100000000001,1.833141,1.727974,1.727973672427972,NO,-45.4488,-5.737,insufficient_sample_or_zero_totals
+SKINCARE|0-10,department+discount,1322,4635.0,2630.026,1.76234,1.76234,1.762339992076124,YES,-43.2573,0.0,
+SMOKING CESSATION|0-10,department+discount,4,5.0,6.619,0.755401,1.385625,1.3856246281254543,NO,32.38,83.429,insufficient_sample_or_zero_totals
+SNACKS BEVERAGES|0-10,department+discount,8,25.0,28.866999999999997,0.866041,1.318171,1.3181710823213773,NO,15.468,52.2066,insufficient_sample_or_zero_totals
+SUNCARE|0-10,department+discount,155,536.0,267.897,2.000769,2.000769,2.0007689522465726,YES,-50.0192,0.0,
+TANNING|0-10,department+discount,84,178.0,137.17500000000004,1.297613,1.297613,1.2976125387279018,YES,-22.9354,-0.0,
+VITAMIN SUPPLEMENT|0-10,department+discount,189,420.0,301.27000000000004,1.394098,1.394098,1.394098317124174,YES,-28.269,0.0,
+ACHE PAIN SUPPORT,department,13,23.0,19.662,1.169769,1.34703,1.3470297940520413,NO,-14.513,15.1535,insufficient_sample_or_zero_totals
+ALLERGY,department,14,45.0,36.129999999999995,1.245502,1.371945,1.3719448798726745,NO,-19.7111,10.1519,insufficient_sample_or_zero_totals
+ANALGESICS,department,20,36.0,42.276999999999994,0.851527,1.061879,1.0618785870222591,NO,17.4361,24.7029,insufficient_sample_or_zero_totals
+ANTI FUNGAL VIRAL,department,4,6.0,5.606999999999999,1.070091,1.427583,1.4275832734238212,NO,-6.55,33.4077,insufficient_sample_or_zero_totals
+BABY CARE,department,14,21.0,22.279,0.942592,1.230587,1.2305865651743677,NO,6.0905,30.5535,insufficient_sample_or_zero_totals
+BATH TOILETRIES,department,72,172.0,147.247,1.168105,1.168105,1.1681052924677582,YES,-14.3913,0.0,
+BEAUTY ACCESSORIES,department,443,888.0,754.112,1.177544,1.177544,1.1775439192056354,YES,-15.0775,0.0,
+BEAUTY ELECTRICAL,department,20,30.0,29.403999999999993,1.020269,1.174374,1.1743735978133467,NO,-1.9867,15.1043,insufficient_sample_or_zero_totals
+COLOUR COSMETICS,department,1657,3062.0,2630.4080000000004,1.164078,1.164078,1.1640779681327003,YES,-14.0951,0.0,
+COUGH COLD,department,42,87.0,68.646,1.267372,1.267372,1.2673717332401013,YES,-21.0966,0.0,
+DEODORANTS,department,137,392.0,227.094,1.726157,1.726157,1.7261574502188521,YES,-42.0679,0.0,
+DIGESTIVE CARE,department,76,129.0,120.86500000000002,1.067306,1.067306,1.0673064989864722,YES,-6.3062,0.0,
+EYES EARS,department,15,25.0,24.969000000000005,1.001242,1.241912,1.2419118153658224,NO,-0.124,24.0372,insufficient_sample_or_zero_totals
+FAMILY PLANNING,department,14,18.0,21.164999999999996,0.850461,1.187592,1.1875920928760368,NO,17.5833,39.641,insufficient_sample_or_zero_totals
+FEMININE CARE,department,122,420.0,236.03,1.779435,1.779435,1.779434817607931,YES,-43.8024,0.0,
+FIRSTAID WOUNDCARE,department,52,150.0,115.666,1.296837,1.296837,1.2968374457489669,YES,-22.8893,0.0,
+FOOTCARE,department,37,63.0,59.33899999999999,1.061696,1.061696,1.0616963548425151,YES,-5.8111,-0.0,
+FRAGRANCE,department,27,54.0,41.12799999999999,1.312974,1.329935,1.3299349257143684,NO,-23.837,1.2918,insufficient_sample_or_zero_totals
+GIFTING,department,6,17.0,8.283,2.052396,1.596545,1.5965449679195698,NO,-51.2765,-22.2107,insufficient_sample_or_zero_totals
+HAIR ACC BRUSHES,department,161,374.0,291.74699999999996,1.281933,1.281933,1.2819326334118262,YES,-21.9928,0.0,
+HAIR REMOVAL,department,61,119.0,90.90700000000001,1.30903,1.30903,1.3090301076924769,YES,-23.6076,0.0,
+HAIRCARE,department,567,1349.0,901.158,1.496963,1.496963,1.4969627967570613,YES,-33.1981,0.0,
+INCONTINENCE,department,32,92.0,55.114999999999995,1.669237,1.669237,1.6692370498049534,YES,-40.0924,0.0,
+MENS GROOMING,department,40,58.0,58.063,0.998915,0.998915,0.9989149716687047,YES,0.1086,0.0,
+NUTRITION WELLBEIN,department,10,46.0,14.28,3.221289,2.062151,2.062150899283824,NO,-68.9565,-35.9837,insufficient_sample_or_zero_totals
+ORAL HEALTH,department,233,1034.0,409.509,2.524975,2.524975,2.5,YES,-60.3956,-0.9891,
+PAPER COTTON,department,21,129.0,70.37100000000001,1.833141,1.727974,1.727973672427972,NO,-45.4488,-5.737,insufficient_sample_or_zero_totals
+SKINCARE,department,1322,4635.0,2630.026,1.76234,1.76234,1.762339992076124,YES,-43.2573,0.0,
+SMOKING CESSATION,department,4,5.0,6.619,0.755401,1.385625,1.3856246281254543,NO,32.38,83.429,insufficient_sample_or_zero_totals
+SNACKS BEVERAGES,department,8,25.0,28.866999999999997,0.866041,1.318171,1.3181710823213773,NO,15.468,52.2066,insufficient_sample_or_zero_totals
+SUNCARE,department,155,536.0,267.897,2.000769,2.000769,2.0007689522465726,YES,-50.0192,0.0,
+TANNING,department,84,178.0,137.17500000000004,1.297613,1.297613,1.2976125387279018,YES,-22.9354,-0.0,
+VITAMIN SUPPLEMENT,department,189,420.0,301.27000000000004,1.394098,1.394098,1.394098317124174,YES,-28.269,0.0,

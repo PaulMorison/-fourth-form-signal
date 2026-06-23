@@ -1,0 +1,4 @@
+data_issue,affected_rows,learning_blocked_value,recommended_fix,priority
+missing_filled_human_review_file,100,3744.0999999999995,Complete SHADOW_TOP_100_HUMAN_REVIEW_FILLED.csv for shadow_run_id keys,HIGH
+data_quality_blocked_learning,2,3744.0999999999995,Repair source quality before lesson-weighted training,HIGH
+unknown_basket_evidence,36,442.501,Improve basket attachment evidence coverage,MEDIUM

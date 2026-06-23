@@ -1,0 +1,5 @@
+risk,phase,likelihood,impact,mitigation
+Backtest export contract break,2,HIGH,LOW,Update pipeline test L128-130; keep policy_adjusted column
+Higher order units when demand uncapped,3,MEDIUM,MEDIUM,Caps remain on order reconciliation path
+Flat model visible to operators,3B/4,HIGH,HIGH,MODEL_DEMAND_COLLAPSED warning; customer_ready=NO gate
+Inflating demand via feature consensus,5,LOW,HIGH,Defer; no feature consensus as truth

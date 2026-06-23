@@ -1,0 +1,6 @@
+model_name,matrix_status,feature_count,row_count,leakage_check_passed,quality_check_passed,ready_for_phase6h_shadow_training_flag,blocker,shadow_mode
+uplift_model,READY,483,500,YES,YES,YES,,SHADOW_DRY_RUN_ONLY
+economic_value_model,READY,483,500,YES,YES,YES,,SHADOW_DRY_RUN_ONLY
+stock_exit_model,READY,483,500,YES,YES,YES,,SHADOW_DRY_RUN_ONLY
+action_classifier,READY,483,500,YES,YES,YES,,SHADOW_DRY_RUN_ONLY
+active_learning_model,READY,483,500,YES,YES,YES,,SHADOW_DRY_RUN_ONLY

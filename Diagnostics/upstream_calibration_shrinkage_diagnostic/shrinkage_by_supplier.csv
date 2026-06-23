@@ -1,0 +1,2 @@
+supplier,row_count,raw_p50,cal_p50,pol_p50,median_cal_over_raw,median_pol_over_raw,rows_raw_ge5_pol_lt1
+0,3531,0.0527796386427607,0.01148,0.0052266666666666,0.11889105683471755,0.07869196228199213,5

@@ -1,0 +1,9 @@
+exclusion_rule_id,condition,target_quality_label,target_weight,rationale,do_not_substitute_with
+EXCL_NEG_SOH,current_soh < 0,INVENTORY_INTEGRITY_CONTAMINATED,0.0,Negative SOH indicates corrupt inventory state,zero or median impute
+EXCL_MISSING_STOCK_BASIS_WITH_SALES,stock_basis_units is null AND actual_units_sold > 0,INVENTORY_INTEGRITY_CONTAMINATED,0.0,Cannot validate demand vs supply without stock basis,baseline or consensus
+EXCL_ZERO_STOCK_BASIS_WITH_SALES,stock_basis_units <= 0 AND actual_units_sold > 0,INVENTORY_INTEGRITY_CONTAMINATED,0.0,Sales with zero recorded stock is integrity failure not zero-demand label,zero target
+EXCL_NO_EVIDENCE_NO_SALES,actual_units_sold == 0 AND promo_sales_day_count == 0 AND stock_basis <= 0,INSUFFICIENT_EVIDENCE,0.0,Never-sold / no stock / no window activity — not informative zero,zero as training label
+EXCL_SPARSE_NO_HISTORY,feature_no_promo_history_flag == 1 AND actual_units_sold == 0 AND baseline_expected_units <= 0.01,INSUFFICIENT_EVIDENCE,0.0,Sparse SKU with no prior and no sales — exclude not train as flat zero,model leaf baseline reinforcement
+EXCL_UNREPAIRABLE_STOCKOUT,target_stockout_flag == 1 AND post_14d_units == 0 AND demand_reference_units is null,INSUFFICIENT_EVIDENCE,0.0,Stockout suspected but no repair ceiling available,feature consensus
+EXCL_REFUND_DOMINATED,actual_refund_units >= actual_units_sold AND actual_units_sold > 0,INVENTORY_INTEGRITY_CONTAMINATED,0.0,Net units unreliable for demand learning,raw gross sales
+EXCL_LEGACY_COMPARE,target_actual_units_sold_legacy retained,NA,NA,Keep legacy column for A/B; exclusion applies to new target only,NA

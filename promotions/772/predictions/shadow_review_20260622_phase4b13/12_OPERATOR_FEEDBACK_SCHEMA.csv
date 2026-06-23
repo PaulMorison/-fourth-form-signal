@@ -1,0 +1,15 @@
+field_name,required,allowed_values,description
+store_number,yes,772,Store identifier
+review_pack_id,yes,shadow_review_20260622_phase4b13,Delivery folder id
+promotion_row_key,yes,,Unique row key from decision sheet
+sku,yes,,SKU number
+sku_description,yes,,Product description
+shadow_action,yes,BUY|HOLD|REVIEW|DO_NOT_BUY,Shadow recommended action
+shadow_order_units,yes,,Shadow order quantity before operator change
+operator_decision,yes,ACCEPT|REJECT|REDUCE|NEEDS_MORE_EVIDENCE,Operator decision
+operator_recommended_units,conditional,,Required when operator_decision=REDUCE
+operator_notes,no,,Free text notes
+reviewed_by,yes,,Name or role of reviewer
+review_date,yes,YYYY-MM-DD,Date of review
+decision_reason,no,,Short reason code or text
+follow_up_required,no,YES|NO,Whether follow-up is needed

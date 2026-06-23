@@ -1,0 +1,2 @@
+total_scored_rows,unscorable_rows,brain_wins,human_wins,governed_wins,both_wrong,censored_outcomes,supplier_failures,long_tail_confirmations,mission_sku_confirmations,avg_brain_value_delta,avg_human_value_delta,top_lesson_label
+100,1,1,28,23,1,0,0,18,0,-0.75314,0.06727999999999999,BRAIN_WRONG_HUMAN_RIGHT

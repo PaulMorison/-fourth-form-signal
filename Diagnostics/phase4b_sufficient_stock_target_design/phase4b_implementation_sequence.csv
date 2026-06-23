@@ -1,0 +1,9 @@
+phase,step,layer,action,depends_on,patch_now,validation_gate
+4B.1,target_engineering,Add apply_ft_sufficient_stock_demand_target.py,Implement schema columns + rule engine as pure pandas module,Phase 4 diagnostic approval,NO,Unit tests per quality label + exclusion
+4B.2,target_engineering,Wire into PromotionTargetEngineer,Append new columns parallel to target_actual_units_sold; preserve legacy,4B.1,NO,test_promotions_target_engineering extended
+4B.3,diagnostics,Target quality slice inventory,Emit row counts by target_quality_label weight histogram repair drivers,4B.2,NO,Compare vs Phase 4 flat cohort SKU keys
+4B.4,trainer,Add trainer target mode flag sufficient_stock_demand,Switch units head label column behind config default legacy until approved,4B.3,NO,Shadow train on slice only — not full retrain yet
+4B.5,trainer,Enable sample_weight from target_weight,Pass weights to sklearn fit for units heads only,4B.4,NO,Verify zero-weight rows excluded from loss
+4B.6,backtest,Demand backtest on repaired cohort,Compare raw vs legacy vs sufficient-stock predictions vs realized AND repaired actuals,4B.5,NO,Gate: flat modal share drops without consensus inflation
+4B.7,actual_outcome,Integrate actual_stockout_flag when packet available,Upgrade stock_constrained_flag from heuristic to observed,actual_outcome_source contract,NO,Provenance-gated only
+4B.8,release,Customer-ready re-eval,Re-run Stage 11 only after 4B.6 passes; keep demand contract unchanged,4B.6,NO,tiny_model_demand_share gate

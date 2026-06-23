@@ -1,0 +1,501 @@
+sku_number,sku_description,department,feature_basket_3plus_attach_rate,feature_basket_5plus_attach_rate,feature_avg_basket_gp_when_present,feature_sister_club_attach_rate,mission_sku_score,basket_completion_sku_score,range_trust_sku_score,long_tail_mission_sku_flag,mission_sku_reason
+70978,0.0,SKINCARE,0.0,0.0,13.87,0.4,32.0,0.0,17.6,NO,standard_mission_profile
+35193,0.0,VITAMIN SUPPLEMENT,0.0,0.0,12.965,0.3966,32.0,0.0,17.6,NO,standard_mission_profile
+72934,0.0,FRAGRANCE,0.0,0.0,17.455,0.4035,32.0,0.0,17.6,NO,standard_mission_profile
+185219,0.0,FRAGRANCE,0.0,0.0,27.284,0.375,31.9,0.0,17.5,NO,standard_mission_profile
+185219,0.0,FRAGRANCE,0.0,0.0,27.284,0.375,31.9,0.0,17.5,NO,standard_mission_profile
+62855,0.0,SKINCARE,0.0,0.0,10.044,0.3714,31.9,0.0,17.5,NO,standard_mission_profile
+72934,0.0,FRAGRANCE,0.0,0.0,17.299,0.3673,31.8,0.0,17.5,NO,standard_mission_profile
+72934,0.0,FRAGRANCE,0.0,0.0,17.299,0.3673,31.8,0.0,17.5,NO,standard_mission_profile
+192083,0.0,SKINCARE,0.0,0.0,10.642,0.3467,31.7,0.0,17.4,NO,standard_mission_profile
+185220,0.0,FRAGRANCE,0.0,0.0,20.122,0.3333,31.7,0.0,17.4,NO,standard_mission_profile
+185220,0.0,FRAGRANCE,0.0,0.0,20.122,0.3333,31.7,0.0,17.4,NO,standard_mission_profile
+185220,0.0,FRAGRANCE,0.0,0.0,20.122,0.3333,31.7,0.0,17.4,NO,standard_mission_profile
+606421,0.0,VITAMIN SUPPLEMENT,0.0,0.0,17.315,0.3165,31.6,0.0,17.4,NO,standard_mission_profile
+57314,0.0,SKINCARE,0.0,0.0,9.817,0.3125,31.6,0.0,17.4,NO,standard_mission_profile
+655159,0.0,SKINCARE,0.0,0.0,9.34,0.3415,31.5,0.0,17.3,NO,standard_mission_profile
+655159,0.0,SKINCARE,0.0,0.0,9.34,0.3415,31.5,0.0,17.3,NO,standard_mission_profile
+195098,0.0,SKINCARE,0.0,0.0,10.793,0.2941,31.5,0.0,17.3,NO,standard_mission_profile
+57315,0.0,SKINCARE,0.0,0.0,10.442,0.2903,31.5,0.0,17.3,NO,standard_mission_profile
+70977,0.0,SKINCARE,0.0,0.0,12.724,0.303,31.5,0.0,17.3,NO,standard_mission_profile
+190839,0.0,SKINCARE,0.0,0.0,14.077,0.2778,31.4,0.0,17.3,NO,standard_mission_profile
+24924,0.0,SKINCARE,0.0,0.0,10.153,0.2667,31.3,0.0,17.2,NO,standard_mission_profile
+65589,0.0,SKINCARE,0.0,0.0,14.571,0.2683,31.3,0.0,17.2,NO,standard_mission_profile
+11895,0.0,SKINCARE,0.0,0.0,9.027,0.3793,31.2,0.0,17.2,NO,standard_mission_profile
+188719,0.0,SKINCARE,0.0,0.0,10.048,0.2333,31.2,0.0,17.2,NO,standard_mission_profile
+188857,0.0,SKINCARE,0.0,0.0,9.423,0.2667,31.2,0.0,17.2,NO,standard_mission_profile
+190840,0.0,SKINCARE,0.0,0.0,10.481,0.2105,31.1,0.0,17.1,NO,standard_mission_profile
+193713,0.0,SKINCARE,0.0,0.0,10.837,0.2297,31.1,0.0,17.1,NO,standard_mission_profile
+65559,0.0,SKINCARE,0.0,0.0,11.288,0.2286,31.1,0.0,17.1,NO,standard_mission_profile
+74931,0.0,SKINCARE,0.0,0.0,16.63,0.2188,31.1,0.0,17.1,NO,standard_mission_profile
+184704,0.0,SKINCARE,0.0,0.0,8.787,0.4211,31.0,0.0,17.0,NO,standard_mission_profile
+184704,0.0,SKINCARE,0.0,0.0,8.787,0.4211,31.0,0.0,17.0,NO,standard_mission_profile
+190840,0.0,SKINCARE,0.0,0.0,10.48,0.1905,31.0,0.0,17.0,NO,standard_mission_profile
+72014,0.0,SKINCARE,0.0,0.0,9.262,0.2745,31.0,0.0,17.0,NO,standard_mission_profile
+191867,0.0,VITAMIN SUPPLEMENT,0.0,0.0,9.587,0.2,31.0,0.0,17.0,NO,standard_mission_profile
+191867,0.0,VITAMIN SUPPLEMENT,0.0,0.0,9.565,0.1935,31.0,0.0,17.0,NO,standard_mission_profile
+447692,0.0,VITAMIN SUPPLEMENT,0.0,0.0,12.299,0.1944,31.0,0.0,17.0,NO,standard_mission_profile
+191867,0.0,VITAMIN SUPPLEMENT,0.0,0.0,9.467,0.2121,31.0,0.0,17.0,NO,standard_mission_profile
+65610,0.0,SKINCARE,0.0,0.0,13.033,0.1818,30.9,0.0,17.0,NO,standard_mission_profile
+304565,0.0,VITAMIN SUPPLEMENT,0.0,0.0,9.134,0.2973,30.9,0.0,17.0,NO,standard_mission_profile
+65557,0.0,SKINCARE,0.0,0.0,11.239,0.1695,30.8,0.0,16.9,NO,standard_mission_profile
+75790,0.0,SKINCARE,0.0,0.0,17.229,0.1579,30.8,0.0,16.9,NO,standard_mission_profile
+193714,0.0,SKINCARE,0.0,0.0,9.031,0.274,30.6,0.0,16.8,NO,standard_mission_profile
+606650,0.0,VITAMIN SUPPLEMENT,0.0,0.0,11.316,0.0882,30.4,0.0,16.7,NO,standard_mission_profile
+65591,0.0,SKINCARE,0.0,0.0,14.012,0.0732,30.4,0.0,16.7,NO,standard_mission_profile
+188951,0.0,SKINCARE,0.0,0.0,9.602,0.4062,30.2,0.0,16.6,NO,standard_mission_profile
+65590,0.0,SKINCARE,0.0,0.0,8.788,0.1163,29.5,0.0,16.2,NO,standard_mission_profile
+948845,0.0,SKINCARE,0.0,0.0,8.113,0.3226,29.4,0.0,16.2,NO,standard_mission_profile
+428868,0.0,ALLERGY,0.0,0.0,8.074,0.3158,29.3,0.0,16.1,NO,standard_mission_profile
+67319,0.0,COLOUR COSMETICS,0.0,0.0,7.987,0.3115,29.2,0.0,16.1,NO,standard_mission_profile
+948845,0.0,SKINCARE,0.0,0.0,8.102,0.2857,29.2,0.0,16.1,NO,standard_mission_profile
+349332,0.0,VITAMIN SUPPLEMENT,0.0,0.0,14.286,0.8182,29.0,0.0,16.0,NO,standard_mission_profile
+349332,0.0,VITAMIN SUPPLEMENT,0.0,0.0,14.286,0.8182,29.0,0.0,16.0,NO,standard_mission_profile
+70977,0.0,SKINCARE,0.0,0.0,12.794,0.3125,28.8,0.0,15.8,NO,standard_mission_profile
+698571,0.0,SKINCARE,0.0,0.0,7.679,0.3134,28.7,0.0,15.8,NO,standard_mission_profile
+698571,0.0,SKINCARE,0.0,0.0,7.644,0.3065,28.6,0.0,15.7,NO,standard_mission_profile
+184705,0.0,SKINCARE,0.0,0.0,7.715,0.25,28.4,0.0,15.6,NO,standard_mission_profile
+184705,0.0,SKINCARE,0.0,0.0,7.707,0.2368,28.4,0.0,15.6,NO,standard_mission_profile
+188721,0.0,SKINCARE,0.0,0.0,7.68,0.2615,28.4,0.0,15.6,NO,standard_mission_profile
+70977,0.0,SKINCARE,0.0,0.0,12.724,0.303,28.4,0.0,15.6,NO,standard_mission_profile
+28233,0.0,COUGH COLD,0.0,0.0,7.692,0.2571,28.4,0.0,15.6,NO,standard_mission_profile
+70977,0.0,SKINCARE,0.0,0.0,12.724,0.303,28.1,0.0,15.5,NO,standard_mission_profile
+194014,0.0,SKINCARE,0.0,0.0,10.452,0.6,28.0,0.0,15.4,NO,standard_mission_profile
+75790,0.0,SKINCARE,0.0,0.0,17.382,0.1667,28.0,0.0,15.4,NO,standard_mission_profile
+66937,0.0,VITAMIN SUPPLEMENT,0.0,0.0,10.815,0.5714,27.9,0.0,15.3,NO,standard_mission_profile
+196405,0.0,FRAGRANCE,0.0,0.0,41.852,0.5333,27.8,0.0,15.3,NO,standard_mission_profile
+203688,0.0,FRAGRANCE,0.0,0.0,19.345,0.5333,27.8,0.0,15.3,NO,standard_mission_profile
+20493,0.0,FRAGRANCE,0.0,0.0,19.351,0.5455,27.8,0.0,15.3,NO,standard_mission_profile
+70977,0.0,SKINCARE,0.0,0.0,12.724,0.303,27.8,0.0,15.3,NO,standard_mission_profile
+203688,0.0,FRAGRANCE,0.0,0.0,19.345,0.5333,27.8,0.0,15.3,NO,standard_mission_profile
+75790,0.0,SKINCARE,0.0,0.0,16.783,0.1707,27.8,0.0,15.3,NO,standard_mission_profile
+203688,0.0,FRAGRANCE,0.0,0.0,19.345,0.5333,27.8,0.0,15.3,NO,standard_mission_profile
+189741,0.0,ORAL HEALTH,0.0,0.0,9.421,0.5385,27.7,0.0,15.2,NO,standard_mission_profile
+835773,0.0,VITAMIN SUPPLEMENT,0.0,0.0,13.46,0.5263,27.7,0.0,15.2,NO,standard_mission_profile
+203688,0.0,FRAGRANCE,0.0,0.0,19.25,0.5,27.6,0.0,15.2,NO,standard_mission_profile
+188739,0.0,SKINCARE,0.0,0.0,9.815,0.5,27.6,0.0,15.2,NO,standard_mission_profile
+203688,0.0,FRAGRANCE,0.0,0.0,19.25,0.5,27.6,0.0,15.2,NO,standard_mission_profile
+203688,0.0,FRAGRANCE,0.0,0.0,19.25,0.5,27.6,0.0,15.2,NO,standard_mission_profile
+62818,0.0,VITAMIN SUPPLEMENT,0.0,0.0,15.269,0.5,27.6,0.0,15.2,NO,standard_mission_profile
+198630,0.0,SUNCARE,0.0,0.0,12.422,0.5,27.6,0.0,15.2,NO,standard_mission_profile
+188806,0.0,SKINCARE,0.0,0.0,10.596,0.5,27.6,0.0,15.2,NO,standard_mission_profile
+7682,0.0,SKINCARE,0.0,0.0,7.197,0.2368,27.6,0.0,15.2,NO,standard_mission_profile
+20493,0.0,FRAGRANCE,0.0,0.0,19.197,0.5,27.6,0.0,15.2,NO,standard_mission_profile
+24552,0.0,SKINCARE,0.0,0.0,6.619,0.4082,27.5,0.0,15.1,NO,standard_mission_profile
+585463,0.0,FRAGRANCE,0.0,0.0,15.506,0.4667,27.5,0.0,15.1,NO,standard_mission_profile
+187276,0.0,SKINCARE,0.0,0.0,19.525,0.4545,27.4,0.0,15.1,NO,standard_mission_profile
+16316,0.0,SKINCARE,0.0,0.0,6.301,0.48,27.4,0.0,15.1,NO,standard_mission_profile
+188806,0.0,SKINCARE,0.0,0.0,10.338,0.4545,27.4,0.0,15.1,NO,standard_mission_profile
+585463,0.0,FRAGRANCE,0.0,0.0,15.511,0.4375,27.4,0.0,15.1,NO,standard_mission_profile
+65559,0.0,SKINCARE,0.0,0.0,10.826,0.2258,27.4,0.0,15.1,NO,standard_mission_profile
+188704,0.0,SKINCARE,0.0,0.0,6.595,0.3962,27.4,0.0,15.1,NO,standard_mission_profile
+70983,0.0,SKINCARE,0.0,0.0,10.934,0.4375,27.4,0.0,15.1,NO,standard_mission_profile
+90014,0.0,SKINCARE,0.0,0.0,12.37,0.4444,27.4,0.0,15.1,NO,standard_mission_profile
+75790,0.0,SKINCARE,0.0,0.0,17.072,0.1538,27.4,0.0,15.1,NO,standard_mission_profile
+585463,0.0,FRAGRANCE,0.0,0.0,15.25,0.4286,27.3,0.0,15.0,NO,standard_mission_profile
+585463,0.0,FRAGRANCE,0.0,0.0,15.25,0.4286,27.3,0.0,15.0,NO,standard_mission_profile
+60343,0.0,SKINCARE,0.0,0.0,10.708,0.4286,27.3,0.0,15.0,NO,standard_mission_profile
+20488,0.0,FRAGRANCE,0.0,0.0,18.523,0.4286,27.3,0.0,15.0,NO,standard_mission_profile
+188738,0.0,SKINCARE,0.0,0.0,9.677,0.4286,27.3,0.0,15.0,NO,standard_mission_profile
+65610,0.0,SKINCARE,0.0,0.0,12.683,0.2,27.3,0.0,15.0,NO,standard_mission_profile
+67621,0.0,SKINCARE,0.0,0.0,7.025,0.2412,27.3,0.0,15.0,NO,standard_mission_profile
+92951,0.0,SKINCARE,0.0,0.0,11.133,0.4167,27.3,0.0,15.0,NO,standard_mission_profile
+7682,0.0,SKINCARE,0.0,0.0,7.131,0.2121,27.3,0.0,15.0,NO,standard_mission_profile
+95696,0.0,SKINCARE,0.0,0.0,14.288,0.4167,27.3,0.0,15.0,NO,standard_mission_profile
+60343,0.0,SKINCARE,0.0,0.0,10.666,0.4091,27.2,0.0,15.0,NO,standard_mission_profile
+60996,0.0,FRAGRANCE,0.0,0.0,18.836,0.4,27.2,0.0,15.0,NO,standard_mission_profile
+188805,0.0,SKINCARE,0.0,0.0,10.338,0.4,27.2,0.0,15.0,NO,standard_mission_profile
+188738,0.0,SKINCARE,0.0,0.0,9.698,0.3846,27.1,0.0,14.9,NO,standard_mission_profile
+115892,0.0,FRAGRANCE,0.0,0.0,19.707,0.375,27.1,0.0,14.9,NO,standard_mission_profile
+188715,0.0,SKINCARE,0.0,0.0,6.819,0.2712,27.1,0.0,14.9,NO,standard_mission_profile
+75790,0.0,SKINCARE,0.0,0.0,17.273,0.1622,27.1,0.0,14.9,NO,standard_mission_profile
+59210,0.0,COLOUR COSMETICS,0.0,0.0,6.509,0.3663,27.1,0.0,14.9,NO,standard_mission_profile
+115892,0.0,FRAGRANCE,0.0,0.0,19.707,0.375,27.1,0.0,14.9,NO,standard_mission_profile
+92332,0.0,SKINCARE,0.0,0.0,14.315,0.375,27.1,0.0,14.9,NO,standard_mission_profile
+115892,0.0,FRAGRANCE,0.0,0.0,19.568,0.3571,27.0,0.0,14.8,NO,standard_mission_profile
+115892,0.0,FRAGRANCE,0.0,0.0,19.568,0.3571,27.0,0.0,14.8,NO,standard_mission_profile
+42431,0.0,ORAL HEALTH,0.0,0.0,11.579,0.35,27.0,0.0,14.8,NO,standard_mission_profile
+92332,0.0,SKINCARE,0.0,0.0,14.997,0.3571,27.0,0.0,14.8,NO,standard_mission_profile
+92332,0.0,SKINCARE,0.0,0.0,14.997,0.3571,27.0,0.0,14.8,NO,standard_mission_profile
+95278,0.0,VITAMIN SUPPLEMENT,0.0,0.0,16.007,0.36,27.0,0.0,14.8,NO,standard_mission_profile
+191065,0.0,VITAMIN SUPPLEMENT,0.0,0.0,12.462,0.3478,27.0,0.0,14.8,NO,standard_mission_profile
+93581,0.0,FRAGRANCE,0.0,0.0,29.446,0.3636,27.0,0.0,14.8,NO,standard_mission_profile
+60996,0.0,FRAGRANCE,0.0,0.0,18.541,0.3636,27.0,0.0,14.8,NO,standard_mission_profile
+72013,0.0,SKINCARE,0.0,0.0,12.303,0.2188,27.0,0.0,14.8,NO,standard_mission_profile
+90125,0.0,VITAMIN SUPPLEMENT,0.0,0.0,11.426,0.3636,27.0,0.0,14.8,NO,standard_mission_profile
+653586,0.0,SKINCARE,0.0,0.0,10.802,0.3333,26.9,0.0,14.8,NO,standard_mission_profile
+653586,0.0,SKINCARE,0.0,0.0,10.824,0.32,26.9,0.0,14.8,NO,standard_mission_profile
+39545,0.0,FRAGRANCE,0.0,0.0,17.355,0.3182,26.9,0.0,14.8,NO,standard_mission_profile
+192119,0.0,SKINCARE,0.0,0.0,9.479,0.3333,26.9,0.0,14.8,NO,standard_mission_profile
+66820,0.0,SKINCARE,0.0,0.0,9.526,0.3333,26.9,0.0,14.8,NO,standard_mission_profile
+20488,0.0,FRAGRANCE,0.0,0.0,18.903,0.3182,26.9,0.0,14.8,NO,standard_mission_profile
+323608,0.0,SKINCARE,0.0,0.0,12.442,0.3,26.8,0.0,14.7,NO,standard_mission_profile
+185220,0.0,FRAGRANCE,0.0,0.0,19.947,0.3103,26.8,0.0,14.7,NO,standard_mission_profile
+185220,0.0,FRAGRANCE,0.0,0.0,19.947,0.3103,26.8,0.0,14.7,NO,standard_mission_profile
+185220,0.0,FRAGRANCE,0.0,0.0,19.947,0.3103,26.8,0.0,14.7,NO,standard_mission_profile
+39545,0.0,FRAGRANCE,0.0,0.0,17.277,0.3,26.8,0.0,14.7,NO,standard_mission_profile
+65589,0.0,SKINCARE,0.0,0.0,13.009,0.2895,26.8,0.0,14.7,NO,standard_mission_profile
+188710,0.0,SKINCARE,0.0,0.0,6.389,0.3478,26.8,0.0,14.7,NO,standard_mission_profile
+24358,0.0,SKINCARE,0.0,0.0,14.22,0.3158,26.8,0.0,14.7,NO,standard_mission_profile
+87452,0.0,SKINCARE,0.0,0.0,15.138,0.3077,26.8,0.0,14.7,NO,standard_mission_profile
+187119,0.0,HAIRCARE,0.0,0.0,8.906,0.5,26.8,0.0,14.7,NO,standard_mission_profile
+62854,0.0,SKINCARE,0.0,0.0,9.513,0.3077,26.8,0.0,14.7,NO,standard_mission_profile
+192197,0.0,SKINCARE,0.0,0.0,12.072,0.3,26.8,0.0,14.7,NO,standard_mission_profile
+192197,0.0,SKINCARE,0.0,0.0,12.072,0.3,26.8,0.0,14.7,NO,standard_mission_profile
+20488,0.0,FRAGRANCE,0.0,0.0,18.911,0.3043,26.8,0.0,14.7,NO,standard_mission_profile
+16728,0.0,FRAGRANCE,0.0,0.0,12.669,0.2727,26.7,0.0,14.7,NO,standard_mission_profile
+88081,0.0,SKINCARE,0.0,0.0,14.315,0.2778,26.7,0.0,14.7,NO,standard_mission_profile
+199243,0.0,SKINCARE,0.0,0.0,9.539,0.2778,26.7,0.0,14.7,NO,standard_mission_profile
+20558,0.0,SKINCARE,0.0,0.0,9.508,0.2727,26.7,0.0,14.7,NO,standard_mission_profile
+57316,0.0,SKINCARE,0.0,0.0,9.543,0.2857,26.7,0.0,14.7,NO,standard_mission_profile
+94457,0.0,SKINCARE,0.0,0.0,11.788,0.2941,26.7,0.0,14.7,NO,standard_mission_profile
+39309,0.0,VITAMIN SUPPLEMENT,0.0,0.0,12.258,0.2857,26.7,0.0,14.7,NO,standard_mission_profile
+194029,0.0,SKINCARE,0.0,0.0,11.264,0.5,26.7,0.0,14.7,NO,standard_mission_profile
+360759,0.0,SKINCARE,0.0,0.0,6.532,0.254,26.6,0.0,14.6,NO,standard_mission_profile
+190842,0.0,SKINCARE,0.0,0.0,10.988,0.2632,26.6,0.0,14.6,NO,standard_mission_profile
+16728,0.0,FRAGRANCE,0.0,0.0,12.807,0.25,26.6,0.0,14.6,NO,standard_mission_profile
+192615,0.0,HAIRCARE,0.0,0.0,8.123,0.6923,26.6,0.0,14.6,NO,standard_mission_profile
+192266,0.0,FRAGRANCE,0.0,0.0,25.589,0.2632,26.6,0.0,14.6,NO,standard_mission_profile
+188699,0.0,SKINCARE,0.0,0.0,6.241,0.3421,26.6,0.0,14.6,NO,standard_mission_profile
+87753,0.0,SKINCARE,0.0,0.0,10.216,0.2667,26.6,0.0,14.6,NO,standard_mission_profile
+90914,0.0,SKINCARE,0.0,0.0,10.2,0.25,26.6,0.0,14.6,NO,standard_mission_profile
+93336,0.0,SUNCARE,0.0,0.0,10.338,0.25,26.6,0.0,14.6,NO,standard_mission_profile
+192266,0.0,FRAGRANCE,0.0,0.0,25.589,0.2632,26.6,0.0,14.6,NO,standard_mission_profile
+194029,0.0,SKINCARE,0.0,0.0,11.264,0.5,26.6,0.0,14.6,NO,standard_mission_profile
+35194,0.0,VITAMIN SUPPLEMENT,0.0,0.0,13.266,0.25,26.6,0.0,14.6,NO,standard_mission_profile
+70983,0.0,SKINCARE,0.0,0.0,10.759,0.4706,26.6,0.0,14.6,NO,standard_mission_profile
+42506,0.0,ORAL HEALTH,0.0,0.0,13.507,0.2308,26.5,0.0,14.6,NO,standard_mission_profile
+16728,0.0,FRAGRANCE,0.0,0.0,13.045,0.2308,26.5,0.0,14.6,NO,standard_mission_profile
+70983,0.0,SKINCARE,0.0,0.0,11.02,0.4286,26.5,0.0,14.6,NO,standard_mission_profile
+65610,0.0,SKINCARE,0.0,0.0,12.94,0.1935,26.5,0.0,14.6,NO,standard_mission_profile
+16728,0.0,FRAGRANCE,0.0,0.0,13.045,0.2308,26.5,0.0,14.6,NO,standard_mission_profile
+195096,0.0,SKINCARE,0.0,0.0,10.179,0.2381,26.5,0.0,14.6,NO,standard_mission_profile
+192266,0.0,FRAGRANCE,0.0,0.0,20.376,0.24,26.5,0.0,14.6,NO,standard_mission_profile
+70983,0.0,SKINCARE,0.0,0.0,10.759,0.4706,26.5,0.0,14.6,NO,standard_mission_profile
+72013,0.0,SKINCARE,0.0,0.0,12.351,0.1935,26.5,0.0,14.6,NO,standard_mission_profile
+72867,0.0,SKINCARE,0.0,0.0,9.249,0.3158,26.5,0.0,14.6,NO,standard_mission_profile
+91441,0.0,HAIRCARE,0.0,0.0,9.0,0.375,26.4,0.0,14.5,NO,standard_mission_profile
+187118,0.0,HAIRCARE,0.0,0.0,9.071,0.3333,26.4,0.0,14.5,NO,standard_mission_profile
+194029,0.0,SKINCARE,0.0,0.0,11.264,0.5,26.4,0.0,14.5,NO,standard_mission_profile
+195099,0.0,SKINCARE,0.0,0.0,11.133,0.2,26.4,0.0,14.5,NO,standard_mission_profile
+24919,0.0,SKINCARE,0.0,0.0,9.543,0.2,26.4,0.0,14.5,NO,standard_mission_profile
+66822,0.0,SKINCARE,0.0,0.0,9.542,0.2,26.4,0.0,14.5,NO,standard_mission_profile
+65610,0.0,SKINCARE,0.0,0.0,12.954,0.1765,26.4,0.0,14.5,NO,standard_mission_profile
+36724,0.0,VITAMIN SUPPLEMENT,0.0,0.0,18.915,0.2143,26.4,0.0,14.5,NO,standard_mission_profile
+193413,0.0,SKINCARE,0.0,0.0,11.845,0.2,26.4,0.0,14.5,NO,standard_mission_profile
+92332,0.0,SKINCARE,0.0,0.0,13.534,0.1818,26.3,0.0,14.5,NO,standard_mission_profile
+199957,0.0,SKINCARE,0.0,0.0,11.133,0.1875,26.3,0.0,14.5,NO,standard_mission_profile
+65589,0.0,SKINCARE,0.0,0.0,14.337,0.2791,26.3,0.0,14.5,NO,standard_mission_profile
+192198,0.0,SKINCARE,0.0,0.0,6.588,0.1528,26.2,0.0,14.4,NO,standard_mission_profile
+24925,0.0,SKINCARE,0.0,0.0,10.225,0.1579,26.2,0.0,14.4,NO,standard_mission_profile
+47723,0.0,SKINCARE,0.0,0.0,9.542,0.1538,26.2,0.0,14.4,NO,standard_mission_profile
+65560,0.0,SKINCARE,0.0,0.0,9.16,0.28,26.2,0.0,14.4,NO,standard_mission_profile
+72013,0.0,SKINCARE,0.0,0.0,13.063,0.1538,26.2,0.0,14.4,NO,standard_mission_profile
+196549,0.0,SKINCARE,0.0,0.0,8.777,0.4,26.2,0.0,14.4,NO,standard_mission_profile
+195092,0.0,SKINCARE,0.0,0.0,10.339,0.1333,26.1,0.0,14.4,NO,standard_mission_profile
+26485,0.0,VITAMIN SUPPLEMENT,0.0,0.0,15.889,0.1429,26.1,0.0,14.4,NO,standard_mission_profile
+70983,0.0,SKINCARE,0.0,0.0,10.921,0.4,26.1,0.0,14.4,NO,standard_mission_profile
+26485,0.0,VITAMIN SUPPLEMENT,0.0,0.0,15.889,0.1429,26.1,0.0,14.4,NO,standard_mission_profile
+66823,0.0,SKINCARE,0.0,0.0,8.597,0.4286,26.1,0.0,14.4,NO,standard_mission_profile
+188712,0.0,SKINCARE,0.0,0.0,6.174,0.254,26.0,0.0,14.3,NO,standard_mission_profile
+228486,0.0,ALLERGY,0.0,0.0,10.146,0.125,26.0,0.0,14.3,NO,standard_mission_profile
+20493,0.0,FRAGRANCE,0.0,0.0,19.351,0.5455,25.9,0.0,14.2,NO,standard_mission_profile
+92334,0.0,SKINCARE,0.0,0.0,9.43,0.1176,25.9,0.0,14.2,NO,standard_mission_profile
+65583,0.0,SKINCARE,0.0,0.0,10.755,0.0952,25.9,0.0,14.2,NO,standard_mission_profile
+92334,0.0,SKINCARE,0.0,0.0,9.43,0.1176,25.9,0.0,14.2,NO,standard_mission_profile
+65583,0.0,SKINCARE,0.0,0.0,10.989,0.0909,25.9,0.0,14.2,NO,standard_mission_profile
+92334,0.0,SKINCARE,0.0,0.0,8.997,0.2381,25.9,0.0,14.2,NO,standard_mission_profile
+186512,0.0,SUNCARE,0.0,0.0,8.015,0.5455,25.8,0.0,14.2,NO,standard_mission_profile
+18253,0.0,TANNING,0.0,0.0,10.276,0.0769,25.8,0.0,14.2,NO,standard_mission_profile
+188708,0.0,SKINCARE,0.0,0.0,8.368,0.4138,25.8,0.0,14.2,NO,standard_mission_profile
+87755,0.0,SKINCARE,0.0,0.0,11.675,0.0769,25.8,0.0,14.2,NO,standard_mission_profile
+65589,0.0,SKINCARE,0.0,0.0,14.337,0.2791,25.8,0.0,14.2,NO,standard_mission_profile
+39545,0.0,FRAGRANCE,0.0,0.0,17.355,0.3182,25.8,0.0,14.2,NO,standard_mission_profile
+194041,0.0,SKINCARE,0.0,0.0,10.114,0.4286,25.7,0.0,14.1,NO,standard_mission_profile
+195978,0.0,HAIRCARE,0.0,0.0,8.813,0.25,25.7,0.0,14.1,NO,standard_mission_profile
+39545,0.0,FRAGRANCE,0.0,0.0,17.355,0.3182,25.7,0.0,14.1,NO,standard_mission_profile
+65610,0.0,SKINCARE,0.0,0.0,13.175,0.1714,25.7,0.0,14.1,NO,standard_mission_profile
+188707,0.0,SKINCARE,0.0,0.0,5.834,0.2676,25.6,0.0,14.1,NO,standard_mission_profile
+192047,0.0,SKINCARE,0.0,0.0,5.864,0.2692,25.6,0.0,14.1,NO,standard_mission_profile
+187117,0.0,HAIRCARE,0.0,0.0,8.759,0.2632,25.6,0.0,14.1,NO,standard_mission_profile
+234915,0.0,SKINCARE,0.0,0.0,5.639,0.3333,25.6,0.0,14.1,NO,standard_mission_profile
+65560,0.0,SKINCARE,0.0,0.0,9.118,0.2667,25.6,0.0,14.1,NO,standard_mission_profile
+725706,0.0,COUGH COLD,0.0,0.0,8.248,0.4167,25.6,0.0,14.1,NO,standard_mission_profile
+65617,0.0,SKINCARE,0.0,0.0,12.702,0.0,25.5,0.0,14.0,NO,standard_mission_profile
+1485,0.0,SKINCARE,0.0,0.0,5.595,0.3289,25.5,0.0,14.0,NO,standard_mission_profile
+65617,0.0,SKINCARE,0.0,0.0,12.702,0.0,25.5,0.0,14.0,NO,standard_mission_profile
+39545,0.0,FRAGRANCE,0.0,0.0,17.355,0.3182,25.5,0.0,14.0,NO,standard_mission_profile
+65617,0.0,SKINCARE,0.0,0.0,12.702,0.0,25.5,0.0,14.0,NO,standard_mission_profile
+90015,0.0,SKINCARE,0.0,0.0,11.133,0.0,25.5,0.0,14.0,NO,standard_mission_profile
+186512,0.0,SUNCARE,0.0,0.0,7.478,0.625,25.5,0.0,14.0,NO,standard_mission_profile
+51977,0.0,FOOTCARE,0.0,0.0,8.906,0.1818,25.5,0.0,14.0,NO,standard_mission_profile
+65617,0.0,SKINCARE,0.0,0.0,12.702,0.0,25.5,0.0,14.0,NO,standard_mission_profile
+188951,0.0,SKINCARE,0.0,0.0,9.643,0.4211,25.4,0.0,14.0,NO,standard_mission_profile
+20493,0.0,FRAGRANCE,0.0,0.0,19.351,0.5455,25.4,0.0,14.0,NO,standard_mission_profile
+72014,0.0,SKINCARE,0.0,0.0,9.244,0.2917,25.4,0.0,14.0,NO,standard_mission_profile
+188706,0.0,SKINCARE,0.0,0.0,5.713,0.2818,25.4,0.0,14.0,NO,standard_mission_profile
+198294,0.0,SKINCARE,0.0,0.0,8.747,0.2,25.4,0.0,14.0,NO,standard_mission_profile
+197635,0.0,VITAMIN SUPPLEMENT,0.0,0.0,8.308,0.3333,25.3,0.0,13.9,NO,standard_mission_profile
+70983,0.0,SKINCARE,0.0,0.0,11.02,0.4286,25.2,0.0,13.9,NO,standard_mission_profile
+192197,0.0,SKINCARE,0.0,0.0,12.072,0.3,25.2,0.0,13.9,NO,standard_mission_profile
+922706,0.0,COLOUR COSMETICS,0.0,0.0,5.447,0.3143,25.2,0.0,13.9,NO,standard_mission_profile
+55834,0.0,ALLERGY,0.0,0.0,8.553,0.2105,25.1,0.0,13.8,NO,standard_mission_profile
+188736,0.0,SKINCARE,0.0,0.0,5.693,0.2245,25.1,0.0,13.8,NO,standard_mission_profile
+188736,0.0,SKINCARE,0.0,0.0,5.718,0.2143,25.1,0.0,13.8,NO,standard_mission_profile
+65589,0.0,SKINCARE,0.0,0.0,12.931,0.275,25.1,0.0,13.8,NO,standard_mission_profile
+92331,0.0,SKINCARE,0.0,0.0,8.771,0.1429,25.1,0.0,13.8,NO,standard_mission_profile
+92331,0.0,SKINCARE,0.0,0.0,8.614,0.1538,25.0,0.0,13.8,NO,standard_mission_profile
+65559,0.0,SKINCARE,0.0,0.0,11.034,0.25,25.0,0.0,13.8,NO,standard_mission_profile
+192805,0.0,ORAL HEALTH,0.0,0.0,5.674,0.2105,25.0,0.0,13.8,NO,standard_mission_profile
+92331,0.0,SKINCARE,0.0,0.0,8.614,0.1538,25.0,0.0,13.8,NO,standard_mission_profile
+192805,0.0,ORAL HEALTH,0.0,0.0,5.676,0.2,25.0,0.0,13.8,NO,standard_mission_profile
+92331,0.0,SKINCARE,0.0,0.0,8.614,0.1538,25.0,0.0,13.8,NO,standard_mission_profile
+65559,0.0,SKINCARE,0.0,0.0,11.218,0.2222,25.0,0.0,13.8,NO,standard_mission_profile
+206474,0.0,SUNCARE,0.0,0.0,5.309,0.3,24.9,0.0,13.7,NO,standard_mission_profile
+606650,0.0,VITAMIN SUPPLEMENT,0.0,0.0,11.377,0.1143,24.9,0.0,13.7,NO,standard_mission_profile
+195134,0.0,SKINCARE,0.0,0.0,7.514,0.45,24.8,0.0,13.6,NO,standard_mission_profile
+60996,0.0,FRAGRANCE,0.0,0.0,18.836,0.4,24.8,0.0,13.6,NO,standard_mission_profile
+68443,0.0,SKINCARE,0.0,0.0,8.479,0.1579,24.8,0.0,13.6,NO,standard_mission_profile
+61392,0.0,COLOUR COSMETICS,0.0,0.0,5.387,0.25,24.8,0.0,13.6,NO,standard_mission_profile
+27160,0.0,SKINCARE,0.0,0.0,5.567,0.1923,24.8,0.0,13.6,NO,standard_mission_profile
+68443,0.0,SKINCARE,0.0,0.0,8.479,0.1579,24.8,0.0,13.6,NO,standard_mission_profile
+198940,0.0,BEAUTY ACCESSORIES,0.0,0.0,7.583,0.4167,24.7,0.0,13.6,NO,standard_mission_profile
+192805,0.0,ORAL HEALTH,0.0,0.0,5.615,0.1714,24.7,0.0,13.6,NO,standard_mission_profile
+44019,0.0,SKINCARE,0.0,0.0,15.183,0.2727,24.7,0.0,13.6,NO,standard_mission_profile
+606987,0.0,VITAMIN SUPPLEMENT,0.0,0.0,8.137,0.25,24.7,0.0,13.6,NO,standard_mission_profile
+606987,0.0,VITAMIN SUPPLEMENT,0.0,0.0,8.137,0.25,24.7,0.0,13.6,NO,standard_mission_profile
+606987,0.0,VITAMIN SUPPLEMENT,0.0,0.0,7.923,0.2727,24.6,0.0,13.5,NO,standard_mission_profile
+606987,0.0,VITAMIN SUPPLEMENT,0.0,0.0,7.923,0.2727,24.6,0.0,13.5,NO,standard_mission_profile
+606987,0.0,VITAMIN SUPPLEMENT,0.0,0.0,7.923,0.2727,24.6,0.0,13.5,NO,standard_mission_profile
+185142,0.0,SKINCARE,0.0,0.0,10.561,0.5,24.6,0.0,13.5,NO,standard_mission_profile
+483753,0.0,SKINCARE,0.0,0.0,13.087,0.2,24.6,0.0,13.5,NO,standard_mission_profile
+606987,0.0,VITAMIN SUPPLEMENT,0.0,0.0,7.923,0.2727,24.6,0.0,13.5,NO,standard_mission_profile
+188709,0.0,SKINCARE,0.0,0.0,4.73,0.4167,24.6,0.0,13.5,NO,standard_mission_profile
+203688,0.0,FRAGRANCE,0.0,0.0,19.345,0.5333,24.6,0.0,13.5,NO,standard_mission_profile
+199244,0.0,SKINCARE,0.0,0.0,5.033,0.3,24.5,0.0,13.5,NO,standard_mission_profile
+44019,0.0,SKINCARE,0.0,0.0,15.183,0.2727,24.5,0.0,13.5,NO,standard_mission_profile
+72707,0.0,COLOUR COSMETICS,0.0,0.0,7.664,0.3077,24.4,0.0,13.4,NO,standard_mission_profile
+74931,0.0,SKINCARE,0.0,0.0,16.729,0.2,24.4,0.0,13.4,NO,standard_mission_profile
+188705,0.0,SKINCARE,0.0,0.0,5.322,0.2073,24.4,0.0,13.4,NO,standard_mission_profile
+90912,0.0,SKINCARE,0.0,0.0,6.945,0.5417,24.4,0.0,13.4,NO,standard_mission_profile
+20493,0.0,FRAGRANCE,0.0,0.0,19.197,0.5,24.4,0.0,13.4,NO,standard_mission_profile
+63369,0.0,SKINCARE,0.0,0.0,4.934,0.3158,24.4,0.0,13.4,NO,standard_mission_profile
+65559,0.0,SKINCARE,0.0,0.0,11.218,0.2222,24.4,0.0,13.4,NO,standard_mission_profile
+63369,0.0,SKINCARE,0.0,0.0,4.934,0.3158,24.4,0.0,13.4,NO,standard_mission_profile
+75006,0.0,SKINCARE,0.0,0.0,5.423,0.1628,24.4,0.0,13.4,NO,standard_mission_profile
+195241,0.0,SKINCARE,0.0,0.0,9.224,0.4545,24.3,0.0,13.4,NO,standard_mission_profile
+92334,0.0,SKINCARE,0.0,0.0,8.328,0.0909,24.3,0.0,13.4,NO,standard_mission_profile
+65583,0.0,SKINCARE,0.0,0.0,10.755,0.0952,24.3,0.0,13.4,NO,standard_mission_profile
+72707,0.0,COLOUR COSMETICS,0.0,0.0,7.627,0.2963,24.3,0.0,13.4,NO,standard_mission_profile
+65630,0.0,SKINCARE,0.0,0.0,4.846,0.3333,24.3,0.0,13.4,NO,standard_mission_profile
+66537,0.0,HAIRCARE,0.0,0.0,4.773,0.3514,24.3,0.0,13.4,NO,standard_mission_profile
+188718,0.0,SKINCARE,0.0,0.0,4.754,0.34,24.2,0.0,13.3,NO,standard_mission_profile
+91439,0.0,HAIRCARE,0.0,0.0,7.623,0.2727,24.2,0.0,13.3,NO,standard_mission_profile
+42899,0.0,HAIRCARE,0.0,0.0,8.534,0.0,24.2,0.0,13.3,NO,standard_mission_profile
+872695,0.0,COLOUR COSMETICS,0.0,0.0,7.276,0.4,24.2,0.0,13.3,NO,standard_mission_profile
+75006,0.0,SKINCARE,0.0,0.0,5.382,0.1429,24.2,0.0,13.3,NO,standard_mission_profile
+71640,0.0,COLOUR COSMETICS,0.0,0.0,4.87,0.3077,24.2,0.0,13.3,NO,standard_mission_profile
+872695,0.0,COLOUR COSMETICS,0.0,0.0,7.276,0.4,24.2,0.0,13.3,NO,standard_mission_profile
+190010,0.0,HAIRCARE,0.0,0.0,6.8,0.5455,24.2,0.0,13.3,NO,standard_mission_profile
+274526,0.0,VITAMIN SUPPLEMENT,0.0,0.0,5.331,0.1522,24.2,0.0,13.3,NO,standard_mission_profile
+66565,0.0,ALLERGY,0.0,0.0,6.599,0.5833,24.1,0.0,13.3,NO,standard_mission_profile
+195090,0.0,SKINCARE,0.0,0.0,7.784,0.2143,24.1,0.0,13.3,NO,standard_mission_profile
+70977,0.0,SKINCARE,0.0,0.0,12.811,0.3226,24.1,0.0,13.3,NO,standard_mission_profile
+195090,0.0,SKINCARE,0.0,0.0,7.784,0.2143,24.1,0.0,13.3,NO,standard_mission_profile
+274526,0.0,VITAMIN SUPPLEMENT,0.0,0.0,5.296,0.15,24.1,0.0,13.3,NO,standard_mission_profile
+191064,0.0,VITAMIN SUPPLEMENT,0.0,0.0,7.503,0.3043,24.1,0.0,13.3,NO,standard_mission_profile
+15186,0.0,SUNCARE,0.0,0.0,4.848,0.2778,24.1,0.0,13.3,NO,standard_mission_profile
+65610,0.0,SKINCARE,0.0,0.0,12.692,0.2069,24.0,0.0,13.2,NO,standard_mission_profile
+192033,0.0,SKINCARE,0.0,0.0,7.607,0.25,24.0,0.0,13.2,NO,standard_mission_profile
+65583,0.0,SKINCARE,0.0,0.0,10.755,0.0952,24.0,0.0,13.2,NO,standard_mission_profile
+72014,0.0,SKINCARE,0.0,0.0,9.145,0.2593,24.0,0.0,13.2,NO,standard_mission_profile
+913898,0.0,COLOUR COSMETICS,0.0,0.0,4.981,0.2333,24.0,0.0,13.2,NO,standard_mission_profile
+199903,0.0,SKINCARE,0.0,0.0,14.388,0.3846,24.0,0.0,13.2,NO,standard_mission_profile
+74931,0.0,SKINCARE,0.0,0.0,16.132,0.2286,24.0,0.0,13.2,NO,standard_mission_profile
+94039,0.0,SKINCARE,0.0,0.0,7.522,0.2353,23.9,0.0,13.1,NO,standard_mission_profile
+192198,0.0,SKINCARE,0.0,0.0,5.414,0.0659,23.9,0.0,13.1,NO,standard_mission_profile
+57561,0.0,HAIRCARE,0.0,0.0,6.986,0.3889,23.8,0.0,13.1,NO,standard_mission_profile
+65583,0.0,SKINCARE,0.0,0.0,10.755,0.0952,23.8,0.0,13.1,NO,standard_mission_profile
+698520,0.0,SKINCARE,0.0,0.0,4.597,0.3004,23.8,0.0,13.1,NO,standard_mission_profile
+546382,0.0,HAIR ACC BRUSHES,0.0,0.0,6.72,0.4706,23.8,0.0,13.1,NO,standard_mission_profile
+698520,0.0,SKINCARE,0.0,0.0,4.603,0.3026,23.8,0.0,13.1,NO,standard_mission_profile
+65591,0.0,SKINCARE,0.0,0.0,13.361,0.0556,23.7,0.0,13.0,NO,standard_mission_profile
+39545,0.0,FRAGRANCE,0.0,0.0,17.355,0.3182,23.7,0.0,13.0,NO,standard_mission_profile
+632950,0.0,SKINCARE,0.0,0.0,9.41,0.1667,23.7,0.0,13.0,NO,standard_mission_profile
+60996,0.0,FRAGRANCE,0.0,0.0,18.322,0.3333,23.7,0.0,13.0,NO,standard_mission_profile
+15238,0.0,SUNCARE,0.0,0.0,6.471,0.5,23.6,0.0,13.0,NO,standard_mission_profile
+188700,0.0,SKINCARE,0.0,0.0,4.466,0.3086,23.6,0.0,13.0,NO,standard_mission_profile
+44363,0.0,COLOUR COSMETICS,0.0,0.0,7.335,0.2308,23.6,0.0,13.0,NO,standard_mission_profile
+90766,0.0,SKINCARE,0.0,0.0,7.178,0.2857,23.6,0.0,13.0,NO,standard_mission_profile
+44363,0.0,COLOUR COSMETICS,0.0,0.0,7.335,0.2308,23.6,0.0,13.0,NO,standard_mission_profile
+72014,0.0,SKINCARE,0.0,0.0,9.131,0.2586,23.6,0.0,13.0,NO,standard_mission_profile
+194088,0.0,FRAGRANCE,0.0,0.0,14.743,0.5,23.6,0.0,13.0,NO,standard_mission_profile
+44363,0.0,COLOUR COSMETICS,0.0,0.0,7.335,0.2308,23.6,0.0,13.0,NO,standard_mission_profile
+22440,0.0,VITAMIN SUPPLEMENT,0.0,0.0,7.061,0.3,23.5,0.0,12.9,NO,standard_mission_profile
+194050,0.0,SKINCARE,0.0,0.0,10.269,0.2727,23.5,0.0,12.9,NO,standard_mission_profile
+192032,0.0,SKINCARE,0.0,0.0,7.781,0.069,23.5,0.0,12.9,NO,standard_mission_profile
+194041,0.0,SKINCARE,0.0,0.0,10.114,0.4286,23.5,0.0,12.9,NO,standard_mission_profile
+191890,0.0,HAIRCARE,0.0,0.0,7.072,0.2941,23.5,0.0,12.9,NO,standard_mission_profile
+72014,0.0,SKINCARE,0.0,0.0,9.231,0.2857,23.5,0.0,12.9,NO,standard_mission_profile
+193722,0.0,SKINCARE,0.0,0.0,7.18,0.25,23.5,0.0,12.9,NO,standard_mission_profile
+58219,0.0,SKINCARE,0.0,0.0,4.347,0.3315,23.5,0.0,12.9,NO,standard_mission_profile
+68444,0.0,SKINCARE,0.0,0.0,7.739,0.0833,23.5,0.0,12.9,NO,standard_mission_profile
+22440,0.0,VITAMIN SUPPLEMENT,0.0,0.0,7.061,0.3,23.5,0.0,12.9,NO,standard_mission_profile
+68444,0.0,SKINCARE,0.0,0.0,7.739,0.0833,23.5,0.0,12.9,NO,standard_mission_profile
+60548,0.0,SKINCARE,0.0,0.0,10.008,0.4,23.4,0.0,12.9,NO,standard_mission_profile
+67914,0.0,SKINCARE,0.0,0.0,6.474,0.4643,23.4,0.0,12.9,NO,standard_mission_profile
+95632,0.0,COLOUR COSMETICS,0.0,0.0,7.052,0.2857,23.4,0.0,12.9,NO,standard_mission_profile
+94039,0.0,SKINCARE,0.0,0.0,7.181,0.2308,23.4,0.0,12.9,NO,standard_mission_profile
+36996,0.0,SUNCARE,0.0,0.0,4.496,0.2667,23.4,0.0,12.9,NO,standard_mission_profile
+35194,0.0,VITAMIN SUPPLEMENT,0.0,0.0,13.266,0.25,23.4,0.0,12.9,NO,standard_mission_profile
+483753,0.0,SKINCARE,0.0,0.0,12.973,0.1818,23.4,0.0,12.9,NO,standard_mission_profile
+65610,0.0,SKINCARE,0.0,0.0,13.175,0.1714,23.4,0.0,12.9,NO,standard_mission_profile
+75790,0.0,SKINCARE,0.0,0.0,17.433,0.1714,23.3,0.0,12.8,NO,standard_mission_profile
+184856,0.0,ORAL HEALTH,0.0,0.0,9.253,0.0,23.3,0.0,12.8,NO,standard_mission_profile
+65590,0.0,SKINCARE,0.0,0.0,8.975,0.1351,23.3,0.0,12.8,NO,standard_mission_profile
+188698,0.0,SKINCARE,0.0,0.0,4.611,0.202,23.3,0.0,12.8,NO,standard_mission_profile
+17096,0.0,SUNCARE,0.0,0.0,7.112,0.2353,23.3,0.0,12.8,NO,standard_mission_profile
+199901,0.0,SKINCARE,0.0,0.0,15.784,0.3846,23.3,0.0,12.8,NO,standard_mission_profile
+199903,0.0,SKINCARE,0.0,0.0,14.388,0.3846,23.3,0.0,12.8,NO,standard_mission_profile
+17096,0.0,SUNCARE,0.0,0.0,7.112,0.2353,23.3,0.0,12.8,NO,standard_mission_profile
+70978,0.0,SKINCARE,0.0,0.0,13.476,0.4545,23.3,0.0,12.8,NO,standard_mission_profile
+194088,0.0,FRAGRANCE,0.0,0.0,14.743,0.5,23.3,0.0,12.8,NO,standard_mission_profile
+67434,0.0,SUNCARE,0.0,0.0,6.772,0.3333,23.3,0.0,12.8,NO,standard_mission_profile
+185142,0.0,SKINCARE,0.0,0.0,10.307,0.4,23.2,0.0,12.8,NO,standard_mission_profile
+74617,0.0,SKINCARE,0.0,0.0,7.46,0.0909,23.2,0.0,12.8,NO,standard_mission_profile
+386359,0.0,SUNCARE,0.0,0.0,3.863,0.4103,23.2,0.0,12.8,NO,standard_mission_profile
+195241,0.0,SKINCARE,0.0,0.0,9.159,0.4118,23.2,0.0,12.8,NO,standard_mission_profile
+74931,0.0,SKINCARE,0.0,0.0,16.454,0.2121,23.2,0.0,12.8,NO,standard_mission_profile
+65583,0.0,SKINCARE,0.0,0.0,10.736,0.0833,23.2,0.0,12.8,NO,standard_mission_profile
+483753,0.0,SKINCARE,0.0,0.0,12.878,0.1667,23.2,0.0,12.8,NO,standard_mission_profile
+90912,0.0,SKINCARE,0.0,0.0,6.011,0.5385,23.1,0.0,12.7,NO,standard_mission_profile
+193722,0.0,SKINCARE,0.0,0.0,6.941,0.2353,23.1,0.0,12.7,NO,standard_mission_profile
+193722,0.0,SKINCARE,0.0,0.0,6.988,0.2222,23.1,0.0,12.7,NO,standard_mission_profile
+188711,0.0,SKINCARE,0.0,0.0,4.232,0.2727,23.1,0.0,12.7,NO,standard_mission_profile
+406333,0.0,DIGESTIVE CARE,0.0,0.0,6.375,0.4118,23.1,0.0,12.7,NO,standard_mission_profile
+388823,0.0,SKINCARE,0.0,0.0,6.711,0.3158,23.1,0.0,12.7,NO,standard_mission_profile
+55494,0.0,SKINCARE,0.0,0.0,14.32,0.25,23.1,0.0,12.7,NO,standard_mission_profile
+195645,0.0,COLOUR COSMETICS,0.0,0.0,6.967,0.2105,23.0,0.0,12.6,NO,standard_mission_profile
+187645,0.0,SUNCARE,0.0,0.0,3.589,0.4737,23.0,0.0,12.6,NO,standard_mission_profile
+72013,0.0,SKINCARE,0.0,0.0,13.063,0.1538,23.0,0.0,12.6,NO,standard_mission_profile
+94039,0.0,SKINCARE,0.0,0.0,7.332,0.1,23.0,0.0,12.6,NO,standard_mission_profile
+87417,0.0,SKINCARE,0.0,0.0,6.816,0.25,23.0,0.0,12.6,NO,standard_mission_profile
+193722,0.0,SKINCARE,0.0,0.0,6.972,0.2105,23.0,0.0,12.6,NO,standard_mission_profile
+203688,0.0,FRAGRANCE,0.0,0.0,19.345,0.5333,23.0,0.0,12.6,NO,standard_mission_profile
+74667,0.0,VITAMIN SUPPLEMENT,0.0,0.0,10.549,0.3182,23.0,0.0,12.6,NO,standard_mission_profile
+199337,0.0,DIGESTIVE CARE,0.0,0.0,6.562,0.3333,23.0,0.0,12.6,NO,standard_mission_profile
+483753,0.0,SKINCARE,0.0,0.0,12.878,0.1667,23.0,0.0,12.6,NO,standard_mission_profile
+70978,0.0,SKINCARE,0.0,0.0,13.641,0.4412,23.0,0.0,12.6,NO,standard_mission_profile
+185183,0.0,SKINCARE,0.0,0.0,6.04,0.5,23.0,0.0,12.6,NO,standard_mission_profile
+195134,0.0,SKINCARE,0.0,0.0,7.479,0.3548,23.0,0.0,12.6,NO,standard_mission_profile
+199337,0.0,DIGESTIVE CARE,0.0,0.0,6.562,0.3333,23.0,0.0,12.6,NO,standard_mission_profile
+44033,0.0,SKINCARE,0.0,0.0,6.599,0.3333,23.0,0.0,12.6,NO,standard_mission_profile
+492817,0.0,SKINCARE,0.0,0.0,7.394,0.0625,23.0,0.0,12.6,NO,standard_mission_profile
+199962,0.0,VITAMIN SUPPLEMENT,0.0,0.0,9.575,0.4,23.0,0.0,12.6,NO,standard_mission_profile
+92848,0.0,SKINCARE,0.0,0.0,5.947,0.5,22.9,0.0,12.6,NO,standard_mission_profile
+17959,0.0,FRAGRANCE,0.0,0.0,7.259,0.0909,22.9,0.0,12.6,NO,standard_mission_profile
+18253,0.0,TANNING,0.0,0.0,10.36,0.1429,22.9,0.0,12.6,NO,standard_mission_profile
+194163,0.0,FRAGRANCE,0.0,0.0,21.0,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+196549,0.0,SKINCARE,0.0,0.0,9.542,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+3006,0.0,FRAGRANCE,0.0,0.0,47.727,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+37016,0.0,FRAGRANCE,0.0,0.0,19.727,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+388823,0.0,SKINCARE,0.0,0.0,6.506,0.3077,22.8,0.0,12.5,NO,standard_mission_profile
+44021,0.0,SKINCARE,0.0,0.0,14.315,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+52382,0.0,TANNING,0.0,0.0,5.88,0.5,22.8,0.0,12.5,NO,standard_mission_profile
+63475,0.0,SKINCARE,0.0,0.0,10.56,0.3333,22.8,0.0,12.5,NO,standard_mission_profile
+67249,0.0,NUTRITION WELLBEIN,0.0,0.0,10.306,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+73770,0.0,VITAMIN SUPPLEMENT,0.0,0.0,12.024,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+809160,0.0,VITAMIN SUPPLEMENT,0.0,0.0,17.936,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+861758,0.0,FRAGRANCE,0.0,0.0,30.227,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+87754,0.0,SKINCARE,0.0,0.0,18.136,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+188521,0.0,BEAUTY ACCESSORIES,0.0,0.0,10.179,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+194077,0.0,FRAGRANCE,0.0,0.0,9.546,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+194163,0.0,FRAGRANCE,0.0,0.0,21.0,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+196549,0.0,SKINCARE,0.0,0.0,9.542,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+198076,0.0,COLOUR COSMETICS,0.0,0.0,11.439,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+3006,0.0,FRAGRANCE,0.0,0.0,47.727,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+345172,0.0,FRAGRANCE,0.0,0.0,14.954,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+37016,0.0,FRAGRANCE,0.0,0.0,19.727,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+371939,0.0,FRAGRANCE,0.0,0.0,18.773,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+4782,0.0,FRAGRANCE,0.0,0.0,34.364,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+52382,0.0,TANNING,0.0,0.0,5.88,0.5,22.8,0.0,12.5,NO,standard_mission_profile
+54088,0.0,FRAGRANCE,0.0,0.0,34.682,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+861758,0.0,FRAGRANCE,0.0,0.0,30.227,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+88628,0.0,HAIRCARE,0.0,0.0,11.953,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+89380,0.0,FRAGRANCE,0.0,0.0,20.682,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+938580,0.0,FRAGRANCE,0.0,0.0,34.045,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+4782,0.0,FRAGRANCE,0.0,0.0,34.364,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+88133,0.0,SKINCARE,0.0,0.0,12.088,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+88628,0.0,HAIRCARE,0.0,0.0,11.953,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+938580,0.0,FRAGRANCE,0.0,0.0,34.045,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+93909,0.0,FRAGRANCE,0.0,0.0,31.818,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+3006,0.0,FRAGRANCE,0.0,0.0,47.727,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+345172,0.0,FRAGRANCE,0.0,0.0,14.954,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+44021,0.0,SKINCARE,0.0,0.0,14.315,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+89503,0.0,BEAUTY ACCESSORIES,0.0,0.0,10.169,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+90806,0.0,HAIR REMOVAL,0.0,0.0,39.868,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+93342,0.0,FRAGRANCE,0.0,0.0,38.182,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+93413,0.0,FRAGRANCE,0.0,0.0,73.182,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+94466,0.0,FRAGRANCE,0.0,0.0,25.136,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+185142,0.0,SKINCARE,0.0,0.0,10.561,0.5,22.8,0.0,12.5,NO,standard_mission_profile
+192006,0.0,SKINCARE,0.0,0.0,20.039,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+194163,0.0,FRAGRANCE,0.0,0.0,21.0,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+195979,0.0,HAIRCARE,0.0,0.0,10.179,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+196234,0.0,VITAMIN SUPPLEMENT,0.0,0.0,10.497,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+196549,0.0,SKINCARE,0.0,0.0,12.721,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+3006,0.0,FRAGRANCE,0.0,0.0,47.727,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+345172,0.0,FRAGRANCE,0.0,0.0,14.954,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+4782,0.0,FRAGRANCE,0.0,0.0,34.364,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+73770,0.0,VITAMIN SUPPLEMENT,0.0,0.0,12.024,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+809160,0.0,VITAMIN SUPPLEMENT,0.0,0.0,17.936,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+87754,0.0,SKINCARE,0.0,0.0,18.136,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+88637,0.0,HAIRCARE,0.0,0.0,14.923,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+89380,0.0,FRAGRANCE,0.0,0.0,20.682,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+938580,0.0,FRAGRANCE,0.0,0.0,34.045,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+93909,0.0,FRAGRANCE,0.0,0.0,31.818,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+94496,0.0,SKINCARE,0.0,0.0,11.133,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+94920,0.0,ORAL HEALTH,0.0,0.0,20.679,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+191354,0.0,FRAGRANCE,0.0,0.0,19.727,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+194077,0.0,FRAGRANCE,0.0,0.0,9.546,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+3006,0.0,FRAGRANCE,0.0,0.0,47.727,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+345172,0.0,FRAGRANCE,0.0,0.0,14.954,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+354260,0.0,ANALGESICS,0.0,0.0,10.146,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+4782,0.0,FRAGRANCE,0.0,0.0,34.364,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+67249,0.0,NUTRITION WELLBEIN,0.0,0.0,10.306,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+861758,0.0,FRAGRANCE,0.0,0.0,30.227,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+89380,0.0,FRAGRANCE,0.0,0.0,20.682,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+93342,0.0,FRAGRANCE,0.0,0.0,38.182,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+938580,0.0,FRAGRANCE,0.0,0.0,34.045,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+93909,0.0,FRAGRANCE,0.0,0.0,31.818,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+94508,0.0,FRAGRANCE,0.0,0.0,36.591,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+192006,0.0,SKINCARE,0.0,0.0,20.039,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+199333,0.0,TANNING,0.0,0.0,15.591,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+52382,0.0,TANNING,0.0,0.0,5.88,0.5,22.8,0.0,12.5,NO,standard_mission_profile
+87754,0.0,SKINCARE,0.0,0.0,18.136,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+90901,0.0,SKINCARE,0.0,0.0,13.361,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+91440,0.0,HAIRCARE,0.0,0.0,20.338,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+93413,0.0,FRAGRANCE,0.0,0.0,73.182,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+94498,0.0,SKINCARE,0.0,0.0,9.542,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+94669,0.0,SKINCARE,0.0,0.0,21.624,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+195286,0.0,SKINCARE,0.0,0.0,18.769,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+354260,0.0,ANALGESICS,0.0,0.0,10.146,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+73770,0.0,VITAMIN SUPPLEMENT,0.0,0.0,12.024,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+809160,0.0,VITAMIN SUPPLEMENT,0.0,0.0,17.936,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+88688,0.0,HAIRCARE,0.0,0.0,10.933,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+91440,0.0,HAIRCARE,0.0,0.0,20.338,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+93909,0.0,FRAGRANCE,0.0,0.0,31.818,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+191480,0.0,EYES EARS,0.0,0.0,11.919,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+195286,0.0,SKINCARE,0.0,0.0,18.769,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+199333,0.0,TANNING,0.0,0.0,15.591,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+64179,0.0,FRAGRANCE,0.0,0.0,38.818,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+93413,0.0,FRAGRANCE,0.0,0.0,73.182,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+93909,0.0,FRAGRANCE,0.0,0.0,31.818,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+94498,0.0,SKINCARE,0.0,0.0,9.542,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+95116,0.0,VITAMIN SUPPLEMENT,0.0,0.0,22.396,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+345172,0.0,FRAGRANCE,0.0,0.0,14.954,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+938580,0.0,FRAGRANCE,0.0,0.0,34.045,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+94508,0.0,FRAGRANCE,0.0,0.0,36.591,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+94984,0.0,FRAGRANCE,0.0,0.0,79.546,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+194088,0.0,FRAGRANCE,0.0,0.0,14.743,0.5,22.8,0.0,12.5,NO,standard_mission_profile
+345172,0.0,FRAGRANCE,0.0,0.0,14.954,1.0,22.8,0.0,12.5,NO,standard_mission_profile
+57983,0.0,VITAMIN SUPPLEMENT,0.0,0.0,11.451,1.0,22.8,0.0,12.5,NO,standard_mission_profile

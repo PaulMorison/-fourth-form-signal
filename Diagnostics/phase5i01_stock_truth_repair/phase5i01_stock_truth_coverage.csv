@@ -1,0 +1,16 @@
+segment,field_name,row_count,non_null_count,zero_count,missing_count,coverage_pct,suspicious_zero_count,source_field_used,source_quality
+total,promo_start_soh,52285,0,0,52285,0.0,0,missing,UNKNOWN
+total,current_soh,52285,0,0,52285,0.0,0,missing,UNKNOWN
+total,stock_on_hand,52285,0,0,52285,0.0,0,missing,UNKNOWN
+total,qty_on_order,52285,0,0,52285,0.0,0,missing,UNKNOWN
+total,inbound_units_before_promo,52285,0,0,52285,0.0,0,missing,UNKNOWN
+total,inbound_units_during_promo,52285,0,0,52285,0.0,0,missing,UNKNOWN
+total,total_supply_units,52285,0,0,52285,0.0,0,missing,UNKNOWN
+total,supplier_number,52285,0,0,52285,0.0,0,missing,UNKNOWN
+total,last_received_date,52285,0,0,52285,0.0,0,missing,UNKNOWN
+total,last_received_units,52285,0,0,52285,0.0,0,missing,UNKNOWN
+total,stock_movement_units,52285,0,0,52285,0.0,0,missing,UNKNOWN
+total,allocation_units,52285,52285,45851,0,100.0,16209,pl_allocation_qty,HIGH
+total,promo_start_stock_date,52285,0,0,52285,0.0,0,missing,UNKNOWN
+release_ready=NO,promo_start_soh,47661,0,0,47661,0.0,0,missing,UNKNOWN
+release_ready=YES,promo_start_soh,4624,0,0,4624,0.0,0,missing,UNKNOWN

@@ -1,0 +1,3 @@
+stage,row_count,avg_conviction,p25,p50,p75,very_high_count,high_count,medium_count,low_count,very_low_count
+conviction_before,52285,99.61021325427943,100.0,100.0,100.0,52285,0,0,0,0
+conviction_after,52285,13.879697810079373,5.0,8.0,23.0,0,0,0,20539,31746

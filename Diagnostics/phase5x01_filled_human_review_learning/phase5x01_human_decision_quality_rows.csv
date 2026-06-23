@@ -1,0 +1,1 @@
+shadow_run_id,store_number,promotion_id,sku_number,brain_action,governed_action,human_action,human_order_units,human_confidence,human_override_reason,human_feedback_signal,human_feedback_weight,action_difference_type,learning_note

@@ -1,0 +1,19 @@
+metric_group,metric_name,comparison_axis,definition,pass_direction,required_for_gate
+prediction_shape,flat_prediction_share,prediction_distribution,share of test rows where abs(pred-train_median_target)/train_median_target < 0.05,shadow <= legacy - 10pp,yes
+prediction_shape,zero_or_tiny_prediction_share,prediction_distribution,share pred <= 1.0 units,shadow <= legacy,yes
+prediction_shape,prediction_p50_p90_ratio,prediction_distribution,p90/p50 of raw_predicted_units,shadow >= legacy or explain trade-off,no
+accuracy,units_mae_raw,validation+test vs actuals,MAE(raw_pred target_actual_units_sold) on rows with realized sales,lower is better,no
+accuracy,units_rmse_raw,validation+test vs actuals,RMSE on same cohort,lower is better,no
+accuracy,weighted_mae_clean,quality_slice,CLEAN_REALIZED_DEMAND rows weighted by target_weight,shadow <= legacy or within +5%,yes
+accuracy,weighted_mae_repaired,quality_slice,STOCK_CONSTRAINED_REPAIRED rows weighted by target_weight,shadow <= legacy or within +5%,yes
+accuracy,weighted_mae_all_trainable,quality_slice,rows target_weight>0,shadow <= legacy,yes
+risk,extreme_over_order_share,risk,share pred > 2x stock_basis_units where stock_basis>0,shadow <= legacy,yes
+risk,under_order_on_repaired_share,risk,repaired rows pred < realized_sales_units,report not block if explained,no
+slice,supplier_mae_top10,supplier,MAE by supplier top volume,no regression >10% without note,no
+slice,category_mae_top10,department/category,MAE by department/category,no regression >10% without note,no
+calibration,calibrated_vs_raw_delta,calibration,mean abs(calibrated-raw) on test,informational only,no
+legacy_vs_shadow,target_mean_gap,target_comparison,mean(sufficient_stock_demand_units_target - target_actual_units_sold) on trainable rows,informational,documents repair uplift
+legacy_vs_shadow,prediction_gap_on_same_features,model_comparison,mean(shadow_pred - legacy_pred) on test,informational,no
+reliability,stage11_reliability_pass,Stage 11 diagnostics,existing reliability gates on shadow backtest output,must pass before live swap,yes
+reconciliation,manager_summary_reconciliation,reporting,manager summary totals reconcile to row grain,must pass before live swap,yes
+customer_output,customer_output_readiness_impact,customer reports,shadow run produces zero changes to live download/score paths,no impact required,yes

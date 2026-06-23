@@ -1,0 +1,43 @@
+segment_name,segment_value,row_count,actual_units_total,predicted_units_total,bias_pct,WAPE,missed_units,missed_gp_proxy,basket_trust_risk_proxy,long_tail_rows,mission_sku_rows,stockout_censored_count,supplier_unknown_count,likely_root_cause,recommended_fix,release_impact
+mission_sku_flag,NO,11054,38495.0,10471.51,-72.7977,0.728,28023.49,6.0,16,12,0,1422,11054,UNKNOWN_DATA_DO_NOT_LEARN,Block learning on unsafe rows; fix data quality first,BLOCKER
+department,SKINCARE,3051,15870.0,3419.15,-78.4552,0.7846,12450.85,3.0,4,8,0,618,3051,UNKNOWN_DATA_DO_NOT_LEARN,Block learning on unsafe rows; fix data quality first,BLOCKER
+department,COLOUR COSMETICS,3321,7239.0,2328.01,-67.8407,0.6784,4910.99,2.0,2,0,0,208,3321,UNKNOWN_DATA_DO_NOT_LEARN,Block learning on unsafe rows; fix data quality first,BLOCKER
+department,HAIRCARE,1156,3738.0,1056.07,-71.7476,0.7175,2681.93,0.0,1,1,0,164,1156,UNKNOWN_DATA_DO_NOT_LEARN,Block learning on unsafe rows; fix data quality first,BLOCKER
+department,ORAL HEALTH,450,1977.0,526.18,-73.385,0.7338,1450.82,0.0,0,1,0,87,450,UNKNOWN_DATA_DO_NOT_LEARN,Block learning on unsafe rows; fix data quality first,BLOCKER
+department,SUNCARE,361,1713.0,384.08,-77.5783,0.7758,1328.92,0.0,1,0,0,67,361,UNKNOWN_DATA_DO_NOT_LEARN,Block learning on unsafe rows; fix data quality first,BLOCKER
+department,VITAMIN SUPPLEMENT,423,1237.0,320.15,-74.1185,0.7412,916.85,0.0,2,1,0,43,423,UNKNOWN_DATA_DO_NOT_LEARN,Block learning on unsafe rows; fix data quality first,BLOCKER
+department,BEAUTY ACCESSORIES,504,1290.0,494.39,-61.6749,0.6167,795.61,0.0,2,0,0,26,504,UNKNOWN_DATA_DO_NOT_LEARN,Block learning on unsafe rows; fix data quality first,BLOCKER
+department,FEMININE CARE,184,804.0,272.16,-66.1494,0.6615,531.84,0.0,0,0,0,17,184,UNKNOWN_DATA_DO_NOT_LEARN,Block learning on unsafe rows; fix data quality first,BLOCKER
+department,HAIR ACC BRUSHES,245,759.0,310.43,-59.1001,0.591,448.57,0.0,0,0,0,20,245,UNKNOWN_DATA_DO_NOT_LEARN,Block learning on unsafe rows; fix data quality first,BLOCKER
+department,DEODORANTS,232,722.0,279.28,-61.3188,0.6132,442.72,0.0,0,0,0,39,232,UNKNOWN_DATA_DO_NOT_LEARN,Block learning on unsafe rows; fix data quality first,BLOCKER
+department,BATH TOILETRIES,137,623.0,180.31,-71.0576,0.7106,442.69,1.0,0,0,0,26,137,UNKNOWN_DATA_DO_NOT_LEARN,Block learning on unsafe rows; fix data quality first,BLOCKER
+department,TANNING,153,409.0,127.53,-68.8198,0.6882,281.47,0.0,0,0,0,20,153,UNKNOWN_DATA_DO_NOT_LEARN,Block learning on unsafe rows; fix data quality first,BLOCKER
+department,FRAGRANCE,143,276.0,84.52,-69.3764,0.6938,191.48,0.0,0,0,0,9,143,UNKNOWN_DATA_DO_NOT_LEARN,Block learning on unsafe rows; fix data quality first,BLOCKER
+department,HAIR REMOVAL,115,257.0,93.41,-63.6533,0.6365,163.59,0.0,0,0,0,12,115,UNKNOWN_DATA_DO_NOT_LEARN,Block learning on unsafe rows; fix data quality first,BLOCKER
+department,DIGESTIVE CARE,83,215.0,75.44,-64.9135,0.6491,139.56,0.0,0,1,0,12,83,UNKNOWN_DATA_DO_NOT_LEARN,Block learning on unsafe rows; fix data quality first,BLOCKER
+department,PAPER COTTON,27,204.0,89.38,-56.1843,0.5618,114.62,0.0,0,0,0,8,27,INSUFFICIENT_HISTORY,Hold learning; require more promo history,LOW
+department,FIRSTAID WOUNDCARE,52,195.0,90.58,-53.5508,0.5355,104.42,0.0,0,0,0,6,52,UNKNOWN_DATA_DO_NOT_LEARN,Block learning on unsafe rows; fix data quality first,BLOCKER
+department,INCONTINENCE,42,130.0,36.23,-72.13,0.7213,93.77,0.0,3,0,0,2,42,UNKNOWN_DATA_DO_NOT_LEARN,Block learning on unsafe rows; fix data quality first,BLOCKER
+department,MENS GROOMING,70,126.0,42.47,-66.2968,0.663,83.53,0.0,0,0,0,2,70,UNKNOWN_DATA_DO_NOT_LEARN,Block learning on unsafe rows; fix data quality first,BLOCKER
+department,COUGH COLD,55,132.0,55.79,-57.7379,0.5774,76.21,0.0,0,0,0,7,55,UNKNOWN_DATA_DO_NOT_LEARN,Block learning on unsafe rows; fix data quality first,BLOCKER
+department,EYES EARS,46,100.0,31.3,-68.697,0.687,68.7,0.0,0,0,0,7,46,UNKNOWN_DATA_DO_NOT_LEARN,Block learning on unsafe rows; fix data quality first,BLOCKER
+decision_triage_class,STANDARD_BUY_REVIEW,32,96.0,44.85,-53.2854,0.5329,51.15,6.0,11,12,0,12,32,INSUFFICIENT_HISTORY,Hold learning; require more promo history,LOW
+department,NUTRITION WELLBEIN,17,62.0,11.01,-82.2484,0.8225,50.99,0.0,1,0,0,0,17,UNKNOWN_DATA_DO_NOT_LEARN,Block learning on unsafe rows; fix data quality first,BLOCKER
+department,GIFTING,30,72.0,23.11,-67.9014,0.679,48.89,0.0,0,0,0,2,30,UNKNOWN_DATA_DO_NOT_LEARN,Block learning on unsafe rows; fix data quality first,BLOCKER
+department,FOOTCARE,40,78.0,30.68,-60.6628,0.6066,47.32,0.0,0,0,0,5,40,UNKNOWN_DATA_DO_NOT_LEARN,Block learning on unsafe rows; fix data quality first,BLOCKER
+basket_attachment_source_quality,MEDIUM,27,79.0,38.0,-51.8937,0.5189,41.0,4.0,0,7,0,7,27,INSUFFICIENT_HISTORY,Hold learning; require more promo history,LOW
+long_tail_sku_flag,NO,32,85.0,45.39,-46.5953,0.466,39.61,4.0,11,0,0,0,32,INSUFFICIENT_HISTORY,Hold learning; require more promo history,LOW
+department,BEAUTY ELECTRICAL,26,57.0,17.91,-68.5807,0.6858,39.09,0.0,0,0,0,7,26,UNKNOWN_DATA_DO_NOT_LEARN,Block learning on unsafe rows; fix data quality first,BLOCKER
+department,ALLERGY,16,56.0,26.75,-52.2375,0.5224,29.25,0.0,0,0,0,2,16,UNKNOWN_DATA_DO_NOT_LEARN,Block learning on unsafe rows; fix data quality first,BLOCKER
+long_tail_sku_flag,YES,12,43.0,16.98,-60.5209,0.6052,26.02,2.0,5,12,0,12,12,UNKNOWN_DATA_DO_NOT_LEARN,Block learning on unsafe rows; fix data quality first,BLOCKER
+department,ANALGESICS,20,45.0,20.41,-54.6356,0.5464,24.59,0.0,0,0,0,2,20,UNKNOWN_DATA_DO_NOT_LEARN,Block learning on unsafe rows; fix data quality first,BLOCKER
+basket_attachment_source_quality,LOW,16,45.0,22.67,-49.62,0.4962,22.33,1.0,16,5,0,5,16,INSUFFICIENT_HISTORY,Hold learning; require more promo history,LOW
+department,BABY CARE,20,33.0,11.86,-64.0515,0.6405,21.14,0.0,0,0,0,2,20,UNKNOWN_DATA_DO_NOT_LEARN,Block learning on unsafe rows; fix data quality first,BLOCKER
+department,ACHE PAIN SUPPORT,12,28.0,11.46,-59.0607,0.5906,16.54,0.0,0,0,0,0,12,UNKNOWN_DATA_DO_NOT_LEARN,Block learning on unsafe rows; fix data quality first,BLOCKER
+decision_triage_class,HIGH_PRIORITY_BUY_REVIEW,12,32.0,17.52,-45.2375,0.4524,14.48,0.0,5,0,0,0,12,INSUFFICIENT_HISTORY,Hold learning; require more promo history,LOW
+department,FAMILY PLANNING,10,21.0,8.67,-58.7095,0.5871,12.33,0.0,0,0,0,2,10,UNKNOWN_DATA_DO_NOT_LEARN,Block learning on unsafe rows; fix data quality first,BLOCKER
+department,SMOKING CESSATION,5,9.0,2.44,-72.8444,0.7284,6.56,0.0,0,0,0,0,5,UNKNOWN_DATA_DO_NOT_LEARN,Block learning on unsafe rows; fix data quality first,BLOCKER
+department,SNACKS BEVERAGES,3,11.0,6.61,-39.9182,0.3992,4.39,0.0,0,0,0,0,3,UNKNOWN_DATA_DO_NOT_LEARN,Block learning on unsafe rows; fix data quality first,BLOCKER
+basket_attachment_source_quality,HIGH,1,4.0,1.7,-57.625,0.5763,2.31,1.0,0,0,0,0,1,INSUFFICIENT_HISTORY,Hold learning; require more promo history,LOW
+department,ANTI FUNGAL VIRAL,3,5.0,2.81,-43.82,0.4382,2.19,0.0,0,0,0,0,3,UNKNOWN_DATA_DO_NOT_LEARN,Block learning on unsafe rows; fix data quality first,BLOCKER
+department,GENERAL MERCHANDIS,2,2.0,0.92,-54.1,0.541,1.08,0.0,0,0,0,0,2,UNKNOWN_DATA_DO_NOT_LEARN,Block learning on unsafe rows; fix data quality first,BLOCKER

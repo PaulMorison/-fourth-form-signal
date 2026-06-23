@@ -1,0 +1,2 @@
+total_rows,human_review_complete,human_review_pending,human_review_invalid,human_decision_valid_rows,duplicate_rejections,human_review_completion_rate
+100,0,100,0,0,0,0.0

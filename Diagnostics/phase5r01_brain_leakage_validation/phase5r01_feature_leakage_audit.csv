@@ -1,0 +1,63 @@
+feature_name,feature_family,dtype,missing_count,unknown_count,unique_count,correlation_with_target,suspicious_target_similarity_flag,contains_actual_keyword_flag,contains_target_keyword_flag,contains_post_promo_keyword_flag,contains_leakage_keyword_flag,leakage_risk_level,leakage_reason,allowed_for_training_flag
+average_daily_units,demand_uplift,float64,0,0,1893,-0.184521,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+expected_normal_units_during_promo,demand_uplift,float64,0,0,1087,-0.19432,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+expected_promo_uplift_units,demand_uplift,float64,0,0,2602,0.126028,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+expected_total_promo_demand_units,demand_uplift,float64,0,0,3055,-0.136041,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+promo_uplift_multiplier,demand_uplift,float64,0,0,3602,0.072991,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+promo_convexity_score,demand_uplift,float64,0,0,911,0.083137,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+recent_momentum_regime,demand_uplift,float64,0,0,1,,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+sku_demand_regime,demand_uplift,float64,0,0,1,,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+current_soh,stock_optimal,float64,0,0,46,-0.094726,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+promo_start_soh_resolved,stock_optimal,float64,0,0,46,-0.094726,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+expected_soh_at_promo_start_before_order,stock_optimal,float64,0,0,46,-0.094726,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+optimal_base_soh_units,stock_optimal,float64,0,0,1484,-0.186022,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+target_day_one_promo_soh,stock_optimal,float64,0,0,4311,-0.169689,NO,0,0,0,1,LOW,Pre-promo planning target SOH; available before buying decision.,YES
+target_end_promo_soh,stock_optimal,float64,0,0,1484,-0.186022,NO,0,0,0,1,LOW,Pre-promo planning target SOH; available before buying decision.,YES
+distance_to_optimal_end_soh,stock_optimal,float64,0,0,2721,-0.118663,NO,0,0,0,1,CRITICAL,Post-outcome or target-derived field; excluded from leak-safe training.,NO
+current_stock_position_label,stock_optimal,float64,0,0,1,,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+stock_position_regime,stock_optimal,float64,0,0,1,,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+cash_tied_above_optimal_cost,stock_optimal,float64,0,0,554,-0.097697,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+feature_basket_attach_rate,basket_trust,str,0,0,2,,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+feature_basket_3plus_attach_rate,basket_trust,str,0,0,2,,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+feature_basket_5plus_attach_rate,basket_trust,str,0,0,2,,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+feature_avg_basket_value_when_present,basket_trust,str,0,0,9910,0.046531,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+feature_avg_basket_gp_when_present,basket_trust,str,0,0,6817,0.046531,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+feature_sister_club_attach_rate,basket_trust,str,0,0,983,-0.009729,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+mission_sku_score,basket_trust,float64,0,0,301,0.068126,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+mission_sku_flag,basket_trust,float64,0,0,1,,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+basket_completion_sku_score,basket_trust,float64,0,0,1,,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+range_trust_sku_score,basket_trust,float64,0,0,170,0.068212,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+long_tail_sku_flag,basket_trust,float64,0,0,1,,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+long_tail_mission_sku_flag,basket_trust,float64,0,0,1,,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+long_tail_protection_value,basket_trust,float64,0,0,417,0.298651,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+basket_trust_convexity_value,basket_trust,float64,0,0,120,0.246755,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+supplier_number_resolved,supplier_replenishment,int64,0,0,1,,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+supplier_replenishment_regime,supplier_replenishment,float64,0,0,1,,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+replenishment_lead_time_days,supplier_replenishment,float64,0,0,3,0.106503,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+replenishment_reliability,supplier_replenishment,float64,0,0,1,,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+supplier_risk_cost,supplier_replenishment,float64,0,0,6242,-0.742832,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+supplier_economic_risk_cost,supplier_replenishment,float64,0,0,6242,-0.742832,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+store_sales_regime,regime_brain,float64,0,0,1,,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+customer_loyalty_regime,regime_brain,float64,0,0,1,,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+customer_price_sensitivity_regime,regime_brain,float64,0,0,1,,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+customer_basket_trust_regime,regime_brain,float64,0,0,1,,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+promo_discount_regime,regime_brain,float64,0,0,1,,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+promo_convexity_regime,regime_brain,float64,0,0,1,,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+cash_efficiency_regime,regime_brain,float64,0,0,1,,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+overall_regime_opportunity_score,regime_brain,float64,0,0,508,0.062737,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+overall_regime_risk_score,regime_brain,float64,0,0,4,-0.544644,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+calibrated_regime_conviction_score,regime_brain,float64,0,0,14,-0.086794,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+economic_net_value_score,economic_triage,float64,0,0,15415,1.0,YES,0,0,0,0,CRITICAL,Post-outcome or target-derived field; excluded from leak-safe training.,NO
+expected_gp_capture_value,economic_triage,float64,0,0,6666,0.257456,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+missed_sales_avoidance_value,economic_triage,float64,0,0,307,0.376482,NO,0,0,0,1,CRITICAL,Post-outcome or target-derived field; excluded from leak-safe training.,NO
+basket_trust_protection_value,economic_triage,float64,0,0,428,0.289068,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+overstock_cash_release_value,economic_triage,float64,0,0,931,0.037439,NO,0,0,0,0,CRITICAL,Post-outcome or target-derived field; excluded from leak-safe training.,NO
+review_roi_score,economic_triage,float64,0,0,12860,0.694395,NO,0,0,0,0,CRITICAL,Post-outcome or target-derived field; excluded from leak-safe training.,NO
+decision_triage_class,economic_triage,float64,0,0,1,,NO,0,0,0,0,CRITICAL,Post-outcome or target-derived field; excluded from leak-safe training.,NO
+promo_demand_source_quality,quality_governance,float64,0,0,1,,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+promo_start_soh_source_quality,quality_governance,float64,0,0,1,,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+basket_attachment_source_quality,quality_governance,float64,0,0,1,,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+calibration_eligible_flag,quality_governance,float64,0,0,1,,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+promo_demand_release_ready_flag,quality_governance,float64,0,0,1,,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+constraint_block_flag,quality_governance,float64,0,0,1,,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES
+unsafe_flag,quality_governance,float64,0,0,1,,NO,0,0,0,0,LOW,Pre-promo feature with no leakage keyword.,YES

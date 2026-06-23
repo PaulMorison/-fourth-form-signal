@@ -1,0 +1,6 @@
+priority,field_name,source,expected_uplift,action
+1,demand_reference_units,apply_ft_baseline_windows upstream; dropped at dataset assembly,Repaired share ~63%; trainable ~97%,Persist in training_ready.parquet on next data build
+2,baseline_expected_units,apply_ft_baseline_windows upstream,Enables partial-window repair + demand_reference derivation,Persist alongside demand_reference_units
+3,required_implied_units,apply_ft_baseline_windows upstream,Improves demand_reference ceiling,Persist on training parquet
+4,stock_basis_units,resolve_allocation_basis_units; alias total_stock_available today,Low alone; explicit column improves auditability,Persist explicit governed stock_basis_units
+5,actual_stockout_flag,actual_outcome packet (not yet in parquet),Replace heuristic stockout inference after packet build,Future actual_outcome_source integration; not before packet

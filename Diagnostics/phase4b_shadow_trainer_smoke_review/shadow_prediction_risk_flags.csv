@@ -1,0 +1,9 @@
+flag_id,severity,status,detail
+flat_legacy_baseline,info,observed,48.9% flat share confirms legacy flatness problem on smoke slice
+flat_shadow_improvement,pass,observed,Shadow flat share 4.2% — material improvement vs legacy
+tiny_prediction_reduction,pass,observed,Tiny (<=1) share 25% vs legacy 59.5%
+shadow_tail_max_elevation,watch,observed,Shadow max pred 86.7 vs legacy 25.5; monitor on formal eval with stock_basis_units
+stock_basis_overorder_check,unknown,not_in_smoke_output,total_stock_available/stock_basis_units not in test prediction passthrough; defer to formal eval
+feature_consensus_as_target,pass,not_used,Shadow target sufficient_stock_demand_units_target only
+production_artifact_overwrite,pass,verified,Separate shadow joblib path; production units_gradient_boosting preserved
+extreme_tail_blocks_eval,no,not_triggered,Elevated max warrants monitoring but flat-share gain supports proceeding to formal shadow eval with tail gates

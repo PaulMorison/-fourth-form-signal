@@ -14,7 +14,7 @@ from typing import Sequence
 import numpy as np
 import pandas as pd
 
-from models.promotions.allocation_calibration import apply_allocation_aware_units_cap
+from models.promotions.allocation_calibration import compute_allocation_aware_cap_units
 from models.promotions.order_policy_adjustments import build_order_policy_adjustments
 from models.promotions.promotion_demand_backtest import (
     compute_backtest_rows,
@@ -379,10 +379,11 @@ def _build_test_predictions_frame(
         dtype="float64",
     ).clip(lower=0.0)
     test_dataset = dataset.loc[test_mask]
-    calibrated_predicted_units = apply_allocation_aware_units_cap(
+    allocation_cap_units = compute_allocation_aware_cap_units(
         test_dataset,
         raw_predicted_units,
     )
+    calibrated_predicted_units = raw_predicted_units.clip(lower=0.0)
     diagnostics = build_live_order_decision_diagnostics(
         test_dataset,
         raw_predicted_units=raw_predicted_units,
@@ -406,9 +407,11 @@ def _build_test_predictions_frame(
     out = test_dataset.loc[:, passthrough].copy()
     out["raw_predicted_units_total_promo"] = raw_predicted_units.values
     out["calibrated_predicted_units_total_promo"] = calibrated_predicted_units.values
+    out["allocation_cap_units"] = allocation_cap_units.values
     out["policy_adjusted_predicted_units_total_promo"] = policy_adjusted_predicted_units.values
     out["policy_adjustment_reason"] = policy_adjustments["policy_adjustment_reason"].values
-    out["predicted_units_total_promo"] = policy_adjusted_predicted_units.values
+    # Phase 2/3: demand export follows calibrated (raw) path, not policy cap.
+    out["predicted_units_total_promo"] = calibrated_predicted_units.values
     if "actual_units_sold_promo" not in out.columns and "actual_units_sold" in out.columns:
         out["actual_units_sold_promo"] = out["actual_units_sold"]
     return out.reset_index(drop=True)

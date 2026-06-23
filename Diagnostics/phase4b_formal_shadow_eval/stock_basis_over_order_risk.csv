@@ -1,0 +1,10 @@
+risk_metric,value
+shadow_gt_stock_basis_count,1225.0
+shadow_gt_stock_basis_share,0.572429906542056
+shadow_gt_demand_reference_count,108.0
+shadow_gt_demand_reference_share,0.05046728971962617
+shadow_gt_2x_demand_reference_count,74.0
+shadow_gt_2x_demand_reference_share,0.03457943925233645
+legacy_max,91.7292278313115
+shadow_max,117.41583258610834
+shadow_p99,37.20502010756889

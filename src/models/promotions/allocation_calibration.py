@@ -10,11 +10,15 @@ ALLOCATION_AWARE_CAP_SCORE_THRESHOLD = 0.15
 ALLOCATION_AWARE_LOW_CONFIDENCE_SLACK = 1.5
 
 
-def apply_allocation_aware_units_cap(
+def compute_allocation_aware_cap_units(
     frame: pd.DataFrame,
     predicted_units: pd.Series | np.ndarray,
 ) -> pd.Series:
-    """Cap raw units forecasts when probability evidence supports excess allocation risk."""
+    """Compute allocation-aware order/risk ceiling units (order path only).
+
+    Phase 3: this cap must not overwrite customer demand forecasts. Demand stays
+    on the raw model path; this series is for order policy and diagnostics.
+    """
 
     raw_prediction = pd.Series(predicted_units, index=frame.index, dtype="float64").clip(lower=0.0)
     baseline_units = _first_present_numeric_column(
@@ -98,6 +102,19 @@ def apply_allocation_aware_units_cap(
         np.minimum(raw_prediction, effective_upper_bound),
     )
     return capped_prediction.clip(lower=0.0)
+
+
+def apply_allocation_aware_units_cap(
+    frame: pd.DataFrame,
+    predicted_units: pd.Series | np.ndarray,
+) -> pd.Series:
+    """Return allocation-aware order/risk ceiling units.
+
+    Backwards-compatible alias for ``compute_allocation_aware_cap_units``. Phase 3
+    callers must not treat this output as customer demand; use raw model output
+    for ``calibrated_predicted_units_*`` / ``predicted_units_sold``.
+    """
+    return compute_allocation_aware_cap_units(frame, predicted_units)
 
 
 def _numeric_column(frame: pd.DataFrame, column_name: str) -> pd.Series:

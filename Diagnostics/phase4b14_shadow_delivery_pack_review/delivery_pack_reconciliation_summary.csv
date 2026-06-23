@@ -1,0 +1,6 @@
+check,pass,detail
+row_counts_match_4b13,True,"[{'file': '02_ADDED_BUYS_REVIEW.csv', 'expected_rows': 462, 'actual_rows': 462, 'match': True}, {'file': '03_REMOVED_BUYS_REVIEW.csv', 'expected_rows': 92, 'actual_rows': 92, 'match': True}, {'file': '04_TINY_DEMAND_BUYS_REVIEW.csv', 'expected_rows': 295, 'actual_rows': 295, 'match': True}, {'file': '05_STOCK_BASIS_REVIEW.csv', 'expected_rows': 60, 'actual_rows': 60, 'match': True}, {'file': '06_HIGH_CONFIDENCE_BUYS.csv', 'expected_rows': 50, 'actual_rows': 50, 'match': True}, {'file': '07_LOW_CONFIDENCE_BUYS.csv', 'expected_rows': 50, 'actual_rows': 50, 'match': True}]"
+summary_reconciles,True,added_buy_rows
+zero_order_buy,True,count=0
+production_files_overwritten,True,new timestamped folder only
+all_files_shadow_labelled,True,model_status column

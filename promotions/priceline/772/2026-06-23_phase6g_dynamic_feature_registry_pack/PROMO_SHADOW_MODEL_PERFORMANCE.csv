@@ -1,0 +1,2 @@
+model_variant,shadow_training_status,feature_count,train_rows,test_rows,WAPE,MAE,bias_pct,underforecast_rate,overforecast_rate,severe_underforecast_rate,severe_overforecast_rate,action_classifier_accuracy,macro_F1,top_decile_value_capture,long_tail_mission_sku_lift,weak_history_new_line_lift,ats_weak_evidence_lift,blocker_reason
+BLOCKED,BLOCKED_BY_FEATURE_QUALITY,406,0,0,,,,,,,,,,,,,,insufficient_rows_with_actuals

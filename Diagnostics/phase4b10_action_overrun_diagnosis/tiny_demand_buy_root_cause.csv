@@ -1,0 +1,6 @@
+root_cause,row_count
+floor_or_gap_driven_despite_tiny_demand,341
+pack_size_rounding,143
+repaired_target_context,106
+missing_action_level_stock_cap,106
+total_tiny_demand_buy_rows,341

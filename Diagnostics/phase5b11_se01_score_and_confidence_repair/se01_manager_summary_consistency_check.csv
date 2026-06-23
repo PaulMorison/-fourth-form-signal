@@ -1,0 +1,7 @@
+check,summary_value,plan_value,reconciles
+execution_ready_count,8.0,8.0,True
+execution_ready_buy_count,8.0,8.0,True
+tier_2_review_high_value_count,188.0,188.0,True
+review_exception_count,732.0,902.0,True
+shortlist_row_count,113.0,113.0,True
+total_recommended_order_units,2526.0,2526.0,True

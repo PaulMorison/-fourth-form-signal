@@ -1,0 +1,20 @@
+metric,value,notes
+test_set_rows,716,out-of-sample test split from 5004-row enriched smoke slice
+positive_weight_training_rows,4889,of 5004 total rows
+trainable_weight_share,0.977618,4889/5004
+legacy_flat_prediction_share,0.488827,within 5% of train median target_actual_units_sold
+shadow_flat_prediction_share,0.041899,
+flat_share_delta_legacy_minus_shadow,0.446927,material improvement
+legacy_tiny_prediction_share_le_1,0.594972,pred <= 1 unit
+shadow_tiny_prediction_share_le_1,0.25,
+legacy_mean_prediction,1.263822,
+shadow_mean_prediction,8.055101,
+legacy_p50_prediction,0.059945,
+shadow_p50_prediction,10.277171,
+legacy_p90_prediction,2.869175,
+shadow_p90_prediction,12.061101,
+legacy_max_prediction,25.499640,
+shadow_max_prediction,86.664756,higher tail; stock-basis over-order check not available in smoke passthrough columns
+production_units_artifact_present,True,units_gradient_boosting.joblib written alongside shadow
+shadow_units_artifact_present,True,target_mode_shadow_sufficient_stock_units_gb.joblib
+shadow_predictions_file_present,True,test_set_predictions_sufficient_stock_shadow.parquet

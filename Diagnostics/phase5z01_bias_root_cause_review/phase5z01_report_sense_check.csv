@@ -1,0 +1,11 @@
+report_name,sense_check_area,status,issue,recommended_fix,severity
+PROMO_ORDER_PLAN.csv,advisory_labelling,PASS,,Ensure advisory_label and production_ordering_approved=NO on all rows,INFO
+PROMO_ORDER_PLAN.csv,field_count,PASS,,Column count acceptable,INFO
+PROMO_MANAGER_SUMMARY.csv,release_blocker_visible,PASS,,Surface primary_blocker and release_recommendation at top of summary,INFO
+PROMO_MANAGER_SUMMARY.csv,readability,PASS,23 manager fields,Keep manager summary under two minutes read time,INFO
+PROMO_BUYER_ACTION_PACK.xlsx,buyer_understandability,PASS,,Buyer workbook exported for review,INFO
+PROMO_SHADOW_TOP_100_REVIEW.xlsx,buyer_understandability,PASS,,Buyer workbook exported for review,INFO
+PROMO_ERROR_RATE_DASHBOARD.csv,error_metrics,PASS,,Include model_bias_pct and underforecast_rate,INFO
+PROMO_RELEASE_GATE_SUMMARY.csv,release_status,PASS,,Keep NO_RELEASE until bias repaired,INFO
+PROMO_SHADOW_TOP_100_REVIEW.xlsx,shadow_top_100_visible,PASS,,Top 100 shadow rows available for review,INFO
+PROMO_ORDER_PLAN.csv,shadow_rows_visible,PASS,,Include shadow_candidate_class and rank,INFO

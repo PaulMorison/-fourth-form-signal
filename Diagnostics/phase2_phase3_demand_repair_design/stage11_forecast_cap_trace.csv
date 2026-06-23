@@ -1,0 +1,6 @@
+metric,min,median,p90,max,distinct_values,rows_eq_1,rows_eq_0
+resolved_before_order_cap,0.0,0.0,0.0,0.0,1,0,3531
+order_cap_units_when_policy_fired,,,,,0,0,0
+resolved_after_order_cap_sim,0.0,0.0,0.0,0.0,1,0,3531
+customer_selected_demand_units,0.0,1.0,1.0,2.0,3,3506,4
+rows_shrunk_by_stage11_order_cap_sim,0.0,,,,,,

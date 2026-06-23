@@ -1,0 +1,17 @@
+graph_component,node_name,rows_populated,rows_partial,row_population_rate,repairable,sample_missing_reason
+DAG_NODE,raw_transaction_history,640,0,0.4008,YES,NO_EVIDENCE_IN_ROW
+DAG_NODE,raw_stock_position,0,0,0.0,YES,COLUMN_NOT_IN_FRAME
+DAG_NODE,raw_supplier_history,0,0,0.0,YES,NO_EVIDENCE_IN_ROW
+DAG_NODE,raw_promo_advice,0,0,0.0,YES,NO_EVIDENCE_IN_ROW
+DAG_NODE,basket_attachment,100,0,0.0626,YES,NO_EVIDENCE_IN_ROW
+DAG_NODE,mission_sku_role,100,100,0.0626,YES,NO_EVIDENCE_IN_ROW
+DAG_NODE,available_to_sell_confidence,1597,64,1.0,YES,
+DAG_NODE,promo_uplift_estimate,0,0,0.0,YES,COLUMN_NOT_IN_FRAME
+DAG_NODE,optimal_stock_target,0,0,0.0,YES,COLUMN_NOT_IN_FRAME
+DAG_NODE,adjacent_path_simulation,1597,0,1.0,YES,
+DAG_NODE,brain_forecast,1597,0,1.0,YES,
+DAG_NODE,bias_calibration,13,0,0.0081,YES,NO_EVIDENCE_IN_ROW
+DAG_NODE,governance_constraints,100,0,0.0626,YES,NO_EVIDENCE_IN_ROW
+DAG_NODE,human_review,0,0,0.0,YES,NO_EVIDENCE_IN_ROW
+DAG_NODE,realised_outcome,640,0,0.4008,YES,NO_EVIDENCE_IN_ROW
+DAG_NODE,lesson_update,100,0,0.0626,YES,NO_EVIDENCE_IN_ROW

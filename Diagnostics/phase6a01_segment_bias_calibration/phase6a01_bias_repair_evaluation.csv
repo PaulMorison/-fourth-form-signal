@@ -1,0 +1,5 @@
+model_variant,row_count,wape,mae,bias_pct,underforecast_rate,overforecast_rate,estimated_missed_units,estimated_excess_units,model_beats_baseline_pct,segment_calibration_allowed_rows
+raw_model,52285,0.67291,0.628766089700679,-50.3291,21.14,2.95,28731.65,4143.39,61.63,0
+calibrated_model,52285,0.670504,0.6265178042650856,-25.382,15.33,10.76,22578.92,10178.56,60.8,0
+segment_calibrated_model,52285,0.795112,0.7429515019604094,7.035,11.77,19.21,17704.13,21141.09,56.46,0
+baseline,52285,1.082549,1.0115317777565267,2.7058,20.92,27.5,25783.0,27104.94,0.0,0

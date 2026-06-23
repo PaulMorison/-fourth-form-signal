@@ -1,0 +1,17 @@
+qa_check_name,qa_status,expected_value,actual_value,difference,severity,fix_recommendation
+required_file_PROMO_MANAGER_SUMMARY.csv,PASS,exists,exists,,INFO,Export PROMO_MANAGER_SUMMARY.csv
+required_file_PROMO_ORDER_PLAN.csv,PASS,exists,exists,,INFO,Export PROMO_ORDER_PLAN.csv
+required_file_PROMO_BUYER_ACTION_PACK.xlsx,PASS,exists,exists,,INFO,Export PROMO_BUYER_ACTION_PACK.xlsx
+required_file_PROMO_SHADOW_TOP_100_REVIEW.xlsx,PASS,exists,exists,,INFO,Export PROMO_SHADOW_TOP_100_REVIEW.xlsx
+required_file_PROMO_ERROR_RATE_DASHBOARD.csv,PASS,exists,exists,,INFO,Export PROMO_ERROR_RATE_DASHBOARD.csv
+required_file_PROMO_REPORT_QA_SUMMARY.csv,FAIL,exists,missing,missing,BLOCKER,Export PROMO_REPORT_QA_SUMMARY.csv
+required_file_PROMO_RELEASE_GATE_SUMMARY.csv,PASS,exists,exists,,INFO,Export PROMO_RELEASE_GATE_SUMMARY.csv
+required_file_PROMO_RUN_MANIFEST.csv,FAIL,exists,missing,missing,BLOCKER,Export PROMO_RUN_MANIFEST.csv
+order_plan_has_rows,PASS,>0,100,100,INFO,Rebuild order plan from shadow journal
+identity_columns_present,PASS,"store_number,promotion_id,sku_number","store_number,promotion_id,sku_number",,INFO,"Include store_number, promotion_id, sku_number"
+no_duplicate_sku_promo_rows,PASS,0,0,,INFO,Deduplicate SKU/promo rows in order plan
+release_recommendation_consistent,PASS,NO_RELEASE,NO_RELEASE,,INFO,Do not inflate release status
+no_auto_order_file,PASS,none,0,0,INFO,Remove auto-order exports
+advisory_labels_present,PASS,INTERNAL_SHADOW_ADVISORY_ONLY,INTERNAL_SHADOW_ADVISORY_ONLY,,INFO,Label all pack outputs as advisory
+governed_actions_not_overwritten,PASS,NO,NO,,INFO,Governed actions remain source-controlled
+run_id_present,PASS,phase5y01,phase5y01-772-20260623T054444Z,phase5y01-772-20260623T054444Z,INFO,Include run_id in manifest

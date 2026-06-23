@@ -1,0 +1,2 @@
+ats_confidence_label,row_count,actual_sales_rate,zero_sales_rate,false_zero_demand_risk_count,stockout_censored_count,unknown_soh_count,mean_ats_score,validation_status,recommended_threshold,verification_note
+LOW,1597,0.4007514088916719,0.5992485911083281,0,64,1,0.0959924859110833,PASS,0.45,false_zero=0 on 1597 rows; 0 rows have SOH>0 with zero sales — no suspicious unflagged pattern detected

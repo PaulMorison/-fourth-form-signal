@@ -1,0 +1,2 @@
+total_rows,total_columns,numeric_columns,object_columns,model_ready_features,model_ready_with_missingness_flag,sparse_signal_kept,categorical_encode_count,constants_blocked,all_zero_blocked,fully_missing_blocked,leakage_risk_blocked,target_derived_blocked,post_promo_actual_blocked,extreme_value_repair_count,broken_join_repair_count,high_cardinality_text_count,review_required_count,final_leak_safe_model_input_feature_count
+3531,661,597,64,345,18,17,24,47,124,15,28,15,12,20,0,10,5,406

@@ -1,0 +1,10 @@
+metric,value
+total_rows,2140
+added_buy_review_rows,462
+removed_buy_review_rows,92
+tiny_demand_buy_review_rows,295
+stock_basis_overrun_review_rows,60
+high_confidence_buy_rows,50
+low_confidence_buy_rows,50
+shadow_buy_count,1172
+caps_applied,552

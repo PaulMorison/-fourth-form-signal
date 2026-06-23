@@ -1,0 +1,4 @@
+metric,value
+mean_target_weight_per_row,0.568941
+trainable_row_share_weight_gt_0,0.980108
+zero_weight_row_share,0.019892

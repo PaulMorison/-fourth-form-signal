@@ -1,0 +1,11 @@
+file,has_shadow_label_column,all_shadow_labelled
+01_MANAGER_ACTIONS_SHADOW.csv,True,True
+02_ADDED_BUYS_REVIEW.csv,True,True
+03_REMOVED_BUYS_REVIEW.csv,True,True
+04_TINY_DEMAND_BUYS_REVIEW.csv,True,True
+05_STOCK_BASIS_REVIEW.csv,True,True
+06_HIGH_CONFIDENCE_BUYS.csv,True,True
+07_LOW_CONFIDENCE_BUYS.csv,True,True
+08_OPERATOR_DECISION_SHEET.csv,True,True
+09_SUMMARY_METRICS.csv,True,True
+10_AUDIT_CAPS_AND_WARNINGS.csv,True,True

@@ -1,0 +1,2 @@
+recommendation,top_50_candidates,eligible_candidates,average_segment_bias,estimated_learning_value,estimated_economic_value,unsafe_rows_excluded,auto_order_created,customer_release_recommendation,primary_blocker,reason
+SHADOW_TOP_100_REVIEW,50,134,-19.477,4710.3,-1462.642,46728,NO,NO_RELEASE,model_bias_dangerously_negative,Broader shadow queue for internal brain comparison.

@@ -1,0 +1,13 @@
+gate,pass,detail
+shadow_reduces_stock_basis_overrun_vs_4b9,True,4b9=550 4b11=60
+shadow_reduces_demand_ref_overrun_vs_4b9,True,4b9=119 4b11=21
+shadow_stock_basis_not_worse_than_legacy_without_review,True,legacy=250 shadow=60
+tiny_demand_buy_lower_than_legacy,True,legacy=456 shadow=295
+zero_order_buy_zero,True,count=0
+top_100_manager_readable,True,readable_share=100.0%
+cap_audit_visible,True,caps=552
+manager_summary_reconciles,True,csv_sum=2893 metric=2893.0
+internal_leakage_zero,True,all rows SHADOW_NOT_PRODUCTION
+output_labelled_shadow_not_production,True,SHADOW_NOT_PRODUCTION
+customer_ready,False,NO — review only
+formal_overall,True,PASS

@@ -1,0 +1,6 @@
+role,path,kind
+live_source_of_truth,/Users/paulmorison/promotions_runtime_governed/promotions/priceline/772/prediction,production_runtime
+shadow_governed_outputs,/Users/paulmorison/promotions_runtime_governed/promotions/772/prediction,shadow_review
+priceline_shadow_mirror,/Users/paulmorison/promotions_runtime_governed/promotions/priceline/772/prediction/shadow_review_20260622_phase4b16,shadow_mirror_copy
+operator_pointer,/Users/paulmorison/promotions_runtime_governed/promotions/priceline/772/prediction/README_SHADOW_REVIEW_LOCATION.md,pointer_readme
+phase4b16_backup,/Users/paulmorison/promotions_runtime_governed/promotions/772/prediction/archive/pre_phase4b16_20260622_1506,archive

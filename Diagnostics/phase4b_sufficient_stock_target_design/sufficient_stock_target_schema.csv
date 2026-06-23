@@ -1,0 +1,10 @@
+column_name,data_type,required,definition,consumer,notes
+realized_sales_units,float64,Y,Observed promo-window net units sold (actual_units_sold clipped >=0),Audit + lower bound,Never treated as demand ceiling when stock constrained
+stock_constrained_flag,int8,Y,1 when realized sales likely understate demand due to stock/allocation limits,Target gating + weighting,Derived from sell-through stockout underallocation post_14d signals
+stock_integrity_issue_flag,int8,Y,1 when inventory record unreliable (negative SOH missing stock_basis etc.),Exclusion,Blocks clean-target use
+sufficient_stock_observed_flag,int8,Y,1 when evidence supports realized sales approximating demand,Clean-target gate,Requires valid stock_basis non-saturated sell-through and no integrity issue
+sufficient_stock_demand_units_target,float64,Y,Training label for units head when row eligible,units_gradient_boosting fit,Null when excluded; never imputed to zero for sparse rows
+target_quality_label,category,Y,CLEAN_REALIZED_DEMAND | STOCK_CONSTRAINED_REPAIRED | INVENTORY_INTEGRITY_CONTAMINATED | INSUFFICIENT_EVIDENCE | EXCLUDED_FROM_TARGET,Audit + weighting,Exactly one label per row
+target_weight,float64,Y,Sample weight for training (0.0-1.0),Trainer sample_weight,Zero weight = excluded from loss; not dropped silently
+target_actual_units_sold_legacy,float64,N,Existing realized-sales target preserved for comparison,Backtest diff,Keep until retrain validated
+target_provenance_note,string,N,Human-readable rule id that assigned label,Audit, e.g. RULE_CLEAN_SELLTHROUGH_LT_85

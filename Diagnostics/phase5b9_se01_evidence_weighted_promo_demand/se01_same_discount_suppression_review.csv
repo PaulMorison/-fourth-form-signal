@@ -1,0 +1,224 @@
+sku_number,sku_description,baseline_period_demand_units,same_discount_promo_units,selected_before,selected_after,decision_before,decision_after,recommended_order_before,recommended_order_after,reason
+92632,Avene Cica+ Mlt P&R Crm Spf50+,30.0,5.0,30.0,30.0,REVIEW,REVIEW,24,26,same_discount_suppressed_by_credible_baseline
+52115,Rexona W Apd Adv Shwr/F 220Ml,24.5,2.091,24.5,24.5,REVIEW,REVIEW,22,23,same_discount_suppressed_by_credible_baseline
+195412,Npmu Pro Fix Stick Cocoa,21.0,0.235,21.0,21.0,REVIEW,REVIEW,18,21,same_discount_suppressed_by_credible_baseline
+195518,Mf Fcefnty Cmpct 001,21.0,0.364,21.0,21.0,REVIEW,REVIEW,18,21,same_discount_suppressed_by_credible_baseline
+799718,Rosehip By Essano Oil 45Ml,14.0,1.0,14.0,14.0,REVIEW,REVIEW,13,14,same_discount_suppressed_by_credible_baseline
+199053,Npmu Wondr Stck Dual Medium,14.0,1.625,14.0,14.0,REVIEW,REVIEW,12,13,same_discount_suppressed_by_credible_baseline
+67690,Rim Btw Pro Pncl Ash Brown,14.0,0.562,14.0,14.0,REVIEW,REVIEW,12,13,same_discount_suppressed_by_credible_baseline
+192936,May Eye Makeup Remover 70Ml,14.0,8.318,14.0,14.0,REVIEW,REVIEW,12,13,same_discount_suppressed_by_credible_baseline
+88458,Mf Divine Lashes Rich Blk,14.0,0.636,14.0,14.0,REVIEW,REVIEW,12,13,same_discount_suppressed_by_credible_baseline
+55245,Garn Micellar Water Rose 400Ml,12.0,3.0,12.0,12.0,REVIEW,REVIEW,10,10,same_discount_suppressed_by_credible_baseline
+323608,Cetaphil Eczema Bdy Mst 295Ml,12.0,0.4,12.0,12.0,REVIEW,REVIEW,9,9,same_discount_suppressed_by_credible_baseline
+90934,Cetaphil Gen Ex Sa Lot 236M,12.0,1.5,12.0,12.0,REVIEW,REVIEW,9,9,same_discount_suppressed_by_credible_baseline
+192118,Olay Hyaluron Cream 50G,10.5,0.423,10.5,10.5,REVIEW,REVIEW,10,10,same_discount_suppressed_by_credible_baseline
+93993,May Face Lift Stix 65 Nu Int,10.5,0.909,10.5,10.5,REVIEW,REVIEW,10,10,same_discount_suppressed_by_credible_baseline
+90432,Rim Wonder'Ink Liner Chestnut,10.5,0.429,10.5,10.5,REVIEW,REVIEW,10,10,same_discount_suppressed_by_credible_baseline
+90462,Mf Mp Wow Liner Emerald Green,10.5,0.667,10.5,10.5,REVIEW,REVIEW,9,10,same_discount_suppressed_by_credible_baseline
+16527,Loreal R/Lift Eye/Fl Tub 15Ml,10.0,1.25,10.0,10.0,REVIEW,REVIEW,8,8,same_discount_suppressed_by_credible_baseline
+73263,Thayers Rose Petal Toner 355Ml,10.0,1.0,10.0,10.0,REVIEW,REVIEW,8,8,same_discount_suppressed_by_credible_baseline
+94071,Npmu Smushy Mte Lb Swipe 2 Sm,9.25,1.143,9.25,9.25,REVIEW,REVIEW,9,9,same_discount_suppressed_by_credible_baseline
+67700,Rim Lst Fin L/L Epic Brgnd,9.25,1.125,9.25,9.25,REVIEW,REVIEW,9,9,same_discount_suppressed_by_credible_baseline
+193696,Mf 2000 Cal Pro Masc Black,9.25,0.667,9.25,9.25,REVIEW,REVIEW,9,9,same_discount_suppressed_by_credible_baseline
+96608,Npmu Make Em Wndr Fdn Nude,8.75,1.5,8.75,8.75,REVIEW,REVIEW,8,8,same_discount_suppressed_by_credible_baseline
+193213,May Ls Sky High Primer,8.375,1.636,8.375,8.375,REVIEW,REVIEW,8,8,same_discount_suppressed_by_credible_baseline
+189518,Npmu Butter Lg Bit Of Honey,8.25,1.647,8.25,8.25,REVIEW,REVIEW,8,8,same_discount_suppressed_by_credible_baseline
+68266,Coco&Eve Bronze Foam Medium,7.0,0.571,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+68268,Coco&Eve Bronze Foam Ult/Dark,7.0,0.714,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+192839,Coco&Eve Face Tan M/Mist 75Ml,7.0,0.429,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+90794,Antipodes Menopause Cream 60Ml,7.0,0.364,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+62854,Olay Luminous Hyaluronic Serum,7.0,0.538,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+191180,May Superstay Glow Tint 05,7.0,0.546,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+1227,May Fit Me Mte Pore Fdn Ivry,7.0,0.652,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+199055,Npmu Wondr Stk Blush Lt Peach,7.0,0.538,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+94766,Rim M/T Trbochrgd Glw Chls Glw,7.0,0.333,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+195443,Npmu Buttermelt Butta Than U,7.0,0.231,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+90458,Rim M.T Brnzcntrsclpt Medium,7.0,0.222,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+94684,Rim K&F S/T Glow Rose Van,7.0,0.5,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+62911,Rim Scndl Eye Def Intense Blck,7.0,1.375,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+57316,Olay Regen Ret Night Eye 15Ml,7.0,0.536,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+24420,May Fm Mpore Fdn Light Beige,7.0,0.435,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+198714,May Sunkisser Blush 06 Sizzle,7.0,0.778,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+521179,May L/S Superstay Infinite Pet,7.0,0.333,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+193291,Rim Lastfin 35Hr Fndn Clas Bge,7.0,0.125,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+96467,May Lifter Conceal 25,7.0,0.25,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+96499,May Cloud Mte 03 Divin Crimson,7.0,0.25,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+96500,May Cloud Mte 04 Pink Daydream,7.0,0.25,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+195433,Npmu Duck Plmp Brick Of Ti,7.0,0.882,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+94677,Rim K&F Lash Ldr Masc Abrgine,7.0,0.2,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+192935,May Ct Eye Stix I Am Fearless,7.0,0.5,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+199746,Rim Kind&Free Lsh Ldr Masc B/B,7.0,0.417,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+38393,May Fit Me Loose Pwd Medium,7.0,0.364,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+67692,Rim Wndr'Care Serum L&B Ser,7.0,0.182,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+90160,Npmu Fat Oil Click Going Live,7.0,0.375,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+49794,Rim Wndr Lx Vol Mas Brwn,7.0,0.154,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+189517,Npmu Fat Oil Follow Back,7.0,1.4,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+93987,May Super Lock Brow Glue Black,7.0,0.546,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+93985,May Spr Lock Brw Glue Med Brwn,7.0,1.091,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+94069,Npmu Smushy Mte Lb Soft Smile,7.0,0.429,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+94066,Npmu Smushy Mte Lb Sweet Smac,7.0,0.571,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+974412,Rim Oh My Gloss 500 Ohh La La,7.0,0.25,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+15009,Rim Lg Oh My Gloss Eternity,7.0,0.625,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+40169,Npmu Suede Matte Ll Berry,7.0,0.429,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+67696,Rim Lst Fin L/L Eastnd Pnk,7.0,1.0,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+67689,Rim Btw Pro Pncl Blnd,7.0,0.562,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+194501,Rim 60 Sec N/P 140 Choc Ecl,7.0,0.25,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+730,Rim 60Sec N/P 703 Wht Hot Love,7.0,0.25,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+96517,May Babylips Love Pink Lolita,7.0,0.5,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+193126,Npmu Ult Es Pal I Know Tha,7.0,1.529,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+198728,May Sst Lumi Matte Fnd 108,7.0,0.571,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+198735,May Sst Lumi Matte Fnd 140,7.0,0.8,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+96475,May Face Lifter Fdn 102,7.0,0.25,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+96484,May Face Lifter Fdn 123,7.0,0.25,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+96486,May Face Lifter Fdn 220,7.0,0.25,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+93992,May Face Lift Stix 55 Nu Int,7.0,0.454,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+93995,May Face Lift Stix 75 Nu Int,7.0,0.454,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+70394,Npmu Plumping Primer 01,7.0,3.176,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+96615,Npmu Make Em Wndr Fdn Class Ta,7.0,0.5,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+96614,Npmu Make Em Wndr Fdn Gold Lgh,7.0,0.5,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+39394,May Fitme Matte Pore Fdn Fporc,7.0,0.826,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+196930,Rim Better Filters Light,7.0,0.529,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+36223,May Fitme M+P Fd Fair Ivory,7.0,0.381,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+39403,May Fitme Matte Pore Fdn Wnude,7.0,0.294,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+93973,May Sunkisser Highlight 21 Int,7.0,0.273,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+93967,May Sunkisser Original 05 As X,7.0,0.091,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+192940,May Vinyl Ink Nude Captivated,7.0,1.091,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+93971,May Sunkisser Mate Ext 34 As X,7.0,0.273,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+93974,May Sunkisser Highlight 22 Int,7.0,0.182,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+93968,May Sunkiser Mat Ext 30 Pnk Mr,7.0,0.273,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+189239,May Ss Vinyl Ink Cheeky,7.0,3.0,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+70359,Npmu Bwm Sr N Calm Conc Golden,7.0,1.588,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+521195,May L/S Superstay Timeless Ros,7.0,0.591,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+55218,May Ss Matte Ink Pinks Savant,7.0,0.478,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+30537,May Ss Matte Ink Lover,7.0,1.261,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+46754,May Ls Matte Ink Grande Bre,7.0,1.087,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+57928,May Iar Eraser Dk Circ Sand,7.0,1.261,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+57612,May Iar Eraser Dk Circ Neutral,7.0,1.158,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+96502,May Cloud Mte 07 Moonlit Rose,7.0,0.5,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+30540,May Ss Matte Ink Romantic,7.0,0.652,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+94055,Npmu Lft Snat Brw Tint Brunett,7.0,0.286,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+93981,May Es.Color Tattoo I Am Cozy,7.0,0.182,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+93982,May Es.Color Tat I Am Unapolog,7.0,0.182,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+192929,May Ct Eye Stix I Am Inspired,7.0,0.2,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+192931,May Ct Eye Stix I Am Corageous,7.0,0.55,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+94696,Rim K&F S/T Blur Vanilla,7.0,0.111,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+94688,Rim K&F S/T Glow Tre Beige,7.0,0.125,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+94685,Rim K&F S/T Glow Gldn Ivry,7.0,0.125,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+90169,Npmu Epic Ink El Midnight Rise,7.0,0.125,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+66928,Npmu Lip Ling Xxl 14 Bust Ed,7.0,0.353,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+57933,May Lifter Gloss 005 Petal,7.0,1.632,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+94005,May Lift Gloss 014 Heat As X,7.0,0.818,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+189513,Npmu Fat Oil My Main,7.0,2.471,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+189514,Npmu Fat Oil Missed Call,7.0,3.118,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+87610,Rim Thrlskr Glsygls Pnk Cndy,7.0,0.286,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+93997,May Lift Glaze 004 Cherry Swir,7.0,0.273,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+192991,Rim Lasting Matte Ls 210,7.0,0.143,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+94074,Npmu Fat Cheek Blsh Guava Gush,7.0,0.143,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+189519,Npmu Butter Lg Butterscotch,7.0,1.294,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+93978,May Tat Gel Pen 821 Stardust,7.0,0.091,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+653048,Rim Masc Lash Acce Endless Blk,7.0,0.421,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+193318,Rim Multi Tasker Con Clas Bge,7.0,0.125,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+87603,Rim Lasting Finish Ls Pump Pch,7.0,0.714,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+30162,Rim Scandaleyes Wp Liner Brown,7.0,0.25,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+67694,Rim Slv Oh My Gloss Sty My Rse,7.0,0.444,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+67699,Rim Lst Fin L/L Mve Spell,7.0,0.562,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+198704,May Lash Sensa Firework Wtp,7.0,1.263,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+26154,Neut H/B Cln Gelee Milk 145G,7.0,2.5,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+1229,May Fit Me Mte Pore Fdn Nt Bge,7.0,1.087,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+93972,May Sunkisser Highlight 20 Int,7.0,0.182,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+63031,May Ssmi Spiced Ed Exhilarator,7.0,2.0,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+195436,Npmu Duck Plmp Bubblegum B,7.0,0.647,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+195435,Npmu Duck Plmp Pick Me Pin,7.0,0.882,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+195439,Npmu Duck Plmp Cherry Spic,7.0,0.588,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+195431,Npmu Duck Plmp Nude Swings,7.0,1.235,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+195424,Npmu Fat Oil Slick Going Viral,7.0,2.294,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+90838,Palmer'S Coco Cream 250G,7.0,1.0,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+192994,Rim Lasting Matte Ls 900,7.0,0.267,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+974331,Rim Oh My Gloss 130 Purr Cat,7.0,0.636,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+34113,Rim Eyebrow Pencil D/Brown,7.0,0.688,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+806463,Olay T/Eff+ Normal Moist 50G,7.0,0.4,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+731188,Olay T/Eff+ Gntl Spf Moist 50G,7.0,0.905,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+190137,Essano Hydrate Sp 600Ml,7.0,0.6,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+1226,May Fit Me Mte Pore Fdn Porc,7.0,0.478,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+521213,Rosehip By Essano 20Ml,7.0,1.667,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+310832,Dv Dn Moist Lotion 500Ml,7.0,1.0,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+195432,Npmu Duck Plmp Apri-Caugh,7.0,0.647,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+32866,Palmers Body Str Mrk Oil 100Ml,7.0,1.0,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+645745,Olay Moist Sens Cream 100G,7.0,1.125,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+679208,Palmers Shea Butter Ltn 400Ml,7.0,1.0,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+192359,Clairol Blonde Kit Plat,7.0,0.6,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+95495,Rexona Wmn Deo Frsh Ctrs 230Ml,7.0,0.75,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+95494,Rexona Wmn Deo Wild Rose 230Ml,7.0,0.75,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+19966,Rim Xtra L/Lash Masc Xtrm Blck,7.0,1.0,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+52118,Rexona W Apd A/Inv Fresh 220Ml,7.0,1.454,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+52116,Rexona W Apd Adv Inv/P 220Ml,7.0,1.636,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+727,Rim 60Sec N/P 740 Clear,7.0,0.312,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+14083,Rim 60Sec N/P 340 Berries Crm,7.0,0.375,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+41206,Olay Whips Regnrst Fce Crm 50G,7.0,0.269,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+94874,Essano Coll Cleans Oil 150Ml,7.0,0.5,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+196240,Mf Lipfinity Pearly Nude 001,7.0,0.273,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+15769,Npmu 3C Palette Light,7.0,1.235,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+90439,Rim Omg Lip Btr Treat 003,7.0,0.667,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+199751,Rim Oh My Gloss Lipoil Pnk Fls,7.0,0.786,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+195994,May Hyp Prec Liner 730 Jungle,7.0,0.546,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+18258,Rim Masc Scandaleyes Reloaded,7.0,0.308,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+96154,Rim My Plump Lip Shaper Ll Hny,7.0,0.25,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+96153,Rim My Plump Lip Shaper Ll Cte,7.0,0.5,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+90447,Mf F.L Eff Rchrg Masc Blk,7.0,0.143,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+94869,Essano Vit C Serum 30Ml,7.0,0.333,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+73217,Dv Ultralight D/Lot Spf50+50Ml,7.0,0.636,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+102282,Mf Lipfinity Spirtual,7.0,0.111,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+196932,Rim Better Filters Medium Deep,7.0,0.059,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+196931,Rim Better Filters Medium,7.0,0.176,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+95024,Essano Coll Retinol Oil 20Ml,7.0,0.333,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+521120,May L/S Superstay Perpet Plum,7.0,0.5,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+29850,Dv Ehg Soap-Free 500Ml,7.0,0.833,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+94011,May Ss Teddy 115 Coffeedate,7.0,0.454,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+94872,Essano Coll Face Moist 100Ml,7.0,0.333,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+54487,Mf Clr Elix Kiss 80 Chilli,7.0,0.25,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+67686,Rim Wndr Ext Masc Very Blk,7.0,0.579,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+521310,May Fit Me Concealer Medium,7.0,2.087,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+90149,Npmu Duck Plump Ll Sienna,7.0,1.0,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+66788,Mf Ce Lip Liner Desert Sand,7.0,0.375,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+729841,Rim P/Powder Peach Glow,7.0,0.467,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+67697,Rim Lst Fin L/L Pnk Enchnt,7.0,0.812,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+341556,Rim Cover Stick Ivory,7.0,0.562,7.0,7.0,REVIEW,REVIEW,7,7,same_discount_suppressed_by_credible_baseline
+191380,Mf Mstrpce 2In1 Lash Wow Masc,7.0,0.071,7.0,7.0,REVIEW,REVIEW,6,6,same_discount_suppressed_by_credible_baseline
+62977,Mf Ff Pwd Bronzer Lght Brnz,7.0,0.273,7.0,7.0,REVIEW,REVIEW,6,7,same_discount_suppressed_by_credible_baseline
+41596,May Mc Met Hl Mlten Rse Gld,7.0,0.429,7.0,7.0,REVIEW,REVIEW,6,7,same_discount_suppressed_by_credible_baseline
+193697,Mf 2000 Cal Pro Masc Blk Brown,7.0,0.429,7.0,7.0,REVIEW,REVIEW,6,6,same_discount_suppressed_by_credible_baseline
+196050,Mf 2000 Cal Gloss Guava Flr,7.0,0.364,7.0,7.0,REVIEW,REVIEW,6,6,same_discount_suppressed_by_credible_baseline
+974390,Rim Oh My Gloss 330 Snog,7.0,0.625,7.0,7.0,REVIEW,REVIEW,6,6,same_discount_suppressed_by_credible_baseline
+974463,Rim Oh My Gloss 800 Crs Clear,7.0,1.0,7.0,7.0,REVIEW,REVIEW,6,7,same_discount_suppressed_by_credible_baseline
+188025,Rim 60Sec N/P Under The Palms,7.0,0.364,7.0,7.0,REVIEW,REVIEW,6,6,same_discount_suppressed_by_credible_baseline
+350165,Mf Masc False Lash Black,7.0,2.214,7.0,7.0,REVIEW,REVIEW,6,6,same_discount_suppressed_by_credible_baseline
+102634,Mf Kohl Pencil Brown,7.0,0.364,7.0,7.0,REVIEW,REVIEW,6,6,same_discount_suppressed_by_credible_baseline
+54481,Mf Clr Elix Kiss Simply Nude,7.0,0.5,7.0,7.0,REVIEW,REVIEW,6,6,same_discount_suppressed_by_credible_baseline
+188037,Mf False Lash Effect Serum,7.0,0.143,7.0,7.0,REVIEW,REVIEW,6,6,same_discount_suppressed_by_credible_baseline
+54486,Mf Clr Elix Kiss Ruby Tsdy,7.0,0.273,7.0,7.0,REVIEW,REVIEW,6,6,same_discount_suppressed_by_credible_baseline
+193079,Mf Facefinity Universal Primer,7.0,0.091,7.0,7.0,REVIEW,REVIEW,6,7,same_discount_suppressed_by_credible_baseline
+195519,Mf Fcefnty Cmpct 002,7.0,0.091,7.0,7.0,REVIEW,REVIEW,6,6,same_discount_suppressed_by_credible_baseline
+71548,Mf Divine Lash Masc Wp,7.0,0.786,7.0,7.0,REVIEW,REVIEW,6,7,same_discount_suppressed_by_credible_baseline
+34109,Rim E/Liner Kohl Jet Black,7.0,1.375,7.0,7.0,REVIEW,REVIEW,6,6,same_discount_suppressed_by_credible_baseline
+184615,Ariana Cloud Body Mist 236Ml,7.0,0.429,7.0,7.0,REVIEW,REVIEW,6,7,same_discount_suppressed_by_credible_baseline
+188943,Ariana Moonlight B/Mist 236Ml,7.0,0.143,7.0,7.0,REVIEW,REVIEW,6,6,same_discount_suppressed_by_credible_baseline
+194020,Csc Brightening Serum 30Ml,7.0,0.5,7.0,7.0,REVIEW,REVIEW,6,6,same_discount_suppressed_by_credible_baseline
+194133,Aeropostale Berries&Cream 237,7.0,0.111,7.0,7.0,REVIEW,REVIEW,6,6,same_discount_suppressed_by_credible_baseline
+194050,Csc Brightening Eye Cream 15Ml,7.0,1.0,7.0,7.0,REVIEW,REVIEW,6,6,same_discount_suppressed_by_credible_baseline
+194045,Csc Spot Treament 10Ml,7.0,2.0,7.0,7.0,REVIEW,REVIEW,6,6,same_discount_suppressed_by_credible_baseline
+37411,Nivea Body Chry&Jojo Oil 400Ml,7.0,1.556,7.0,7.0,REVIEW,REVIEW,6,6,same_discount_suppressed_by_credible_baseline
+194049,Csc Moisture+ Eye Gel 15Ml,7.0,2.0,7.0,7.0,REVIEW,REVIEW,6,6,same_discount_suppressed_by_credible_baseline
+46574,Tena Pants Disc Super Lge 8Pk,7.0,0.091,7.0,7.0,REVIEW,REVIEW,6,6,same_discount_suppressed_by_credible_baseline
+43878,Clairol Rtu Powder Light Brown,7.0,0.467,7.0,7.0,REVIEW,REVIEW,5,5,same_discount_suppressed_by_credible_baseline
+199946,Loreal Brght Dark Spt Exf Peel,6.0,1.6,6.0,6.0,REVIEW,REVIEW,5,5,same_discount_suppressed_by_credible_baseline
+95025,Essano Coll Night Cream 50Ml,6.0,1.667,6.0,6.0,REVIEW,REVIEW,5,5,same_discount_suppressed_by_credible_baseline
+55881,Avene Cleanance Starter Kit,6.0,1.625,6.0,6.0,REVIEW,REVIEW,5,5,same_discount_suppressed_by_credible_baseline
+66821,Olay Regen Coll Pep24 Srm 30Ml,6.0,0.643,6.0,6.0,REVIEW,REVIEW,5,5,same_discount_suppressed_by_credible_baseline
+92214,Olay Retinol Body Lotion 502Ml,6.0,3.714,6.0,6.0,REVIEW,REVIEW,4,4,same_discount_suppressed_by_credible_baseline
+90936,Cetaphil Pro Itch Rel Gel 59M,4.0,0.5,4.0,4.0,REVIEW,REVIEW,3,3,same_discount_suppressed_by_credible_baseline
+65837,No7 Rad+ Vitamin C Toner 200Ml,4.0,0.667,4.0,4.0,REVIEW,REVIEW,3,3,same_discount_suppressed_by_credible_baseline
+193143,Npmu Bwm Calm Conclr Med Gold,3.5,0.214,3.5,3.5,REVIEW,REVIEW,4,4,same_discount_suppressed_by_credible_baseline
+94063,Npmu Bmelt Brnz Butta'D Down,3.5,1.0,3.5,3.5,REVIEW,REVIEW,4,4,same_discount_suppressed_by_credible_baseline
+63360,Avene Cicalfate+ Scar Gel 30Ml,3.0,0.625,3.0,3.0,REVIEW,REVIEW,3,3,same_discount_suppressed_by_credible_baseline
+90346,Loreal B/R Spf50 Fld Lght 50Ml,2.0,0.875,0.0,0.0,REVIEW,REVIEW,2,0,no_credible_promo_demand_evidence
+259519,Olay T/Eff+ Norm Spf Moist 50G,2.0,0.88,0.0,0.0,REVIEW,REVIEW,2,0,no_credible_promo_demand_evidence

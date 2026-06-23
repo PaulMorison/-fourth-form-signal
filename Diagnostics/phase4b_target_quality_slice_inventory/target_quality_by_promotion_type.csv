@@ -1,0 +1,7 @@
+promo_type,target_quality_label,row_count
+amount_off,CLEAN_REALIZED_DEMAND,1
+amount_off,STOCK_CONSTRAINED_REPAIRED,1
+catalogue,CLEAN_REALIZED_DEMAND,7
+catalogue,STOCK_CONSTRAINED_REPAIRED,4
+clearance,STOCK_CONSTRAINED_REPAIRED,1
+multi_buy,CLEAN_REALIZED_DEMAND,2

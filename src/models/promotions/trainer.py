@@ -36,7 +36,7 @@ from sklearn.metrics import (
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder, StandardScaler
 
-from models.promotions.allocation_calibration import apply_allocation_aware_units_cap
+from models.promotions.allocation_calibration import compute_allocation_aware_cap_units
 from models.promotions.model_bundle import (
     PromotionInferenceSchema,
     PromotionTrainingManifest,
@@ -265,6 +265,25 @@ _PROMOTION_TRAINER_TARGET_MODES: dict[str, PromotionTrainerTargetMode] = {
     mode: mode for mode in PROMOTION_TRAINER_TARGET_MODE_CHOICES
 }
 
+# Phase 4B shadow units-target evaluation modes. Default preserves live training on
+# target_actual_units_sold. sufficient_stock_shadow trains evaluation-only heads
+# and must never replace production scoring without separate approval.
+PromotionUnitsTargetMode = Literal["legacy_realized_sales", "sufficient_stock_shadow"]
+PROMOTION_UNITS_TARGET_MODE_CHOICES: tuple[PromotionUnitsTargetMode, ...] = (
+    "legacy_realized_sales",
+    "sufficient_stock_shadow",
+)
+DEFAULT_PROMOTION_UNITS_TARGET_MODE: PromotionUnitsTargetMode = "legacy_realized_sales"
+_PROMOTION_UNITS_TARGET_MODES: dict[str, PromotionUnitsTargetMode] = {
+    mode: mode for mode in PROMOTION_UNITS_TARGET_MODE_CHOICES
+}
+LIVE_UNITS_TRAINING_TARGET_COLUMN = "target_actual_units_sold"
+SUFFICIENT_STOCK_SHADOW_UNITS_TARGET_COLUMN = "sufficient_stock_demand_units_target"
+SUFFICIENT_STOCK_SHADOW_WEIGHT_COLUMN = "target_weight"
+SUFFICIENT_STOCK_SHADOW_LINEAR_MODEL_NAME = "shadow_sufficient_stock_units_linear"
+SUFFICIENT_STOCK_SHADOW_GB_MODEL_NAME = "shadow_sufficient_stock_units_gb"
+SUFFICIENT_STOCK_SHADOW_TEST_PREDICTIONS_FILENAME = "test_set_predictions_sufficient_stock_shadow.parquet"
+
 
 def _resolve_promotion_trainer_target_mode(
     target_mode: PromotionTrainerTargetMode | str | None,
@@ -275,6 +294,88 @@ def _resolve_promotion_trainer_target_mode(
     except KeyError as exc:
         expected = ", ".join(_PROMOTION_TRAINER_TARGET_MODES)
         raise ValueError(f"Unsupported promotions trainer target_mode {raw_mode!r}. Expected one of: {expected}") from exc
+
+
+def _resolve_units_target_mode(
+    units_target_mode: PromotionUnitsTargetMode | str | None,
+) -> PromotionUnitsTargetMode:
+    raw_mode = DEFAULT_PROMOTION_UNITS_TARGET_MODE if units_target_mode is None else str(units_target_mode)
+    try:
+        return _PROMOTION_UNITS_TARGET_MODES[raw_mode]
+    except KeyError as exc:
+        expected = ", ".join(_PROMOTION_UNITS_TARGET_MODES)
+        raise ValueError(
+            f"Unsupported promotions trainer units_target_mode {raw_mode!r}. Expected one of: {expected}"
+        ) from exc
+
+
+def _resolve_units_training_target_column(units_target_mode: PromotionUnitsTargetMode) -> str:
+    if units_target_mode == "sufficient_stock_shadow":
+        return SUFFICIENT_STOCK_SHADOW_UNITS_TARGET_COLUMN
+    return LIVE_UNITS_TRAINING_TARGET_COLUMN
+
+
+def _require_sufficient_stock_shadow_columns(dataset: pd.DataFrame) -> None:
+    missing = [
+        column_name
+        for column_name in (
+            SUFFICIENT_STOCK_SHADOW_UNITS_TARGET_COLUMN,
+            SUFFICIENT_STOCK_SHADOW_WEIGHT_COLUMN,
+        )
+        if column_name not in dataset.columns
+    ]
+    if missing:
+        raise ValueError(
+            "sufficient_stock_shadow units_target_mode requires training dataset columns: "
+            + ", ".join(missing)
+        )
+    if SUFFICIENT_STOCK_SHADOW_UNITS_TARGET_COLUMN == "feature_probability_expected_units_consensus":
+        raise ValueError("feature consensus must not be used as sufficient-stock shadow target truth")
+
+
+def _build_sufficient_stock_shadow_units_training_sets(
+    *,
+    dataset: pd.DataFrame,
+    model_input: pd.DataFrame,
+    split,
+) -> dict[str, pd.DataFrame | pd.Series]:
+    _require_sufficient_stock_shadow_columns(dataset)
+    train_mask = _coerce_split_mask(split.train_mask, dataset.index)
+    train_weights = pd.to_numeric(
+        dataset.loc[train_mask, SUFFICIENT_STOCK_SHADOW_WEIGHT_COLUMN],
+        errors="coerce",
+    ).fillna(0.0)
+    positive_train_mask = train_mask & train_weights.gt(0.0)
+    if not bool(positive_train_mask.any()):
+        raise ValueError(
+            "sufficient_stock_shadow units_target_mode requires at least one training row with target_weight > 0"
+        )
+    train_features = model_input.loc[positive_train_mask]
+    train_targets = pd.to_numeric(
+        dataset.loc[positive_train_mask, SUFFICIENT_STOCK_SHADOW_UNITS_TARGET_COLUMN],
+        errors="coerce",
+    )
+    train_sample_weights = train_weights.loc[positive_train_mask]
+    return {
+        "train_features": train_features,
+        "train_targets": train_targets,
+        "train_sample_weights": train_sample_weights,
+        "positive_train_row_count": int(positive_train_mask.sum()),
+    }
+
+
+def _fit_units_pipeline_with_sample_weight(
+    pipeline: Pipeline,
+    features: pd.DataFrame,
+    targets: pd.Series,
+    sample_weights: pd.Series,
+) -> Pipeline:
+    pipeline.fit(
+        features,
+        targets,
+        model__sample_weight=sample_weights.to_numpy(dtype="float64"),
+    )
+    return pipeline
 
 
 class _ConstantProbabilityClassifier:
@@ -403,10 +504,12 @@ class PromotionModelTrainer:
         dataset_path: str,
         artifact_paths: PromotionArtifactPaths,
         target_mode: PromotionTrainerTargetMode | str = DEFAULT_PROMOTION_TRAINER_TARGET_MODE,
+        units_target_mode: PromotionUnitsTargetMode | str = DEFAULT_PROMOTION_UNITS_TARGET_MODE,
     ) -> PromotionTrainingArtifacts:
         """Train the promotions model family and persist artifacts plus lineage."""
 
         resolved_target_mode = _resolve_promotion_trainer_target_mode(target_mode)
+        resolved_units_target_mode = _resolve_units_target_mode(units_target_mode)
         if resolved_target_mode != DEFAULT_PROMOTION_TRAINER_TARGET_MODE:
             dataset = _ensure_historical_allocation_candidate_target_bundle(dataset)
         model_input, schema = prepare_model_input_frame(dataset)
@@ -605,6 +708,25 @@ class PromotionModelTrainer:
                     "target_mode_shadow_historical_overallocation_classifier": target_mode_artifact_paths["shadow_historical_overallocation_classifier_path"],
                 }
             )
+        shadow_sufficient_stock_artifact_files: dict[str, str] = {}
+        shadow_sufficient_stock_test_predictions_path: str | None = None
+        units_target_weight_used = False
+        if resolved_units_target_mode == "sufficient_stock_shadow":
+            shadow_bundle = self._train_and_persist_sufficient_stock_shadow_units(
+                run_id=run_id,
+                artifact_paths=artifact_paths,
+                artifact_root=artifact_root,
+                dataset=dataset,
+                model_input=model_input,
+                schema=schema,
+                split=split,
+                legacy_units_model=units_tree,
+            )
+            shadow_sufficient_stock_artifact_files = shadow_bundle["artifact_files"]
+            shadow_sufficient_stock_test_predictions_path = shadow_bundle["test_set_predictions_path"]
+            artifact_files.update(shadow_sufficient_stock_artifact_files)
+            metrics["sufficient_stock_shadow_units"] = shadow_bundle["metrics"]
+            units_target_weight_used = True
         trained_at = datetime.now(tz=UTC).isoformat()
         feature_list_path = artifact_root / "feature_list.json"
         metrics_path = artifact_root / "training_metrics.json"
@@ -625,27 +747,34 @@ class PromotionModelTrainer:
         write_json(feature_list_path, {"feature_columns": list(schema.feature_columns)})
         write_json(metrics_path, metrics)
         write_json(inference_schema_path, inference_schema.to_dict())
-        write_json(
-            manifest_path,
-            PromotionTrainingManifest(
-                run_id=run_id,
-                trained_at_utc=trained_at,
-                dataset_path=dataset_path,
-                target_mode=resolved_target_mode,
-                split_summary={
-                    "train_rows": int(split.train_mask.sum()),
-                    "validation_rows": int(split.validation_mask.sum()),
-                    "test_rows": int(split.test_mask.sum()),
-                    "train_last_date": split.train_last_date,
-                    "validation_last_date": split.validation_last_date,
-                    "test_last_date": split.test_last_date,
-                },
-                feature_list_path=str(feature_list_path),
-                metrics_path=str(metrics_path),
-                inference_schema_path=str(inference_schema_path),
-                artifact_files=artifact_files,
-            ).to_dict(),
-        )
+        manifest_payload = PromotionTrainingManifest(
+            run_id=run_id,
+            trained_at_utc=trained_at,
+            dataset_path=dataset_path,
+            target_mode=resolved_target_mode,
+            split_summary={
+                "train_rows": int(split.train_mask.sum()),
+                "validation_rows": int(split.validation_mask.sum()),
+                "test_rows": int(split.test_mask.sum()),
+                "train_last_date": split.train_last_date,
+                "validation_last_date": split.validation_last_date,
+                "test_last_date": split.test_last_date,
+            },
+            feature_list_path=str(feature_list_path),
+            metrics_path=str(metrics_path),
+            inference_schema_path=str(inference_schema_path),
+            artifact_files=artifact_files,
+        ).to_dict()
+        manifest_payload["units_target_mode"] = resolved_units_target_mode
+        manifest_payload["units_target_column"] = _resolve_units_training_target_column(resolved_units_target_mode)
+        manifest_payload["units_target_weight_used"] = units_target_weight_used
+        manifest_payload["live_units_training_target_column"] = LIVE_UNITS_TRAINING_TARGET_COLUMN
+        manifest_payload["live_units_model_is_production_default"] = True
+        if shadow_sufficient_stock_artifact_files:
+            manifest_payload["shadow_sufficient_stock_units_artifact_files"] = shadow_sufficient_stock_artifact_files
+        if shadow_sufficient_stock_test_predictions_path is not None:
+            manifest_payload["shadow_sufficient_stock_test_predictions_path"] = shadow_sufficient_stock_test_predictions_path
+        write_json(manifest_path, manifest_payload)
         # Governed model-input audit: write the EXACT frame handed to the model
         # for training, plus a 10k-row sample CSV with consistent 4dp rounding,
         # plus the feature-lineage and contract validation artifacts.
@@ -1154,6 +1283,152 @@ class PromotionModelTrainer:
             "test_targets": dataset.loc[split.test_mask, target_columns],
         }
 
+    def _train_and_persist_sufficient_stock_shadow_units(
+        self,
+        *,
+        run_id: str,
+        artifact_paths: PromotionArtifactPaths,
+        artifact_root: Path,
+        dataset: pd.DataFrame,
+        model_input: pd.DataFrame,
+        schema,
+        split,
+        legacy_units_model: Pipeline,
+    ) -> dict[str, object]:
+        """Evaluation-only sufficient-stock shadow units heads.
+
+        Shadow mode must never replace production scoring or overwrite
+        units_gradient_boosting.joblib. Production model swap requires
+        separate approval.
+        """
+
+        shadow_sets = _build_sufficient_stock_shadow_units_training_sets(
+            dataset=dataset,
+            model_input=model_input,
+            split=split,
+        )
+        shadow_linear = self._build_linear_regressor(schema)
+        shadow_tree = self._build_tree_regressor(schema)
+        _fit_units_pipeline_with_sample_weight(
+            shadow_linear,
+            shadow_sets["train_features"],
+            shadow_sets["train_targets"],
+            shadow_sets["train_sample_weights"],
+        )
+        _fit_units_pipeline_with_sample_weight(
+            shadow_tree,
+            shadow_sets["train_features"],
+            shadow_sets["train_targets"],
+            shadow_sets["train_sample_weights"],
+        )
+        linear_path = artifact_paths.target_mode_shadow_model_path(
+            run_id,
+            SUFFICIENT_STOCK_SHADOW_LINEAR_MODEL_NAME,
+        )
+        gb_path = artifact_paths.target_mode_shadow_model_path(
+            run_id,
+            SUFFICIENT_STOCK_SHADOW_GB_MODEL_NAME,
+        )
+        linear_path.parent.mkdir(parents=True, exist_ok=True)
+        gb_path.parent.mkdir(parents=True, exist_ok=True)
+        joblib.dump(shadow_linear, linear_path)
+        joblib.dump(shadow_tree, gb_path)
+        artifact_files = {
+            "target_mode_shadow_sufficient_stock_units_linear": str(linear_path),
+            "target_mode_shadow_sufficient_stock_units_gb": str(gb_path),
+        }
+        validation_mask = _coerce_split_mask(split.validation_mask, dataset.index)
+        test_mask = _coerce_split_mask(split.test_mask, dataset.index)
+        validation_features = model_input.loc[validation_mask]
+        test_features = model_input.loc[test_mask]
+        validation_target = pd.to_numeric(
+            dataset.loc[validation_mask, SUFFICIENT_STOCK_SHADOW_UNITS_TARGET_COLUMN],
+            errors="coerce",
+        ).fillna(0.0)
+        test_target = pd.to_numeric(
+            dataset.loc[test_mask, SUFFICIENT_STOCK_SHADOW_UNITS_TARGET_COLUMN],
+            errors="coerce",
+        ).fillna(0.0)
+        shadow_metrics = {
+            "linear": self._regression_metrics(
+                shadow_linear,
+                validation_features,
+                validation_target,
+                test_features,
+                test_target,
+            ),
+            "gradient_boosting": self._regression_metrics(
+                shadow_tree,
+                validation_features,
+                validation_target,
+                test_features,
+                test_target,
+            ),
+            "positive_train_row_count": shadow_sets["positive_train_row_count"],
+            "units_target_column": SUFFICIENT_STOCK_SHADOW_UNITS_TARGET_COLUMN,
+            "sample_weight_column": SUFFICIENT_STOCK_SHADOW_WEIGHT_COLUMN,
+        }
+        test_set_predictions_path = self._write_sufficient_stock_shadow_test_set_predictions(
+            artifact_root=artifact_root,
+            dataset=dataset,
+            model_input=model_input,
+            split=split,
+            shadow_units_model=shadow_tree,
+            legacy_units_model=legacy_units_model,
+        )
+        return {
+            "artifact_files": artifact_files,
+            "metrics": shadow_metrics,
+            "test_set_predictions_path": test_set_predictions_path,
+        }
+
+    def _write_sufficient_stock_shadow_test_set_predictions(
+        self,
+        *,
+        artifact_root: Path,
+        dataset: pd.DataFrame,
+        model_input: pd.DataFrame,
+        split,
+        shadow_units_model: Pipeline,
+        legacy_units_model: Pipeline | None,
+    ) -> str | None:
+        test_mask = split.test_mask
+        if int(test_mask.sum()) == 0:
+            return None
+        test_features = model_input.loc[test_mask]
+        shadow_raw_predicted_units = pd.Series(
+            shadow_units_model.predict(test_features),
+            index=test_features.index,
+            dtype="float64",
+        ).clip(lower=0.0)
+        test_dataset = dataset.loc[test_mask]
+        passthrough = [
+            column_name
+            for column_name in self._BACKTEST_PASSTHROUGH_COLUMNS
+            if column_name in test_dataset.columns
+        ]
+        out = test_dataset.loc[:, passthrough].copy()
+        out["shadow_sufficient_stock_raw_predicted_units_total_promo"] = shadow_raw_predicted_units.values
+        out["shadow_sufficient_stock_calibrated_predicted_units_total_promo"] = shadow_raw_predicted_units.values
+        if legacy_units_model is not None:
+            legacy_raw = pd.Series(
+                legacy_units_model.predict(test_features),
+                index=test_features.index,
+                dtype="float64",
+            ).clip(lower=0.0)
+            out["legacy_raw_predicted_units_total_promo"] = legacy_raw.values
+        if SUFFICIENT_STOCK_SHADOW_UNITS_TARGET_COLUMN in test_dataset.columns:
+            out[SUFFICIENT_STOCK_SHADOW_UNITS_TARGET_COLUMN] = test_dataset[
+                SUFFICIENT_STOCK_SHADOW_UNITS_TARGET_COLUMN
+            ].values
+        if SUFFICIENT_STOCK_SHADOW_WEIGHT_COLUMN in test_dataset.columns:
+            out[SUFFICIENT_STOCK_SHADOW_WEIGHT_COLUMN] = test_dataset[SUFFICIENT_STOCK_SHADOW_WEIGHT_COLUMN].values
+        if "target_quality_label" in test_dataset.columns:
+            out["target_quality_label"] = test_dataset["target_quality_label"].values
+        target_path = artifact_root / SUFFICIENT_STOCK_SHADOW_TEST_PREDICTIONS_FILENAME
+        out.to_parquet(target_path, index=False)
+        return str(target_path)
+
     def _build_linear_regressor(self, schema) -> Pipeline:
         preprocessor = ColumnTransformer(
             transformers=[
@@ -1280,8 +1555,9 @@ class PromotionModelTrainer:
 
     # Persist honest out-of-sample test-set predictions for the completed-promotion
     # demand backtest. Predictions follow the governed live scoring path: raw head,
-    # allocation-aware calibration, then the post-calibration policy overlay that
-    # ultimately owns `predicted_units_total_promo` in scoring. Output parquet uses
+    # allocation-aware calibration, then order-policy caps as separate columns.
+    # `predicted_units_total_promo` is the demand export (= calibrated); policy caps
+    # live in `policy_adjusted_predicted_units_total_promo` only. Output parquet uses
     # the `promotion_row_key` grain and carries through the segment columns the
     # backtest orchestrator splits on.
     _BACKTEST_PASSTHROUGH_COLUMNS: tuple[str, ...] = (
@@ -1463,10 +1739,12 @@ class PromotionModelTrainer:
         ).clip(lower=0.0)
         # Floor at zero — negative unit predictions are not commercially meaningful.
         test_dataset = dataset.loc[test_mask]
-        calibrated_predicted_units = apply_allocation_aware_units_cap(
+        allocation_cap_units = compute_allocation_aware_cap_units(
             test_dataset,
             raw_predicted_units,
         )
+        # Phase 3: demand export uses raw model output; allocation cap is order-path only.
+        calibrated_predicted_units = raw_predicted_units.clip(lower=0.0)
         diagnostics = build_live_order_decision_diagnostics(
             test_dataset,
             raw_predicted_units=raw_predicted_units,
@@ -1490,9 +1768,12 @@ class PromotionModelTrainer:
         out = test_dataset.loc[:, passthrough].copy()
         out["raw_predicted_units_total_promo"] = raw_predicted_units.values
         out["calibrated_predicted_units_total_promo"] = calibrated_predicted_units.values
+        out["allocation_cap_units"] = allocation_cap_units.values
         out["policy_adjusted_predicted_units_total_promo"] = policy_adjusted_predicted_units.values
         out["policy_adjustment_reason"] = policy_adjustments["policy_adjustment_reason"].values
-        out["predicted_units_total_promo"] = policy_adjusted_predicted_units.values
+        # Phase 2 demand/order separation: demand export follows calibrated path;
+        # policy_adjusted_predicted_units_total_promo remains order-cap compatibility only.
+        out["predicted_units_total_promo"] = calibrated_predicted_units.values
         # Make sure the canonical actual column is present even if only `actual_units_sold`
         # exists on this dataset variant.
         if "actual_units_sold_promo" not in out.columns and "actual_units_sold" in out.columns:
@@ -2341,7 +2622,8 @@ def _build_allocation_split_diagnostic_rows(
     if len(features.index) == 0:
         return pd.DataFrame()
     raw_predicted_units = pd.Series(units_model.predict(features), index=features.index).clip(lower=0.0)
-    calibrated_predicted_units = apply_allocation_aware_units_cap(dataset, raw_predicted_units)
+    allocation_cap_units = compute_allocation_aware_cap_units(dataset, raw_predicted_units)
+    calibrated_predicted_units = raw_predicted_units.clip(lower=0.0)
     overallocation_probability = pd.Series(
         overallocation_model.predict_proba(features)[:, 1],
         index=features.index,
@@ -2443,7 +2725,8 @@ def _build_allocation_split_diagnostic_rows(
                     "overallocation_probability": overallocation_probability,
                     "predicted_overallocation_flag": predicted_overallocation.astype(float),
                     "actual_overallocation_flag": actual_overallocation.astype(float),
-                    "allocation_aware_units_cap_applied_flag": calibrated_predicted_units.lt(raw_predicted_units).astype(float),
+                    "allocation_aware_units_cap_applied_flag": allocation_cap_units.lt(raw_predicted_units).astype(float),
+                    "allocation_cap_units": allocation_cap_units,
                     "stock_basis_units": stock_basis,
                     "demand_reference_units": demand_reference,
                     "actual_units_sold": actual_units,

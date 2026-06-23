@@ -1,0 +1,7 @@
+metric,value,gate
+shadow_p99,37.20502010756889,watch_commercial_extreme
+shadow_max,117.41583258610834,watch_commercial_extreme
+shadow_gt_2x_demand_reference_share,0.03457943925233645,tail_risk_flag
+shadow_gt_stock_basis_share,0.572429906542056,tail_risk_flag
+legacy_flat_share,0.007476635514018692,baseline
+shadow_flat_share,0.02149532710280374,must_improve

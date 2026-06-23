@@ -1,0 +1,6 @@
+metric,value,prior_shadow_p99,prior_shadow_max
+shadow_4b7_p99,11.799684528750225,37.2,
+shadow_4b7_max,53.41860480560158,,117.4
+shadow_4b7_gt_2x_demand_share,0.08130841121495327,,
+shadow_4b7_gt_stock_basis_share,0.24906542056074765,,
+prior_shadow_gt_stock_basis_share,0.572,,

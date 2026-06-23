@@ -13,7 +13,7 @@ from models.promotions.model_input_quality import (  # noqa: E402
     BOUNDED_ZERO_ONE_COLUMNS,
     iter_default_model_use_feature_columns,
 )
-from models.promotions.allocation_calibration import apply_allocation_aware_units_cap  # noqa: E402
+from models.promotions.allocation_calibration import compute_allocation_aware_cap_units  # noqa: E402
 from state.promotions.feature_engineering.demand.ft_allocation_discipline import (  # noqa: E402
     ALLOCATION_DISCIPLINE_FEATURE_COLUMNS,
     apply_ft_allocation_discipline,
@@ -455,7 +455,7 @@ class PromotionAllocationDisciplineFeatureTests(unittest.TestCase):
         )
         raw_prediction = pd.Series([90.0, 90.0, 90.0, 50.0], index=frame.index)
 
-        capped = apply_allocation_aware_units_cap(frame, raw_prediction)
+        capped = compute_allocation_aware_cap_units(frame, raw_prediction)
 
         self.assertEqual(capped.tolist(), [60.0, 90.0, 90.0, 50.0])
 

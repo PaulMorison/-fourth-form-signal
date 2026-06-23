@@ -1,0 +1,6 @@
+demand_threshold,buy_count,total_order_units,order_over_stock_basis,order_over_demand_reference,order_over_2x_demand_reference,tiny_demand_buy,p99_order,max_order
+1,922,3365.0,444,57,48,0,10.0,55.0
+2,599,2429.0,282,8,3,0,10.0,55.0
+3,375,1743.0,171,5,0,0,10.0,55.0
+4,139,899.0,71,3,0,0,9.0,55.0
+5,57,471.0,22,2,0,0,6.610000000000127,55.0

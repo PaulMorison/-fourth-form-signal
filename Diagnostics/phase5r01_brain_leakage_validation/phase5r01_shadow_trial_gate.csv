@@ -1,0 +1,2 @@
+recommendation,time_split_pass_count,group_split_pass_count,time_models_passing,group_models_passing,validated_opportunity_count,validated_top50_value,model_bias_pct,bias_controlled,unsafe_rows_blocked,auto_order_created,customer_release_recommendation,primary_blocker,reason
+INTERNAL_DIAGNOSTIC_ONLY,12,12,4,4,18565,-986.445,-23.6,NO,46728,NO,NO_RELEASE,model_bias_dangerously_negative,Model bias dangerously negative (-23.6%); shadow trial capped.

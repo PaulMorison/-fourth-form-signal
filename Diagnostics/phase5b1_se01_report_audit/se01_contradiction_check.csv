@@ -1,0 +1,14 @@
+check,violation_count,pass,sku_count
+buy_zero_order,0,True,
+hold_positive_order,0,True,
+order_differs_from_recommended_unexplained,0,True,
+negative_promo_demand,0,True,
+buy_missing_promo_demand,0,True,
+buy_missing_soh,0,True,
+missing_target_soh,0,True,
+review_flag_missing_on_risk,0,True,
+duplicate_sku_rows,0,True,
+all_skus_present,0,True,3531.0
+no_buy_rows_in_promotion,3531,False,
+all_zero_order_units,3531,False,
+action_enum_non_standard,3531,False,

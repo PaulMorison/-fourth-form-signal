@@ -1,0 +1,165 @@
+segment_key,row_count,bias_pct,wape,eligibility_before,eligibility_after,eligibility_status,eligibility_blocker_before,eligibility_blocker_after,ats_support_flag,feature_merge_support_flag,human_review_support_flag,safe_for_human_approval_review_flag,deployment_status
+ACHE PAIN SUPPORT|0.0,3,14.3,,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+ALLERGY|0.0,3,-27.3,0.438333,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+ANALGESICS|0.0,2,11.6,,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+ANTI FUNGAL VIRAL|0.0,2,-6.5,0.069,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+BABY CARE|0.0,4,2.2,0.156,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+BATH TOILETRIES|0.0,8,-24.075,0.35975,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+BATH TOILETRIES|NO,3,-26.5667,0.502667,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+BEAUTY ACCESSORIES|0.0,67,-29.9022,0.557778,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+BEAUTY ACCESSORIES|NO,15,-10.456,0.40264,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+BEAUTY ACCESSORIES|YES,1,40.0,0.4,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+BEAUTY ELECTRICAL|0.0,1,3.4,,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+BEAUTY ELECTRICAL|NO,1,31.1,0.311,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+COLOUR COSMETICS|0.0,667,-31.4449,0.635627,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+COLOUR COSMETICS|NO,24,-17.2975,0.469575,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+COUGH COLD|0.0,11,-56.2533,0.731467,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+DEODORANTS|0.0,22,-52.6792,0.534333,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+DIGESTIVE CARE|0.0,12,-28.7222,0.557222,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+DIGESTIVE CARE|NO,3,42.2,0.422,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+DIGESTIVE CARE|YES,2,-6.6667,0.333333,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+EYES EARS|0.0,12,-33.04,0.8576,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+FAMILY PLANNING|0.0,2,45.3,0.453,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+FAMILY PLANNING|NO,1,49.1,0.491,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+FEMININE CARE|0.0,6,-72.1,0.732333,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+FIRSTAID WOUNDCARE|0.0,9,-28.0875,0.339375,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+FOOTCARE|0.0,3,19.1,0.262,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+FRAGRANCE|0.0,54,-35.5769,0.674231,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+GIFTING|0.0,11,22.2,0.356,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+HAIR ACC BRUSHES|0.0,14,-25.9591,0.433682,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+HAIR ACC BRUSHES|NO,3,1.0,0.3068,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+HAIR REMOVAL|0.0,10,-30.8889,0.717778,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+HAIR REMOVAL|NO,2,40.0,0.4,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+HAIR REMOVAL|YES,1,-18.75,0.1875,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+HAIRCARE|0.0,134,-48.2541,0.672426,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+HAIRCARE|NO,11,-16.5778,0.356333,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+HAIRCARE|YES,2,-41.7,0.577,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+INCONTINENCE|0.0,3,-90.97,0.9202,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+INCONTINENCE|NO,3,-54.4818,0.544818,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+INSOMNIA|0.0,1,131.9,1.319,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+MENS GROOMING|0.0,18,10.82,0.575,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+NUTRITION WELLBEIN|0.0,4,18.8,,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+NUTRITION WELLBEIN|NO,1,-33.85,0.3385,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+NUTRITION WELLBEIN|YES,1,40.0,0.4,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+ORAL HEALTH|0.0,32,-46.6576,0.600697,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+ORAL HEALTH|NO,3,34.8,0.348,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+ORAL HEALTH|YES,1,-58.5333,0.585333,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+PAPER COTTON|0.0,1,-66.6667,0.666667,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+SKINCARE|0.0,250,-59.1448,0.69429,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+SKINCARE|NO,3,-23.05,0.636167,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+SKINCARE|YES,9,-61.1606,0.635848,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+SMOKING CESSATION|0.0,3,10.5,,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+SUNCARE|0.0,26,-55.9172,0.761953,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+SUNCARE|NO,6,-23.6364,0.454545,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+TANNING|0.0,23,-60.1578,0.640244,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+TANNING|NO,1,-17.6,0.176,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+VITAMIN SUPPLEMENT|0.0,79,-42.1889,0.6425,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+VITAMIN SUPPLEMENT|NO,2,-27.225,0.27225,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+VITAMIN SUPPLEMENT|YES,1,-30.0,0.3,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+ACHE PAIN SUPPORT|NO,3,14.3,,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+ALLERGY|NO,3,-27.3,0.438333,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+ANALGESICS|NO,2,11.6,,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+ANTI FUNGAL VIRAL|NO,2,-6.5,0.069,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+BABY CARE|NO,4,2.2,0.156,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+BATH TOILETRIES|NO,11,-25.57,0.4455,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+BEAUTY ACCESSORIES|NO,83,-22.0704,0.50093,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+BEAUTY ELECTRICAL|NO,2,34.5,0.345,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+COLOUR COSMETICS|NO,691,-29.5772,0.613706,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+COUGH COLD|NO,11,-56.2533,0.731467,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+DEODORANTS|NO,22,-52.6792,0.534333,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+DIGESTIVE CARE|NO,17,-10.1267,0.4854,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+EYES EARS|NO,12,-33.04,0.8576,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+FAMILY PLANNING|NO,3,47.2,0.472,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+FEMININE CARE|NO,6,-72.1,0.732333,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+FIRSTAID WOUNDCARE|NO,9,-28.0875,0.339375,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+FOOTCARE|NO,3,19.1,0.262,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+FRAGRANCE|NO,54,-35.5769,0.674231,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+GIFTING|NO,11,22.2,0.356,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+HAIR ACC BRUSHES|NO,17,-20.9667,0.410185,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+HAIR REMOVAL|NO,13,-18.1154,0.587308,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+HAIRCARE|NO,147,-44.0959,0.629897,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+INCONTINENCE|NO,6,-78.0226,0.787,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+INSOMNIA|NO,1,131.9,1.319,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+MENS GROOMING|NO,18,10.82,0.575,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+NUTRITION WELLBEIN|NO,6,-2.9667,0.421667,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+ORAL HEALTH|NO,36,-41.3051,0.580077,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+PAPER COTTON|NO,1,-66.6667,0.666667,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+SKINCARE|NO,262,-58.8373,0.689623,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+SMOKING CESSATION|NO,3,10.5,,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+SUNCARE|NO,32,-51.1827,0.716867,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+TANNING|NO,24,-58.3468,0.620489,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+VITAMIN SUPPLEMENT|NO,82,-40.1833,0.590929,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+ACHE PAIN SUPPORT|0-10,3,14.3,,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+ALLERGY|0-10,3,-27.3,0.438333,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+ANALGESICS|0-10,2,11.6,,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+ANTI FUNGAL VIRAL|0-10,2,-6.5,0.069,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+BABY CARE|0-10,4,2.2,0.156,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+BATH TOILETRIES|0-10,11,-25.57,0.4455,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+BEAUTY ACCESSORIES|0-10,83,-22.0704,0.50093,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+BEAUTY ELECTRICAL|0-10,2,34.5,0.345,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+COLOUR COSMETICS|0-10,691,-29.5772,0.613706,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+COUGH COLD|0-10,11,-56.2533,0.731467,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+DEODORANTS|0-10,22,-52.6792,0.534333,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+DIGESTIVE CARE|0-10,17,-10.1267,0.4854,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+EYES EARS|0-10,12,-33.04,0.8576,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+FAMILY PLANNING|0-10,3,47.2,0.472,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+FEMININE CARE|0-10,6,-72.1,0.732333,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+FIRSTAID WOUNDCARE|0-10,9,-28.0875,0.339375,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+FOOTCARE|0-10,3,19.1,0.262,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+FRAGRANCE|0-10,54,-35.5769,0.674231,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+GIFTING|0-10,11,22.2,0.356,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+HAIR ACC BRUSHES|0-10,17,-20.9667,0.410185,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+HAIR REMOVAL|0-10,13,-18.1154,0.587308,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+HAIRCARE|0-10,147,-44.0959,0.629897,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+INCONTINENCE|0-10,6,-78.0226,0.787,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+INSOMNIA|0-10,1,131.9,1.319,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+MENS GROOMING|0-10,18,10.82,0.575,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+NUTRITION WELLBEIN|0-10,6,-2.9667,0.421667,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+ORAL HEALTH|0-10,36,-41.3051,0.580077,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+PAPER COTTON|0-10,1,-66.6667,0.666667,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+SKINCARE|0-10,262,-58.8373,0.689623,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+SMOKING CESSATION|0-10,3,10.5,,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+SUNCARE|0-10,32,-51.1827,0.716867,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+TANNING|0-10,24,-58.3468,0.620489,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+VITAMIN SUPPLEMENT|0-10,82,-40.1833,0.590929,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+ACHE PAIN SUPPORT,3,14.3,,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+ALLERGY,3,-27.3,0.438333,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+ANALGESICS,2,11.6,,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+ANTI FUNGAL VIRAL,2,-6.5,0.069,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+BABY CARE,4,2.2,0.156,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+BATH TOILETRIES,11,-25.57,0.4455,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+BEAUTY ACCESSORIES,83,-22.0704,0.50093,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+BEAUTY ELECTRICAL,2,34.5,0.345,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+COLOUR COSMETICS,691,-29.5772,0.613706,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+COUGH COLD,11,-56.2533,0.731467,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+DEODORANTS,22,-52.6792,0.534333,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+DIGESTIVE CARE,17,-10.1267,0.4854,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+EYES EARS,12,-33.04,0.8576,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+FAMILY PLANNING,3,47.2,0.472,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+FEMININE CARE,6,-72.1,0.732333,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+FIRSTAID WOUNDCARE,9,-28.0875,0.339375,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+FOOTCARE,3,19.1,0.262,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+FRAGRANCE,54,-35.5769,0.674231,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+GIFTING,11,22.2,0.356,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+HAIR ACC BRUSHES,17,-20.9667,0.410185,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+HAIR REMOVAL,13,-18.1154,0.587308,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+HAIRCARE,147,-44.0959,0.629897,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+INCONTINENCE,6,-78.0226,0.787,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+INSOMNIA,1,131.9,1.319,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+MENS GROOMING,18,10.82,0.575,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+NUTRITION WELLBEIN,6,-2.9667,0.421667,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+ORAL HEALTH,36,-41.3051,0.580077,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+PAPER COTTON,1,-66.6667,0.666667,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+SKINCARE,262,-58.8373,0.689623,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+SMOKING CESSATION,3,10.5,,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+SUNCARE,32,-51.1827,0.716867,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+TANNING,24,-58.3468,0.620489,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+VITAMIN SUPPLEMENT,82,-40.1833,0.590929,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+0.0,1497,-48.1377,0.660109,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+NO,82,-15.8879,0.433236,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+YES,18,-48.798,0.56798,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+NO,1597,-45.0295,0.634888,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+0.0,1497,-48.1377,0.660109,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+HIGH,5,-12.5333,0.483556,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+LOW,36,-23.0299,0.457313,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED
+MEDIUM,59,-26.3895,0.474211,0,0,STILL_BLOCKED,not_segment_calibration_eligible,not_segment_calibration_eligible,NO,YES,YES,NO,PROPOSED_NOT_DEPLOYED

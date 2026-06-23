@@ -66,6 +66,8 @@ from runtime.promotions.operator_progress import (
     PromotionOperatorProgress,
     PromotionOperatorProgressArtifacts,
     PromotionOperatorStageRecord,
+    configure_operator_console_quiet,
+    resolve_operator_display_mode,
 )
 from runtime.promotions.audit_promotions_operational_cycle import audit_operational_cycle
 from runtime.promotions.promotion_demand_backtest_orchestrator import (
@@ -390,7 +392,11 @@ def _derive_stage12_legitimate_excluded_row_count(
 def main(argv: list[str] | None = None) -> None:
     parser = _build_parser()
     args = parser.parse_args(argv)
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s %(message)s")
+    display_mode = resolve_operator_display_mode(requested_mode=getattr(args, "operator_display", None))
+    if display_mode == "operator":
+        configure_operator_console_quiet()
+    else:
+        logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s %(message)s")
     settings = _build_settings(args)
     if settings.completed_preflight_planner.planner_only:
         if (
@@ -441,6 +447,7 @@ def main(argv: list[str] | None = None) -> None:
             "proof_future_fallback_slice_promotions",
             None,
         ),
+        operator_display_mode=display_mode,
     )
     LOGGER.info(
         "Completed promotions operational cycle: manifest=%s decision_surface=%s",
@@ -468,6 +475,7 @@ def run_operational_cycle(
     proof_future_fallback_mode: str | None = None,
     proof_future_fallback_topn_limit: int | None = None,
     proof_future_fallback_slice_promotions: int | None = None,
+    operator_display_mode: str | None = None,
 ) -> PromotionOperationalCycleArtifacts:
     """Run the governed promotions cycle from extraction through decision surface."""
 
@@ -475,7 +483,11 @@ def run_operational_cycle(
     resolved_score_run_id = score_run_id or f"{run_id}-score"
     resolved_decision_surface_run_id = decision_surface_run_id or f"{run_id}-decision-surface"
     manifest_path = settings.artifacts.operational_cycle_manifest_path(run_id)
-    progress = PromotionOperatorProgress(run_id=run_id, artifact_paths=settings.artifacts)
+    progress = PromotionOperatorProgress(
+        run_id=run_id,
+        artifact_paths=settings.artifacts,
+        display_mode=resolve_operator_display_mode(requested_mode=operator_display_mode),
+    )
     extraction_runner = extraction_provider or _extract_promotions_base_artifact
     nas_bootstrap_artifacts: PromotionNasBootstrapArtifacts | None = None
     local_inspection_artifacts: PromotionLocalInspectionArtifacts | None = None
@@ -3423,6 +3435,10 @@ def run_operational_cycle(
             status="completed",
             final_outputs=manifest_payload["final_outputs"],
         )
+        progress.finalize_operator_view(
+            status="completed",
+            store_prediction_csv_path=store_prediction_artifacts.csv_path,
+        )
         if local_inspection_artifacts is not None:
             local_inspection_artifacts = write_local_inspection_outputs(
                 run_id=run_id,
@@ -3642,6 +3658,7 @@ def run_operational_cycle(
                 status="failed",
                 final_outputs=failure_final_outputs,
             )
+            progress.finalize_operator_view(status="failed")
             manifest_payload = _build_failure_manifest_payload(
                 settings=settings,
                 run_id=run_id,
@@ -3886,6 +3903,7 @@ def _complete_zero_future_scored_rows_noop(
     )
     progress.emit_final_outputs(outputs=final_outputs)
     operator_artifacts = progress.persist(status="completed", final_outputs=final_outputs)
+    progress.finalize_operator_view(status="completed")
 
     manifest_payload = PromotionOperationalCycleManifest(
         run_id=run_id,
@@ -4700,6 +4718,11 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--stage-temp-chunk-files", choices=("true", "false"))
     parser.add_argument("--max-candidate-promotion-rows", type=int)
     parser.add_argument("--max-candidate-store-sku", type=int)
+    parser.add_argument(
+        "--operator-display",
+        choices=("verbose", "operator"),
+        help="Terminal display style: verbose engineering trace or operator-friendly summary.",
+    )
     parser.add_argument("--max-window-span-days-total", type=int)
     parser.add_argument("--max-window-span-days-max", type=int)
     parser.add_argument("--planner-only", action="store_true")

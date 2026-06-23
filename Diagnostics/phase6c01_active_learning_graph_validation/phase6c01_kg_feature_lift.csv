@@ -1,0 +1,8 @@
+feature_name,feature_family,available_to_brain_advisory,source,lift_note
+kg_basket_centrality_score,dag_knowledge_graph_memory,YES,phase6c_kg_enrichment,Advisory KG-derived feature for brain diagnostics
+kg_substitute_availability_score,dag_knowledge_graph_memory,YES,phase6c_kg_enrichment,Advisory KG-derived feature for brain diagnostics
+kg_supplier_dependency_score,dag_knowledge_graph_memory,YES,phase6c_kg_enrichment,Advisory KG-derived feature for brain diagnostics
+kg_mission_role_strength,dag_knowledge_graph_memory,YES,phase6c_kg_enrichment,Advisory KG-derived feature for brain diagnostics
+kg_history_similarity_score,dag_knowledge_graph_memory,YES,phase6c_kg_enrichment,Advisory KG-derived feature for brain diagnostics
+kg_stockout_memory_score,dag_knowledge_graph_memory,YES,phase6c_kg_enrichment,Advisory KG-derived feature for brain diagnostics
+kg_human_override_memory_score,dag_knowledge_graph_memory,YES,phase6c_kg_enrichment,Advisory KG-derived feature for brain diagnostics

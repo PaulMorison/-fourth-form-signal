@@ -1,0 +1,77 @@
+sku_number,sku_description,promotion_name,promotion_start_date,promotion_end_date,promo_demand_baseline_daily_units,promo_days,promo_demand_uplift_multiplier,discount_percent,promo_demand_stock_availability_adjustment,promo_demand_recent_momentum_adjustment,model_expected_units_total_promo,historical_proxy_expected_units_total_promo,baseline_expected_units_total_promo,selected_promo_period_demand,promo_demand_source_quality,promo_demand_release_ready_flag,promo_demand_blocker_reason,historical_promo_units_per_day
+188713,Cerave Eye Repair Cream 14Ml,SE01 skincare sales event,2026-07-23,2026-07-29,3.142857,7,1.0311,40.0,0.85,1.0,17.778,22.0,22.0,22.0,LOW,NO,using_governed_proxy,0.7143
+948829,Lrp Soothing Lotion 200Ml,SE01 skincare sales event,2026-07-23,2026-07-29,2.333329,7,1.0311,40.0,1.0,1.0,14.972,16.333,16.333,16.333,LOW,NO,using_governed_proxy,0.2987
+698571,Bioderma Sensibio H20 500Ml,SE01 skincare sales event,2026-07-23,2026-07-29,2.4026,7,1.0311,40.0,1.0,1.0,15.599,16.818,16.818,16.818,LOW,NO,using_governed_proxy,0.052
+192083,Cerave Renew Peptide Crm 48G,SE01 skincare sales event,2026-07-23,2026-07-29,5.0,7,1.0311,40.0,1.0,1.0,32.57,35.0,35.0,35.0,LOW,NO,using_governed_proxy,0.0336
+188715,Cerave Moist Pm 52Ml,SE01 skincare sales event,2026-07-23,2026-07-29,3.857143,7,1.0311,40.0,1.0,1.0,25.126,27.0,27.0,27.0,LOW,NO,using_governed_proxy,0.1714
+188710,Cerave Moist Lotion 473Ml,SE01 skincare sales event,2026-07-23,2026-07-29,3.857143,7,1.0311,40.0,1.0,1.0,25.46,27.0,27.0,27.0,LOW,NO,using_governed_proxy,0.0
+188721,Cerave Sa Smooth Clns 473Ml,SE01 skincare sales event,2026-07-23,2026-07-29,3.857143,7,1.0311,40.0,1.0,1.0,25.167,27.0,27.0,27.0,LOW,NO,using_governed_proxy,0.1429
+16859,Lrp Anth Xl Ult Crm Spf50 50Ml,SE01 skincare sales event,2026-07-23,2026-07-29,3.095243,7,1.0311,40.0,1.0,1.0,20.397,21.667,21.667,21.667,LOW,NO,using_governed_proxy,0.0909
+92849,Cerave Moist Lotion Refill,SE01 skincare sales event,2026-07-23,2026-07-29,2.285714,7,1.0311,40.0,1.0,1.0,14.642,16.0,16.0,16.0,LOW,NO,using_governed_proxy,0.0
+87550,Lrp Xl Wet Skin Spf 50+ 200Ml,SE01 skincare sales event,2026-07-23,2026-07-29,2.714286,7,1.0311,40.0,1.0,1.0,17.828,19.0,19.0,19.0,LOW,NO,using_governed_proxy,0.2321
+92846,Cerave Foaming Cleanser Refill,SE01 skincare sales event,2026-07-23,2026-07-29,3.285714,7,1.0311,40.0,1.0,1.0,21.048,23.0,23.0,23.0,LOW,NO,using_governed_proxy,0.0
+94902,Lrp Hyaluron Serum 50Ml,SE01 skincare sales event,2026-07-23,2026-07-29,3.714286,7,1.0311,40.0,1.0,1.0,24.316,26.0,26.0,26.0,LOW,NO,using_governed_proxy,0.0803
+92847,Cerave Hydrating Cleans Refill,SE01 skincare sales event,2026-07-23,2026-07-29,2.857143,7,1.0311,40.0,1.0,1.0,18.302,20.0,20.0,20.0,LOW,NO,using_governed_proxy,0.0
+188712,Cerave Moist Cream 340G,SE01 skincare sales event,2026-07-23,2026-07-29,4.285714,7,1.0311,40.0,1.0,1.0,28.521,30.0,30.0,30.0,LOW,NO,using_governed_proxy,1.1883
+367011,Lanolips 101 O/Ment Balm 15G,SE01 skincare sales event,2026-07-23,2026-07-29,2.214286,7,1.0311,40.0,1.0,1.0,14.76,15.5,15.5,15.5,LOW,NO,using_governed_proxy,0.0571
+188699,Cerave Hydrating Clns 473Ml,SE01 skincare sales event,2026-07-23,2026-07-29,2.857143,7,1.0311,40.0,1.0,1.0,19.014,20.0,20.0,20.0,LOW,NO,using_governed_proxy,0.2143
+90912,Cerave Face Moist Lotion Spf50,SE01 skincare sales event,2026-07-23,2026-07-29,3.0,7,1.0311,40.0,1.0,1.0,20.029,21.0,21.0,21.0,LOW,NO,using_governed_proxy,0.4286
+90914,Cerave Int Moist Lotion 473,SE01 skincare sales event,2026-07-23,2026-07-29,2.285714,7,1.0311,40.0,1.0,1.0,15.236,16.0,16.0,16.0,LOW,NO,using_governed_proxy,0.0
+188704,Cerave Foaming Cleanser 473Ml,SE01 skincare sales event,2026-07-23,2026-07-29,2.571429,7,1.0311,40.0,1.0,1.0,17.14,18.0,18.0,18.0,LOW,NO,using_governed_proxy,0.1786
+188711,Cerave Moist Cream 177Ml,SE01 skincare sales event,2026-07-23,2026-07-29,3.857143,7,1.0311,40.0,1.0,1.0,25.71,27.0,27.0,27.0,LOW,NO,using_governed_proxy,0.0604
+92632,Avene Cica+ Mlt P&R Crm Spf50+,SE01 skincare sales event,2026-07-23,2026-07-29,4.285714,7,0.383,40.0,1.0,1.0,10.765,5.0,30.0,10.765,HIGH,YES,,0.1429
+52115,Rexona W Apd Adv Shwr/F 220Ml,SE01 skincare sales event,2026-07-23,2026-07-29,3.5,7,0.3275,50.0,1.0,1.0,7.614,2.091,24.5,7.614,HIGH,YES,,0.1299
+195518,Mf Fcefnty Cmpct 001,SE01 skincare sales event,2026-07-23,2026-07-29,3.0,7,0.2742,50.0,1.0,1.0,5.43,0.364,21.0,5.43,HIGH,YES,,0.0953
+195412,Npmu Pro Fix Stick Cocoa,SE01 skincare sales event,2026-07-23,2026-07-29,3.0,7,0.2698,50.0,1.0,1.0,5.386,0.235,21.0,5.386,HIGH,YES,,0.0613
+91149,Col Tp Adv Wht Baking Soda 180,SE01 skincare sales event,2026-07-23,2026-07-29,3.0,7,0.25,9.1,1.0,1.0,4.833,1.2,21.0,4.833,HIGH,YES,,0.0
+88414,Es Lashes To Impress 03,SE01 skincare sales event,2026-07-23,2026-07-29,2.5,7,0.25,9.1,1.0,1.0,4.112,0.0,17.5,4.112,MEDIUM,YES,,0.0
+799718,Rosehip By Essano Oil 45Ml,SE01 skincare sales event,2026-07-23,2026-07-29,2.0,7,0.3167,50.0,1.0,1.0,4.214,1.0,14.0,4.214,HIGH,YES,,0.0953
+88458,Mf Divine Lashes Rich Blk,SE01 skincare sales event,2026-07-23,2026-07-29,2.0,7,0.2965,50.0,1.0,1.0,3.895,0.636,14.0,3.895,HIGH,YES,,0.1633
+96617,Npmu Make Em Wndr Fdn Medium,SE01 skincare sales event,2026-07-23,2026-07-29,2.0,7,0.2611,50.0,1.0,1.0,3.475,0.0,14.0,3.475,MEDIUM,YES,,0.1607
+199053,Npmu Wondr Stck Dual Medium,SE01 skincare sales event,2026-07-23,2026-07-29,2.0,7,0.3514,50.0,1.0,1.0,4.676,1.625,14.0,4.676,HIGH,YES,,0.2747
+389404,Nivea Men Apd C/Kick 250Ml,SE01 skincare sales event,2026-07-23,2026-07-29,2.0,7,0.2611,50.0,1.0,1.0,3.464,0.0,14.0,3.464,MEDIUM,YES,,0.0
+67690,Rim Btw Pro Pncl Ash Brown,SE01 skincare sales event,2026-07-23,2026-07-29,2.0,7,0.2924,50.0,1.0,1.0,3.884,0.562,14.0,3.884,HIGH,YES,,0.2143
+91058,Catr Allround Masc Ult Blk 010,SE01 skincare sales event,2026-07-23,2026-07-29,2.0,7,0.25,9.1,1.0,1.0,3.327,0.0,14.0,3.327,MEDIUM,YES,,0.2337
+192936,May Eye Makeup Remover 70Ml,SE01 skincare sales event,2026-07-23,2026-07-29,2.0,7,0.7233,50.1,1.0,1.0,9.564,8.318,14.0,9.564,HIGH,YES,,0.2353
+323608,Cetaphil Eczema Bdy Mst 295Ml,SE01 skincare sales event,2026-07-23,2026-07-29,1.714286,7,0.2793,40.0,1.0,1.0,2.989,0.4,12.0,2.989,HIGH,YES,,0.0
+90934,Cetaphil Gen Ex Sa Lot 236M,SE01 skincare sales event,2026-07-23,2026-07-29,1.714286,7,0.3506,40.0,1.0,1.0,3.733,1.5,12.0,3.733,HIGH,YES,,0.2857
+55245,Garn Micellar Water Rose 400Ml,SE01 skincare sales event,2026-07-23,2026-07-29,1.714286,7,0.4556,50.0,1.0,1.0,4.95,3.0,12.0,4.95,HIGH,YES,,0.0714
+478354,Es Long Lasting Eye Pencil 01,SE01 skincare sales event,2026-07-23,2026-07-29,1.821429,7,0.25,9.1,1.0,1.0,3.03,0.0,12.75,3.03,MEDIUM,YES,,0.0
+16527,Loreal R/Lift Eye/Fl Tub 15Ml,SE01 skincare sales event,2026-07-23,2026-07-29,1.428571,7,0.3583,50.0,1.0,1.0,3.196,1.25,10.0,3.196,HIGH,YES,,0.1429
+192118,Olay Hyaluron Cream 50G,SE01 skincare sales event,2026-07-23,2026-07-29,1.5,7,0.2925,50.0,1.0,1.0,2.919,0.423,10.5,2.919,HIGH,YES,,0.052
+73263,Thayers Rose Petal Toner 355Ml,SE01 skincare sales event,2026-07-23,2026-07-29,1.428571,7,0.3389,50.0,1.0,1.0,3.023,1.0,10.0,3.023,HIGH,YES,,0.0384
+93993,May Face Lift Stix 65 Nu Int,SE01 skincare sales event,2026-07-23,2026-07-29,1.5,7,0.3285,50.0,1.0,1.0,3.278,0.909,10.5,3.278,HIGH,YES,,0.0
+90462,Mf Mp Wow Liner Emerald Green,SE01 skincare sales event,2026-07-23,2026-07-29,1.5,7,0.3105,50.0,1.0,1.0,3.05,0.667,10.5,3.05,HIGH,YES,,0.0769
+90432,Rim Wonder'Ink Liner Chestnut,SE01 skincare sales event,2026-07-23,2026-07-29,1.5,7,0.2929,50.0,1.0,1.0,2.909,0.429,10.5,2.909,HIGH,YES,,0.0
+90990,Catr Slmmtc Wp Brow Pen 050,SE01 skincare sales event,2026-07-23,2026-07-29,1.5,7,0.25,9.1,1.0,1.0,2.495,0.0,10.5,2.495,MEDIUM,YES,,0.0766
+95868,Es Soft Touch Bouncy Glow 10,SE01 skincare sales event,2026-07-23,2026-07-29,0.428571,7,0.25,9.1,1.0,1.0,0.677,0.0,3.0,3.0,UNSAFE,NO,model_forecast_not_release_ready,0.0714
+187639,Versace Pour Homme Edt 200Ml,SE01 skincare sales event,2026-07-23,2026-07-29,0.0,7,1.0259,33.3,1.0,1.0,0.0,0.2,0.0,0.2,LOW,NO,using_governed_proxy,0.0613
+97677,Jpg Classique Edt 100Ml,SE01 skincare sales event,2026-07-23,2026-07-29,0.0,7,1.046,59.2,1.0,1.0,0.0,0.0,0.0,0.0,UNSAFE,NO,insufficient_promo_demand_evidence,0.0204
+51564,Issey Miyake P/Homme Edt 75Ml,SE01 skincare sales event,2026-07-23,2026-07-29,0.0,7,1.0372,47.8,1.0,1.0,0.0,0.556,0.0,0.556,LOW,NO,using_governed_proxy,0.0
+167330,Av Hap Tightening Serum 20Ml,SE01 skincare sales event,2026-07-23,2026-07-29,0.0,7,1.0311,40.0,1.0,1.0,0.0,0.0,0.0,0.0,UNSAFE,NO,insufficient_promo_demand_evidence,0.0
+167332,Av Hap Lifting Cream 30Ml,SE01 skincare sales event,2026-07-23,2026-07-29,0.0,7,1.0311,40.0,1.0,1.0,0.0,0.0,0.0,0.0,UNSAFE,NO,insufficient_promo_demand_evidence,0.013
+167331,Av Hap Eye & Lip Cream 15Ml,SE01 skincare sales event,2026-07-23,2026-07-29,0.0,7,1.0311,40.0,1.0,1.0,0.0,0.0,0.0,0.0,UNSAFE,NO,insufficient_promo_demand_evidence,0.013
+97434,Emily In Paris New Begin P100,SE01 skincare sales event,2026-07-23,2026-07-29,0.0,7,1.0222,28.6,1.0,1.0,0.0,0.0,0.0,0.0,UNSAFE,NO,insufficient_promo_demand_evidence,0.0
+96065,Bridgerton Rebel Vanilla P50,SE01 skincare sales event,2026-07-23,2026-07-29,0.0,7,1.025,32.2,1.0,1.0,0.0,0.0,0.0,0.0,UNSAFE,NO,insufficient_promo_demand_evidence,0.0
+96066,Bridgerton Tempting Peach P50,SE01 skincare sales event,2026-07-23,2026-07-29,0.0,7,1.025,32.2,1.0,1.0,0.0,0.0,0.0,0.0,UNSAFE,NO,insufficient_promo_demand_evidence,0.0667
+96067,Bridgerton Grace Hydrangea P50,SE01 skincare sales event,2026-07-23,2026-07-29,0.0,7,1.025,32.2,1.0,1.0,0.0,0.0,0.0,0.0,UNSAFE,NO,insufficient_promo_demand_evidence,0.0816
+88057,Burberry London For Women P50,SE01 skincare sales event,2026-07-23,2026-07-29,0.0,7,1.0485,62.3,1.0,1.0,0.0,0.667,0.0,0.667,LOW,NO,using_governed_proxy,0.102
+88795,Cb Gel Moisturiser 60Ml,SE01 skincare sales event,2026-07-23,2026-07-29,0.0,7,1.0233,30.0,1.0,1.0,0.0,0.0,0.0,0.0,UNSAFE,NO,insufficient_promo_demand_evidence,0.0613
+195096,Olay Pep24 Spf30 Moist 50G,SE01 skincare sales event,2026-07-23,2026-07-29,0.131429,7,1.0282,50.0,0.85,1.0,0.712,0.92,0.92,0.92,UNSAFE,NO,model_forecast_not_release_ready,0.0571
+71410,Olay Luminous Vit C Moist 50G,SE01 skincare sales event,2026-07-23,2026-07-29,0.130429,7,1.0389,50.0,0.85,1.0,0.714,0.913,0.913,0.913,UNSAFE,NO,model_forecast_not_release_ready,0.1293
+97554,No7 Future Renew Serum 50Ml,SE01 skincare sales event,2026-07-23,2026-07-29,0.0,7,1.0311,40.0,1.0,1.0,0.0,0.0,0.0,0.0,UNSAFE,NO,insufficient_promo_demand_evidence,0.2184
+71225,Loreal Age Perf Midngt Srm30Ml,SE01 skincare sales event,2026-07-23,2026-07-29,0.079371,7,1.0389,50.0,0.85,1.0,0.445,0.556,0.556,0.556,UNSAFE,NO,model_forecast_not_release_ready,0.078
+65583,No7 P&P Serum 30Ml,SE01 skincare sales event,2026-07-23,2026-07-29,0.128571,7,1.0145,40.0,0.85,1.0,0.693,0.9,0.9,0.9,UNSAFE,NO,model_forecast_not_release_ready,0.0816
+94803,No7 Artist Soft Glow Cream Bro,SE01 skincare sales event,2026-07-23,2026-07-29,0.0,7,1.0311,40.0,1.0,1.0,0.0,2.5,0.0,2.5,LOW,NO,using_governed_proxy,0.1143
+195048,Lrp Refill Lipikar S 400Ml,SE01 skincare sales event,2026-07-23,2026-07-29,0.380957,7,1.0311,40.0,0.85,1.0,2.081,2.667,2.667,2.667,LOW,NO,using_governed_proxy,0.0357
+94802,No7 Artist Soft Glow Cream Bro,SE01 skincare sales event,2026-07-23,2026-07-29,0.0,7,1.0311,40.0,1.0,1.0,0.0,6.0,0.0,6.0,LOW,NO,using_governed_proxy,0.0357
+483621,Antip Hos C/Plump W/Ser 30Ml,SE01 skincare sales event,2026-07-23,2026-07-29,0.093171,7,1.0311,40.0,0.85,1.0,0.529,0.652,0.652,0.652,UNSAFE,NO,model_forecast_not_release_ready,0.0
+97201,Lunz Bonze Ul/Ecpse Mss 200Ml,SE01 skincare sales event,2026-07-23,2026-07-29,0.0,7,1.0156,20.0,1.0,1.0,0.0,0.0,0.0,0.0,UNSAFE,NO,insufficient_promo_demand_evidence,0.0357
+97847,Antip Man Org Vol Shn Sp 340Ml,SE01 skincare sales event,2026-07-23,2026-07-29,0.0,7,1.0233,30.0,1.0,1.0,0.0,0.0,0.0,0.0,UNSAFE,NO,insufficient_promo_demand_evidence,0.0
+97849,Antip Pea Free Sm Hyd Sp 340Ml,SE01 skincare sales event,2026-07-23,2026-07-29,0.0,7,1.0233,30.0,1.0,1.0,0.0,0.0,0.0,0.0,UNSAFE,NO,insufficient_promo_demand_evidence,0.0159
+92213,Olay N/Mide Body Lotion 502Ml,SE01 skincare sales event,2026-07-23,2026-07-29,0.387757,7,1.0389,50.0,0.85,1.0,2.127,2.714,2.714,2.714,LOW,NO,using_governed_proxy,0.0
+93758,Neut Zinc Face Fld Spf50 50Ml,SE01 skincare sales event,2026-07-23,2026-07-29,0.095243,7,1.5403,40.0,0.85,1.0,0.789,0.667,0.667,0.667,UNSAFE,NO,model_forecast_not_release_ready,0.0159
+94892,No7 Lip & Cheek Multi Use Stic,SE01 skincare sales event,2026-07-23,2026-07-29,0.0,7,1.0311,40.0,1.0,1.0,0.0,1.0,0.0,1.0,LOW,NO,using_governed_proxy,0.0857
+94524,No7 Matte Muse Lipstick Rose C,SE01 skincare sales event,2026-07-23,2026-07-29,0.0,7,1.0311,40.0,1.0,1.0,0.0,1.0,0.0,1.0,LOW,NO,using_governed_proxy,0.039
+92939,Mp 2Pc Orange Zigzag Set 25,SE01 skincare sales event,2026-07-23,2026-07-29,0.0,7,1.0311,40.0,1.0,1.0,0.0,0.0,0.0,0.0,UNSAFE,NO,insufficient_promo_demand_evidence,0.0
+167333,Loreal R/Lift Glass Crm 50Ml,SE01 skincare sales event,2026-07-23,2026-07-29,0.0,7,1.0389,50.0,1.0,1.0,0.0,0.0,0.0,0.0,UNSAFE,NO,insufficient_promo_demand_evidence,0.0683

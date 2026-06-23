@@ -1,0 +1,11 @@
+gate,pass,detail
+order_over_stock_basis_falls_vs_4b9,True,4b9=550 4b11=60
+order_over_demand_reference_not_increased,True,4b9=119 4b11=21
+order_over_2x_demand_not_increased,True,4b9=106 4b11=11
+total_order_units_falls_vs_4b9,True,4b9=4064 4b11=2893
+tiny_demand_buy_not_worse,True,4b9=341 4b11=295
+p99_max_controlled,True,p99=6.0 max=24.0
+buy_count_not_collapsed,True,4b9=1263 4b11=1172
+zero_order_buy_zero,True,count=0
+audit_caps_populated,True,caps=552
+formal_overall,True,PASS

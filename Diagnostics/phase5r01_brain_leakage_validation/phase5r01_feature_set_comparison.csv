@@ -1,0 +1,2 @@
+total_features_before,leak_safe_features_after,excluded_features_count,excluded_feature_names,reason
+62,56,6,distance_to_optimal_end_soh; economic_net_value_score; missed_sales_avoidance_value; overstock_cash_release_value; review_roi_score; decision_triage_class,"Post-outcome, target-derived, or high leakage-risk fields removed from training."

@@ -1,0 +1,138 @@
+field,value,row_count
+selected_demand_units,0,4
+selected_demand_units,1,3506
+selected_demand_units,2,21
+total_expected_demand_units,0,4
+total_expected_demand_units,1,3212
+total_expected_demand_units,2,7
+total_expected_demand_units,3,1
+total_expected_demand_units,17,6
+total_expected_demand_units,25,3
+total_expected_demand_units,29,2
+total_expected_demand_units,33,3
+total_expected_demand_units,49,5
+total_expected_demand_units,57,253
+total_expected_demand_units,65,2
+total_expected_demand_units,67,1
+total_expected_demand_units,69,1
+total_expected_demand_units,71,1
+total_expected_demand_units,76,4
+total_expected_demand_units,79,1
+total_expected_demand_units,81,2
+total_expected_demand_units,85,5
+total_expected_demand_units,97,3
+total_expected_demand_units,103,1
+total_expected_demand_units,113,8
+total_expected_demand_units,141,1
+total_expected_demand_units,169,3
+total_expected_demand_units,197,1
+total_expected_demand_units,241,1
+promo_window_demand_units,0,4
+promo_window_demand_units,1,3527
+pre_promo_demand_units,0,3216
+pre_promo_demand_units,1,7
+pre_promo_demand_units,2,1
+pre_promo_demand_units,16,6
+pre_promo_demand_units,24,3
+pre_promo_demand_units,28,2
+pre_promo_demand_units,32,3
+pre_promo_demand_units,48,5
+pre_promo_demand_units,56,253
+pre_promo_demand_units,64,2
+pre_promo_demand_units,66,1
+pre_promo_demand_units,68,1
+pre_promo_demand_units,70,1
+pre_promo_demand_units,75,4
+pre_promo_demand_units,78,1
+pre_promo_demand_units,80,2
+pre_promo_demand_units,84,5
+pre_promo_demand_units,96,3
+pre_promo_demand_units,102,1
+pre_promo_demand_units,112,8
+pre_promo_demand_units,140,1
+pre_promo_demand_units,168,3
+pre_promo_demand_units,196,1
+pre_promo_demand_units,240,1
+demand_forecast_confidence,MEDIUM,2158
+demand_forecast_confidence,LOW,833
+demand_forecast_confidence,HIGH,540
+demand_forecast_basis,MODEL_PREDICTION,3531
+demand_forecast_reason_code,MODEL_PREDICTION_USED,3531
+selected_demand_quantile,q50,3429
+selected_demand_quantile,q85,101
+selected_demand_quantile,q95,1
+demand_forecast_warning,,3371
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 5.0; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,14
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 5.5; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,7
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 7.0; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,7
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 9.0; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,6
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 5.3; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,6
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 5.7; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,6
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 27.0; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,5
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 11.0; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,5
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 6.7; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,4
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 5.8; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,4
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 6.0; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,4
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 16.0; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,3
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 13.0; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,3
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 7.5; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,3
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 10.0; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,3
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 8.0; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,3
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 6.3; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,3
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 5.9; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,3
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 6.6; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,3
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 8.3; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,2
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 15.0; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,2
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 9.7; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,2
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 12.0; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,2
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 10.3; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,2
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 7.7; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,2
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 5.1; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,2
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 5.4; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,2
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 7.4; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,2
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 5.2; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,2
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 10.7; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,2
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 6.5; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,2
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 20.0; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,2
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 22.0; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 16.3; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 16.8; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 35.0; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 15.3; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 7.3; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 14.0; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 11.5; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 26.7; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 73.0; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 12.7; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 21.7; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 6.4; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 7.8; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 19.0; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 7.1; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 11.6; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 8.4; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 12.5; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 11.7; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 12.4; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 11.8; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 10.5; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 23.0; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 26.0; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 10.8; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 12.3; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 9.3; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 30.0; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 5.6; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 12.6; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 13.3; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 13.6; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 8.5; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 9.1; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 15.5; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 8.8; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 21.0; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 8.1; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 18.0; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 6.2; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1
+demand_forecast_warning,DEMAND_COLLAPSE_RISK_FEATURE_SIGNAL_HIGHER: model promo-window demand is 1 unit(s) but feature-layer demand signal is 6.8; review demand bridge (MODEL_PREDICTION_COLLAPSE_RISK).,1

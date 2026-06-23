@@ -1,0 +1,15 @@
+metric,value,note
+recommended_order_units_total,27074.0,proxy from allocation/adjusted qty
+actual_units_sold_total,48855.0,realised promo-window units
+estimated_leftover_units,15725.0,"proxy max(recommended-actual,0)"
+estimated_missed_sales_units,37506.0,"proxy max(actual-recommended,0)"
+estimated_capital_at_risk_proxy,0.0,recommended * unit_cost
+estimated_gross_profit_captured_proxy,235559.64,actual * unit_gp
+estimated_gross_profit_missed_proxy,180260.91,missed * unit_gp
+over_order_cost_proxy,0.0,leftover * unit_cost
+under_order_cost_proxy,180260.91,missed * unit_gp
+net_value_proxy,55298.73000000001,gp_captured - over_cost - under_cost
+sell_through_pct_proxy,8.436831379306625,mean(actual/recommended)
+capital_efficiency_proxy,0.0,gp/capital
+model_economic_value_vs_baseline_proxy,0.0,baseline over-order cost minus model
+model_economic_value_vs_historical_proxy_proxy,0.0,historical proxy over-order cost minus model

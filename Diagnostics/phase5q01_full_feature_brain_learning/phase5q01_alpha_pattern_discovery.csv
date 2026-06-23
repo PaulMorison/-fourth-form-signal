@@ -1,0 +1,17 @@
+pattern_id,pattern_label,pattern_description,value_estimate,risk_note
+FEATURE_ECONOMIC_TRIAGE,economic_triage driver,economic_net_value_score ranks highly in economic_value_model.,1.0,Model-derived; advisory only.
+FEATURE_STOCK_OPTIMAL,stock_optimal driver,distance_to_optimal_end_soh ranks highly in stock_exit_model.,0.9999999999999999,Model-derived; advisory only.
+FEATURE_SUPPLIER_REPLENISHMENT,supplier_replenishment driver,supplier_economic_risk_cost ranks highly in economic_value_model.,0.7428321696014091,Model-derived; advisory only.
+FEATURE_SUPPLIER_REPLENISHMENT,supplier_replenishment driver,supplier_risk_cost ranks highly in economic_value_model.,0.7428321696014091,Model-derived; advisory only.
+FEATURE_ECONOMIC_TRIAGE,economic_triage driver,review_roi_score ranks highly in economic_value_model.,0.6943953610351465,Model-derived; advisory only.
+FEATURE_DEMAND_UPLIFT,demand_uplift driver,expected_total_promo_demand_units ranks highly in stock_exit_model.,0.6497975255162627,Model-derived; advisory only.
+FEATURE_DEMAND_UPLIFT,demand_uplift driver,expected_normal_units_during_promo ranks highly in stock_exit_model.,0.631262270083989,Model-derived; advisory only.
+FEATURE_DEMAND_UPLIFT,demand_uplift driver,average_daily_units ranks highly in stock_exit_model.,0.6219812547027261,Model-derived; advisory only.
+FEATURE_STOCK_OPTIMAL,stock_optimal driver,target_day_one_promo_soh ranks highly in stock_exit_model.,0.6183860720362114,Model-derived; advisory only.
+FEATURE_STOCK_OPTIMAL,stock_optimal driver,target_end_promo_soh ranks highly in stock_exit_model.,0.5986313847682135,Model-derived; advisory only.
+UNKNOWN_DATA_DO_NOT_LEARN,Unknown data do not learn,Basket or demand evidence is UNKNOWN/UNSAFE; brain confidence is capped.,3145.619,segment_rows=47928
+UNDERSTOCKED_HIGH_CONVEXITY,Understocked high convexity,Convex promo with understock; uplift capture requires controlled top-up.,1362.535,segment_rows=1058
+WEAK_PROMO_DO_NOT_CHASE,Weak promo do not chase,Low convexity and low uplift; avoid over-ordering weak promo SKUs.,1307.587,segment_rows=1936
+OVERSTOCK_CASH_RELEASE,Overstock cash release,Overstocked row with cash-release upside; run-down preferred over chase-buy.,731.855,segment_rows=364
+REGIME_SHIFT_OPPORTUNITY,Regime shift opportunity,Regime and economic context suggest review beyond volume ranking.,538.651,segment_rows=970
+MISSION_SKU_STOCKOUT_TRUST_RISK,Mission SKU stockout trust risk,Long-tail basket SKU below 2 SOH threatens basket completion.,461.591,segment_rows=29

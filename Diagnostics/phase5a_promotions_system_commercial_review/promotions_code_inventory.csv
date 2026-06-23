@@ -1,0 +1,23 @@
+module_file,responsibility,inputs,outputs,commercial_relevance,complexity_score,risk_score,action_required
+src/models/promotions/sufficient_stock_demand_target.py,Target repair & stock/demand ceiling,enriched rows,target labels/weights,HIGH,4,3,keep
+src/models/promotions/shadow_store_action_eval.py,Shadow-only action build + cap,shadow predictions,capped store actions,HIGH,3,2,keep
+src/models/promotions/trainer.py,Model training orchestration,features/targets,model artifacts,MEDIUM,5,4,keep
+src/surfaces/promotions/reporting/store_prediction_download_builder.py,Stage 11 production report builder,scored rows,allocation/manager/audit CSVs,HIGH,5,5,rewrite
+src/surfaces/promotions/reporting/store_prediction_publisher.py,Publish store prediction outputs,builder outputs,runtime folders,HIGH,4,4,rewrite
+src/surfaces/promotions/reporting/allocation_stock_contract.py,Stock/demand contract for actions,feature+final demand,order units/gaps,HIGH,4,3,keep
+src/runtime/promotions/run_promotions_operational_cycle.py,Operational cycle runner,config/packets,stage outputs,MEDIUM,4,3,keep
+src/runtime/promotions/commercial_action_instructions.py,Commercial action copy/guidance,policy outputs,instructions,MEDIUM,2,1,keep
+src/state/promotions/datasets/model_input_export.py,Dataset assembly/export,materialized source,training parquet,MEDIUM,4,3,keep
+src/models/promotions/__init__.py,model/support module,varies,varies,LOW-MEDIUM,3,2,keep
+src/models/promotions/allocation_calibration.py,model/support module,varies,varies,LOW-MEDIUM,3,2,keep
+src/models/promotions/allocation_demand_forecast_contract.py,model/support module,varies,varies,LOW-MEDIUM,3,2,keep
+src/models/promotions/low_nonzero_specialist.py,model/support module,varies,varies,LOW-MEDIUM,3,2,keep
+src/models/promotions/model_bundle.py,model/support module,varies,varies,LOW-MEDIUM,3,2,keep
+src/models/promotions/model_input_quality.py,model/support module,varies,varies,LOW-MEDIUM,3,2,keep
+src/models/promotions/order_policy_adjustments.py,model/support module,varies,varies,LOW-MEDIUM,3,2,keep
+src/models/promotions/preprocessing.py,model/support module,varies,varies,LOW-MEDIUM,3,2,keep
+src/models/promotions/promotion_demand_backtest.py,model/support module,varies,varies,LOW-MEDIUM,3,2,keep
+src/models/promotions/promotion_execution_scorecard.py,model/support module,varies,varies,LOW-MEDIUM,3,2,keep
+src/models/promotions/risk_adjusted_economics.py,model/support module,varies,varies,LOW-MEDIUM,3,2,keep
+src/models/promotions/target_stock_policy.py,model/support module,varies,varies,LOW-MEDIUM,3,2,keep
+src/models/promotions/time_split.py,model/support module,varies,varies,LOW-MEDIUM,3,2,keep

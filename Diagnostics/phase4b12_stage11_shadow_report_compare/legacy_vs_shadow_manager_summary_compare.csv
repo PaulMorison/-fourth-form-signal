@@ -1,0 +1,15 @@
+metric,legacy,shadow_4b11,shadow_4b9
+buy_count,802.0,1172.0,1263.0
+caps_applied,0.0,552.0,0.0
+hold_count,1194.0,893.0,821.0
+max_order,91.0,24.0,55.0
+order_over_2x_demand_reference,103.0,11.0,106.0
+order_over_demand_reference,111.0,21.0,119.0
+order_over_stock_basis,250.0,60.0,550.0
+p99_order,6.0,6.0,10.0
+realized_exceeds_cap,0.0,165.0,0.0
+tiny_demand_buy,456.0,295.0,341.0
+tiny_demand_rows,1357.0,727.0,727.0
+total_order_units,2193.0,2893.0,4064.0
+units_removed_by_cap,0.0,1171.0,0.0
+zero_order_buy,0.0,0.0,0.0

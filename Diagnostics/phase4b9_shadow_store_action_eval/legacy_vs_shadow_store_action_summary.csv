@@ -1,0 +1,16 @@
+metric,legacy,shadow_4b7
+buy_count,802.0,1263.0
+do_not_buy_count,144.0,56.0
+hold_count,1194.0,821.0
+max_order_units,91.0,55.0
+median_order_units,0.0,2.0
+order_over_2x_demand_reference,103.0,106.0
+order_over_demand_reference,111.0,119.0
+order_over_stock_basis,250.0,550.0
+p90_order_units,3.0,4.0
+p99_order_units,6.0,10.0
+rows,2140.0,2140.0
+tiny_demand_rows,1357.0,727.0
+tiny_demand_with_buy,456.0,341.0
+total_expected_demand,1955.038380281952,4577.8700996502575
+total_order_units,2193.0,4064.0

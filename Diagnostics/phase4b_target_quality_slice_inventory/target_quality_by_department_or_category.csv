@@ -1,0 +1,5 @@
+department,target_quality_label,row_count
+Beauty,CLEAN_REALIZED_DEMAND,8
+Beauty,STOCK_CONSTRAINED_REPAIRED,4
+Health,CLEAN_REALIZED_DEMAND,2
+Health,STOCK_CONSTRAINED_REPAIRED,2

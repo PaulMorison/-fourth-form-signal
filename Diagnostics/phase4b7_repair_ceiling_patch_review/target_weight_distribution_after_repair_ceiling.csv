@@ -1,0 +1,7 @@
+phase,metric,value
+before,repaired_mean_weight,0.35969571230982017
+before,repaired_max_weight,0.5
+before,trainable_share,0.9801083385134535
+after,repaired_mean_weight,0.19999999999999996
+after,repaired_max_weight,0.2
+after,trainable_share,0.697096172631205

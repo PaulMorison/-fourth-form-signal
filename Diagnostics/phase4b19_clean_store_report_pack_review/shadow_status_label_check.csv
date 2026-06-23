@@ -1,0 +1,6 @@
+file,all_shadow_labelled
+01_STORE_ACTIONS.csv,True
+02_MANAGER_SUMMARY.csv,True
+03_REVIEW_EXCEPTIONS.csv,True
+04_OPERATOR_DECISION_SHEET.csv,True
+05_AUDIT_TRAIL.csv,True

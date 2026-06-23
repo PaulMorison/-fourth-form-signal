@@ -1,0 +1,2 @@
+baseline_wape,model_wape,model_bias_pct,distance_to_optimal_before,distance_to_optimal_after,distance_improvement_units,missed_demand_before,missed_demand_after,cash_tied_above_optimal_before,cash_tied_above_optimal_after,promo_exit_success_rate,overstock_no_buy_count,limited_release_rows,unsafe_rows,recommendation,primary_blocker,notes
+1.083,0.675,-23.6,1.9593733958114177,1.0071367313761117,0.952236664435306,9019.348,5643.0,83230.085,25052.592999999997,95.19173759204361,2076,0,46728,NO_RELEASE,model_bias_dangerously_negative,phase5j_blocks_full_customer_release_by_default

@@ -1,0 +1,15 @@
+{
+  "slice_notes": [
+    "policy-measurement-envfix-recent5k-20260522 (tmp/policy_measurement_envfix_recent5k_20260522/promotions_artifacts/training/datasets/policy-measurement-envfix-recent5k-20260522T000000Z/training_ready.parquet, n=5,004)",
+    "policy-measurement-envfix-hard5k-20260522 (tmp/policy_measurement_envfix_hard5k_20260522/promotions_artifacts/training/datasets/policy-measurement-envfix-hard5k-20260522T000000Z/training_ready.parquet, n=6,419)"
+  ],
+  "rows_total": 11261,
+  "clean_share": 0.3380694432110825,
+  "repaired_share": 0.0,
+  "contaminated_share": 0.0047065091910132315,
+  "insufficient_share": 0.6572240475979043,
+  "weighted_trainable_share": 0.3380694432110825,
+  "mean_target_weight_per_row": 0.33800284166592665,
+  "clean_repaired_row_share": 0.3380694432110825,
+  "viable_shadow_training": false
+}

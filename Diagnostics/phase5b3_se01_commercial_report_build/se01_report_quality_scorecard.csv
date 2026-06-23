@@ -1,0 +1,12 @@
+metric,score
+all_skus_included,1
+one_row_per_sku,1
+decision_enum_valid,1
+buy_positive_units,1
+hold_dnb_zero_units,1
+demand_windows_distinct,1
+manager_reconciles,1
+shadow_labelled,1
+governance_no,1
+has_buy_rows,1
+report_quality_score,100

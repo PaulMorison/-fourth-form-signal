@@ -1,0 +1,11 @@
+score_field,mean,p25,p50,p75,min,max
+store_regime_score,58.75695706225495,50.0,54.4,61.7,50.0,100.0
+customer_regime_score,78.80156832743617,70.0,90.0,90.0,40.0,90.0
+demand_regime_score,48.002844027923885,30.2,50.1,50.2,30.0,100.0
+stock_regime_score,64.09719804915368,63.6,67.1,69.6,0.0,70.0
+supplier_regime_score,35.30955340919958,25.0,25.0,60.0,25.0,60.0
+promo_regime_score,8.839365018647795,0.4,0.4,0.6,0.0,100.0
+cash_regime_score,79.89982786650091,80.0,80.0,80.0,40.0,80.0
+overall_regime_opportunity_score,25.136496126996263,16.7,23.7,23.8,12.0,83.5
+overall_regime_risk_score,15.260208472793344,0.0,20.0,20.0,0.0,55.0
+overall_regime_conviction_score,99.61021325427943,100.0,100.0,100.0,86.0,100.0

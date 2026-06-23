@@ -1,0 +1,14 @@
+step_order,stage,source_module,function_or_field,field_in,field_out,transformation,used_by_units_model,notes
+1,completed_join,completed_dataset_joiner.py,PromotionCompletedDatasetJoiner.join,window_aggregate_frame.actual_units_sold,actual_units_sold,left join on promotion_row_key,NO,Promo-window realized net units from SQL window aggregates
+2,completed_join,completed_dataset_joiner.py,PromotionCompletedDatasetJoiner.join,actual_units_sold,actual_units_sold_promo,alias copy,NO,Same value as actual_units_sold for promo grain
+3,baseline_windows,ft_group_windows.py,apply_ft_baseline_windows,allocation + baseline fields,stock_basis_units,resolve_allocation_basis_units(),NO,Stock available at promo start decision point
+4,baseline_windows,ft_group_windows.py,apply_ft_baseline_windows,baseline_expected_units + required_implied_units,demand_reference_units,max(baseline_expected_units required_implied_units),NO,Prior demand reference not used as units training label today
+5,target_engineering,ft_target_units_sold.py,apply_ft_target_units_sold,actual_units_sold,target_actual_units_sold,ensure_numeric(actual_units_sold).clip(lower=0),YES — direct label,Canonical units target today = realized sales only
+6,target_engineering,ft_target_sell_through.py,apply_ft_target_sell_through,target_actual_units_sold + stock_basis_units,target_sell_through_pct,safe_ratio(actual stock_basis),NO,Auxiliary target; stockout evidence input
+7,target_engineering,ft_target_stockout_flag.py,apply_ft_target_stockout_flag,actual vs stock_basis + post_14d,target_stockout_flag,(actual >= 0.98*stock_basis) OR (post_14d>0 AND sell_through>=0.9),NO,Used by stockout classifier not units head
+8,target_engineering,ft_target_underallocation_flag.py,apply_ft_target_underallocation_flag,stock_basis vs demand_reference,target_underallocation_flag,stock_basis < 0.85*demand_reference OR stockout_flag,NO,Allocation stress signal
+9,dataset_assembly,dataset_assembler.py,PromotionDatasetAssembler.assemble_training_dataset,target_frame + feature_frame,training_ready.parquet,persist joined frame,INDIRECT,Carries target_actual_units_sold into trainer dataset
+10,preprocessing,preprocessing.py,prepare_model_input_frame,dataset,model_input,feature selection + governed imputation,INDIRECT,Features only; target stays on dataset frame
+11,training,trainer.py,PromotionModelTrainer.train,dataset.target_actual_units_sold,units_gradient_boosting.fit label,direct regression target,YES,units_linear and units_tree both fit target_actual_units_sold
+12,training,trainer.py,PromotionModelTrainer._training_sets,dataset.loc[split train_mask target_columns],train_targets,time-split row selection,YES,No sample weights or target quality filter today
+13,inference,scoring_service.py,PromotionModelTrainer.score path,model_input,raw_predicted_units_sold,units_model.predict(model_input).clip(lower=0),OUTPUT,Model predicts promo-window units trained on realized sales

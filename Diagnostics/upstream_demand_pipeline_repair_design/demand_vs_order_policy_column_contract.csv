@@ -1,0 +1,18 @@
+column,domain,current_role,proposed_role,stage11_consumes,deprecated
+raw_predicted_units_sold,demand_forecast,model raw total promo-window units,unchanged — auditable model output,diagnostic only,False
+calibrated_predicted_units_sold,demand_forecast,allocation-aware capped demand (misplaced),demand forecast after light calibration ONLY if recalibrated as demand repair; interim: canonical demand for Stage 11,YES — primary demand input,False
+demand_repaired_predicted_units_sold,demand_forecast,does not exist,"optional future demand-only repair (stockout uplift, missing evidence routing) — NOT order cap",future optional,False
+predicted_units_total_promo,demand_forecast,policy-capped total via Stage 11 resolution,canonical promo-window demand total for allocation contract; sourced from calibrated/demand_repaired NOT order cap,YES — demand contract model_promo_window_units,False
+predicted_units_first_7_days,demand_forecast,derived from policy-capped predicted_units_sold / days,prorated from demand total (first 7 of promo window),YES,False
+demand_prediction_basis,demand_forecast,partial via demand_forecast_basis in Stage 11 contract,MODEL_PREDICTION | BASELINE_FALLBACK | REVIEW — upstream scoring,pass-through,False
+demand_prediction_warning,demand_forecast,demand_forecast_warning in Stage 11 only,upstream flat-cohort / collapse warnings emitted at scoring,pass-through,False
+demand_prediction_confidence,demand_forecast,row_model_confidence_score + contract confidence,governed demand confidence separate from order policy strength,pass-through,False
+predicted_units_sold,demand_forecast,equals policy_adjusted_predicted_units_sold (order cap),alias of calibrated_predicted_units_sold (demand only); deprecate cap semantics,forecast source rank 4 — must read demand not cap,semantic deprecated — keep name one release with alias note
+allocation_cap_units,order_policy,embedded inside apply_allocation_aware_units_cap output as calibrated,explicit order/allocation ceiling from allocation-aware cap; diagnostic + order path,order cap only,False
+risk_adjusted_order_cap_units,order_policy,partially in adjusted_supported_total_units,explicit intermediate policy cap before final order cap,order only,False
+capital_policy_order_cap_units,order_policy,not explicit,optional capital-drag specific cap layer,order only,False
+adjusted_order_cap_units,order_policy,order cap also written to predicted_units_sold,final governed order cap ONLY — never demand,suggested_order cap in Stage 11 order path only,False
+adjusted_launch_units,order_policy,exists,launch-window order cap — order only,first-7 order cap only,False
+policy_adjustment_reason,order_policy,exists → rename candidate order_policy_reason_code,order_policy_reason_code,audit only,rename alias one release
+policy_adjusted_predicted_units_sold,order_policy,misnamed demand field = adjusted_order_cap_units,DEPRECATE — alias to adjusted_order_cap_units with deprecation note,MUST NOT,True
+order_policy_warning,order_policy,partial via review_override_reason,explicit order-policy warnings separate from demand warnings,audit only,False

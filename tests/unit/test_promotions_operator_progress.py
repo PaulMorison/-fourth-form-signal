@@ -213,3 +213,38 @@ class PromotionOperatorProgressTests(unittest.TestCase):
         self.assertEqual(owner, "operator")
         self.assertIn("interrupted", reason)
         self.assertIn("operator cancellation", action)
+
+    def test_operator_display_mode_formats_clean_summary(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            artifact_paths = PromotionArtifactPaths(
+                root=Path(temp_dir) / "promotions_artifacts",
+                local_inspection_root=Path(temp_dir) / "local_inspection",
+            )
+            stream = StringIO()
+            progress = PromotionOperatorProgress(
+                run_id="operator-display-run",
+                artifact_paths=artifact_paths,
+                stream=stream,
+                display_mode="operator",
+            )
+            progress.start_run(
+                as_of_date="2026-05-20",
+                artifact_root=artifact_paths.root,
+                local_inspection_root=artifact_paths.local_inspection_root,
+                server="test-server",
+                database="test-database",
+                execution_mode="live_sql",
+            )
+            progress.start_stage(1, 14, "Load runtime config")
+            progress.complete_stage(note="ready")
+            progress.start_stage(5, 14, "Train model bundle")
+            progress.complete_stage(row_count=1200, note="trained")
+            progress.persist(status="completed")
+            progress.finalize_operator_view(status="completed")
+
+            rendered_output = stream.getvalue()
+            self.assertIn("PROMOTIONS RUN", rendered_output)
+            self.assertIn("[ 1/14] Load runtime config", rendered_output)
+            self.assertIn("RUN SUMMARY", rendered_output)
+            self.assertNotIn("PROMOTIONS MSSQL SETTINGS", rendered_output)
+            self.assertNotIn("START STAGE", rendered_output)

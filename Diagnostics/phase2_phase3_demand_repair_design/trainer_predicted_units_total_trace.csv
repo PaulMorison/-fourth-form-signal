@@ -1,0 +1,4 @@
+code_path,file,line,column_written,source,phase1_aligned,recommended_fix
+backtest_test_predictions,trainer.py,1495,predicted_units_total_promo,policy_adjusted_predicted_units,NO,Use calibrated_predicted_units_total_promo
+policy_replay_diagnostics,trainer.py,2454,predicted_units_total_promo,calibrated_predicted_units,YES,none
+live_scoring,scoring_service.py,231,predicted_units_sold,calibrated_predicted_units_sold,YES,none (Phase 1 complete)
