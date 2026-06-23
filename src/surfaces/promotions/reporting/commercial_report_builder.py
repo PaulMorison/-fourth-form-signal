@@ -2912,13 +2912,73 @@ def build_manager_summary(order_plan: pd.DataFrame, exceptions: pd.DataFrame) ->
                 else 0
             ),
             "store_reporting_export_folder": (
-                str(pd.read_csv("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting/phase6b01_store_reporting_export_status.csv")["export_folder"].iloc[0])
-                if Path("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting/phase6b01_store_reporting_export_status.csv").exists()
-                else ""
+                str(pd.read_csv("Diagnostics/phase6c01_active_learning_graph_validation/phase6c01_store_reporting_export_status.csv")["export_folder"].iloc[0])
+                if Path("Diagnostics/phase6c01_active_learning_graph_validation/phase6c01_store_reporting_export_status.csv").exists()
+                else (
+                    str(pd.read_csv("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting/phase6b01_store_reporting_export_status.csv")["export_folder"].iloc[0])
+                    if Path("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting/phase6b01_store_reporting_export_status.csv").exists()
+                    else ""
+                )
             ),
             "ml_innovation_top_recommendation": (
                 str(pd.read_csv("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting/phase6b01_ml_innovation_audit.csv").sort_values("implementation_priority").iloc[0]["method_name"])
                 if Path("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting/phase6b01_ml_innovation_audit.csv").exists()
+                else ""
+            ),
+            "feature_inventory_reconciliation_status": (
+                str(pd.read_csv("Diagnostics/phase6c01_active_learning_graph_validation/phase6c01_feature_inventory_reconciliation.csv")["count_reconciliation_status"].iloc[0])
+                if Path("Diagnostics/phase6c01_active_learning_graph_validation/phase6c01_feature_inventory_reconciliation.csv").exists()
+                else ""
+            ),
+            "adjacent_path_validation_status": (
+                str(pd.read_csv("Diagnostics/phase6c01_active_learning_graph_validation/phase6c01_release_gate.csv")["phase6c_adjacent_validation_status"].iloc[0])
+                if Path("Diagnostics/phase6c01_active_learning_graph_validation/phase6c01_release_gate.csv").exists()
+                else ""
+            ),
+            "adjacent_path_wape": (
+                float(pd.read_csv("Diagnostics/phase6c01_active_learning_graph_validation/phase6c01_release_gate.csv")["phase6c_adjacent_path_wape"].iloc[0])
+                if Path("Diagnostics/phase6c01_active_learning_graph_validation/phase6c01_release_gate.csv").exists()
+                else float("nan")
+            ),
+            "adjacent_path_bias_pct": (
+                float(pd.read_csv("Diagnostics/phase6c01_active_learning_graph_validation/phase6c01_release_gate.csv")["phase6c_adjacent_path_bias_pct"].iloc[0])
+                if Path("Diagnostics/phase6c01_active_learning_graph_validation/phase6c01_release_gate.csv").exists()
+                and "phase6c_adjacent_path_bias_pct" in pd.read_csv("Diagnostics/phase6c01_active_learning_graph_validation/phase6c01_release_gate.csv", nrows=0).columns
+                else float("nan")
+            ),
+            "adjacent_beats_model_rate": (
+                float(pd.read_csv("Diagnostics/phase6c01_active_learning_graph_validation/phase6c01_release_gate.csv")["phase6c_adjacent_beats_model_rate"].iloc[0])
+                if Path("Diagnostics/phase6c01_active_learning_graph_validation/phase6c01_release_gate.csv").exists()
+                else float("nan")
+            ),
+            "active_learning_candidates": (
+                int(pd.read_csv("Diagnostics/phase6c01_active_learning_graph_validation/phase6c01_release_gate.csv")["phase6c_active_learning_candidates"].iloc[0])
+                if Path("Diagnostics/phase6c01_active_learning_graph_validation/phase6c01_release_gate.csv").exists()
+                else 0
+            ),
+            "top_active_learning_reason": (
+                str(pd.read_csv("Diagnostics/phase6c01_active_learning_graph_validation/phase6c01_active_learning_review_queue.csv")["active_learning_reason"].iloc[0])
+                if Path("Diagnostics/phase6c01_active_learning_graph_validation/phase6c01_active_learning_review_queue.csv").exists()
+                else ""
+            ),
+            "dag_repairable_coverage_score": (
+                float(pd.read_csv("Diagnostics/phase6c01_active_learning_graph_validation/phase6c01_release_gate.csv")["dag_repairable_coverage_score"].iloc[0])
+                if Path("Diagnostics/phase6c01_active_learning_graph_validation/phase6c01_release_gate.csv").exists()
+                else float("nan")
+            ),
+            "kg_enriched_edge_count": (
+                int(pd.read_csv("Diagnostics/phase6c01_active_learning_graph_validation/phase6c01_release_gate.csv")["kg_enriched_edge_count"].iloc[0])
+                if Path("Diagnostics/phase6c01_active_learning_graph_validation/phase6c01_release_gate.csv").exists()
+                else 0
+            ),
+            "ats_validation_status": (
+                str(pd.read_csv("Diagnostics/phase6c01_active_learning_graph_validation/phase6c01_release_gate.csv")["ats_validation_status"].iloc[0])
+                if Path("Diagnostics/phase6c01_active_learning_graph_validation/phase6c01_release_gate.csv").exists()
+                else ""
+            ),
+            "top_ml_next_action": (
+                str(pd.read_csv("Diagnostics/phase6c01_active_learning_graph_validation/phase6c01_ml_innovation_implementation_roadmap.csv")["next_action"].iloc[0])
+                if Path("Diagnostics/phase6c01_active_learning_graph_validation/phase6c01_ml_innovation_implementation_roadmap.csv").exists()
                 else ""
             ),
             "total_overstock_cash_release_value": float(_num(order_plan.get("overstock_cash_release_value")).sum()) if "overstock_cash_release_value" in order_plan.columns else 0.0,

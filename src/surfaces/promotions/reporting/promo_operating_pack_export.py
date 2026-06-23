@@ -23,11 +23,19 @@ PHASE5W_WORKBOOK = Path("Diagnostics/phase5w01_human_review_capture/SHADOW_TOP_1
 PHASE5X_STATUS = Path("Diagnostics/phase5x01_filled_human_review_learning/SHADOW_TOP_100_BUYER_REVIEW_STATUS.xlsx")
 PHASE5X_SCORECARD = Path("Diagnostics/phase5x01_filled_human_review_learning/phase5x01_decision_quality_scorecard.csv")
 PHASE6B_DIR = Path("Diagnostics/phase6b01_brain_state_adjacent_graph_reporting")
+PHASE6C_DIR = Path("Diagnostics/phase6c01_active_learning_graph_validation")
 
 STORE_772_EXTENDED_EXPORTS = (
     "PROMO_FEATURE_VISIBILITY_AUDIT.csv",
     "PROMO_ADJACENT_PATH_REVIEW.csv",
     "PROMO_DAG_KG_COVERAGE_AUDIT.csv",
+    "PROMO_ACTIVE_LEARNING_REVIEW_QUEUE.csv",
+    "PROMO_ADJACENT_PATH_VALIDATION.csv",
+    "PROMO_GRAPH_COVERAGE_REPAIR_PLAN.csv",
+    "PROMO_FEATURE_INVENTORY_RECONCILIATION.csv",
+    "PROMO_ATS_VALIDATION.csv",
+    "PROMO_ML_INNOVATION_ROADMAP.csv",
+    "PROMO_PHASE6C_RELEASE_GATE.csv",
 )
 
 REQUIRED_EXPORT_FILES = (
@@ -721,13 +729,14 @@ def run_store_772_reporting_export(
     export_root: Path | None = None,
     diagnostics_dir: Path = DEFAULT_DIAGNOSTICS_DIR,
     phase6b_dir: Path = PHASE6B_DIR,
+    phase6c_dir: Path = PHASE6C_DIR,
     store_number: int = 772,
-    phase_or_run_id: str = "phase6b01",
+    phase_or_run_id: str = "phase6c01",
 ) -> dict[str, Any]:
-    """Export store 772 operating pack on every major run, including Phase 6B audits."""
-    from models.promotions.promo_phase6b_orchestrator import write_phase6b_diagnostics
+    """Export store 772 operating pack on every major run, including Phase 6B/6C audits."""
+    from models.promotions.promo_phase6c_active_learning_graph_validation import write_phase6c_diagnostics
 
-    phase6b = write_phase6b_diagnostics(diagnostics_dir=phase6b_dir)
+    phase6c = write_phase6c_diagnostics(diagnostics_dir=phase6c_dir)
     y_result = write_phase5y_diagnostics(export_root=export_root, diagnostics_dir=diagnostics_dir, store_number=store_number)
 
     export_folder = Path(y_result["export_folder"])
@@ -738,7 +747,16 @@ def run_store_772_reporting_export(
         "PROMO_ADJACENT_PATH_REVIEW.csv": phase6b_dir / "phase6b01_adjacent_path_simulation.csv",
         "PROMO_DAG_KG_COVERAGE_AUDIT.csv": phase6b_dir / "phase6b01_graph_coverage_audit.csv",
     }
-    for out_name, src in phase6b_copies.items():
+    phase6c_copies = {
+        "PROMO_ACTIVE_LEARNING_REVIEW_QUEUE.csv": phase6c_dir / "phase6c01_active_learning_review_queue.csv",
+        "PROMO_ADJACENT_PATH_VALIDATION.csv": phase6c_dir / "phase6c01_adjacent_path_validation.csv",
+        "PROMO_GRAPH_COVERAGE_REPAIR_PLAN.csv": phase6c_dir / "phase6c01_graph_coverage_repair_plan.csv",
+        "PROMO_FEATURE_INVENTORY_RECONCILIATION.csv": phase6c_dir / "phase6c01_feature_inventory_reconciliation.csv",
+        "PROMO_ATS_VALIDATION.csv": phase6c_dir / "phase6c01_available_to_sell_validation.csv",
+        "PROMO_ML_INNOVATION_ROADMAP.csv": phase6c_dir / "phase6c01_ml_innovation_implementation_roadmap.csv",
+        "PROMO_PHASE6C_RELEASE_GATE.csv": phase6c_dir / "phase6c01_release_gate.csv",
+    }
+    for out_name, src in {**phase6b_copies, **phase6c_copies}.items():
         if src.exists():
             dst = export_folder / out_name
             dst.write_bytes(src.read_bytes())
@@ -757,11 +775,14 @@ def run_store_772_reporting_export(
         "missing_reports": ";".join(missing) if missing else "",
         "qa_blockers": qa_blockers,
         "qa_warnings": qa_warnings,
-        "release_recommendation": phase6b.get("release_recommendation", RELEASE_RECOMMENDATION),
-        "primary_blocker": phase6b.get("primary_blocker", PRIMARY_BLOCKER),
-        "phase6b_dag_coverage_score": phase6b.get("dag_coverage_score", 0.0),
-        "phase6b_adjacent_path_avg_confidence": phase6b.get("adjacent_path_avg_confidence", 0.0),
+        "release_recommendation": phase6c.get("release_recommendation", RELEASE_RECOMMENDATION),
+        "primary_blocker": phase6c.get("primary_blocker", PRIMARY_BLOCKER),
+        "phase6c_dag_coverage_score": phase6c.get("dag_current_coverage_score", 0.0),
+        "phase6c_adjacent_path_wape": phase6c.get("adjacent_path_wape", 0.0),
+        "phase6c_active_learning_candidates": phase6c.get("active_learning_candidate_count", 0),
     }])
+    status.to_csv(phase6c_dir / "phase6c01_store_reporting_export_status.csv", index=False)
+    phase6b_dir.mkdir(parents=True, exist_ok=True)
     status.to_csv(phase6b_dir / "phase6b01_store_reporting_export_status.csv", index=False)
     status.to_csv(export_folder / "PROMO_STORE_REPORTING_EXPORT_STATUS.csv", index=False)
     exported.append("PROMO_STORE_REPORTING_EXPORT_STATUS.csv")
@@ -773,7 +794,7 @@ def run_store_772_reporting_export(
 
     return {
         **y_result,
-        **{k: v for k, v in phase6b.items() if k not in {"visibility_df", "legacy_df", "contract_df", "ml_audit_df"}},
+        **{k: v for k, v in phase6c.items()},
         "export_folder": str(export_folder),
         "reports_exported": exported,
         "missing_reports": missing,
