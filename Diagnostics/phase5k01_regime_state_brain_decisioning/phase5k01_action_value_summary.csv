@@ -1,0 +1,2 @@
+row_count,avg_regime_adjusted_decision_value,total_expected_gp_proxy,total_cash_drag_penalty,total_missed_demand_penalty,total_overstock_run_down_reward,total_stockout_trust_penalty,aggressive_buy_count,no_buy_run_down_count,constraint_block_count
+52285,4.041525160179784,235559.64,25052.593,20835.36,7669.409,4648.46,88,2076,47418

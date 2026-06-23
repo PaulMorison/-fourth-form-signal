@@ -8,6 +8,7 @@ from models.promotions.promo_period_demand_forecast import attach_promo_period_d
 from models.promotions.promo_demand_bias_repair import apply_underforecast_bias_adjustments, load_bias_repair_artifacts
 from models.promotions.promo_demand_calibration import apply_promo_demand_calibration, load_calibration_artifacts
 from models.promotions.promo_optimal_stock_learning import apply_optimal_stock_learning, load_optimal_stock_artifacts
+from models.promotions.promo_regime_state import apply_regime_brain_decisioning, load_regime_artifacts
 from models.promotions.promo_stock_outcome_optimisation import apply_stock_outcome_optimisation, load_stock_outcome_artifacts
 from models.promotions.promo_stock_truth_repair import apply_stock_truth_repair, load_stock_truth_artifacts
 
@@ -197,6 +198,29 @@ ORDER_PLAN_COLUMNS: tuple[str, ...] = (
     "stock_position_order_reason",
     "replenishment_lead_time_days",
     "replenishment_risk_class",
+    "store_sales_regime",
+    "customer_loyalty_regime",
+    "sku_demand_regime",
+    "stock_position_regime",
+    "supplier_replenishment_regime",
+    "promo_convexity_regime",
+    "cash_efficiency_regime",
+    "capital_at_risk_regime",
+    "customer_basket_trust_regime",
+    "overall_regime_opportunity_score",
+    "overall_regime_risk_score",
+    "overall_regime_conviction_score",
+    "regime_adjusted_decision_value",
+    "brain_action_label",
+    "brain_order_units_proposal",
+    "constraint_block_flag",
+    "constraint_block_reason",
+    "final_governed_action_label",
+    "final_governed_order_units",
+    "top_regime_driver_1",
+    "top_regime_driver_2",
+    "top_regime_driver_3",
+    "human_interpretation_summary",
     "stock_target_conflict_flag",
     "reason_demand",
     "reason_stock",
@@ -438,6 +462,8 @@ def load_se01_scored_sources(prediction_dir: Path) -> pd.DataFrame:
     out = apply_stock_outcome_optimisation(out, gate_recommendation=stock_recommendation)
     _opt_gate, opt_rec = load_optimal_stock_artifacts()
     out = apply_optimal_stock_learning(out, gate_recommendation=opt_rec)
+    _regime_gate, regime_rec = load_regime_artifacts()
+    out = apply_regime_brain_decisioning(out, gate_recommendation=regime_rec)
     return out
 
 def _baseline_daily_rate(frame: pd.DataFrame) -> tuple[pd.Series, pd.Series, pd.Series]:
@@ -1368,13 +1394,38 @@ def assemble_commercial_order_rows(
         "stock_position_order_reason",
         "replenishment_lead_time_days",
         "replenishment_risk_class",
+        "store_sales_regime",
+        "customer_loyalty_regime",
+        "sku_demand_regime",
+        "stock_position_regime",
+        "supplier_replenishment_regime",
+        "promo_convexity_regime",
+        "cash_efficiency_regime",
+        "capital_at_risk_regime",
+        "customer_basket_trust_regime",
+        "overall_regime_opportunity_score",
+        "overall_regime_risk_score",
+        "overall_regime_conviction_score",
+        "regime_adjusted_decision_value",
+        "brain_action_label",
+        "brain_order_units_proposal",
+        "constraint_block_flag",
+        "constraint_block_reason",
+        "final_governed_action_label",
+        "final_governed_order_units",
+        "top_regime_driver_1",
+        "top_regime_driver_2",
+        "top_regime_driver_3",
+        "human_interpretation_summary",
     )
     numeric_position = {
         "optimal_base_soh_units", "current_days_cover", "expected_units_until_promo_start",
         "expected_soh_at_promo_start_before_order", "expected_normal_units_during_promo",
         "expected_promo_uplift_units", "promo_convexity_score", "target_day_one_promo_soh",
         "target_end_promo_soh", "optimal_stock_position_order_units", "distance_to_optimal_end_soh",
-        "replenishment_lead_time_days",
+        "replenishment_lead_time_days", "overall_regime_opportunity_score", "overall_regime_risk_score",
+        "overall_regime_conviction_score", "regime_adjusted_decision_value", "brain_order_units_proposal",
+        "final_governed_order_units",
     }
     for col in position_cols:
         out[col] = _field_series(frame, (col,), frame.index)
@@ -1991,6 +2042,17 @@ def build_manager_summary(order_plan: pd.DataFrame, exceptions: pd.DataFrame) ->
             "promo_convexity_estimate": float(_num(order_plan.get("promo_convexity_score")).mean() or 0.0) if "promo_convexity_score" in order_plan.columns else 0.0,
             "promo_exit_success_rate": float(order_plan.get("promo_exit_success_flag", pd.Series("NO", index=order_plan.index)).eq("YES").mean() * 100.0) if "promo_exit_success_flag" in order_plan.columns else 0.0,
             "optimal_stock_release_recommendation": optimal_stock_rec,
+            "regime_opportunity_average": float(_num(order_plan.get("overall_regime_opportunity_score")).mean() or 0.0) if "overall_regime_opportunity_score" in order_plan.columns else 0.0,
+            "regime_risk_average": float(_num(order_plan.get("overall_regime_risk_score")).mean() or 0.0) if "overall_regime_risk_score" in order_plan.columns else 0.0,
+            "high_convexity_sku_count": int(order_plan.get("promo_convexity_regime", pd.Series("", index=order_plan.index)).eq("HIGH_CONVEXITY").sum()) if "promo_convexity_regime" in order_plan.columns else 0,
+            "cash_release_opportunity_count": int(order_plan.get("capital_at_risk_regime", pd.Series("", index=order_plan.index)).eq("CASH_RELEASE_PRIORITY").sum()) if "capital_at_risk_regime" in order_plan.columns else 0,
+            "basket_trust_risk_count": int(order_plan.get("customer_basket_trust_regime", pd.Series("", index=order_plan.index)).eq("BASKET_TRUST_RISK").sum()) if "customer_basket_trust_regime" in order_plan.columns else 0,
+            "aggressive_buy_proposal_count": int(order_plan.get("brain_action_label", pd.Series("", index=order_plan.index)).eq("AGGRESSIVE_BUY").sum()) if "brain_action_label" in order_plan.columns else 0,
+            "no_buy_run_down_proposal_count": int(order_plan.get("brain_action_label", pd.Series("", index=order_plan.index)).eq("NO_BUY_RUN_DOWN").sum()) if "brain_action_label" in order_plan.columns else 0,
+            "constraint_blocked_count": int(order_plan.get("constraint_block_flag", pd.Series("NO", index=order_plan.index)).eq("YES").sum()) if "constraint_block_flag" in order_plan.columns else 0,
+            "final_governed_buy_count": int(order_plan.get("final_governed_action_label", pd.Series("", index=order_plan.index)).isin(["AGGRESSIVE_BUY", "CONTROLLED_BUY", "TOP_UP_TO_OPTIMAL"]).sum()) if "final_governed_action_label" in order_plan.columns else 0,
+            "final_governed_hold_count": int(order_plan.get("final_governed_action_label", pd.Series("", index=order_plan.index)).eq("HOLD_FOR_REPLENISHMENT").sum()) if "final_governed_action_label" in order_plan.columns else 0,
+            "final_governed_no_buy_count": int(order_plan.get("final_governed_action_label", pd.Series("", index=order_plan.index)).isin(["NO_BUY_RUN_DOWN", "BLOCKED_UNSAFE"]).sum()) if "final_governed_action_label" in order_plan.columns else 0,
             "model_status": META_STATUS,
             "production_ordering_approved": PRODUCTION_ORDERING,
             "customer_report_release_approved": CUSTOMER_RELEASE,
