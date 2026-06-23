@@ -1,0 +1,48 @@
+segment_type,segment_value,row_count,actuals_available_count,actuals_missing_count,model_wape,model_mae,model_bias_pct,overforecast_rate,underforecast_rate,severe_underforecast_rate,severe_overforecast_rate,forecast_beats_baseline_rate,calibrated_bias_pct,bias_adjusted_bias_pct,stock_exit_error,basket_evidence_coverage,unknown_basket_evidence_count,long_tail_error_rate,mission_sku_error_rate,supplier_unknown_error_rate,high_wape_regime_count,dangerous_bias_regime_count,release_blocked_reason
+total,all,52285,20196,32089,0.6729,0.628766089700679,-50.3291,2.95,21.14,6.93,0.2,0.0,-25.382,-25.382,0.0014,,36,1.5777,,0,0,9,model_bias_dangerously_negative
+department,ACHE PAIN SUPPORT,147,44,103,0.614,0.26731292517006805,-1.7609,4.76,8.16,1.36,1.36,0.0,-25.382,-25.382,0.0,,0,,,0,0,0,monitor
+department,ALLERGY,107,42,65,0.4648,0.4213177570093458,-17.9,4.67,14.95,4.67,0.93,0.0,-25.382,-25.382,0.0,,0,,,0,0,0,model_bias_dangerously_negative
+department,ANALGESICS,99,51,48,0.562,0.4938686868686868,-7.5805,12.12,20.2,4.04,1.01,0.0,-25.382,-25.382,0.0,,0,,,0,0,0,monitor
+department,ANTI FUNGAL VIRAL,23,8,15,0.3777,0.16421739130434784,-10.07,0.0,13.04,0.0,0.0,0.0,-25.382,-25.382,0.0,,0,,,0,0,0,monitor
+department,BABY CARE,213,47,166,0.6033,0.17276995305164317,-12.777,0.94,9.39,0.0,0.47,0.0,-25.382,-25.382,0.0,,0,,,0,0,0,monitor
+department,BATH TOILETRIES,550,269,281,0.698,0.9873745454545453,-46.6452,4.36,24.91,10.73,0.36,0.0,-25.382,-25.382,0.0036,,1,,,0,0,0,model_bias_dangerously_negative
+department,BEAUTY ACCESSORIES,2557,1122,1435,0.56,0.43777278060226826,-28.6041,5.55,19.71,4.93,0.27,0.0,-25.382,-25.382,0.0039,,4,0.4,,0,0,0,model_bias_dangerously_negative
+department,BEAUTY ELECTRICAL,92,56,36,0.5623,0.543945652173913,-36.3157,2.17,28.26,5.43,0.0,0.0,-25.382,-25.382,0.0,,0,,,0,0,0,model_bias_dangerously_negative
+department,COLOUR COSMETICS,22702,6582,16120,0.6094,0.2883131001673861,-35.3881,1.69,14.63,2.75,0.07,0.0,-25.382,-25.382,0.0007,,5,,,0,0,0,model_bias_dangerously_negative
+department,COUGH COLD,276,120,156,0.539,0.40422826086956526,-22.6594,6.16,19.93,3.26,0.36,0.0,-25.382,-25.382,0.0,,0,,,0,0,0,model_bias_dangerously_negative
+department,DEODORANTS,626,410,216,0.5549,0.8252763578274761,-42.6826,5.43,37.06,12.46,0.0,0.0,-25.382,-25.382,0.0,,0,,,0,0,0,model_bias_dangerously_negative
+department,DIGESTIVE CARE,448,203,245,0.561,0.43326562500000004,-27.3656,5.13,18.53,5.13,0.0,0.0,-25.382,-25.382,0.0022,,4,0.5,,0,0,0,model_bias_dangerously_negative
+department,DISEASE STATE MGMT,10,2,8,0.197,0.039400000000000004,6.3,0.0,0.0,0.0,0.0,0.0,-25.382,-25.382,0.0,,0,,,0,0,0,monitor
+department,EYES EARS,424,89,335,0.6221,0.21568160377358486,-35.1109,1.65,10.85,2.36,0.0,0.0,-25.382,-25.382,0.0,,0,,,0,0,0,model_bias_dangerously_negative
+department,FAMILY PLANNING,73,32,41,0.5045,0.3178767123287671,-7.4022,5.48,13.7,2.74,0.0,0.0,-25.382,-25.382,0.0,,1,,,0,0,0,monitor
+department,FEMININE CARE,392,279,113,0.6238,1.478280612244898,-53.6715,5.87,46.94,27.55,0.26,0.0,-25.382,-25.382,0.0,,0,,,0,0,0,model_bias_dangerously_negative
+department,FIRSTAID WOUNDCARE,198,99,99,0.5286,0.6941111111111111,-28.5423,8.08,26.26,8.59,1.52,0.0,-25.382,-25.382,0.0,,0,,,0,0,0,model_bias_dangerously_negative
+department,FOOTCARE,193,95,98,0.4976,0.36610880829015546,-21.3641,5.18,20.73,1.55,0.0,0.0,-25.382,-25.382,0.0,,0,,,0,0,0,model_bias_dangerously_negative
+department,FRAGRANCE,2002,298,1704,0.656,0.1431958041958042,-29.9648,0.6,7.14,0.8,0.0,0.0,-25.382,-25.382,0.0,,0,,,0,0,0,model_bias_dangerously_negative
+department,GENERAL MERCHANDIS,2,2,0,0.541,0.541,-54.1,0.0,100.0,0.0,0.0,0.0,-25.382,-25.382,0.0,,0,,,0,0,0,model_bias_dangerously_negative
+department,GIFTING,355,67,288,0.601,0.1879154929577465,-38.0505,0.0,8.45,3.1,0.0,0.0,-25.382,-25.382,0.0,,0,,,0,0,0,model_bias_dangerously_negative
+department,HAIR ACC BRUSHES,781,485,296,0.5338,0.718349551856594,-34.9152,6.66,31.37,10.24,0.38,0.0,-25.382,-25.382,0.0026,,0,,,0,0,0,model_bias_dangerously_negative
+department,HAIR REMOVAL,488,240,248,0.5582,0.4472315573770492,-32.4637,4.92,23.57,4.92,0.2,0.0,-25.382,-25.382,0.0,,1,0.375,,0,0,0,model_bias_dangerously_negative
+department,HAIRCARE,4705,2083,2622,0.6493,0.6586973432518598,-50.3488,3.06,24.57,7.84,0.17,0.0,-25.382,-25.382,0.0021,,4,1.4425,,0,0,0,model_bias_dangerously_negative
+department,HOME HEALTH,1,0,1,,0.018,,0.0,0.0,0.0,0.0,0.0,-25.382,-25.382,0.0,,0,,,0,0,0,monitor
+department,INCONTINENCE,184,73,111,0.635,0.5970652173913044,-46.415,4.89,22.83,7.61,0.0,0.0,-25.382,-25.382,0.0217,,3,,,0,0,0,model_bias_dangerously_negative
+department,INSOMNIA,2,1,1,1.337,0.6685,133.7,50.0,0.0,0.0,0.0,0.0,-25.382,-25.382,0.0,,0,,,0,0,0,monitor
+department,MENS GROOMING,583,192,391,0.5264,0.22754373927958832,-20.0833,2.74,12.01,1.37,0.0,0.0,-25.382,-25.382,0.0,,0,,,0,0,0,model_bias_dangerously_negative
+department,NUTRITION WELLBEIN,111,36,75,0.7178,0.5367027027027027,-53.7904,0.9,15.32,3.6,0.0,0.0,-25.382,-25.382,0.018,,2,0.4,,0,0,0,model_bias_dangerously_negative
+department,ORAL HEALTH,1225,749,476,0.6996,1.3278595918367346,-56.8926,4.98,36.73,16.9,0.33,0.0,-25.382,-25.382,0.0041,,1,1.756,,0,0,0,model_bias_dangerously_negative
+department,PAPER COTTON,58,49,9,0.5167,2.3249655172413783,-36.8521,18.97,46.55,29.31,3.45,0.0,-25.382,-25.382,0.0,,0,,,0,0,0,model_bias_dangerously_negative
+department,SKINCARE,8527,4700,3827,0.7561,1.5844706227278058,-65.1194,4.44,35.78,17.36,0.52,0.0,-25.382,-25.382,0.0016,,4,2.3314,,0,0,9,model_bias_dangerously_negative
+department,SMOKING CESSATION,130,17,113,0.7193,0.11620000000000001,-1.9333,1.54,3.85,0.0,0.0,0.0,-25.382,-25.382,0.0,,0,,,0,0,0,monitor
+department,SNACKS BEVERAGES,16,12,4,0.4185,0.8631875,13.6273,25.0,18.75,6.25,6.25,0.0,-25.382,-25.382,0.0,,0,,,0,0,0,monitor
+department,SUNCARE,878,543,335,0.745,1.6265911161731206,-65.4408,4.78,41.12,18.79,0.46,0.0,-25.382,-25.382,0.0057,,3,,,0,0,0,model_bias_dangerously_negative
+department,TANNING,771,293,478,0.614,0.45316212710765247,-41.7487,2.46,19.84,5.58,0.0,0.0,-25.382,-25.382,0.0013,,0,,,0,0,0,model_bias_dangerously_negative
+department,VITAMIN SUPPLEMENT,2336,806,1530,0.6687,0.47235616438356165,-48.5114,2.18,18.11,4.67,0.09,0.0,-25.382,-25.382,0.0009,,3,0.6,,0,0,0,model_bias_dangerously_negative
+long_tail_sku_flag,NO,82,81,1,0.4332,0.739670731707317,-15.8879,8.54,39.02,6.1,0.0,0.0,-25.382,-25.382,0.6761,,28,,,0,0,0,model_bias_dangerously_negative
+long_tail_sku_flag,YES,18,18,0,0.568,1.5777222222222222,-48.798,0.0,66.67,33.33,0.0,0.0,-25.382,-25.382,1.0,,8,1.5777,,0,0,9,model_bias_dangerously_negative
+basket_attachment_source_quality,HIGH,5,5,0,0.4836,0.8704000000000001,-12.5333,20.0,20.0,20.0,0.0,0.0,-25.382,-25.382,0.8,,0,,,0,0,0,monitor
+basket_attachment_source_quality,LOW,36,36,0,0.4573,0.851111111111111,-23.0299,5.56,44.44,11.11,0.0,0.0,-25.382,-25.382,0.6667,,36,1.4312,,0,0,4,model_bias_dangerously_negative
+basket_attachment_source_quality,MEDIUM,59,58,1,0.4742,0.9162711864406778,-26.3895,6.78,45.76,10.17,0.0,0.0,-25.382,-25.382,0.7702,,0,1.6949,,0,0,5,model_bias_dangerously_negative
+shadow_candidate_class,SHADOW_TOP_100_CANDIDATE,50,49,1,0.4316,0.7164600000000001,-13.4277,10.0,38.0,6.0,0.0,0.0,-25.382,-25.382,0.6488,,17,,,0,0,0,monitor
+shadow_candidate_class,SHADOW_TOP_50_CANDIDATE,50,50,0,0.4975,1.06458,-33.1748,4.0,50.0,16.0,0.0,0.0,-25.382,-25.382,0.82,,19,1.5777,,0,0,9,model_bias_dangerously_negative
+decision_triage_class,HIGH_PRIORITY_BUY_REVIEW,31,31,0,0.4234,0.7102258064516128,-15.0865,6.45,38.71,6.45,0.0,0.0,-25.382,-25.382,0.6774,,17,,,0,0,0,model_bias_dangerously_negative
+decision_triage_class,STANDARD_BUY_REVIEW,69,68,1,0.4858,0.9715217391304349,-28.1138,7.25,46.38,13.04,0.0,0.0,-25.382,-25.382,0.76,,19,1.5777,,0,0,9,model_bias_dangerously_negative

@@ -2666,6 +2666,113 @@ def build_manager_summary(order_plan: pd.DataFrame, exceptions: pd.DataFrame) ->
                 if Path("Diagnostics/phase5x01_filled_human_review_learning/phase5x01_release_gate.csv").exists()
                 else "NO_RELEASE"
             ),
+            "operating_pack_exported_flag": (
+                "YES"
+                if Path("Diagnostics/phase5y01_reporting_export_error_rates/phase5y01_operating_pack_manifest.csv").exists()
+                else "NO"
+            ),
+            "export_folder": (
+                str(sorted(Path("promotions/priceline/772").glob("*_phase5y_operating_pack"))[-1])
+                if Path("promotions/priceline/772").exists()
+                and list(Path("promotions/priceline/772").glob("*_phase5y_operating_pack"))
+                else ""
+            ),
+            "required_report_count": 8,
+            "reports_generated": (
+                int(len(pd.read_csv("Diagnostics/phase5y01_reporting_export_error_rates/phase5y01_operating_pack_manifest.csv")))
+                if Path("Diagnostics/phase5y01_reporting_export_error_rates/phase5y01_operating_pack_manifest.csv").exists()
+                else 0
+            ),
+            "qa_blocker_count": (
+                int(
+                    pd.read_csv("Diagnostics/phase5y01_reporting_export_error_rates/phase5y01_report_qa_summary.csv")
+                    .loc[
+                        lambda d: d["severity"].eq("BLOCKER") & d["qa_status"].ne("PASS")
+                    ]
+                    .shape[0]
+                )
+                if Path("Diagnostics/phase5y01_reporting_export_error_rates/phase5y01_report_qa_summary.csv").exists()
+                else 0
+            ),
+            "qa_warning_count": (
+                int(
+                    pd.read_csv("Diagnostics/phase5y01_reporting_export_error_rates/phase5y01_report_qa_summary.csv")
+                    .loc[
+                        lambda d: d["severity"].eq("WARNING") & d["qa_status"].ne("PASS")
+                    ]
+                    .shape[0]
+                )
+                if Path("Diagnostics/phase5y01_reporting_export_error_rates/phase5y01_report_qa_summary.csv").exists()
+                else 0
+            ),
+            "model_wape": (
+                float(
+                    pd.read_csv("Diagnostics/phase5y01_reporting_export_error_rates/phase5y01_error_rate_dashboard.csv")
+                    .loc[lambda d: d["segment_type"].eq("total"), "model_wape"]
+                    .iloc[0]
+                )
+                if Path("Diagnostics/phase5y01_reporting_export_error_rates/phase5y01_error_rate_dashboard.csv").exists()
+                else (
+                    float(pd.read_csv("Diagnostics/phase5d01_forecast_backtest_validation/phase5d01_manager_summary.csv")["model_wape"].iloc[0])
+                    if Path("Diagnostics/phase5d01_forecast_backtest_validation/phase5d01_manager_summary.csv").exists()
+                    else float("nan")
+                )
+            ),
+            "model_bias_pct": (
+                float(
+                    pd.read_csv("Diagnostics/phase5y01_reporting_export_error_rates/phase5y01_error_rate_dashboard.csv")
+                    .loc[lambda d: d["segment_type"].eq("total"), "model_bias_pct"]
+                    .iloc[0]
+                )
+                if Path("Diagnostics/phase5y01_reporting_export_error_rates/phase5y01_error_rate_dashboard.csv").exists()
+                else (
+                    float(pd.read_csv("Diagnostics/phase5d01_forecast_backtest_validation/phase5d01_manager_summary.csv")["model_bias_pct"].iloc[0])
+                    if Path("Diagnostics/phase5d01_forecast_backtest_validation/phase5d01_manager_summary.csv").exists()
+                    else float("nan")
+                )
+            ),
+            "overforecast_rate": (
+                float(
+                    pd.read_csv("Diagnostics/phase5y01_reporting_export_error_rates/phase5y01_error_rate_dashboard.csv")
+                    .loc[lambda d: d["segment_type"].eq("total"), "overforecast_rate"]
+                    .iloc[0]
+                )
+                if Path("Diagnostics/phase5y01_reporting_export_error_rates/phase5y01_error_rate_dashboard.csv").exists()
+                else float("nan")
+            ),
+            "underforecast_rate": (
+                float(
+                    pd.read_csv("Diagnostics/phase5y01_reporting_export_error_rates/phase5y01_error_rate_dashboard.csv")
+                    .loc[lambda d: d["segment_type"].eq("total"), "underforecast_rate"]
+                    .iloc[0]
+                )
+                if Path("Diagnostics/phase5y01_reporting_export_error_rates/phase5y01_error_rate_dashboard.csv").exists()
+                else float("nan")
+            ),
+            "dangerous_bias_regime_count": (
+                int(
+                    pd.read_csv("Diagnostics/phase5y01_reporting_export_error_rates/phase5y01_error_rate_dashboard.csv")
+                    .loc[lambda d: d["segment_type"].eq("total"), "dangerous_bias_regime_count"]
+                    .iloc[0]
+                )
+                if Path("Diagnostics/phase5y01_reporting_export_error_rates/phase5y01_error_rate_dashboard.csv").exists()
+                else 0
+            ),
+            "release_recommendation": (
+                str(pd.read_csv("Diagnostics/phase5y01_reporting_export_error_rates/phase5y01_release_gate_summary.csv")["customer_release_recommendation"].iloc[0])
+                if Path("Diagnostics/phase5y01_reporting_export_error_rates/phase5y01_release_gate_summary.csv").exists()
+                else "NO_RELEASE"
+            ),
+            "primary_blocker": (
+                str(pd.read_csv("Diagnostics/phase5y01_reporting_export_error_rates/phase5y01_release_gate_summary.csv")["primary_blocker"].iloc[0])
+                if Path("Diagnostics/phase5y01_reporting_export_error_rates/phase5y01_release_gate_summary.csv").exists()
+                else "model_bias_dangerously_negative"
+            ),
+            "next_required_fix": (
+                str(pd.read_csv("Diagnostics/phase5y01_reporting_export_error_rates/phase5y01_release_gate_summary.csv")["next_required_fixes"].iloc[0])
+                if Path("Diagnostics/phase5y01_reporting_export_error_rates/phase5y01_release_gate_summary.csv").exists()
+                else "Complete shadow human review and reduce model bias"
+            ),
             "total_overstock_cash_release_value": float(_num(order_plan.get("overstock_cash_release_value")).sum()) if "overstock_cash_release_value" in order_plan.columns else 0.0,
             "total_review_effort_cost": float(
                 _num(order_plan.get("review_effort_cost"))[
