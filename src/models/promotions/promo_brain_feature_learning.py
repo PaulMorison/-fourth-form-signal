@@ -369,7 +369,7 @@ def train_brain_value_models(training_df: pd.DataFrame, config: dict[str, Any] |
     """Train first-pass brain models on full feature frame."""
     cfg = config or {}
     frame = build_brain_training_frame(training_df)
-    feature_names = _all_feature_names()
+    feature_names = list(cfg.get("feature_names") or _all_feature_names())
     x_df, used_features = _encode_matrix(frame, feature_names)
     if x_df.empty:
         return {"models": {}, "used_features": [], "metrics": {}, "train_rows": 0, "test_rows": 0, "sklearn_available": False}
@@ -378,15 +378,26 @@ def train_brain_value_models(training_df: pd.DataFrame, config: dict[str, Any] |
     sklearn_available = HGBReg is not None
     test_size = float(cfg.get("test_size", 0.2))
     random_state = int(cfg.get("random_state", 42))
-    split_idx = max(1, int(len(frame) * (1.0 - test_size)))
-    x_train, x_test = x_df.iloc[:split_idx], x_df.iloc[split_idx:]
+    train_mask = cfg.get("train_mask")
+    test_mask = cfg.get("test_mask")
+    if train_mask is not None and test_mask is not None:
+        train_idx = np.asarray(train_mask, dtype=bool)
+        test_idx = np.asarray(test_mask, dtype=bool)
+        x_train, x_test = x_df.loc[train_idx], x_df.loc[test_idx]
+        split_idx = int(train_idx.sum())
+    else:
+        split_idx = max(1, int(len(frame) * (1.0 - test_size)))
+        train_idx = np.zeros(len(frame), dtype=bool)
+        train_idx[:split_idx] = True
+        test_idx = ~train_idx
+        x_train, x_test = x_df.iloc[:split_idx], x_df.iloc[split_idx:]
 
     models: dict[str, Any] = {}
     metrics: dict[str, dict[str, float | str]] = {}
 
     def _train_reg(name: str, target: str) -> None:
         y = _numeric(frame, target)
-        y_train, y_test = y.iloc[:split_idx], y.iloc[split_idx:]
+        y_train, y_test = y.loc[train_idx], y.loc[test_idx]
         baseline = float(y_train.mean()) if len(y_train) else 0.0
         if sklearn_available and len(x_train) >= 10 and y_train.std() > 0:
             model = HGBReg(max_depth=4, max_iter=80, random_state=random_state)
@@ -419,7 +430,7 @@ def train_brain_value_models(training_df: pd.DataFrame, config: dict[str, Any] |
     _train_reg("stock_exit_model", "target_distance_to_optimal_end_soh")
 
     y_action = frame["target_optimal_action_label"].astype(str)
-    y_train_a, y_test_a = y_action.iloc[:split_idx], y_action.iloc[split_idx:]
+    y_train_a, y_test_a = y_action.loc[train_idx], y_action.loc[test_idx]
     if sklearn_available and len(x_train) >= 10 and y_train_a.nunique() > 1:
         clf = HGBClf(max_depth=4, max_iter=80, random_state=random_state)
         clf.fit(x_train, y_train_a)
@@ -495,10 +506,11 @@ def train_brain_value_models(training_df: pd.DataFrame, config: dict[str, Any] |
         "used_features": used_features,
         "feature_importance": pd.DataFrame(importance_rows),
         "metrics": metrics,
-        "train_rows": split_idx,
-        "test_rows": len(frame) - split_idx,
+        "train_rows": int(train_idx.sum()),
+        "test_rows": int(test_idx.sum()),
         "sklearn_available": sklearn_available,
         "x_columns": list(x_df.columns),
+        "feature_names": feature_names,
     }
 
 
@@ -603,7 +615,8 @@ def score_brain_value_models(
     used_features = artifact.get("used_features", _all_feature_names())
     metrics = artifact.get("metrics", {})
     frame = _ensure_columns(scored_df)
-    x_df, _ = _encode_matrix(frame, _all_feature_names())
+    feat_names = artifact.get("feature_names") or _all_feature_names()
+    x_df, _ = _encode_matrix(frame, feat_names)
     if artifact.get("x_columns"):
         for col in artifact["x_columns"]:
             if col not in x_df.columns:

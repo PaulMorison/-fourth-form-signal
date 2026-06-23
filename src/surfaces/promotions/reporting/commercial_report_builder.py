@@ -12,7 +12,8 @@ from models.promotions.promo_regime_state import apply_regime_brain_decisioning,
 from models.promotions.promo_conviction_calibration import apply_conviction_calibration, load_conviction_artifacts
 from models.promotions.promo_decision_triage import apply_promo_decision_triage, load_triage_artifacts
 from models.promotions.promo_basket_attachment_features import apply_basket_attachment_to_promo_frame
-from models.promotions.promo_brain_feature_learning import apply_brain_feature_learning
+from models.promotions.promo_brain_feature_learning import FEATURE_FAMILIES, apply_brain_feature_learning
+from models.promotions.promo_brain_leakage_audit import apply_brain_leakage_validation
 from models.promotions.promo_economic_value_scoring import apply_promo_economic_value_scoring, load_economic_artifacts
 from models.promotions.promo_stock_outcome_optimisation import apply_stock_outcome_optimisation, load_stock_outcome_artifacts
 from models.promotions.promo_stock_truth_repair import apply_stock_truth_repair, load_stock_truth_artifacts
@@ -23,6 +24,7 @@ import pandas as pd
 META_STATUS = "SHADOW_NOT_PRODUCTION"
 PRODUCTION_ORDERING = "NO"
 CUSTOMER_RELEASE = "NO"
+BRAIN_FEATURE_COUNT = sum(len(cols) for cols in FEATURE_FAMILIES.values())
 ALLOWED_DECISIONS = frozenset({"BUY", "REVIEW", "HOLD", "DO_NOT_BUY"})
 FORMULA_TOLERANCE = 0.01
 OPERATOR_SHEET_COLUMNS: tuple[str, ...] = (
@@ -300,6 +302,16 @@ ORDER_PLAN_COLUMNS: tuple[str, ...] = (
     "alpha_pattern_description",
     "alpha_pattern_value_estimate",
     "alpha_pattern_risk_note",
+    "brain_leakage_risk_level",
+    "brain_leak_safe_feature_count",
+    "brain_validated_action_label",
+    "brain_validated_expected_value",
+    "brain_validated_confidence_score",
+    "brain_validation_status",
+    "brain_value_survives_leakage_control_flag",
+    "validated_alpha_pattern_label",
+    "shadow_trial_candidate_flag",
+    "shadow_trial_reason",
     "regime_adjusted_decision_value",
     "brain_action_label",
     "brain_order_units_proposal",
@@ -562,6 +574,7 @@ def load_se01_scored_sources(prediction_dir: Path) -> pd.DataFrame:
     econ_rec = load_economic_artifacts()
     out = apply_promo_economic_value_scoring(out, gate_recommendation=econ_rec)
     out = apply_brain_feature_learning(out)
+    out = apply_brain_leakage_validation(out, config={"skip_full_validation": True})
     return out
 
 def _baseline_daily_rate(frame: pd.DataFrame) -> tuple[pd.Series, pd.Series, pd.Series]:
@@ -2367,6 +2380,35 @@ def build_manager_summary(order_plan: pd.DataFrame, exceptions: pd.DataFrame) ->
                 .index[0]
                 if "alpha_pattern_id" in order_plan.columns
                 else "none"
+            ),
+            "leak_safe_features_count": int(
+                order_plan.get("brain_leak_safe_feature_count", pd.Series(0, index=order_plan.index)).iloc[0]
+            ) if "brain_leak_safe_feature_count" in order_plan.columns else 0,
+            "excluded_leakage_features_count": max(
+                0,
+                BRAIN_FEATURE_COUNT - int(
+                    order_plan.get("brain_leak_safe_feature_count", pd.Series(0, index=order_plan.index)).iloc[0]
+                ),
+            ) if "brain_leak_safe_feature_count" in order_plan.columns else 0,
+            "time_split_pass_count": int(
+                pd.read_csv("Diagnostics/phase5r01_brain_leakage_validation/phase5r01_time_split_model_performance.csv")["pass_fail"].eq("PASS").sum()
+            ) if Path("Diagnostics/phase5r01_brain_leakage_validation/phase5r01_time_split_model_performance.csv").exists() else 0,
+            "group_split_pass_count": int(
+                pd.read_csv("Diagnostics/phase5r01_brain_leakage_validation/phase5r01_group_split_model_performance.csv")["pass_fail"].eq("PASS").sum()
+            ) if Path("Diagnostics/phase5r01_brain_leakage_validation/phase5r01_group_split_model_performance.csv").exists() else 0,
+            "validated_brain_opportunities_count": int(
+                order_plan.get("brain_value_survives_leakage_control_flag", pd.Series("NO", index=order_plan.index)).astype(str).eq("YES").sum()
+            ) if "brain_value_survives_leakage_control_flag" in order_plan.columns else 0,
+            "validated_top50_opportunity_value": float(
+                _num(order_plan.get("brain_validated_expected_value")).nlargest(50).sum()
+            ) if "brain_validated_expected_value" in order_plan.columns else 0.0,
+            "validated_alpha_patterns_count": int(
+                order_plan.get("brain_validation_status", pd.Series("", index=order_plan.index)).astype(str).eq("LEAK_SAFE_VALIDATED").sum()
+            ) if "brain_validation_status" in order_plan.columns else 0,
+            "shadow_trial_recommendation": (
+                str(pd.read_csv("Diagnostics/phase5r01_brain_leakage_validation/phase5r01_shadow_trial_gate.csv")["recommendation"].iloc[0])
+                if Path("Diagnostics/phase5r01_brain_leakage_validation/phase5r01_shadow_trial_gate.csv").exists()
+                else "INTERNAL_DIAGNOSTIC_ONLY"
             ),
             "total_overstock_cash_release_value": float(_num(order_plan.get("overstock_cash_release_value")).sum()) if "overstock_cash_release_value" in order_plan.columns else 0.0,
             "total_review_effort_cost": float(
