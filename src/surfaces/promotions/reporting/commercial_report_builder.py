@@ -2618,6 +2618,54 @@ def build_manager_summary(order_plan: pd.DataFrame, exceptions: pd.DataFrame) ->
                 if Path("Diagnostics/phase5w01_human_review_capture/phase5w01_release_gate.csv").exists()
                 else "NO_RELEASE"
             ),
+            "filled_human_review_file_found": (
+                str(pd.read_csv("Diagnostics/phase5x01_filled_human_review_learning/phase5x01_release_gate.csv")["filled_review_file_found"].iloc[0])
+                if Path("Diagnostics/phase5x01_filled_human_review_learning/phase5x01_release_gate.csv").exists()
+                else "NO"
+            ),
+            "filled_review_completed_count": int(
+                pd.read_csv("Diagnostics/phase5x01_filled_human_review_learning/phase5x01_decision_quality_scorecard.csv")["completed_reviews"].iloc[0]
+            ) if Path("Diagnostics/phase5x01_filled_human_review_learning/phase5x01_decision_quality_scorecard.csv").exists() else 0,
+            "filled_review_pending_count": int(
+                pd.read_csv("Diagnostics/phase5x01_filled_human_review_learning/phase5x01_decision_quality_scorecard.csv")["pending_reviews"].iloc[0]
+            ) if Path("Diagnostics/phase5x01_filled_human_review_learning/phase5x01_decision_quality_scorecard.csv").exists() else 0,
+            "filled_review_completion_rate_pct": float(
+                pd.read_csv("Diagnostics/phase5x01_filled_human_review_learning/phase5x01_decision_quality_scorecard.csv")["review_completion_rate"].iloc[0]
+            ) if Path("Diagnostics/phase5x01_filled_human_review_learning/phase5x01_decision_quality_scorecard.csv").exists() else 0.0,
+            "filled_review_accepted_brain_count": int(
+                pd.read_csv("Diagnostics/phase5x01_filled_human_review_learning/phase5x01_decision_quality_scorecard.csv")["accepted_brain_count"].iloc[0]
+            ) if Path("Diagnostics/phase5x01_filled_human_review_learning/phase5x01_decision_quality_scorecard.csv").exists() else 0,
+            "filled_review_accepted_governed_count": int(
+                pd.read_csv("Diagnostics/phase5x01_filled_human_review_learning/phase5x01_decision_quality_scorecard.csv")["accepted_governed_count"].iloc[0]
+            ) if Path("Diagnostics/phase5x01_filled_human_review_learning/phase5x01_decision_quality_scorecard.csv").exists() else 0,
+            "filled_review_override_count": int(
+                pd.read_csv("Diagnostics/phase5x01_filled_human_review_learning/phase5x01_decision_quality_scorecard.csv")["override_count"].iloc[0]
+            ) if Path("Diagnostics/phase5x01_filled_human_review_learning/phase5x01_decision_quality_scorecard.csv").exists() else 0,
+            "filled_review_high_confidence_override_count": int(
+                pd.read_csv("Diagnostics/phase5x01_filled_human_review_learning/phase5x01_decision_quality_scorecard.csv")["high_confidence_override_count"].iloc[0]
+            ) if Path("Diagnostics/phase5x01_filled_human_review_learning/phase5x01_decision_quality_scorecard.csv").exists() else 0,
+            "filled_review_long_tail_protection_count": int(
+                pd.read_csv("Diagnostics/phase5x01_filled_human_review_learning/phase5x01_decision_quality_scorecard.csv")["long_tail_basket_protection_decisions"].iloc[0]
+            ) if Path("Diagnostics/phase5x01_filled_human_review_learning/phase5x01_decision_quality_scorecard.csv").exists() else 0,
+            "filled_review_data_quality_block_count": int(
+                pd.read_csv("Diagnostics/phase5x01_filled_human_review_learning/phase5x01_decision_quality_scorecard.csv")["blocked_data_quality_count"].iloc[0]
+            ) if Path("Diagnostics/phase5x01_filled_human_review_learning/phase5x01_decision_quality_scorecard.csv").exists() else 0,
+            "top_buyer_learning_themes": (
+                ";".join(
+                    pd.read_csv("Diagnostics/phase5x01_filled_human_review_learning/phase5x01_buyer_learning_pack.csv")
+                    .sort_values("row_count", ascending=False)["learning_theme"]
+                    .head(5)
+                    .astype(str)
+                    .tolist()
+                )
+                if Path("Diagnostics/phase5x01_filled_human_review_learning/phase5x01_buyer_learning_pack.csv").exists()
+                else ""
+            ),
+            "filled_human_review_learning_release": (
+                str(pd.read_csv("Diagnostics/phase5x01_filled_human_review_learning/phase5x01_release_gate.csv")["recommendation"].iloc[0])
+                if Path("Diagnostics/phase5x01_filled_human_review_learning/phase5x01_release_gate.csv").exists()
+                else "NO_RELEASE"
+            ),
             "total_overstock_cash_release_value": float(_num(order_plan.get("overstock_cash_release_value")).sum()) if "overstock_cash_release_value" in order_plan.columns else 0.0,
             "total_review_effort_cost": float(
                 _num(order_plan.get("review_effort_cost"))[

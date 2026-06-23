@@ -1,0 +1,2 @@
+learning_theme,row_count,example_skus,buyer_decision_pattern,brain_learning_implication,governance_learning_implication,data_quality_implication,recommended_next_action
+PENDING_REVIEW,100,,No completed reviews yet,MONITOR,MONITOR,COMPLETE_FILLED_REVIEW_FILE,EXPORT_FILLED_REVIEW_CSV
