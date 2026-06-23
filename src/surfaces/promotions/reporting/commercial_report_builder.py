@@ -2912,15 +2912,19 @@ def build_manager_summary(order_plan: pd.DataFrame, exceptions: pd.DataFrame) ->
                 else 0
             ),
             "store_reporting_export_folder": (
-                str(pd.read_csv("Diagnostics/phase6e01_feature_merge_calibration_ats/phase6e01_store_reporting_export_status.csv")["export_folder"].iloc[0])
-                if Path("Diagnostics/phase6e01_feature_merge_calibration_ats/phase6e01_store_reporting_export_status.csv").exists()
+                str(pd.read_csv("Diagnostics/phase6f01_feature_universe_quality_gate/phase6f01_store_reporting_export_status.csv")["export_folder"].iloc[0])
+                if Path("Diagnostics/phase6f01_feature_universe_quality_gate/phase6f01_store_reporting_export_status.csv").exists()
                 else (
-                    str(pd.read_csv("Diagnostics/phase6d01_dag_active_learning_adjacent_calibration/phase6d01_store_reporting_export_status.csv")["export_folder"].iloc[0])
-                    if Path("Diagnostics/phase6d01_dag_active_learning_adjacent_calibration/phase6d01_store_reporting_export_status.csv").exists()
+                    str(pd.read_csv("Diagnostics/phase6e01_feature_merge_calibration_ats/phase6e01_store_reporting_export_status.csv")["export_folder"].iloc[0])
+                    if Path("Diagnostics/phase6e01_feature_merge_calibration_ats/phase6e01_store_reporting_export_status.csv").exists()
                     else (
-                        str(pd.read_csv("Diagnostics/phase6c01_active_learning_graph_validation/phase6c01_store_reporting_export_status.csv")["export_folder"].iloc[0])
-                        if Path("Diagnostics/phase6c01_active_learning_graph_validation/phase6c01_store_reporting_export_status.csv").exists()
-                        else ""
+                        str(pd.read_csv("Diagnostics/phase6d01_dag_active_learning_adjacent_calibration/phase6d01_store_reporting_export_status.csv")["export_folder"].iloc[0])
+                        if Path("Diagnostics/phase6d01_dag_active_learning_adjacent_calibration/phase6d01_store_reporting_export_status.csv").exists()
+                        else (
+                            str(pd.read_csv("Diagnostics/phase6c01_active_learning_graph_validation/phase6c01_store_reporting_export_status.csv")["export_folder"].iloc[0])
+                            if Path("Diagnostics/phase6c01_active_learning_graph_validation/phase6c01_store_reporting_export_status.csv").exists()
+                            else ""
+                        )
                     )
                 )
             ),
@@ -3084,6 +3088,83 @@ def build_manager_summary(order_plan: pd.DataFrame, exceptions: pd.DataFrame) ->
                 str(pd.read_csv("Diagnostics/phase6e01_feature_merge_calibration_ats/phase6e01_release_gate.csv")["brain_retraining_readiness_status"].iloc[0])
                 if Path("Diagnostics/phase6e01_feature_merge_calibration_ats/phase6e01_release_gate.csv").exists()
                 else ""
+            ),
+            "total_engineered_columns": (
+                int(pd.read_csv("Diagnostics/phase6f01_feature_universe_quality_gate/phase6f01_release_gate.csv")["total_engineered_columns"].iloc[0])
+                if Path("Diagnostics/phase6f01_feature_universe_quality_gate/phase6f01_release_gate.csv").exists()
+                else 0
+            ),
+            "model_ready_feature_count": (
+                int(pd.read_csv("Diagnostics/phase6f01_feature_universe_quality_gate/phase6f01_brain_visibility_scorecard.csv")["model_ready_feature_count"].iloc[0])
+                if Path("Diagnostics/phase6f01_feature_universe_quality_gate/phase6f01_brain_visibility_scorecard.csv").exists()
+                else 0
+            ),
+            "leak_safe_model_input_count": (
+                int(pd.read_csv("Diagnostics/phase6f01_feature_universe_quality_gate/phase6f01_release_gate.csv")["leak_safe_model_input_count"].iloc[0])
+                if Path("Diagnostics/phase6f01_feature_universe_quality_gate/phase6f01_release_gate.csv").exists()
+                else 0
+            ),
+            "phase6f_blocked_feature_count": (
+                int(pd.read_csv("Diagnostics/phase6f01_feature_universe_quality_gate/phase6f01_release_gate.csv")["blocked_feature_count"].iloc[0])
+                if Path("Diagnostics/phase6f01_feature_universe_quality_gate/phase6f01_release_gate.csv").exists()
+                else 0
+            ),
+            "broken_feature_count": (
+                int(pd.read_csv("Diagnostics/phase6f01_feature_universe_quality_gate/phase6f01_release_gate.csv")["broken_feature_count"].iloc[0])
+                if Path("Diagnostics/phase6f01_feature_universe_quality_gate/phase6f01_release_gate.csv").exists()
+                else 0
+            ),
+            "all_zero_feature_count": (
+                int(pd.read_csv("Diagnostics/phase6f01_feature_universe_quality_gate/phase6f01_feature_quality_summary.csv")["all_zero_blocked"].iloc[0])
+                if Path("Diagnostics/phase6f01_feature_universe_quality_gate/phase6f01_feature_quality_summary.csv").exists()
+                else 0
+            ),
+            "fully_missing_feature_count": (
+                int(pd.read_csv("Diagnostics/phase6f01_feature_universe_quality_gate/phase6f01_feature_quality_summary.csv")["fully_missing_blocked"].iloc[0])
+                if Path("Diagnostics/phase6f01_feature_universe_quality_gate/phase6f01_feature_quality_summary.csv").exists()
+                else 0
+            ),
+            "extreme_value_repair_count": (
+                int(pd.read_csv("Diagnostics/phase6f01_feature_universe_quality_gate/phase6f01_feature_quality_summary.csv")["extreme_value_repair_count"].iloc[0])
+                if Path("Diagnostics/phase6f01_feature_universe_quality_gate/phase6f01_feature_quality_summary.csv").exists()
+                else 0
+            ),
+            "leakage_risk_blocked_count": (
+                int(pd.read_csv("Diagnostics/phase6f01_feature_universe_quality_gate/phase6f01_feature_quality_summary.csv")["leakage_risk_blocked"].iloc[0])
+                + int(pd.read_csv("Diagnostics/phase6f01_feature_universe_quality_gate/phase6f01_feature_quality_summary.csv")["target_derived_blocked"].iloc[0])
+                + int(pd.read_csv("Diagnostics/phase6f01_feature_universe_quality_gate/phase6f01_feature_quality_summary.csv")["post_promo_actual_blocked"].iloc[0])
+                if Path("Diagnostics/phase6f01_feature_universe_quality_gate/phase6f01_feature_quality_summary.csv").exists()
+                else 0
+            ),
+            "brain_feature_visibility_score": (
+                float(pd.read_csv("Diagnostics/phase6f01_feature_universe_quality_gate/phase6f01_release_gate.csv")["brain_feature_visibility_score"].iloc[0])
+                if Path("Diagnostics/phase6f01_feature_universe_quality_gate/phase6f01_release_gate.csv").exists()
+                else 0.0
+            ),
+            "visibility_status": (
+                str(pd.read_csv("Diagnostics/phase6f01_feature_universe_quality_gate/phase6f01_release_gate.csv")["visibility_status"].iloc[0])
+                if Path("Diagnostics/phase6f01_feature_universe_quality_gate/phase6f01_release_gate.csv").exists()
+                else ""
+            ),
+            "shadow_training_status": (
+                str(pd.read_csv("Diagnostics/phase6f01_feature_universe_quality_gate/phase6f01_release_gate.csv")["shadow_training_status"].iloc[0])
+                if Path("Diagnostics/phase6f01_feature_universe_quality_gate/phase6f01_release_gate.csv").exists()
+                else ""
+            ),
+            "phase6f_store_export_folder": (
+                str(pd.read_csv("Diagnostics/phase6f01_feature_universe_quality_gate/phase6f01_store_reporting_export_status.csv")["export_folder"].iloc[0])
+                if Path("Diagnostics/phase6f01_feature_universe_quality_gate/phase6f01_store_reporting_export_status.csv").exists()
+                else ""
+            ),
+            "phase6f_release_recommendation": (
+                str(pd.read_csv("Diagnostics/phase6f01_feature_universe_quality_gate/phase6f01_release_gate.csv")["customer_release_recommendation"].iloc[0])
+                if Path("Diagnostics/phase6f01_feature_universe_quality_gate/phase6f01_release_gate.csv").exists()
+                else CUSTOMER_RELEASE
+            ),
+            "phase6f_primary_blocker": (
+                str(pd.read_csv("Diagnostics/phase6f01_feature_universe_quality_gate/phase6f01_release_gate.csv")["primary_blocker"].iloc[0])
+                if Path("Diagnostics/phase6f01_feature_universe_quality_gate/phase6f01_release_gate.csv").exists()
+                else PRIMARY_BLOCKER
             ),
             "total_overstock_cash_release_value": float(_num(order_plan.get("overstock_cash_release_value")).sum()) if "overstock_cash_release_value" in order_plan.columns else 0.0,
             "total_review_effort_cost": float(

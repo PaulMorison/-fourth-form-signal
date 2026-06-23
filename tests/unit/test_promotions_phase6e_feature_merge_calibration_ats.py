@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import importlib.util
 import sys
 import tempfile
 import unittest
@@ -9,6 +10,15 @@ import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.append(str(REPO_ROOT / "src"))
+
+
+def _load_operating_pack_export():
+    path = REPO_ROOT / "src/surfaces/promotions/reporting/promo_operating_pack_export.py"
+    spec = importlib.util.spec_from_file_location("promo_operating_pack_export", path)
+    mod = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(mod)
+    return mod
 
 from models.promotions.promo_available_to_sell_evidence import (  # noqa: E402
     detect_censored_zero_demand_risk,
@@ -26,7 +36,8 @@ from models.promotions.promo_phase6e_orchestrator import (  # noqa: E402
     build_brain_retraining_readiness,
     write_phase6e_diagnostics,
 )
-from surfaces.promotions.reporting.promo_operating_pack_export import run_store_772_reporting_export  # noqa: E402
+
+run_store_772_reporting_export = _load_operating_pack_export().run_store_772_reporting_export
 
 
 def _row(**overrides) -> dict:
@@ -155,7 +166,7 @@ class TestPhase6eFeatureMergeCalibrationAts(unittest.TestCase):
                 phase6c_dir=Path(tmp) / "phase6c",
                 phase6b_dir=Path(tmp) / "phase6b",
             )
-            self.assertIn("phase6e_operating_pack", result["export_folder"])
+            self.assertIn("phase6f_feature_quality_operating_pack", result["export_folder"])
 
     def test_governed_actions_not_overwritten(self) -> None:
         core = pd.DataFrame([_row()])

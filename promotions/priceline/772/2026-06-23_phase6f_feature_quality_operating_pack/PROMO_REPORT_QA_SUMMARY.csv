@@ -14,4 +14,4 @@ release_recommendation_consistent,PASS,NO_RELEASE,NO_RELEASE,,INFO,Do not inflat
 no_auto_order_file,PASS,none,0,0,INFO,Remove auto-order exports
 advisory_labels_present,PASS,INTERNAL_SHADOW_ADVISORY_ONLY,INTERNAL_SHADOW_ADVISORY_ONLY,,INFO,Label all pack outputs as advisory
 governed_actions_not_overwritten,PASS,NO,NO,,INFO,Governed actions remain source-controlled
-run_id_present,PASS,phase5y01,phase5y01-772-20260623T060711Z,phase5y01-772-20260623T060711Z,INFO,Include run_id in manifest
+run_id_present,PASS,phase5y01,phase5y01-772-20260623T060709Z,phase5y01-772-20260623T060709Z,INFO,Include run_id in manifest
