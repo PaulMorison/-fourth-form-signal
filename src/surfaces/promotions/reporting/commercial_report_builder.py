@@ -14,6 +14,7 @@ from models.promotions.promo_decision_triage import apply_promo_decision_triage,
 from models.promotions.promo_basket_attachment_features import apply_basket_attachment_to_promo_frame
 from models.promotions.promo_brain_feature_learning import FEATURE_FAMILIES, apply_brain_feature_learning
 from models.promotions.promo_brain_leakage_audit import apply_brain_leakage_validation
+from models.promotions.promo_shadow_candidate_selection import apply_shadow_candidate_selection
 from models.promotions.promo_economic_value_scoring import apply_promo_economic_value_scoring, load_economic_artifacts
 from models.promotions.promo_stock_outcome_optimisation import apply_stock_outcome_optimisation, load_stock_outcome_artifacts
 from models.promotions.promo_stock_truth_repair import apply_stock_truth_repair, load_stock_truth_artifacts
@@ -312,6 +313,19 @@ ORDER_PLAN_COLUMNS: tuple[str, ...] = (
     "validated_alpha_pattern_label",
     "shadow_trial_candidate_flag",
     "shadow_trial_reason",
+    "shadow_candidate_flag",
+    "shadow_candidate_class",
+    "shadow_candidate_score",
+    "shadow_candidate_rank",
+    "shadow_candidate_bucket",
+    "segment_historical_bias_pct",
+    "segment_historical_wape",
+    "segment_bias_control_status",
+    "shadow_expected_learning_value",
+    "action_difference_flag",
+    "action_difference_type",
+    "expected_shadow_learning_question",
+    "shadow_observation_plan",
     "regime_adjusted_decision_value",
     "brain_action_label",
     "brain_order_units_proposal",
@@ -575,6 +589,7 @@ def load_se01_scored_sources(prediction_dir: Path) -> pd.DataFrame:
     out = apply_promo_economic_value_scoring(out, gate_recommendation=econ_rec)
     out = apply_brain_feature_learning(out)
     out = apply_brain_leakage_validation(out, config={"skip_full_validation": True})
+    out = apply_shadow_candidate_selection(out)
     return out
 
 def _baseline_daily_rate(frame: pd.DataFrame) -> tuple[pd.Series, pd.Series, pd.Series]:
@@ -2406,10 +2421,42 @@ def build_manager_summary(order_plan: pd.DataFrame, exceptions: pd.DataFrame) ->
                 order_plan.get("brain_validation_status", pd.Series("", index=order_plan.index)).astype(str).eq("LEAK_SAFE_VALIDATED").sum()
             ) if "brain_validation_status" in order_plan.columns else 0,
             "shadow_trial_recommendation": (
-                str(pd.read_csv("Diagnostics/phase5r01_brain_leakage_validation/phase5r01_shadow_trial_gate.csv")["recommendation"].iloc[0])
-                if Path("Diagnostics/phase5r01_brain_leakage_validation/phase5r01_shadow_trial_gate.csv").exists()
-                else "INTERNAL_DIAGNOSTIC_ONLY"
+                str(pd.read_csv("Diagnostics/phase5s01_bias_controlled_shadow_candidates/phase5s01_shadow_trial_gate.csv")["recommendation"].iloc[0])
+                if Path("Diagnostics/phase5s01_bias_controlled_shadow_candidates/phase5s01_shadow_trial_gate.csv").exists()
+                else (
+                    str(pd.read_csv("Diagnostics/phase5r01_brain_leakage_validation/phase5r01_shadow_trial_gate.csv")["recommendation"].iloc[0])
+                    if Path("Diagnostics/phase5r01_brain_leakage_validation/phase5r01_shadow_trial_gate.csv").exists()
+                    else "INTERNAL_DIAGNOSTIC_ONLY"
+                )
             ),
+            "shadow_candidate_count": int(
+                order_plan.get("shadow_candidate_flag", pd.Series("NO", index=order_plan.index)).astype(str).eq("YES").sum()
+            ) if "shadow_candidate_flag" in order_plan.columns else 0,
+            "shadow_top_50_candidate_count": int(
+                order_plan.get("shadow_candidate_class", pd.Series("", index=order_plan.index)).astype(str).eq("SHADOW_TOP_50_CANDIDATE").sum()
+            ) if "shadow_candidate_class" in order_plan.columns else 0,
+            "shadow_mission_sku_candidate_count": int(
+                order_plan.get("shadow_candidate_class", pd.Series("", index=order_plan.index)).astype(str).eq("SHADOW_MISSION_SKU_CANDIDATE").sum()
+            ) if "shadow_candidate_class" in order_plan.columns else 0,
+            "shadow_overstock_run_down_candidate_count": int(
+                order_plan.get("shadow_candidate_class", pd.Series("", index=order_plan.index)).astype(str).eq("SHADOW_OVERSTOCK_RUN_DOWN_CANDIDATE").sum()
+            ) if "shadow_candidate_class" in order_plan.columns else 0,
+            "shadow_understocked_convexity_candidate_count": int(
+                order_plan.get("shadow_candidate_class", pd.Series("", index=order_plan.index)).astype(str).eq("SHADOW_UNDERSTOCKED_CONVEXITY_CANDIDATE").sum()
+            ) if "shadow_candidate_class" in order_plan.columns else 0,
+            "shadow_data_repair_only_count": int(
+                order_plan.get("shadow_candidate_class", pd.Series("", index=order_plan.index)).astype(str).eq("SHADOW_DATA_REPAIR_ONLY").sum()
+            ) if "shadow_candidate_class" in order_plan.columns else 0,
+            "average_shadow_candidate_bias": float(
+                _num(order_plan.get("segment_historical_bias_pct"))[
+                    order_plan.get("shadow_candidate_flag", pd.Series("NO", index=order_plan.index)).astype(str).eq("YES")
+                ].mean() or 0.0
+            ) if "segment_historical_bias_pct" in order_plan.columns else 0.0,
+            "estimated_shadow_learning_value": float(
+                _num(order_plan.get("shadow_expected_learning_value"))[
+                    order_plan.get("shadow_candidate_flag", pd.Series("NO", index=order_plan.index)).astype(str).eq("YES")
+                ].sum()
+            ) if "shadow_expected_learning_value" in order_plan.columns else 0.0,
             "total_overstock_cash_release_value": float(_num(order_plan.get("overstock_cash_release_value")).sum()) if "overstock_cash_release_value" in order_plan.columns else 0.0,
             "total_review_effort_cost": float(
                 _num(order_plan.get("review_effort_cost"))[

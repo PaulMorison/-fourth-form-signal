@@ -1,0 +1,2 @@
+total_rows,eligible_shadow_candidates,top_50_candidates,top_100_candidates,mission_sku_candidates,overstock_run_down_candidates,understocked_convexity_candidates,data_repair_only_count,not_shadow_safe_count,average_segment_bias,average_shadow_candidate_score,estimated_learning_value,estimated_economic_value,release_recommendation
+52285,134,50,100,0,0,15,19,52151,-19.476790857798605,27.88955223880597,4710.299999999999,-1462.642,NO_RELEASE
