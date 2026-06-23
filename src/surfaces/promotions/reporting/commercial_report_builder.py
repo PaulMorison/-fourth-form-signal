@@ -2457,6 +2457,15 @@ def build_manager_summary(order_plan: pd.DataFrame, exceptions: pd.DataFrame) ->
                     order_plan.get("shadow_candidate_flag", pd.Series("NO", index=order_plan.index)).astype(str).eq("YES")
                 ].sum()
             ) if "shadow_expected_learning_value" in order_plan.columns else 0.0,
+            "shadow_journal_row_count": int(
+                pd.read_csv("Diagnostics/phase5t01_shadow_observation_journal/phase5t01_shadow_journal_summary.csv")["total_journal_rows"].iloc[0]
+            ) if Path("Diagnostics/phase5t01_shadow_observation_journal/phase5t01_shadow_journal_summary.csv").exists() else 0,
+            "shadow_human_review_pending_count": int(
+                pd.read_csv("Diagnostics/phase5t01_shadow_observation_journal/phase5t01_shadow_journal_summary.csv")["total_journal_rows"].iloc[0]
+            ) if Path("Diagnostics/phase5t01_shadow_observation_journal/phase5t01_shadow_journal_summary.csv").exists() else 0,
+            "shadow_brain_governed_mismatch_count": int(
+                pd.read_csv("Diagnostics/phase5t01_shadow_observation_journal/phase5t01_shadow_journal_summary.csv")["brain_governed_action_mismatch_count"].iloc[0]
+            ) if Path("Diagnostics/phase5t01_shadow_observation_journal/phase5t01_shadow_journal_summary.csv").exists() else 0,
             "total_overstock_cash_release_value": float(_num(order_plan.get("overstock_cash_release_value")).sum()) if "overstock_cash_release_value" in order_plan.columns else 0.0,
             "total_review_effort_cost": float(
                 _num(order_plan.get("review_effort_cost"))[

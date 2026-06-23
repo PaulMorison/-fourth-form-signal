@@ -1,0 +1,2 @@
+recommendation,shadow_recommendation,journal_rows,human_review_pending,auto_order_created,governed_actions_overwritten,primary_blocker,reason
+NO_RELEASE,SHADOW_TOP_100_REVIEW,100,100,NO,NO,model_bias_dangerously_negative,Shadow journal is internal observation only; customer release not earned.
