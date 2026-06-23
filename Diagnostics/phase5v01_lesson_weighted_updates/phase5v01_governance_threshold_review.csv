@@ -1,0 +1,6 @@
+governance_rule,current_threshold,recommended_direction,affected_rows,evidence_label,estimated_value_at_risk,estimated_risk_if_relaxed,recommendation,requires_human_approval_flag
+model_bias_release_gate,bias_pct<=23.6%,KEEP,100,aggregate_bias_still_dangerous,-892.07,HIGH,BLOCK_CHANGE,YES
+long_tail_review_priority_weight,baseline,UP,18,LONG_TAIL_PROTECTION_CONFIRMED,3744.0999999999995,MEDIUM,REVIEW_FOR_RELAXATION,YES
+governance_conservative_buy_threshold,governed_action_cap,REVIEW,23,GOVERNANCE_TOO_CONSERVATIVE,-456.0450000000001,HIGH,REVIEW_FOR_RELAXATION,YES
+buyer_review_required_threshold,human_review_mandatory,KEEP,28,BRAIN_WRONG_HUMAN_RIGHT,0.0,HIGH,KEEP,YES
+shadow_operational_trial_gate,NO_RELEASE,KEEP,100,shadow_top_100_review_only,0.0,HIGH,BLOCK_CHANGE,YES

@@ -2519,6 +2519,61 @@ def build_manager_summary(order_plan: pd.DataFrame, exceptions: pd.DataFrame) ->
                 if Path("Diagnostics/phase5u01_shadow_outcome_learning/phase5u01_release_gate.csv").exists()
                 else "model_bias_dangerously_negative"
             ),
+            "lesson_rows_processed": int(
+                pd.read_csv("Diagnostics/phase5v01_lesson_weighted_updates/phase5v01_release_gate.csv")["lesson_rows_processed"].iloc[0]
+            ) if Path("Diagnostics/phase5v01_lesson_weighted_updates/phase5v01_release_gate.csv").exists() else 0,
+            "lesson_weighted_brain_updates": (
+                ";".join(
+                    pd.read_csv("Diagnostics/phase5v01_lesson_weighted_updates/phase5v01_brain_update_recommendations.csv")
+                    ["recommended_update_type"]
+                    .head(5)
+                    .astype(str)
+                    .tolist()
+                )
+                if Path("Diagnostics/phase5v01_lesson_weighted_updates/phase5v01_brain_update_recommendations.csv").exists()
+                else ""
+            ),
+            "lesson_weighted_governance_recommendations": (
+                ";".join(
+                    pd.read_csv("Diagnostics/phase5v01_lesson_weighted_updates/phase5v01_governance_threshold_review.csv")
+                    ["recommendation"]
+                    .astype(str)
+                    .tolist()
+                )
+                if Path("Diagnostics/phase5v01_lesson_weighted_updates/phase5v01_governance_threshold_review.csv").exists()
+                else ""
+            ),
+            "long_tail_reinforcement_recommendation": (
+                str(pd.read_csv("Diagnostics/phase5v01_lesson_weighted_updates/phase5v01_long_tail_reinforcement_review.csv")["recommendation"].iloc[0])
+                if Path("Diagnostics/phase5v01_lesson_weighted_updates/phase5v01_long_tail_reinforcement_review.csv").exists()
+                else ""
+            ),
+            "human_review_policy_recommendation": (
+                str(pd.read_csv("Diagnostics/phase5v01_lesson_weighted_updates/phase5v01_human_review_policy.csv")["review_required_recommendation"].iloc[0])
+                if Path("Diagnostics/phase5v01_lesson_weighted_updates/phase5v01_human_review_policy.csv").exists()
+                else "MAINTAIN_HUMAN_REVIEW"
+            ),
+            "top_data_quality_priorities": (
+                ";".join(
+                    pd.read_csv("Diagnostics/phase5v01_lesson_weighted_updates/phase5v01_data_quality_update_priorities.csv")
+                    .sort_values("priority")["data_issue"]
+                    .head(5)
+                    .astype(str)
+                    .tolist()
+                )
+                if Path("Diagnostics/phase5v01_lesson_weighted_updates/phase5v01_data_quality_update_priorities.csv").exists()
+                else ""
+            ),
+            "lesson_weighted_update_release": (
+                str(pd.read_csv("Diagnostics/phase5v01_lesson_weighted_updates/phase5v01_release_gate.csv")["recommendation"].iloc[0])
+                if Path("Diagnostics/phase5v01_lesson_weighted_updates/phase5v01_release_gate.csv").exists()
+                else "NO_RELEASE"
+            ),
+            "lesson_weighted_primary_blocker": (
+                str(pd.read_csv("Diagnostics/phase5v01_lesson_weighted_updates/phase5v01_release_gate.csv")["primary_blocker"].iloc[0])
+                if Path("Diagnostics/phase5v01_lesson_weighted_updates/phase5v01_release_gate.csv").exists()
+                else "model_bias_dangerously_negative"
+            ),
             "total_overstock_cash_release_value": float(_num(order_plan.get("overstock_cash_release_value")).sum()) if "overstock_cash_release_value" in order_plan.columns else 0.0,
             "total_review_effort_cost": float(
                 _num(order_plan.get("review_effort_cost"))[
