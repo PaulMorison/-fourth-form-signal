@@ -256,6 +256,17 @@ ORDER_PLAN_COLUMNS: tuple[str, ...] = (
     "triage_priority_score_v2",
     "priority_rank_change",
     "priority_rank_change_reason",
+    "long_tail_sku_flag",
+    "basket_completion_sku_flag",
+    "basket_attachment_score",
+    "basket_mission_importance_score",
+    "long_tail_stockout_risk_score",
+    "basket_loss_multiplier",
+    "long_tail_protection_value",
+    "basket_trust_convexity_value",
+    "long_tail_minimum_soh_required",
+    "long_tail_open_for_sale_required_flag",
+    "long_tail_basket_protection_reason",
     "regime_adjusted_decision_value",
     "brain_action_label",
     "brain_order_units_proposal",
@@ -1501,6 +1512,17 @@ def assemble_commercial_order_rows(
         "triage_priority_score_v2",
         "priority_rank_change",
         "priority_rank_change_reason",
+        "long_tail_sku_flag",
+        "basket_completion_sku_flag",
+        "basket_attachment_score",
+        "basket_mission_importance_score",
+        "long_tail_stockout_risk_score",
+        "basket_loss_multiplier",
+        "long_tail_protection_value",
+        "basket_trust_convexity_value",
+        "long_tail_minimum_soh_required",
+        "long_tail_open_for_sale_required_flag",
+        "long_tail_basket_protection_reason",
         "regime_adjusted_decision_value",
         "brain_action_label",
         "brain_order_units_proposal",
@@ -1526,7 +1548,9 @@ def assemble_commercial_order_rows(
         "economic_net_value_score", "economic_value_confidence_score", "missed_sales_avoidance_value",
         "basket_trust_protection_value", "overstock_cash_release_value", "cash_tied_above_optimal_cost",
         "supplier_economic_risk_cost", "review_roi_score", "triage_priority_score_v2", "economic_priority_rank",
-        "priority_rank_change",
+        "priority_rank_change", "basket_attachment_score", "basket_mission_importance_score",
+        "long_tail_stockout_risk_score", "basket_loss_multiplier", "long_tail_protection_value",
+        "basket_trust_convexity_value", "long_tail_minimum_soh_required",
     }
     for col in position_cols:
         out[col] = _field_series(frame, (col,), frame.index)
@@ -2242,6 +2266,18 @@ def build_manager_summary(order_plan: pd.DataFrame, exceptions: pd.DataFrame) ->
             ) if "economic_review_queue_bucket" in order_plan.columns else 0.0,
             "total_missed_sales_avoidance_value": float(_num(order_plan.get("missed_sales_avoidance_value")).sum()) if "missed_sales_avoidance_value" in order_plan.columns else 0.0,
             "total_basket_trust_protection_value": float(_num(order_plan.get("basket_trust_protection_value")).sum()) if "basket_trust_protection_value" in order_plan.columns else 0.0,
+            "total_long_tail_protection_value": float(_num(order_plan.get("long_tail_protection_value")).sum()) if "long_tail_protection_value" in order_plan.columns else 0.0,
+            "total_basket_trust_convexity_value": float(_num(order_plan.get("basket_trust_convexity_value")).sum()) if "basket_trust_convexity_value" in order_plan.columns else 0.0,
+            "long_tail_sku_count": int(order_plan.get("long_tail_sku_flag", pd.Series("NO", index=order_plan.index)).astype(str).eq("YES").sum()) if "long_tail_sku_flag" in order_plan.columns else 0,
+            "long_tail_open_for_sale_required_count": int(
+                order_plan.get("long_tail_open_for_sale_required_flag", pd.Series("NO", index=order_plan.index)).astype(str).eq("YES").sum()
+            ) if "long_tail_open_for_sale_required_flag" in order_plan.columns else 0,
+            "long_tail_rows_in_top_50": int(
+                (
+                    order_plan.get("long_tail_sku_flag", pd.Series("NO", index=order_plan.index)).astype(str).eq("YES")
+                    & order_plan.get("economic_review_queue_bucket", pd.Series("", index=order_plan.index)).eq("TOP_50")
+                ).sum()
+            ) if "long_tail_sku_flag" in order_plan.columns else 0,
             "total_overstock_cash_release_value": float(_num(order_plan.get("overstock_cash_release_value")).sum()) if "overstock_cash_release_value" in order_plan.columns else 0.0,
             "total_review_effort_cost": float(
                 _num(order_plan.get("review_effort_cost"))[

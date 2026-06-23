@@ -110,6 +110,8 @@ class PromoEconomicValueScoringTests(unittest.TestCase):
             out["expected_gp_capture_value"]
             + out["missed_sales_avoidance_value"]
             + out["basket_trust_protection_value"]
+            + out["long_tail_protection_value"]
+            + out["basket_trust_convexity_value"]
             + out["overstock_cash_release_value"]
             - out["cash_tied_above_optimal_cost"]
             - out["supplier_risk_cost"]

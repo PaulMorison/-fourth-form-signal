@@ -8,6 +8,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
+from models.promotions.promo_long_tail_basket_trust import build_long_tail_basket_trust_frame
 from models.promotions.promo_conviction_calibration import (
     DEFAULT_MODEL_BIAS_PCT,
     apply_conviction_calibration,
@@ -194,10 +195,14 @@ def build_promo_economic_value_frame(df: pd.DataFrame, config: dict[str, Any] | 
     out["review_effort_minutes_estimate"] = pd.Series(effort, index=out.index).round(1)
     out["review_effort_cost"] = (out["review_effort_minutes_estimate"] * REVIEW_COST_PER_MINUTE).round(3)
 
+    out = build_long_tail_basket_trust_frame(out)
+
     out["economic_net_value_score"] = (
         out["expected_gp_capture_value"]
         + out["missed_sales_avoidance_value"]
         + out["basket_trust_protection_value"]
+        + out["long_tail_protection_value"]
+        + out["basket_trust_convexity_value"]
         + out["overstock_cash_release_value"]
         - out["cash_tied_above_optimal_cost"]
         - out["supplier_risk_cost"]
@@ -224,6 +229,8 @@ def build_promo_economic_value_frame(df: pd.DataFrame, config: dict[str, Any] | 
         "gp_capture": out["expected_gp_capture_value"],
         "missed_sales": out["missed_sales_avoidance_value"],
         "basket_trust": out["basket_trust_protection_value"],
+        "long_tail": out["long_tail_protection_value"],
+        "basket_convexity": out["basket_trust_convexity_value"],
         "cash_release": out["overstock_cash_release_value"],
         "cash_tied_cost": out["cash_tied_above_optimal_cost"],
         "supplier_cost": out["supplier_risk_cost"],
@@ -254,11 +261,13 @@ def apply_economic_review_rerank(frame: pd.DataFrame, config: dict[str, Any] | N
     roi_norm = _normalize_series(_numeric(out, "review_roi_score"))
     econ_norm = _normalize_series(_numeric(out, "economic_net_value_score"))
     out["triage_priority_score_v2"] = (
-        roi_norm * 0.35
-        + econ_norm * 0.35
+        roi_norm * 0.30
+        + econ_norm * 0.30
         + _numeric(out, "buyer_review_priority_score") * 0.15
         + _numeric(out, "overall_regime_opportunity_score") * 0.10
         + _numeric(out, "calibrated_regime_conviction_score") * 0.05
+        + _normalize_series(_numeric(out, "long_tail_protection_value")) * 0.05
+        + _normalize_series(_numeric(out, "basket_trust_convexity_value")) * 0.05
     ).clip(0, 100).round(1)
 
     review = out.get("buyer_review_required_flag_triaged", pd.Series("NO", index=out.index)).astype(str).eq("YES")
@@ -320,6 +329,7 @@ def apply_economic_review_rerank(frame: pd.DataFrame, config: dict[str, Any] | N
 def build_economic_value_distribution(frame: pd.DataFrame) -> pd.DataFrame:
     cols = [
         "expected_gp_capture_value", "missed_sales_avoidance_value", "basket_trust_protection_value",
+        "long_tail_protection_value", "basket_trust_convexity_value",
         "overstock_cash_release_value", "cash_tied_above_optimal_cost", "supplier_risk_cost",
         "review_effort_cost", "economic_net_value_score", "review_roi_score",
     ]
