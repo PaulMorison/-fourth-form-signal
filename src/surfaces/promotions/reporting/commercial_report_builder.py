@@ -9,6 +9,7 @@ from models.promotions.promo_demand_bias_repair import apply_underforecast_bias_
 from models.promotions.promo_demand_calibration import apply_promo_demand_calibration, load_calibration_artifacts
 from models.promotions.promo_optimal_stock_learning import apply_optimal_stock_learning, load_optimal_stock_artifacts
 from models.promotions.promo_regime_state import apply_regime_brain_decisioning, load_regime_artifacts
+from models.promotions.promo_conviction_calibration import apply_conviction_calibration, load_conviction_artifacts
 from models.promotions.promo_stock_outcome_optimisation import apply_stock_outcome_optimisation, load_stock_outcome_artifacts
 from models.promotions.promo_stock_truth_repair import apply_stock_truth_repair, load_stock_truth_artifacts
 
@@ -210,6 +211,19 @@ ORDER_PLAN_COLUMNS: tuple[str, ...] = (
     "overall_regime_opportunity_score",
     "overall_regime_risk_score",
     "overall_regime_conviction_score",
+    "raw_regime_conviction_score",
+    "regime_historical_wape",
+    "regime_historical_bias_pct",
+    "regime_confidence_cap",
+    "calibrated_regime_conviction_score",
+    "calibrated_conviction_label",
+    "conviction_downgrade_reason",
+    "regime_bias_direction",
+    "regime_bias_adjustment_recommendation",
+    "buyer_review_required_flag",
+    "buyer_review_reason",
+    "decision_confidence_for_report",
+    "decision_confidence_label_for_report",
     "regime_adjusted_decision_value",
     "brain_action_label",
     "brain_order_units_proposal",
@@ -464,6 +478,8 @@ def load_se01_scored_sources(prediction_dir: Path) -> pd.DataFrame:
     out = apply_optimal_stock_learning(out, gate_recommendation=opt_rec)
     _regime_gate, regime_rec = load_regime_artifacts()
     out = apply_regime_brain_decisioning(out, gate_recommendation=regime_rec)
+    _conv_profile, conv_rec = load_conviction_artifacts()
+    out = apply_conviction_calibration(out, error_profile_df=_conv_profile if not _conv_profile.empty else None, gate_recommendation=conv_rec)
     return out
 
 def _baseline_daily_rate(frame: pd.DataFrame) -> tuple[pd.Series, pd.Series, pd.Series]:
@@ -1406,6 +1422,19 @@ def assemble_commercial_order_rows(
         "overall_regime_opportunity_score",
         "overall_regime_risk_score",
         "overall_regime_conviction_score",
+        "raw_regime_conviction_score",
+        "regime_historical_wape",
+        "regime_historical_bias_pct",
+        "regime_confidence_cap",
+        "calibrated_regime_conviction_score",
+        "calibrated_conviction_label",
+        "conviction_downgrade_reason",
+        "regime_bias_direction",
+        "regime_bias_adjustment_recommendation",
+        "buyer_review_required_flag",
+        "buyer_review_reason",
+        "decision_confidence_for_report",
+        "decision_confidence_label_for_report",
         "regime_adjusted_decision_value",
         "brain_action_label",
         "brain_order_units_proposal",
@@ -1424,7 +1453,9 @@ def assemble_commercial_order_rows(
         "expected_promo_uplift_units", "promo_convexity_score", "target_day_one_promo_soh",
         "target_end_promo_soh", "optimal_stock_position_order_units", "distance_to_optimal_end_soh",
         "replenishment_lead_time_days", "overall_regime_opportunity_score", "overall_regime_risk_score",
-        "overall_regime_conviction_score", "regime_adjusted_decision_value", "brain_order_units_proposal",
+        "overall_regime_conviction_score", "raw_regime_conviction_score", "regime_historical_wape",
+        "regime_historical_bias_pct", "regime_confidence_cap", "calibrated_regime_conviction_score",
+        "decision_confidence_for_report", "regime_adjusted_decision_value", "brain_order_units_proposal",
         "final_governed_order_units",
     }
     for col in position_cols:
@@ -2053,6 +2084,45 @@ def build_manager_summary(order_plan: pd.DataFrame, exceptions: pd.DataFrame) ->
             "final_governed_buy_count": int(order_plan.get("final_governed_action_label", pd.Series("", index=order_plan.index)).isin(["AGGRESSIVE_BUY", "CONTROLLED_BUY", "TOP_UP_TO_OPTIMAL"]).sum()) if "final_governed_action_label" in order_plan.columns else 0,
             "final_governed_hold_count": int(order_plan.get("final_governed_action_label", pd.Series("", index=order_plan.index)).eq("HOLD_FOR_REPLENISHMENT").sum()) if "final_governed_action_label" in order_plan.columns else 0,
             "final_governed_no_buy_count": int(order_plan.get("final_governed_action_label", pd.Series("", index=order_plan.index)).isin(["NO_BUY_RUN_DOWN", "BLOCKED_UNSAFE"]).sum()) if "final_governed_action_label" in order_plan.columns else 0,
+            "avg_raw_conviction": float(_num(order_plan.get("raw_regime_conviction_score")).mean() or 0.0) if "raw_regime_conviction_score" in order_plan.columns else 0.0,
+            "avg_calibrated_conviction": float(_num(order_plan.get("calibrated_regime_conviction_score")).mean() or 0.0) if "calibrated_regime_conviction_score" in order_plan.columns else 0.0,
+            "conviction_very_high_count": int(order_plan.get("calibrated_conviction_label", pd.Series("", index=order_plan.index)).eq("VERY_HIGH").sum()) if "calibrated_conviction_label" in order_plan.columns else 0,
+            "conviction_high_count": int(order_plan.get("calibrated_conviction_label", pd.Series("", index=order_plan.index)).eq("HIGH").sum()) if "calibrated_conviction_label" in order_plan.columns else 0,
+            "conviction_medium_count": int(order_plan.get("calibrated_conviction_label", pd.Series("", index=order_plan.index)).eq("MEDIUM").sum()) if "calibrated_conviction_label" in order_plan.columns else 0,
+            "conviction_low_count": int(order_plan.get("calibrated_conviction_label", pd.Series("", index=order_plan.index)).eq("LOW").sum()) if "calibrated_conviction_label" in order_plan.columns else 0,
+            "conviction_very_low_count": int(order_plan.get("calibrated_conviction_label", pd.Series("", index=order_plan.index)).eq("VERY_LOW").sum()) if "calibrated_conviction_label" in order_plan.columns else 0,
+            "unsafe_rows_capped_by_conviction": int(
+                (
+                    order_plan.get("promo_demand_source_quality", pd.Series("", index=order_plan.index)).eq("UNSAFE")
+                    & ~order_plan.get("calibrated_conviction_label", pd.Series("", index=order_plan.index)).isin(["HIGH", "VERY_HIGH"])
+                ).sum()
+            ) if "calibrated_conviction_label" in order_plan.columns else 0,
+            "release_ready_rows_capped_by_conviction": int(
+                (
+                    order_plan.get("promo_demand_release_ready_flag", pd.Series("NO", index=order_plan.index)).eq("YES")
+                    & ~order_plan.get("calibrated_conviction_label", pd.Series("", index=order_plan.index)).isin(["HIGH", "VERY_HIGH"])
+                ).sum()
+            ) if "calibrated_conviction_label" in order_plan.columns else 0,
+            "buyer_review_required_count": int(order_plan.get("buyer_review_required_flag", pd.Series("NO", index=order_plan.index)).eq("YES").sum()) if "buyer_review_required_flag" in order_plan.columns else 0,
+            "top_conviction_downgrade_reason": (
+                order_plan.get("conviction_downgrade_reason", pd.Series("none", index=order_plan.index))
+                .astype(str)
+                .replace("none", np.nan)
+                .dropna()
+                .value_counts()
+                .index[0]
+                if "conviction_downgrade_reason" in order_plan.columns
+                and order_plan.get("conviction_downgrade_reason", pd.Series("none", index=order_plan.index)).astype(str).ne("none").any()
+                else "none"
+            ),
+            "top_regime_bias_repair_priority": (
+                order_plan.get("regime_bias_learning_note", pd.Series("none", index=order_plan.index))
+                .astype(str)
+                .value_counts()
+                .index[0]
+                if "regime_bias_learning_note" in order_plan.columns
+                else "none"
+            ),
             "model_status": META_STATUS,
             "production_ordering_approved": PRODUCTION_ORDERING,
             "customer_report_release_approved": CUSTOMER_RELEASE,
