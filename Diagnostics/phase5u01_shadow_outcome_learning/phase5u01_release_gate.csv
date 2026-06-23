@@ -1,0 +1,2 @@
+recommendation,shadow_recommendation,scored_rows,unscorable_rows,auto_order_created,governed_actions_overwritten,primary_blocker,reason
+NO_RELEASE,SHADOW_TOP_100_REVIEW,100,1,NO,NO,model_bias_dangerously_negative,Shadow outcome learning is internal only; customer release not earned.

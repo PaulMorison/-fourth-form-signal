@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""Phase 5T — shadow observation journal and brain-vs-buyer learning loop."""
+"""Phase 5T/5U — shadow observation journal, outcome scoring, and lesson ingestion."""
 
 from datetime import datetime, timezone
 from pathlib import Path
@@ -27,14 +27,21 @@ from models.promotions.promo_stock_outcome_optimisation import apply_stock_outco
 from models.promotions.promo_stock_truth_repair import apply_stock_truth_repair, load_stock_truth_source
 
 DEFAULT_DIAGNOSTICS_DIR = Path("Diagnostics/phase5t01_shadow_observation_journal")
+PHASE5U_DIAGNOSTICS_DIR = Path("Diagnostics/phase5u01_shadow_outcome_learning")
+PHASE5T_JOURNAL_PATH = DEFAULT_DIAGNOSTICS_DIR / "SHADOW_TOP_100_OBSERVATION_JOURNAL.csv"
+HUMAN_FILLED_FILENAME = "SHADOW_TOP_100_HUMAN_REVIEW_FILLED.csv"
 JOURNAL_VERSION = "phase5t01"
 UNKNOWN = "UNKNOWN"
+MERGE_KEY_COLUMNS = ("shadow_run_id", "store_number", "promotion_id", "sku_number")
+GP_MARGIN_PROXY = 0.35
 
 LESSON_LEARNED_LABELS = (
     "BRAIN_RIGHT_HUMAN_RIGHT",
     "BRAIN_RIGHT_HUMAN_WRONG",
     "BRAIN_WRONG_HUMAN_RIGHT",
     "BOTH_WRONG",
+    "GOVERNANCE_RIGHT_BRAIN_TOO_AGGRESSIVE",
+    "GOVERNANCE_TOO_CONSERVATIVE",
     "DATA_QUALITY_BLOCKED_LEARNING",
     "INSUFFICIENT_OUTCOME_SIGNAL",
     "CENSORED_BY_STOCKOUT",
@@ -42,6 +49,17 @@ LESSON_LEARNED_LABELS = (
     "BASKET_TRUST_SIGNAL_CONFIRMED",
     "LONG_TAIL_PROTECTION_CONFIRMED",
     "OVERSTOCK_RUN_DOWN_CONFIRMED",
+    "MISSION_SKU_SIGNAL_CONFIRMED",
+)
+
+CORRECTNESS_LABELS = (
+    "RIGHT",
+    "WRONG",
+    "PARTIAL",
+    "UNSCORABLE",
+    "CENSORED",
+    "DATA_QUALITY_BLOCKED",
+    "SUPPLIER_FAILURE",
 )
 
 HUMAN_BUYER_DECISIONS = (
@@ -137,14 +155,36 @@ OUTCOME_PLACEHOLDER_COLUMNS = (
 )
 
 SCORING_COLUMNS = (
+    "brain_value_realised_proxy",
+    "human_value_realised_proxy",
+    "governed_value_realised_proxy",
     "brain_would_have_been_better_flag",
     "brain_vs_human_value_delta",
     "brain_vs_governed_value_delta",
+    "human_vs_governed_value_delta",
     "brain_prediction_error",
     "brain_action_correctness_label",
     "human_action_correctness_label",
+    "governed_action_correctness_label",
     "lesson_learned_label",
     "lesson_learned_note",
+    "brain_update_recommendation",
+    "governance_update_recommendation",
+    "data_quality_update_recommendation",
+)
+
+HUMAN_REVIEW_STATUS_COLUMNS = (
+    "human_review_status",
+    "human_decision_valid_flag",
+    "human_decision_validation_error",
+    "human_decision_merge_status",
+)
+
+OUTCOME_MERGE_COLUMNS = (
+    "actual_outcome_merge_status",
+    "actual_outcome_quality",
+    "actual_outcome_proxy_flag",
+    "actual_outcome_missing_reason",
 )
 
 JOURNAL_COLUMNS = (
@@ -152,8 +192,10 @@ JOURNAL_COLUMNS = (
     *BRAIN_COLUMNS,
     *GOVERNED_COLUMNS,
     *HUMAN_COLUMNS,
+    *HUMAN_REVIEW_STATUS_COLUMNS,
     *STOCK_CONTEXT_COLUMNS,
     *OUTCOME_PLACEHOLDER_COLUMNS,
+    *OUTCOME_MERGE_COLUMNS,
     *SCORING_COLUMNS,
 )
 
@@ -182,6 +224,13 @@ def _numeric(frame: pd.DataFrame, col: str, default: float = 0.0) -> pd.Series:
     if col not in frame.columns:
         return pd.Series(default, index=frame.index, dtype=float)
     return pd.to_numeric(frame[col], errors="coerce").fillna(default)
+
+
+def _safe_float(value: Any, default: float = 0.0) -> float:
+    parsed = pd.to_numeric(value, errors="coerce")
+    if pd.isna(parsed):
+        return default
+    return float(parsed)
 
 
 def _quality_col(frame: pd.DataFrame) -> str:
@@ -288,36 +337,365 @@ def append_shadow_journal(existing: pd.DataFrame, new_rows: pd.DataFrame) -> pd.
     return merged.drop(columns=["_key"], errors="ignore")
 
 
-def _infer_lesson(
-    *,
-    quality_unsafe: bool,
-    stockout: bool,
-    brain_better: bool,
-    human_better: bool,
-    long_tail: bool,
-    overstock: bool,
-    basket_confirmed: bool,
-    actual_units: float,
-) -> tuple[str, str]:
-    if quality_unsafe:
-        return "DATA_QUALITY_BLOCKED_LEARNING", "Outcome learning blocked by unsafe or unknown source quality."
-    if actual_units <= 0:
-        return "INSUFFICIENT_OUTCOME_SIGNAL", "No realised units to score brain vs buyer."
-    if stockout:
-        return "CENSORED_BY_STOCKOUT", "Stockout censors demand signal; compare with caution."
-    if basket_confirmed and long_tail:
-        return "BASKET_TRUST_SIGNAL_CONFIRMED", "Basket trust signal aligned with long-tail protection lesson."
-    if overstock:
-        return "OVERSTOCK_RUN_DOWN_CONFIRMED", "Run-down case observed; compare brain conservative bias."
+def load_shadow_human_review_template(path: Path | str) -> pd.DataFrame:
+    """Load human review template or filled decisions CSV."""
+    frame = pd.read_csv(path)
+    for col in MERGE_KEY_COLUMNS:
+        if col not in frame.columns:
+            raise ValueError(f"Missing required identity column: {col}")
+    return frame
+
+
+def _validate_human_row(row: pd.Series) -> tuple[str, str, str, str]:
+    decision = str(row.get("human_buyer_decision", "")).strip()
+    if not decision:
+        return "PENDING", "NO", "", "NOT_MERGED"
+    errors: list[str] = []
+    if decision not in HUMAN_BUYER_DECISIONS:
+        errors.append("invalid_human_buyer_decision")
+    units = _numeric(pd.DataFrame([row]), "human_order_units").iloc[0]
+    if units < 0:
+        errors.append("negative_human_order_units")
+    conf = _numeric(pd.DataFrame([row]), "human_confidence_score", np.nan).iloc[0]
+    if not np.isnan(conf) and (conf < 0 or conf > 100):
+        errors.append("human_confidence_out_of_range")
+    if errors:
+        return "INVALID", "NO", ";".join(errors), "MERGE_REJECTED"
+    return "COMPLETE", "YES", "", "MERGED"
+
+
+def merge_human_review_decisions(
+    journal_df: pd.DataFrame,
+    human_review_df: pd.DataFrame,
+    config: dict[str, Any] | None = None,
+) -> pd.DataFrame:
+    """Merge filled human buyer decisions into shadow journal."""
+    del config
+    if journal_df.empty:
+        return journal_df.copy()
+
+    out = journal_df.copy()
+    human = human_review_df.copy()
+    for col in MERGE_KEY_COLUMNS:
+        out[col] = out[col].astype(str)
+        human[col] = human[col].astype(str)
+
+    dup = human.duplicated(subset=list(MERGE_KEY_COLUMNS), keep=False)
+    if dup.any():
+        human = human.copy()
+        human["_duplicate_key"] = dup
+    else:
+        human["_duplicate_key"] = False
+
+    merge_cols = list(MERGE_KEY_COLUMNS)
+    human_cols = [c for c in HUMAN_COLUMNS if c in human.columns]
+    merged = out.merge(
+        human[merge_cols + human_cols + ["_duplicate_key"]],
+        on=merge_cols,
+        how="left",
+        suffixes=("_journal", ""),
+    )
+
+    statuses, valid, errors, merge_status = [], [], [], []
+    for _, row in merged.iterrows():
+        if bool(row.get("_duplicate_key", False)):
+            statuses.append("INVALID")
+            valid.append("NO")
+            errors.append("duplicate_human_decision")
+            merge_status.append("MERGE_REJECTED")
+            continue
+        st, vf, er, ms = _validate_human_row(row)
+        statuses.append(st)
+        valid.append(vf)
+        errors.append(er)
+        merge_status.append(ms if row.get("human_buyer_decision", "") != "" or ms == "NOT_MERGED" else "NOT_MERGED")
+
+    merged["human_review_status"] = statuses
+    merged["human_decision_valid_flag"] = valid
+    merged["human_decision_validation_error"] = errors
+    merged["human_decision_merge_status"] = merge_status
+
+    for col in HUMAN_COLUMNS:
+        journal_col = f"{col}_journal"
+        if journal_col in merged.columns and col in merged.columns:
+            merged[col] = merged[col].where(merged[col].astype(str).str.len().gt(0), merged[journal_col])
+            merged = merged.drop(columns=[journal_col])
+
+    merged = merged.drop(columns=["_duplicate_key"], errors="ignore")
+    for col in HUMAN_REVIEW_STATUS_COLUMNS:
+        if col not in merged.columns:
+            merged[col] = "PENDING" if col == "human_review_status" else ""
+    return merged
+
+
+def _coalesce_field(merged: pd.DataFrame, dst: str, sources: tuple[str, ...]) -> tuple[pd.Series, bool]:
+    """Coalesce outcome field from journal and merged actuals sources."""
+    result = pd.Series(pd.NA, index=merged.index, dtype=object)
+    used_proxy = False
+    primary = sources[0] if sources else dst
+    for idx, src in enumerate(sources):
+        for col_name in (src, f"{src}_src"):
+            if col_name not in merged.columns:
+                continue
+            candidate = merged[col_name]
+            valid = candidate.notna() & candidate.astype(str).str.strip().ne("")
+            if not valid.any():
+                continue
+            empty = result.isna() | result.astype(str).str.strip().eq("")
+            fill = empty & valid
+            result = result.where(~fill, candidate.astype(object))
+            if fill.any() and (idx > 0 or src != primary):
+                used_proxy = True
+    if dst in merged.columns:
+        journal_vals = merged[dst].astype(object)
+        empty = journal_vals.isna() | journal_vals.astype(str).str.strip().eq("")
+        result = journal_vals.where(~empty, result)
+    return result, used_proxy
+
+
+def merge_actual_outcomes(
+    journal_df: pd.DataFrame,
+    actuals_df: pd.DataFrame,
+    config: dict[str, Any] | None = None,
+) -> pd.DataFrame:
+    """Merge realised promotion outcomes into journal rows."""
+    del config
+    if journal_df.empty:
+        return journal_df.copy()
+
+    merge_cols = [c for c in ("store_number", "promotion_id", "sku_number") if c in journal_df.columns and c in actuals_df.columns]
+    if not merge_cols:
+        out = journal_df.copy()
+        out["actual_outcome_merge_status"] = "NO_MERGE_KEYS"
+        out["actual_outcome_quality"] = "MISSING"
+        out["actual_outcome_proxy_flag"] = "YES"
+        out["actual_outcome_missing_reason"] = "missing_merge_keys"
+        return out
+
+    out = journal_df.copy()
+    outcome_source_cols = {
+        "actual_units_sold_promo", "actual_units_sold", "target_actual_units_sold",
+        "actual_gp_promo", "gross_profit_promo_dollars", "actual_sales_ex_gst_promo",
+        "actual_start_soh", "promo_start_soh_resolved", "current_soh",
+        "actual_end_soh", "target_end_soh",
+        "actual_stockout_flag", "stockout_suspected_flag",
+        "actual_lost_sales_proxy", "missed_units_risk", "simulated_missed_demand_units",
+        "actual_basket_gp_when_present", "feature_avg_basket_gp_when_present",
+        "actual_basket_attachment_observed", "feature_basket_3plus_attach_rate",
+        "actual_end_distance_to_optimal_soh", "distance_to_optimal_end_soh",
+        "actual_cash_tied_above_optimal", "cash_tied_above_optimal_cost",
+        "actual_overstock_reduction_units", "leftover_units_estimate",
+        "promo_exit_success_flag_actual", "promo_exit_success_flag",
+    }
+    keep_actual_cols = merge_cols + [c for c in actuals_df.columns if c in outcome_source_cols]
+    actuals = actuals_df[keep_actual_cols].drop_duplicates(subset=merge_cols, keep="first").copy()
+    for col in merge_cols:
+        out[col] = out[col].astype(str)
+        actuals[col] = actuals[col].astype(str)
+    merged = out.merge(actuals, on=merge_cols, how="left", suffixes=("", "_src"))
+
+    field_map = {
+        "actual_units_sold_promo": ("actual_units_sold_promo", "actual_units_sold", "target_actual_units_sold"),
+        "actual_gp_promo": ("actual_gp_promo", "gross_profit_promo_dollars", "actual_sales_ex_gst_promo"),
+        "actual_start_soh": ("actual_start_soh", "promo_start_soh_resolved", "current_soh"),
+        "actual_end_soh": ("actual_end_soh", "target_end_soh"),
+        "actual_stockout_flag": ("actual_stockout_flag", "stockout_suspected_flag"),
+        "actual_lost_sales_proxy": ("actual_lost_sales_proxy", "missed_units_risk", "simulated_missed_demand_units"),
+        "actual_basket_gp_when_present": ("actual_basket_gp_when_present", "feature_avg_basket_gp_when_present"),
+        "actual_basket_attachment_observed": ("actual_basket_attachment_observed", "feature_basket_3plus_attach_rate"),
+        "actual_end_distance_to_optimal_soh": ("actual_end_distance_to_optimal_soh", "distance_to_optimal_end_soh"),
+        "actual_cash_tied_above_optimal": ("actual_cash_tied_above_optimal", "cash_tied_above_optimal_cost"),
+        "actual_overstock_reduction_units": ("actual_overstock_reduction_units", "leftover_units_estimate"),
+        "promo_exit_success_flag_actual": ("promo_exit_success_flag_actual", "promo_exit_success_flag"),
+    }
+
+    row_proxy = pd.Series(False, index=merged.index)
+    for dst, sources in field_map.items():
+        coalesced, proxy_used = _coalesce_field(merged, dst, sources)
+        merged[dst] = coalesced
+        row_proxy = row_proxy | proxy_used
+
+    units = pd.to_numeric(merged["actual_units_sold_promo"], errors="coerce")
+    quality = np.where(units.gt(0), "HIGH", "MISSING")
+    quality = np.where((quality == "HIGH") & row_proxy, "PROXY", quality)
+    merged["actual_outcome_proxy_flag"] = np.where(row_proxy | (quality == "PROXY"), "YES", "NO")
+    merged["actual_outcome_quality"] = quality
+    merged["actual_outcome_merge_status"] = np.where(np.isin(quality, ["HIGH", "PROXY"]), "MERGED", "MISSING")
+    merged["actual_outcome_missing_reason"] = np.where(quality == "MISSING", "missing_actual_units", "")
+
+    drop_cols = [c for c in merged.columns if c.endswith("_src")]
+    return merged.drop(columns=drop_cols, errors="ignore")
+
+
+def _value_realised_proxy(row: pd.Series, *, actor: str) -> float:
+    gp = _safe_float(row.get("actual_gp_promo", np.nan))
+    units = _safe_float(row.get("actual_units_sold_promo", 0))
+    if gp <= 0 and units > 0:
+        gp = units * GP_MARGIN_PROXY
+    basket = _safe_float(row.get("actual_basket_gp_when_present", 0))
+    long_tail = _safe_float(row.get("long_tail_protection_value", 0)) if "long_tail_protection_value" in row.index else 0.0
+    cash_drag = _safe_float(row.get("actual_cash_tied_above_optimal", 0))
+    end_dist = _safe_float(row.get("actual_end_distance_to_optimal_soh", 0))
+
+    if actor == "brain":
+        base = _safe_float(row.get("brain_validated_expected_value", 0))
+        return float(gp - abs(end_dist) * 0.5 - cash_drag * 0.01 + (base * 0.1))
+    if actor == "human":
+        h_units = _safe_float(row.get("human_order_units", row.get("final_governed_order_units", 0)))
+        return float(gp - abs(units - h_units) * GP_MARGIN_PROXY + basket * 0.05)
+    g_units = _safe_float(row.get("final_governed_order_units", 0))
+    return float(gp - abs(units - g_units) * GP_MARGIN_PROXY + long_tail * 0.1)
+
+
+def _infer_lesson_row(row: pd.Series) -> tuple[str, str, str, str, str]:
+    decision = str(row.get("human_buyer_decision", "")).strip()
+    quality = str(row.get("actual_outcome_quality", "MISSING"))
+    if decision == "SUPPLIER_UNAVAILABLE":
+        return (
+            "SUPPLIER_FAILURE",
+            "Supplier unavailable; do not treat as model failure.",
+            "NO_MODEL_UPDATE",
+            "NO_GOVERNANCE_UPDATE",
+            "REVIEW_SUPPLIER_DATA",
+        )
+    if decision == "BLOCKED_DATA_QUALITY" or quality == "MISSING":
+        return (
+            "DATA_QUALITY_BLOCKED_LEARNING",
+            "Outcome or data quality blocked reliable learning.",
+            "NO_MODEL_UPDATE",
+            "NO_GOVERNANCE_UPDATE",
+            "REPAIR_SOURCE_QUALITY",
+        )
+    units = _safe_float(row.get("actual_units_sold_promo", 0))
+    if units <= 0:
+        return (
+            "INSUFFICIENT_OUTCOME_SIGNAL",
+            "No realised units to score actors.",
+            "NO_MODEL_UPDATE",
+            "MONITOR",
+            "REPAIR_DEMAND_ACTUALS",
+        )
+    if str(row.get("actual_stockout_flag", "")).upper() == "YES":
+        return (
+            "CENSORED_BY_STOCKOUT",
+            "Stockout censors demand; lesson is observational only.",
+            "REVIEW_STOCKOUT_SEGMENTS",
+            "MAINTAIN_GOVERNANCE",
+            "REPAIR_SOH_TRUTH",
+        )
+
+    brain_v = _safe_float(row.get("brain_value_realised_proxy", 0))
+    human_v = _safe_float(row.get("human_value_realised_proxy", 0))
+    gov_v = _safe_float(row.get("governed_value_realised_proxy", 0))
+    mission = _safe_float(row.get("mission_sku_score", 0)) >= 45
+    long_tail = str(row.get("long_tail_sku_flag", "NO")) == "YES"
+    overstock = str(row.get("current_stock_position_label", "")) in {"OVERSTOCKED", "SEVERELY_OVERSTOCKED"}
+
+    if mission and long_tail:
+        return (
+            "MISSION_SKU_SIGNAL_CONFIRMED",
+            "Mission SKU shadow case supports basket-trust learning.",
+            "REINFORCE_MISSION_SKU_FEATURES",
+            "MAINTAIN_LONG_TAIL_MIN_SOH",
+            "MAINTAIN_BASKET_EVIDENCE",
+        )
     if long_tail:
-        return "LONG_TAIL_PROTECTION_CONFIRMED", "Long-tail SKU outcome supports basket-trust review."
-    if brain_better and human_better:
-        return "BRAIN_RIGHT_HUMAN_RIGHT", "Brain and human both aligned with realised outcome."
-    if brain_better and not human_better:
-        return "BRAIN_RIGHT_HUMAN_WRONG", "Brain advisory outperformed human/governed path ex-post."
-    if human_better and not brain_better:
-        return "BRAIN_WRONG_HUMAN_RIGHT", "Human buyer outperformed brain advisory ex-post."
-    return "BOTH_WRONG", "Neither brain nor human path clearly best ex-post."
+        return (
+            "LONG_TAIL_PROTECTION_CONFIRMED",
+            "Long-tail protection signal observed post-promo.",
+            "REINFORCE_LONG_TAIL_VALUE",
+            "MAINTAIN_GOVERNANCE",
+            "MAINTAIN_BASKET_EVIDENCE",
+        )
+    if overstock:
+        return (
+            "OVERSTOCK_RUN_DOWN_CONFIRMED",
+            "Overstock run-down lesson confirmed.",
+            "REINFORCE_RUN_DOWN_ACTIONS",
+            "MAINTAIN_CASH_RELEASE_QUEUE",
+            "NONE",
+        )
+    if _safe_float(row.get("actual_basket_attachment_observed", 0)) > 0.2 and long_tail:
+        return (
+            "BASKET_TRUST_SIGNAL_CONFIRMED",
+            "Basket attachment aligned with trust-sensitive demand.",
+            "REINFORCE_BASKET_FEATURES",
+            "MAINTAIN_GOVERNANCE",
+            "MAINTAIN_BASKET_EVIDENCE",
+        )
+
+    best = max(("brain", brain_v), ("human", human_v), ("governed", gov_v), key=lambda t: t[1])
+    if best[0] == "brain" and brain_v > human_v + 1 and brain_v > gov_v + 1:
+        return (
+            "BRAIN_RIGHT_HUMAN_WRONG",
+            "Brain advisory best matched realised proxy outcome.",
+            "REVIEW_BRAIN_WEIGHTS",
+            "NO_GOVERNANCE_UPDATE",
+            "NONE",
+        )
+    if best[0] == "human" and human_v > brain_v + 1:
+        return (
+            "BRAIN_WRONG_HUMAN_RIGHT",
+            "Human buyer path best matched realised proxy outcome.",
+            "REVIEW_BRAIN_ACTION_CLASSIFIER",
+            "MAINTAIN_HUMAN_REVIEW",
+            "NONE",
+        )
+    if best[0] == "governed" and gov_v > brain_v + 1 and brain_v > human_v + 1:
+        return (
+            "GOVERNANCE_RIGHT_BRAIN_TOO_AGGRESSIVE",
+            "Governed action outperformed aggressive brain advisory.",
+            "REDUCE_BRAIN_AGGRESSION",
+            "MAINTAIN_GOVERNANCE",
+            "NONE",
+        )
+    if gov_v > brain_v + 1 and human_v < gov_v:
+        return (
+            "GOVERNANCE_TOO_CONSERVATIVE",
+            "Governance may be too conservative versus realised upside.",
+            "REVIEW_UNDERSTOCK_SEGMENTS",
+            "REVIEW_GOVERNANCE_THRESHOLDS",
+            "NONE",
+        )
+    if abs(brain_v - human_v) < 1 and abs(human_v - gov_v) < 1:
+        return (
+            "BRAIN_RIGHT_HUMAN_RIGHT",
+            "Brain, human, and governed paths broadly aligned ex-post.",
+            "MONITOR",
+            "MONITOR",
+            "NONE",
+        )
+    return (
+        "BOTH_WRONG",
+        "No actor clearly outperformed on realised proxy outcome.",
+        "REVIEW_ALL_ACTORS",
+        "REVIEW_GOVERNANCE",
+        "REVIEW_DATA_QUALITY",
+    )
+
+
+def _correctness_label(row: pd.Series, actor: str) -> str:
+    lesson = str(row.get("lesson_learned_label", ""))
+    if lesson == "SUPPLIER_FAILURE":
+        return "SUPPLIER_FAILURE"
+    if lesson in {"DATA_QUALITY_BLOCKED_LEARNING", "INSUFFICIENT_OUTCOME_SIGNAL"}:
+        return "DATA_QUALITY_BLOCKED" if lesson.startswith("DATA") else "UNSCORABLE"
+    if lesson == "CENSORED_BY_STOCKOUT":
+        return "CENSORED"
+    if str(row.get("actual_outcome_quality", "")) == "MISSING":
+        return "UNSCORABLE"
+
+    brain_v = _safe_float(row.get("brain_value_realised_proxy", 0))
+    human_v = _safe_float(row.get("human_value_realised_proxy", 0))
+    gov_v = _safe_float(row.get("governed_value_realised_proxy", 0))
+    vals = {"brain": brain_v, "human": human_v, "governed": gov_v}
+    best = max(vals.values())
+    val = vals[actor]
+    if val >= best - 0.5:
+        return "RIGHT"
+    if val >= best - 2.0:
+        return "PARTIAL"
+    return "WRONG"
 
 
 def score_shadow_outcomes(
@@ -326,99 +704,254 @@ def score_shadow_outcomes(
     config: dict[str, Any] | None = None,
 ) -> pd.DataFrame:
     """Score post-promotion outcomes and brain-vs-buyer lessons."""
-    del config
+    cfg = config or {}
     if journal_df.empty:
         return journal_df.copy()
 
-    out = journal_df.copy()
-    merge_cols = [c for c in ("store_number", "promotion_id", "sku_number") if c in out.columns and c in actuals_df.columns]
-    if not merge_cols:
-        return out
+    merged = merge_actual_outcomes(journal_df, actuals_df, config=cfg)
+    rows = []
+    for _, row in merged.iterrows():
+        r = row.copy()
+        r["brain_value_realised_proxy"] = round(_value_realised_proxy(r, actor="brain"), 3)
+        r["human_value_realised_proxy"] = round(_value_realised_proxy(r, actor="human"), 3)
+        r["governed_value_realised_proxy"] = round(_value_realised_proxy(r, actor="governed"), 3)
+        r["brain_vs_human_value_delta"] = round(r["brain_value_realised_proxy"] - r["human_value_realised_proxy"], 3)
+        r["brain_vs_governed_value_delta"] = round(r["brain_value_realised_proxy"] - r["governed_value_realised_proxy"], 3)
+        r["human_vs_governed_value_delta"] = round(r["human_value_realised_proxy"] - r["governed_value_realised_proxy"], 3)
+        uplift_pred = _safe_float(r.get("brain_expected_uplift_units", 0))
+        actual_u = _safe_float(r.get("actual_units_sold_promo", 0))
+        r["brain_prediction_error"] = round(uplift_pred - actual_u, 3)
+        lesson, note, brain_upd, gov_upd, dq_upd = _infer_lesson_row(r)
+        r["lesson_learned_label"] = lesson
+        r["lesson_learned_note"] = note
+        r["brain_update_recommendation"] = brain_upd
+        r["governance_update_recommendation"] = gov_upd
+        r["data_quality_update_recommendation"] = dq_upd
+        r["brain_action_correctness_label"] = _correctness_label(r, "brain")
+        r["human_action_correctness_label"] = _correctness_label(r, "human")
+        r["governed_action_correctness_label"] = _correctness_label(r, "governed")
+        r["brain_would_have_been_better_flag"] = "YES" if r["brain_value_realised_proxy"] >= max(r["human_value_realised_proxy"], r["governed_value_realised_proxy"]) else "NO"
+        rows.append(r)
+    out = pd.DataFrame(rows)
+    keep = [c for c in JOURNAL_COLUMNS if c in out.columns]
+    extra = [c for c in out.columns if c not in keep]
+    return out[keep + extra].copy()
 
-    actuals = actuals_df.drop_duplicates(subset=merge_cols, keep="first")
-    merged = out.merge(actuals, on=merge_cols, how="left", suffixes=("", "_actual_src"))
 
-    actual_units = _numeric(merged, "actual_units_sold_promo")
-    if "actual_units_sold_promo_actual_src" in merged.columns:
-        actual_units = _numeric(merged, "actual_units_sold_promo_actual_src", actual_units.iloc[0] if len(actual_units) else 0.0)
-    merged["actual_units_sold_promo"] = actual_units
-
-    gp_candidates = ("actual_gp_promo", "gross_profit_promo_dollars", "actual_sales_ex_gst_promo")
-    for name in gp_candidates:
-        if name in actuals_df.columns:
-            src = name if name in merged.columns else f"{name}_actual_src"
-            if src in merged.columns:
-                merged["actual_gp_promo"] = _numeric(merged, src)
-            break
-
-    for src, dst in (
-        ("promo_start_soh_resolved", "actual_start_soh"),
-        ("target_end_soh", "actual_end_soh"),
-        ("distance_to_optimal_end_soh", "actual_end_distance_to_optimal_soh"),
-        ("cash_tied_above_optimal_cost", "actual_cash_tied_above_optimal"),
-        ("leftover_units_estimate", "actual_overstock_reduction_units"),
-        ("promo_exit_success_flag", "promo_exit_success_flag_actual"),
-        ("stockout_suspected_flag", "actual_stockout_flag"),
-    ):
-        if dst not in merged.columns or merged[dst].isna().all():
-            col = src if src in merged.columns else f"{src}_actual_src"
-            if col in merged.columns:
-                merged[dst] = merged[col]
-
-    brain_value = _numeric(merged, "brain_validated_expected_value")
-    governed_value = _numeric(merged, "economic_net_value_score")
-    realised_proxy = _numeric(merged, "actual_gp_promo")
-    if realised_proxy.sum() == 0:
-        realised_proxy = _numeric(merged, "actual_units_sold_promo") * 0.35
-
-    merged["brain_vs_governed_value_delta"] = (brain_value - governed_value).round(3)
-    merged["brain_vs_human_value_delta"] = brain_value - governed_value
-    if "human_order_units" in merged.columns:
-        human_units = _numeric(merged, "human_order_units")
-        merged["brain_vs_human_value_delta"] = (brain_value - human_units * 0.35).round(3)
-
-    uplift_pred = _numeric(merged, "brain_expected_uplift_units")
-    merged["brain_prediction_error"] = (uplift_pred - _numeric(merged, "actual_units_sold_promo")).round(3)
-
-    quality = merged.get(_quality_col(merged), pd.Series("UNSAFE", index=merged.index)).astype(str)
-    stockout = merged.get("actual_stockout_flag", pd.Series("", index=merged.index)).astype(str).eq("YES")
-    long_tail = merged.get("long_tail_sku_flag", pd.Series("NO", index=merged.index)).astype(str).eq("YES")
-    position = merged.get("current_stock_position_label", pd.Series("", index=merged.index)).astype(str)
-    brain_better = (realised_proxy - brain_value.abs()).ge(0) | merged["brain_prediction_error"].abs().lt(
-        _numeric(merged, "expected_promo_uplift_units").sub(_numeric(merged, "actual_units_sold_promo")).abs()
-    )
-    human_better = governed_value.gt(brain_value) & realised_proxy.gt(0)
-
-    lessons = []
-    for idx, row in merged.iterrows():
-        label, note = _infer_lesson(
-            quality_unsafe=quality.loc[idx] == "UNSAFE",
-            stockout=bool(stockout.loc[idx]) if idx in stockout.index else False,
-            brain_better=bool(brain_better.loc[idx]) if idx in brain_better.index else False,
-            human_better=bool(human_better.loc[idx]) if idx in human_better.index else False,
-            long_tail=str(row.get("long_tail_sku_flag", "NO")) == "YES",
-            overstock=str(row.get("current_stock_position_label", "")) in {"OVERSTOCKED", "SEVERELY_OVERSTOCKED"},
-            basket_confirmed=float(row.get("actual_basket_attachment_observed", 0) or 0) > 0,
-            actual_units=float(row.get("actual_units_sold_promo", 0) or 0),
+def build_shadow_lesson_frame(
+    journal_df: pd.DataFrame,
+    *,
+    human_review_df: pd.DataFrame | None = None,
+    actuals_df: pd.DataFrame | None = None,
+    config: dict[str, Any] | None = None,
+) -> pd.DataFrame:
+    """Build scored lesson frame from journal, human review, and actual outcomes."""
+    cfg = config or {}
+    frame = journal_df.copy()
+    if human_review_df is not None and not human_review_df.empty:
+        frame = merge_human_review_decisions(frame, human_review_df, config=cfg)
+    elif "human_review_status" not in frame.columns:
+        frame["human_review_status"] = np.where(
+            frame.get("human_buyer_decision", pd.Series("", index=frame.index)).astype(str).str.len().gt(0),
+            "COMPLETE",
+            "PENDING",
         )
-        lessons.append((label, note))
-    merged["lesson_learned_label"] = [t[0] for t in lessons]
-    merged["lesson_learned_note"] = [t[1] for t in lessons]
-    merged["brain_would_have_been_better_flag"] = np.where(brain_better, "YES", "NO")
-    merged["brain_action_correctness_label"] = np.where(
-        merged["lesson_learned_label"].isin(["BRAIN_RIGHT_HUMAN_RIGHT", "BRAIN_RIGHT_HUMAN_WRONG", "BASKET_TRUST_SIGNAL_CONFIRMED"]),
-        "CORRECT",
-        np.where(merged["lesson_learned_label"].eq("INSUFFICIENT_OUTCOME_SIGNAL"), "PENDING", "INCORRECT"),
-    )
-    merged["human_action_correctness_label"] = np.where(
-        merged["lesson_learned_label"].isin(["BRAIN_RIGHT_HUMAN_RIGHT", "BRAIN_WRONG_HUMAN_RIGHT"]),
-        "CORRECT",
-        np.where(merged["human_buyer_decision"].astype(str).str.len().eq(0), "PENDING", "INCORRECT"),
+        frame["human_decision_valid_flag"] = np.where(frame["human_review_status"].eq("COMPLETE"), "YES", "NO")
+        frame["human_decision_validation_error"] = ""
+        frame["human_decision_merge_status"] = np.where(frame["human_review_status"].eq("PENDING"), "NOT_MERGED", "MERGED")
+
+    if actuals_df is not None and not actuals_df.empty:
+        frame = score_shadow_outcomes(frame, actuals_df, config=cfg)
+    return frame
+
+
+def build_human_review_ingestion_summary(frame: pd.DataFrame) -> pd.DataFrame:
+    status = frame.get("human_review_status", pd.Series("PENDING", index=frame.index)).astype(str)
+    return pd.DataFrame([{
+        "total_rows": int(len(frame)),
+        "human_review_complete": int(status.eq("COMPLETE").sum()),
+        "human_review_pending": int(status.eq("PENDING").sum()),
+        "human_review_invalid": int(status.eq("INVALID").sum()),
+        "human_decision_valid_rows": int(frame.get("human_decision_valid_flag", pd.Series("NO")).astype(str).eq("YES").sum()),
+        "duplicate_rejections": int(frame.get("human_decision_validation_error", pd.Series("")).astype(str).str.contains("duplicate").sum()),
+        "human_review_completion_rate": round(float(status.eq("COMPLETE").mean() * 100.0), 2) if len(frame) else 0.0,
+    }])
+
+
+def build_actual_outcome_ingestion_summary(frame: pd.DataFrame) -> pd.DataFrame:
+    merge_status = frame.get("actual_outcome_merge_status", pd.Series("MISSING", index=frame.index)).astype(str)
+    return pd.DataFrame([{
+        "total_rows": int(len(frame)),
+        "outcome_merged_rows": int(merge_status.eq("MERGED").sum()),
+        "outcome_missing_rows": int(merge_status.eq("MISSING").sum()),
+        "outcome_proxy_rows": int(frame.get("actual_outcome_proxy_flag", pd.Series("NO")).astype(str).eq("YES").sum()),
+        "outcome_merge_rate": round(float(merge_status.eq("MERGED").mean() * 100.0), 2) if len(frame) else 0.0,
+        "high_quality_outcomes": int(frame.get("actual_outcome_quality", pd.Series("")).astype(str).eq("HIGH").sum()),
+    }])
+
+
+def build_brain_vs_human_scorecard(frame: pd.DataFrame) -> pd.DataFrame:
+    lesson = frame.get("lesson_learned_label", pd.Series("", index=frame.index)).astype(str)
+    brain_corr = frame.get("brain_action_correctness_label", pd.Series("", index=frame.index)).astype(str)
+    human_corr = frame.get("human_action_correctness_label", pd.Series("", index=frame.index)).astype(str)
+    gov_corr = frame.get("governed_action_correctness_label", pd.Series("", index=frame.index)).astype(str)
+    unscorable = brain_corr.eq("UNSCORABLE") | frame.get("actual_outcome_quality", pd.Series("")).astype(str).eq("MISSING")
+    return pd.DataFrame([{
+        "total_scored_rows": int(len(frame)),
+        "unscorable_rows": int(unscorable.sum()),
+        "brain_wins": int(lesson.isin(["BRAIN_RIGHT_HUMAN_WRONG", "MISSION_SKU_SIGNAL_CONFIRMED"]).sum()),
+        "human_wins": int(lesson.eq("BRAIN_WRONG_HUMAN_RIGHT").sum()),
+        "governed_wins": int(lesson.isin(["GOVERNANCE_RIGHT_BRAIN_TOO_AGGRESSIVE", "GOVERNANCE_TOO_CONSERVATIVE"]).sum()),
+        "both_wrong": int(lesson.eq("BOTH_WRONG").sum()),
+        "censored_outcomes": int(lesson.eq("CENSORED_BY_STOCKOUT").sum()),
+        "supplier_failures": int(lesson.eq("SUPPLIER_FAILURE").sum()),
+        "long_tail_confirmations": int(lesson.eq("LONG_TAIL_PROTECTION_CONFIRMED").sum()),
+        "mission_sku_confirmations": int(lesson.eq("MISSION_SKU_SIGNAL_CONFIRMED").sum()),
+        "avg_brain_value_delta": float(_numeric(frame, "brain_vs_governed_value_delta").mean()),
+        "avg_human_value_delta": float(_numeric(frame, "human_vs_governed_value_delta").mean()),
+        "top_lesson_label": lesson.value_counts().index[0] if len(lesson) and lesson.ne("").any() else "",
+    }])
+
+
+def build_lesson_learned_summary(frame: pd.DataFrame) -> pd.DataFrame:
+    if frame.empty:
+        return pd.DataFrame(columns=["lesson_learned_label", "row_count", "avg_brain_delta", "avg_human_delta"])
+    return (
+        frame.groupby("lesson_learned_label", dropna=False)
+        .agg(
+            row_count=("sku_number", "count"),
+            avg_brain_delta=("brain_vs_governed_value_delta", "mean"),
+            avg_human_delta=("human_vs_governed_value_delta", "mean"),
+        )
+        .reset_index()
+        .sort_values("row_count", ascending=False)
     )
 
-    keep = [c for c in JOURNAL_COLUMNS if c in merged.columns]
-    extra = [c for c in merged.columns if c not in keep and c in OUTCOME_PLACEHOLDER_COLUMNS + SCORING_COLUMNS]
-    return merged[keep + extra].copy()
+
+def build_model_update_recommendations(frame: pd.DataFrame) -> pd.DataFrame:
+    if frame.empty:
+        return pd.DataFrame(columns=["recommendation_type", "recommendation", "row_count", "priority"])
+    rows = []
+    for col, rtype in (
+        ("brain_update_recommendation", "brain"),
+        ("governance_update_recommendation", "governance"),
+        ("data_quality_update_recommendation", "data_quality"),
+    ):
+        if col not in frame.columns:
+            continue
+        counts = frame[col].astype(str).value_counts()
+        for rec, cnt in counts.items():
+            if rec in {"", "NONE", "MONITOR", "NO_MODEL_UPDATE", "NO_GOVERNANCE_UPDATE"}:
+                continue
+            rows.append({
+                "recommendation_type": rtype,
+                "recommendation": rec,
+                "row_count": int(cnt),
+                "priority": "HIGH" if int(cnt) >= 10 else "MEDIUM" if int(cnt) >= 3 else "LOW",
+            })
+    return pd.DataFrame(rows).sort_values(["recommendation_type", "row_count"], ascending=[True, False])
+
+
+def build_phase5u_release_gate(scorecard: pd.DataFrame) -> pd.DataFrame:
+    row = scorecard.iloc[0] if not scorecard.empty else {}
+    return pd.DataFrame([{
+        "recommendation": "NO_RELEASE",
+        "shadow_recommendation": "SHADOW_TOP_100_REVIEW",
+        "scored_rows": row.get("total_scored_rows", 0),
+        "unscorable_rows": row.get("unscorable_rows", 0),
+        "auto_order_created": "NO",
+        "governed_actions_overwritten": "NO",
+        "primary_blocker": "model_bias_dangerously_negative",
+        "reason": "Shadow outcome learning is internal only; customer release not earned.",
+    }])
+
+
+def _load_enriched_backtest(rebuild: bool = False, model_bias_pct: float = DEFAULT_MODEL_BIAS_PCT) -> pd.DataFrame:
+    source = apply_stock_truth_repair(load_stock_truth_source(rebuild=rebuild))
+    source = apply_stock_outcome_optimisation(source, gate_recommendation="NO_RELEASE")
+    source = apply_optimal_stock_learning(source, gate_recommendation="NO_RELEASE")
+    working = simulate_stock_position_outcomes(source)
+    _rg, regime_rec = load_regime_artifacts()
+    regime = apply_regime_brain_decisioning(working, gate_recommendation=regime_rec)
+    prof, conv_rec = load_conviction_artifacts()
+    calibrated = apply_conviction_calibration(
+        regime, error_profile_df=prof if not prof.empty else None, gate_recommendation=conv_rec, model_bias_pct=model_bias_pct,
+    )
+    triage_rec = load_triage_artifacts()
+    triaged = apply_promo_decision_triage(calibrated, gate_recommendation=triage_rec, model_bias_pct=model_bias_pct)
+    basket = apply_basket_attachment_to_promo_frame(triaged)
+    econ_rec = load_economic_artifacts()
+    enriched = apply_promo_economic_value_scoring(basket, gate_recommendation=econ_rec, model_bias_pct=model_bias_pct)
+    enriched = apply_brain_feature_learning(enriched)
+    enriched = apply_brain_leakage_validation(enriched, config={"skip_full_validation": True})
+    return apply_shadow_candidate_selection(enriched, config={"error_profile_df": build_regime_error_profile(enriched, enriched)})
+
+
+def write_phase5u_diagnostics(
+    *,
+    journal_df: pd.DataFrame | None = None,
+    human_review_df: pd.DataFrame | None = None,
+    actuals_df: pd.DataFrame | None = None,
+    diagnostics_dir: Path = PHASE5U_DIAGNOSTICS_DIR,
+    rebuild: bool = False,
+    model_bias_pct: float = DEFAULT_MODEL_BIAS_PCT,
+) -> dict[str, Any]:
+    diagnostics_dir.mkdir(parents=True, exist_ok=True)
+    enriched = _load_enriched_backtest(rebuild=rebuild, model_bias_pct=model_bias_pct) if actuals_df is None else actuals_df
+
+    if journal_df is None:
+        journal_path = PHASE5T_JOURNAL_PATH
+        if journal_path.exists():
+            journal_df = pd.read_csv(journal_path)
+        else:
+            journal_df = build_shadow_observation_journal(enriched)
+
+    if human_review_df is None:
+        filled_path = DEFAULT_DIAGNOSTICS_DIR / HUMAN_FILLED_FILENAME
+        if filled_path.exists():
+            human_review_df = load_shadow_human_review_template(filled_path)
+        else:
+            human_review_df = None
+
+    lesson_frame = build_shadow_lesson_frame(
+        journal_df,
+        human_review_df=human_review_df,
+        actuals_df=enriched,
+    )
+
+    human_summary = build_human_review_ingestion_summary(lesson_frame)
+    outcome_summary = build_actual_outcome_ingestion_summary(lesson_frame)
+    scorecard = build_brain_vs_human_scorecard(lesson_frame)
+    lesson_summary = build_lesson_learned_summary(lesson_frame)
+    updates = build_model_update_recommendations(lesson_frame)
+    gate = build_phase5u_release_gate(scorecard)
+
+    human_summary.to_csv(diagnostics_dir / "phase5u01_human_review_ingestion_summary.csv", index=False)
+    outcome_summary.to_csv(diagnostics_dir / "phase5u01_actual_outcome_ingestion_summary.csv", index=False)
+    lesson_frame.to_csv(diagnostics_dir / "phase5u01_shadow_scored_outcomes.csv", index=False)
+    lesson_summary.to_csv(diagnostics_dir / "phase5u01_lesson_learned_summary.csv", index=False)
+    scorecard.to_csv(diagnostics_dir / "phase5u01_brain_vs_human_scorecard.csv", index=False)
+    updates.to_csv(diagnostics_dir / "phase5u01_model_update_recommendations.csv", index=False)
+    gate.to_csv(diagnostics_dir / "phase5u01_release_gate.csv", index=False)
+
+    scored = lesson_frame[lesson_frame.get("actual_outcome_quality", pd.Series("")).astype(str).ne("MISSING")]
+    return {
+        "human_review_completion_rate": float(human_summary["human_review_completion_rate"].iloc[0]),
+        "actual_outcome_merge_rate": float(outcome_summary["outcome_merge_rate"].iloc[0]),
+        "scored_rows": int(scorecard["total_scored_rows"].iloc[0]),
+        "unscorable_rows": int(scorecard["unscorable_rows"].iloc[0]),
+        "brain_win_count": int(scorecard["brain_wins"].iloc[0]),
+        "human_win_count": int(scorecard["human_wins"].iloc[0]),
+        "governed_win_count": int(scorecard["governed_wins"].iloc[0]),
+        "top_lesson_labels": lesson_summary["lesson_learned_label"].head(5).tolist() if not lesson_summary.empty else [],
+        "recommended_model_updates": updates["recommendation"].head(5).tolist() if not updates.empty else [],
+        "release_recommendation": "NO_RELEASE",
+        "primary_blocker": "model_bias_dangerously_negative",
+    }
+
+
+def run_phase5u01_shadow_outcome_learning(*, diagnostics_dir: Path = PHASE5U_DIAGNOSTICS_DIR, rebuild: bool = False) -> dict[str, Any]:
+    return write_phase5u_diagnostics(diagnostics_dir=diagnostics_dir, rebuild=rebuild)
 
 
 def build_human_review_template(journal: pd.DataFrame) -> pd.DataFrame:

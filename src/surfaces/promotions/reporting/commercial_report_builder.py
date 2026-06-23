@@ -2466,6 +2466,59 @@ def build_manager_summary(order_plan: pd.DataFrame, exceptions: pd.DataFrame) ->
             "shadow_brain_governed_mismatch_count": int(
                 pd.read_csv("Diagnostics/phase5t01_shadow_observation_journal/phase5t01_shadow_journal_summary.csv")["brain_governed_action_mismatch_count"].iloc[0]
             ) if Path("Diagnostics/phase5t01_shadow_observation_journal/phase5t01_shadow_journal_summary.csv").exists() else 0,
+            "shadow_rows_scored": int(
+                pd.read_csv("Diagnostics/phase5u01_shadow_outcome_learning/phase5u01_brain_vs_human_scorecard.csv")["total_scored_rows"].iloc[0]
+            ) if Path("Diagnostics/phase5u01_shadow_outcome_learning/phase5u01_brain_vs_human_scorecard.csv").exists() else 0,
+            "shadow_human_review_completion_rate": float(
+                pd.read_csv("Diagnostics/phase5u01_shadow_outcome_learning/phase5u01_human_review_ingestion_summary.csv")["human_review_completion_rate"].iloc[0]
+            ) if Path("Diagnostics/phase5u01_shadow_outcome_learning/phase5u01_human_review_ingestion_summary.csv").exists() else 0.0,
+            "shadow_outcome_merge_rate": float(
+                pd.read_csv("Diagnostics/phase5u01_shadow_outcome_learning/phase5u01_actual_outcome_ingestion_summary.csv")["outcome_merge_rate"].iloc[0]
+            ) if Path("Diagnostics/phase5u01_shadow_outcome_learning/phase5u01_actual_outcome_ingestion_summary.csv").exists() else 0.0,
+            "shadow_brain_win_count": int(
+                pd.read_csv("Diagnostics/phase5u01_shadow_outcome_learning/phase5u01_brain_vs_human_scorecard.csv")["brain_wins"].iloc[0]
+            ) if Path("Diagnostics/phase5u01_shadow_outcome_learning/phase5u01_brain_vs_human_scorecard.csv").exists() else 0,
+            "shadow_human_win_count": int(
+                pd.read_csv("Diagnostics/phase5u01_shadow_outcome_learning/phase5u01_brain_vs_human_scorecard.csv")["human_wins"].iloc[0]
+            ) if Path("Diagnostics/phase5u01_shadow_outcome_learning/phase5u01_brain_vs_human_scorecard.csv").exists() else 0,
+            "shadow_governed_win_count": int(
+                pd.read_csv("Diagnostics/phase5u01_shadow_outcome_learning/phase5u01_brain_vs_human_scorecard.csv")["governed_wins"].iloc[0]
+            ) if Path("Diagnostics/phase5u01_shadow_outcome_learning/phase5u01_brain_vs_human_scorecard.csv").exists() else 0,
+            "shadow_unscorable_count": int(
+                pd.read_csv("Diagnostics/phase5u01_shadow_outcome_learning/phase5u01_brain_vs_human_scorecard.csv")["unscorable_rows"].iloc[0]
+            ) if Path("Diagnostics/phase5u01_shadow_outcome_learning/phase5u01_brain_vs_human_scorecard.csv").exists() else 0,
+            "shadow_top_lesson_learned_labels": (
+                ";".join(
+                    pd.read_csv("Diagnostics/phase5u01_shadow_outcome_learning/phase5u01_lesson_learned_summary.csv")
+                    .sort_values("row_count", ascending=False)["lesson_learned_label"]
+                    .head(5)
+                    .astype(str)
+                    .tolist()
+                )
+                if Path("Diagnostics/phase5u01_shadow_outcome_learning/phase5u01_lesson_learned_summary.csv").exists()
+                else ""
+            ),
+            "shadow_recommended_model_updates": (
+                ";".join(
+                    pd.read_csv("Diagnostics/phase5u01_shadow_outcome_learning/phase5u01_model_update_recommendations.csv")
+                    .sort_values("row_count", ascending=False)["recommendation"]
+                    .head(5)
+                    .astype(str)
+                    .tolist()
+                )
+                if Path("Diagnostics/phase5u01_shadow_outcome_learning/phase5u01_model_update_recommendations.csv").exists()
+                else ""
+            ),
+            "shadow_outcome_learning_release": (
+                str(pd.read_csv("Diagnostics/phase5u01_shadow_outcome_learning/phase5u01_release_gate.csv")["recommendation"].iloc[0])
+                if Path("Diagnostics/phase5u01_shadow_outcome_learning/phase5u01_release_gate.csv").exists()
+                else "NO_RELEASE"
+            ),
+            "shadow_outcome_primary_blocker": (
+                str(pd.read_csv("Diagnostics/phase5u01_shadow_outcome_learning/phase5u01_release_gate.csv")["primary_blocker"].iloc[0])
+                if Path("Diagnostics/phase5u01_shadow_outcome_learning/phase5u01_release_gate.csv").exists()
+                else "model_bias_dangerously_negative"
+            ),
             "total_overstock_cash_release_value": float(_num(order_plan.get("overstock_cash_release_value")).sum()) if "overstock_cash_release_value" in order_plan.columns else 0.0,
             "total_review_effort_cost": float(
                 _num(order_plan.get("review_effort_cost"))[
