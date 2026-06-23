@@ -11,6 +11,7 @@ from models.promotions.promo_optimal_stock_learning import apply_optimal_stock_l
 from models.promotions.promo_regime_state import apply_regime_brain_decisioning, load_regime_artifacts
 from models.promotions.promo_conviction_calibration import apply_conviction_calibration, load_conviction_artifacts
 from models.promotions.promo_decision_triage import apply_promo_decision_triage, load_triage_artifacts
+from models.promotions.promo_basket_attachment_features import apply_basket_attachment_to_promo_frame
 from models.promotions.promo_economic_value_scoring import apply_promo_economic_value_scoring, load_economic_artifacts
 from models.promotions.promo_stock_outcome_optimisation import apply_stock_outcome_optimisation, load_stock_outcome_artifacts
 from models.promotions.promo_stock_truth_repair import apply_stock_truth_repair, load_stock_truth_artifacts
@@ -267,6 +268,21 @@ ORDER_PLAN_COLUMNS: tuple[str, ...] = (
     "long_tail_minimum_soh_required",
     "long_tail_open_for_sale_required_flag",
     "long_tail_basket_protection_reason",
+    "feature_basket_attach_rate",
+    "feature_basket_3plus_attach_rate",
+    "feature_basket_5plus_attach_rate",
+    "feature_avg_basket_value_when_present",
+    "feature_avg_basket_gp_when_present",
+    "feature_sister_club_attach_rate",
+    "mission_sku_score",
+    "mission_sku_flag",
+    "basket_completion_sku_score",
+    "range_trust_sku_score",
+    "long_tail_mission_sku_flag",
+    "basket_attachment_source",
+    "basket_attachment_source_quality",
+    "basket_attachment_used_real_transactions_flag",
+    "mission_sku_reason",
     "regime_adjusted_decision_value",
     "brain_action_label",
     "brain_order_units_proposal",
@@ -525,6 +541,7 @@ def load_se01_scored_sources(prediction_dir: Path) -> pd.DataFrame:
     out = apply_conviction_calibration(out, error_profile_df=_conv_profile if not _conv_profile.empty else None, gate_recommendation=conv_rec)
     triage_rec = load_triage_artifacts()
     out = apply_promo_decision_triage(out, gate_recommendation=triage_rec)
+    out = apply_basket_attachment_to_promo_frame(out)
     econ_rec = load_economic_artifacts()
     out = apply_promo_economic_value_scoring(out, gate_recommendation=econ_rec)
     return out
@@ -1523,6 +1540,21 @@ def assemble_commercial_order_rows(
         "long_tail_minimum_soh_required",
         "long_tail_open_for_sale_required_flag",
         "long_tail_basket_protection_reason",
+        "feature_basket_attach_rate",
+        "feature_basket_3plus_attach_rate",
+        "feature_basket_5plus_attach_rate",
+        "feature_avg_basket_value_when_present",
+        "feature_avg_basket_gp_when_present",
+        "feature_sister_club_attach_rate",
+        "mission_sku_score",
+        "mission_sku_flag",
+        "basket_completion_sku_score",
+        "range_trust_sku_score",
+        "long_tail_mission_sku_flag",
+        "basket_attachment_source",
+        "basket_attachment_source_quality",
+        "basket_attachment_used_real_transactions_flag",
+        "mission_sku_reason",
         "regime_adjusted_decision_value",
         "brain_action_label",
         "brain_order_units_proposal",
@@ -1551,6 +1583,7 @@ def assemble_commercial_order_rows(
         "priority_rank_change", "basket_attachment_score", "basket_mission_importance_score",
         "long_tail_stockout_risk_score", "basket_loss_multiplier", "long_tail_protection_value",
         "basket_trust_convexity_value", "long_tail_minimum_soh_required",
+        "mission_sku_score", "basket_completion_sku_score", "range_trust_sku_score",
     }
     for col in position_cols:
         out[col] = _field_series(frame, (col,), frame.index)
@@ -2278,6 +2311,24 @@ def build_manager_summary(order_plan: pd.DataFrame, exceptions: pd.DataFrame) ->
                     & order_plan.get("economic_review_queue_bucket", pd.Series("", index=order_plan.index)).eq("TOP_50")
                 ).sum()
             ) if "long_tail_sku_flag" in order_plan.columns else 0,
+            "real_basket_evidence_count": int(
+                order_plan.get("basket_attachment_used_real_transactions_flag", pd.Series("NO", index=order_plan.index)).astype(str).eq("YES").sum()
+            ) if "basket_attachment_used_real_transactions_flag" in order_plan.columns else 0,
+            "unknown_basket_evidence_count": int(
+                order_plan.get("feature_basket_attach_rate", pd.Series("UNKNOWN", index=order_plan.index)).astype(str).eq("UNKNOWN").sum()
+            ) if "feature_basket_attach_rate" in order_plan.columns else 0,
+            "high_mission_sku_count": int(
+                _num(order_plan.get("mission_sku_score")).ge(45).sum()
+            ) if "mission_sku_score" in order_plan.columns else 0,
+            "long_tail_mission_sku_count": int(
+                order_plan.get("long_tail_mission_sku_flag", pd.Series("NO", index=order_plan.index)).astype(str).eq("YES").sum()
+            ) if "long_tail_mission_sku_flag" in order_plan.columns else 0,
+            "estimated_basket_gp_at_risk": float(
+                pd.to_numeric(order_plan.get("feature_avg_basket_gp_when_present", pd.Series(0, index=order_plan.index)), errors="coerce")
+                .fillna(0)
+                .mul(order_plan.get("long_tail_sku_flag", pd.Series("NO", index=order_plan.index)).astype(str).eq("YES").astype(float))
+                .sum()
+            ) if "feature_avg_basket_gp_when_present" in order_plan.columns else 0.0,
             "total_overstock_cash_release_value": float(_num(order_plan.get("overstock_cash_release_value")).sum()) if "overstock_cash_release_value" in order_plan.columns else 0.0,
             "total_review_effort_cost": float(
                 _num(order_plan.get("review_effort_cost"))[

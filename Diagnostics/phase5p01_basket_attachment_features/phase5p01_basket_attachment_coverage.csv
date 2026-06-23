@@ -1,0 +1,2 @@
+total_skus,skus_with_real_basket_evidence,skus_with_unknown_basket_evidence,median_sample_size,low_sample_count,high_basket_attachment_count,high_mission_sku_count,long_tail_mission_sku_count
+52285,34439,17846,3.0,37452,0,0,0

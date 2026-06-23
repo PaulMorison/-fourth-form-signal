@@ -14,6 +14,7 @@ MIN_OPEN_FOR_SALE = 2.0
 MAX_LONG_TAIL_PROTECTION = 300.0
 MAX_CONVEXITY_VALUE = 200.0
 GP_MARGIN_PROXY = 0.35
+UNKNOWN = "UNKNOWN"
 
 BASKET_RATE_COLS = (
     "basket_3plus_attachment_rate",
@@ -49,14 +50,39 @@ def _gp_unit(frame: pd.DataFrame) -> pd.Series:
 
 
 def _has_basket_evidence(frame: pd.DataFrame) -> pd.Series:
-    flag = _first_col(frame, ("feature_basket_structure_evidence_available_flag",), default=np.nan)
+    real_txn = frame.get("basket_attachment_used_real_transactions_flag", pd.Series("NO", index=frame.index)).astype(str).eq("YES")
+    quality = frame.get("feature_basket_attachment_quality", pd.Series(UNKNOWN, index=frame.index)).astype(str)
     attach = _first_col(
         frame,
-        ("feature_basket_attach_rate", "feature_probability_sku_in_multi_item_basket"),
+        ("feature_basket_attach_rate", "feature_basket_3plus_attach_rate", "feature_probability_sku_in_multi_item_basket"),
         default=np.nan,
     )
+    flag = _first_col(frame, ("feature_basket_structure_evidence_available_flag",), default=np.nan)
     dependency = _first_col(frame, ("feature_basket_drag_along_dependency_score",), default=np.nan)
-    return flag.eq(1) | attach.notna() | dependency.notna()
+    return real_txn | quality.isin(["HIGH", "MEDIUM", "LOW"]) | flag.eq(1) | attach.notna() | dependency.notna()
+
+
+def _basket_source(frame: pd.DataFrame) -> pd.Series:
+    source = frame.get("basket_attachment_source", pd.Series(UNKNOWN, index=frame.index)).astype(str)
+    real = frame.get("basket_attachment_used_real_transactions_flag", pd.Series("NO", index=frame.index)).astype(str).eq("YES")
+    return np.where(
+        real & source.ne(UNKNOWN),
+        source,
+        np.where(
+            _has_basket_evidence(frame),
+            "REGIME_PROXY",
+            UNKNOWN,
+        ),
+    )
+
+
+def _rate_from_feature(frame: pd.DataFrame, col: str, fallback_cols: tuple[str, ...] = ()) -> pd.Series:
+    if col in frame.columns:
+        raw = frame[col]
+        if raw.dtype == object:
+            return pd.to_numeric(raw, errors="coerce")
+        return pd.to_numeric(raw, errors="coerce")
+    return _first_col(frame, fallback_cols, default=np.nan)
 
 
 def _rate_or_unknown(frame: pd.DataFrame, values: pd.Series) -> pd.Series:
@@ -82,14 +108,21 @@ def build_long_tail_basket_trust_frame(df: pd.DataFrame, config: dict[str, Any] 
     expected_start = _numeric(out, "expected_soh_at_promo_start_before_order", _numeric(out, "current_soh"))
     evidence = _has_basket_evidence(out)
 
-    attach_raw = _first_col(out, ("feature_basket_attach_rate", "feature_probability_sku_in_multi_item_basket"), default=np.nan)
-    multi_raw = _first_col(
-        out,
-        ("feature_probability_sold_in_multi_item_basket_rate", "feature_probability_sku_in_multi_item_basket"),
-        default=np.nan,
+    out["basket_attachment_source"] = _basket_source(out)
+    out["basket_attachment_source_quality"] = out.get(
+        "feature_basket_attachment_quality",
+        np.where(_has_basket_evidence(out), "PROXY", UNKNOWN),
     )
+    out["basket_attachment_used_real_transactions_flag"] = out.get(
+        "basket_attachment_used_real_transactions_flag",
+        np.where(out["basket_attachment_source"].eq("REAL_TRANSACTION_LINES"), "YES", "NO"),
+    )
+
+    attach_raw = _rate_from_feature(out, "feature_basket_3plus_attach_rate", ("feature_basket_attach_rate", "feature_probability_sku_in_multi_item_basket"))
+    multi_raw = _rate_from_feature(out, "feature_basket_5plus_attach_rate", ("feature_probability_sold_in_multi_item_basket_rate",))
     dependency_raw = _first_col(out, ("feature_basket_drag_along_dependency_score",), default=np.nan)
     convex_support_raw = _first_col(out, ("feature_basket_convexity_support_score",), default=np.nan)
+    mission_feature = _rate_from_feature(out, "feature_mission_basket_attach_rate", ())
     long_tail_dep = _first_col(out, ("feature_long_tail_dependency_flag",), default=0.0).fillna(0.0)
 
     out["basket_3plus_attachment_rate"] = _rate_or_unknown(out, attach_raw)
@@ -103,7 +136,7 @@ def build_long_tail_basket_trust_frame(df: pd.DataFrame, config: dict[str, Any] 
     out["sister_club_attachment_rate"] = _rate_or_unknown(
         out, _first_col(out, ("feature_sister_club_attachment_rate",), default=np.nan)
     )
-    mission_raw = pd.concat([dependency_raw, convex_support_raw], axis=1).max(axis=1)
+    mission_raw = pd.concat([mission_feature, dependency_raw, convex_support_raw], axis=1).max(axis=1)
     out["mission_basket_attachment_rate"] = _rate_or_unknown(out, mission_raw)
 
     attach_num = pd.to_numeric(out["basket_3plus_attachment_rate"], errors="coerce").fillna(0.0)
@@ -131,6 +164,7 @@ def build_long_tail_basket_trust_frame(df: pd.DataFrame, config: dict[str, Any] 
         attach_num.ge(0.15)
         | mission_num.ge(0.15)
         | long_tail_dep.gt(0)
+        | out.get("long_tail_mission_sku_flag", pd.Series("NO", index=out.index)).astype(str).eq("YES")
         | out.get("mission_sku_flag", pd.Series("NO", index=out.index)).astype(str).eq("YES")
         | dependency.ge(0.35)
         | (structure_evidence & basket_trust_risk & intermittent)
@@ -138,13 +172,19 @@ def build_long_tail_basket_trust_frame(df: pd.DataFrame, config: dict[str, Any] 
     )
     out["long_tail_sku_flag"] = np.where(intermittent & mission_signal, "YES", "NO")
     out["basket_completion_sku_flag"] = np.where(
-        attach_num.ge(0.35)
+        out.get("basket_completion_sku_flag", pd.Series("NO", index=out.index)).astype(str).eq("YES")
+        | attach_num.ge(0.35)
         | mission_num.ge(0.35)
         | long_tail_dep.gt(0)
         | (structure_evidence & (basket_trust_risk | trust_risk_score.ge(35))),
         "YES",
         "NO",
     )
+    mission_score = _numeric(out, "mission_sku_score")
+    if "mission_sku_score" in out.columns:
+        out["basket_mission_importance_score"] = (
+            np.maximum(out["basket_mission_importance_score"], mission_score * 0.6)
+        ).clip(0, 100).round(1)
 
     below_min = (current.lt(MIN_OPEN_FOR_SALE)) | (expected_start.lt(MIN_OPEN_FOR_SALE))
     blocked = unsafe | out.get("constraint_block_flag", pd.Series("NO", index=out.index)).astype(str).eq("YES")

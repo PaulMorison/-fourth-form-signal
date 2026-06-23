@@ -124,9 +124,9 @@ def build_promo_economic_value_frame(df: pd.DataFrame, config: dict[str, Any] | 
         np.where(out["basket_trust_risk_score"].ge(25), "MEDIUM", "LOW"),
     )
     out["mission_sku_flag"] = np.where(
-        loyalty & basket_risk & hist.gt(0),
+        _numeric(out, "mission_sku_score").ge(45) if "mission_sku_score" in out.columns else pd.Series(False, index=out.index),
         "YES",
-        "NO",
+        np.where(loyalty & basket_risk & hist.gt(0), "YES", "NO"),
     )
 
     optimal = _numeric(out, "optimal_base_soh_units")
