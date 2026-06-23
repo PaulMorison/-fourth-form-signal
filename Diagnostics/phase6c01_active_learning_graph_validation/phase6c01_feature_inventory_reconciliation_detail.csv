@@ -46,9 +46,9 @@ final_governed_order_units,metadata_or_other,source_column,PRESENT,UNKNOWN,NO,NO
 mission_sku_flag,metadata_or_other,basket_trust,PRESENT,YES,NO,NO,NO,nan,NO,KEEP
 high_wape_regime,metadata_or_other,source_column,PRESENT,UNKNOWN,NO,NO,NO,,NO,KEEP
 dangerous_bias_regime,metadata_or_other,source_column,PRESENT,UNKNOWN,NO,NO,NO,,NO,KEEP
-supplier_replenishment_regime,metadata_or_other,supplier_replenishment,PRESENT,YES,NO,NO,NO,nan,NO,KEEP
-stock_position_regime,metadata_or_other,stock_optimal,PRESENT,YES,NO,NO,NO,nan,NO,KEEP
-promo_convexity_regime,metadata_or_other,regime_brain,PRESENT,YES,NO,NO,NO,nan,NO,KEEP
+supplier_replenishment_regime,metadata_or_other,supplier_replenishment,PRESENT,YES,NO,NO,NO,nan,NO,REPAIR_ENCODING_OR_DEFAULTS
+stock_position_regime,metadata_or_other,stock_optimal,PRESENT,YES,NO,NO,NO,nan,NO,REPAIR_ENCODING_OR_DEFAULTS
+promo_convexity_regime,metadata_or_other,regime_brain,PRESENT,YES,NO,NO,NO,nan,NO,REPAIR_ENCODING_OR_DEFAULTS
 advisory_label,metadata_or_other,source_column,PRESENT,UNKNOWN,NO,NO,NO,,NO,KEEP
 human_review_status,metadata_or_other,shadow_human_feedback,PRESENT,NO,NO,NO,NO,not_in_brain_feature_families,YES,ADD_TO_BRAIN_FAMILY_OR_DIAGNOSTICS
 lesson_learned_label,derived_feature,shadow_human_feedback,PRESENT,NO,NO,YES,NO,not_in_brain_feature_families,YES,ADD_TO_BRAIN_FAMILY_OR_DIAGNOSTICS

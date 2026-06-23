@@ -51,7 +51,7 @@ optimal_base_soh_units,stock_optimal,NO,YES,NO,NO,NO,NO,,NO,NO,YES,NO,BUILD_OR_M
 overall_regime_opportunity_score,regime_brain,NO,YES,NO,NO,NO,NO,,NO,NO,YES,NO,BUILD_OR_MERGE_FEATURE
 overall_regime_risk_score,regime_brain,NO,YES,NO,NO,NO,NO,,NO,NO,YES,NO,BUILD_OR_MERGE_FEATURE
 overstock_cash_release_value,economic_triage,NO,NO,NO,NO,NO,NO,leakage_audit_exclusion,NO,NO,NO,NO,KEEP
-promo_convexity_regime,regime_brain,YES,YES,NO,NO,NO,NO,,NO,NO,NO,NO,KEEP
+promo_convexity_regime,regime_brain,YES,YES,NO,NO,NO,NO,,NO,NO,NO,YES,REPAIR_ENCODING_OR_DEFAULTS
 promo_convexity_score,demand_uplift,NO,YES,NO,NO,NO,NO,,NO,NO,YES,NO,BUILD_OR_MERGE_FEATURE
 promo_demand_release_ready_flag,quality_governance,YES,YES,YES,NO,NO,NO,,NO,NO,NO,NO,KEEP
 promo_demand_source_quality,quality_governance,YES,YES,YES,NO,NO,NO,,NO,NO,NO,NO,KEEP
@@ -71,11 +71,11 @@ segment_historical_wape,derived_or_phase_extension,YES,NO,NO,NO,NO,NO,not_in_bra
 shadow_candidate_class,shadow_human_feedback,YES,NO,NO,YES,NO,NO,not_in_brain_feature_families,YES,NO,NO,NO,ADD_TO_BRAIN_FAMILY_OR_DIAGNOSTICS
 shadow_candidate_score,shadow_human_feedback,NO,NO,NO,YES,NO,NO,,NO,NO,YES,NO,BUILD_OR_MERGE_FEATURE
 sku_demand_regime,demand_uplift,NO,YES,NO,NO,NO,NO,,NO,NO,YES,NO,BUILD_OR_MERGE_FEATURE
-stock_position_regime,stock_optimal,YES,YES,NO,NO,NO,NO,,NO,NO,NO,NO,KEEP
+stock_position_regime,stock_optimal,YES,YES,NO,NO,NO,NO,,NO,NO,NO,YES,REPAIR_ENCODING_OR_DEFAULTS
 store_sales_regime,regime_brain,NO,YES,NO,NO,NO,NO,,NO,NO,YES,NO,BUILD_OR_MERGE_FEATURE
 supplier_economic_risk_cost,supplier_replenishment,NO,YES,NO,NO,NO,NO,,NO,NO,YES,NO,BUILD_OR_MERGE_FEATURE
 supplier_number_resolved,supplier_replenishment,NO,YES,NO,NO,NO,NO,,NO,NO,YES,NO,BUILD_OR_MERGE_FEATURE
-supplier_replenishment_regime,supplier_replenishment,YES,YES,NO,NO,NO,YES,,NO,NO,NO,NO,KEEP
+supplier_replenishment_regime,supplier_replenishment,YES,YES,NO,NO,NO,YES,,NO,NO,NO,YES,REPAIR_ENCODING_OR_DEFAULTS
 supplier_risk_cost,supplier_replenishment,NO,YES,NO,NO,NO,NO,,NO,NO,YES,NO,BUILD_OR_MERGE_FEATURE
 target_day_one_promo_soh,stock_optimal,NO,YES,NO,NO,NO,NO,,NO,NO,YES,NO,BUILD_OR_MERGE_FEATURE
 target_end_promo_soh,stock_optimal,NO,YES,NO,NO,NO,NO,,NO,NO,YES,NO,BUILD_OR_MERGE_FEATURE
