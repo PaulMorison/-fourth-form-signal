@@ -1,0 +1,3 @@
+decision_triage_class,decision_triage_reason,row_count
+AUTO_BLOCK_UNSAFE,unsafe_source_quality_auto_block,46728
+AUTO_BLOCK_CAPITAL_RISK,severe_capital_risk_block,8

@@ -10,6 +10,7 @@ from models.promotions.promo_demand_calibration import apply_promo_demand_calibr
 from models.promotions.promo_optimal_stock_learning import apply_optimal_stock_learning, load_optimal_stock_artifacts
 from models.promotions.promo_regime_state import apply_regime_brain_decisioning, load_regime_artifacts
 from models.promotions.promo_conviction_calibration import apply_conviction_calibration, load_conviction_artifacts
+from models.promotions.promo_decision_triage import apply_promo_decision_triage, load_triage_artifacts
 from models.promotions.promo_stock_outcome_optimisation import apply_stock_outcome_optimisation, load_stock_outcome_artifacts
 from models.promotions.promo_stock_truth_repair import apply_stock_truth_repair, load_stock_truth_artifacts
 
@@ -224,6 +225,18 @@ ORDER_PLAN_COLUMNS: tuple[str, ...] = (
     "buyer_review_reason",
     "decision_confidence_for_report",
     "decision_confidence_label_for_report",
+    "decision_triage_class",
+    "decision_triage_reason",
+    "buyer_review_priority_score",
+    "buyer_review_priority_label",
+    "buyer_review_required_flag_triaged",
+    "buyer_review_queue_rank",
+    "buyer_review_queue_bucket",
+    "recommended_review_batch",
+    "auto_block_flag",
+    "watchlist_flag",
+    "future_auto_approve_candidate_flag",
+    "triage_governance_note",
     "regime_adjusted_decision_value",
     "brain_action_label",
     "brain_order_units_proposal",
@@ -480,6 +493,8 @@ def load_se01_scored_sources(prediction_dir: Path) -> pd.DataFrame:
     out = apply_regime_brain_decisioning(out, gate_recommendation=regime_rec)
     _conv_profile, conv_rec = load_conviction_artifacts()
     out = apply_conviction_calibration(out, error_profile_df=_conv_profile if not _conv_profile.empty else None, gate_recommendation=conv_rec)
+    triage_rec = load_triage_artifacts()
+    out = apply_promo_decision_triage(out, gate_recommendation=triage_rec)
     return out
 
 def _baseline_daily_rate(frame: pd.DataFrame) -> tuple[pd.Series, pd.Series, pd.Series]:
@@ -1435,6 +1450,18 @@ def assemble_commercial_order_rows(
         "buyer_review_reason",
         "decision_confidence_for_report",
         "decision_confidence_label_for_report",
+        "decision_triage_class",
+        "decision_triage_reason",
+        "buyer_review_priority_score",
+        "buyer_review_priority_label",
+        "buyer_review_required_flag_triaged",
+        "buyer_review_queue_rank",
+        "buyer_review_queue_bucket",
+        "recommended_review_batch",
+        "auto_block_flag",
+        "watchlist_flag",
+        "future_auto_approve_candidate_flag",
+        "triage_governance_note",
         "regime_adjusted_decision_value",
         "brain_action_label",
         "brain_order_units_proposal",
@@ -1456,7 +1483,7 @@ def assemble_commercial_order_rows(
         "overall_regime_conviction_score", "raw_regime_conviction_score", "regime_historical_wape",
         "regime_historical_bias_pct", "regime_confidence_cap", "calibrated_regime_conviction_score",
         "decision_confidence_for_report", "regime_adjusted_decision_value", "brain_order_units_proposal",
-        "final_governed_order_units",
+        "final_governed_order_units", "buyer_review_priority_score", "buyer_review_queue_rank",
     }
     for col in position_cols:
         out[col] = _field_series(frame, (col,), frame.index)
@@ -2123,6 +2150,38 @@ def build_manager_summary(order_plan: pd.DataFrame, exceptions: pd.DataFrame) ->
                 if "regime_bias_learning_note" in order_plan.columns
                 else "none"
             ),
+            "buyer_review_required_before_triage": int(order_plan.get("buyer_review_required_flag", pd.Series("NO", index=order_plan.index)).eq("YES").sum()) if "buyer_review_required_flag" in order_plan.columns else 0,
+            "buyer_review_required_after_triage": int(order_plan.get("buyer_review_required_flag_triaged", pd.Series("NO", index=order_plan.index)).eq("YES").sum()) if "buyer_review_required_flag_triaged" in order_plan.columns else 0,
+            "triage_auto_block_count": int(order_plan.get("auto_block_flag", pd.Series("NO", index=order_plan.index)).eq("YES").sum()) if "auto_block_flag" in order_plan.columns else 0,
+            "triage_watchlist_count": int(order_plan.get("watchlist_flag", pd.Series("NO", index=order_plan.index)).eq("YES").sum()) if "watchlist_flag" in order_plan.columns else 0,
+            "triage_no_action_count": int(order_plan.get("decision_triage_class", pd.Series("", index=order_plan.index)).eq("NO_ACTION").sum()) if "decision_triage_class" in order_plan.columns else 0,
+            "triage_high_priority_review_count": int(order_plan.get("decision_triage_class", pd.Series("", index=order_plan.index)).isin(["HIGH_PRIORITY_BUY_REVIEW", "HIGH_PRIORITY_RUN_DOWN_REVIEW"]).sum()) if "decision_triage_class" in order_plan.columns else 0,
+            "triage_standard_review_count": int(order_plan.get("decision_triage_class", pd.Series("", index=order_plan.index)).isin(["STANDARD_BUY_REVIEW", "STANDARD_RUN_DOWN_REVIEW"]).sum()) if "decision_triage_class" in order_plan.columns else 0,
+            "top_50_review_decision_value": float(
+                _num(order_plan.get("regime_adjusted_decision_value"))[
+                    order_plan.get("buyer_review_queue_bucket", pd.Series("", index=order_plan.index)).eq("TOP_50")
+                ].sum()
+            ) if "buyer_review_queue_bucket" in order_plan.columns else 0.0,
+            "top_250_review_decision_value": float(
+                _num(order_plan.get("regime_adjusted_decision_value"))[
+                    order_plan.get("buyer_review_queue_bucket", pd.Series("", index=order_plan.index)).isin(["TOP_50", "TOP_100", "TOP_250"])
+                ].sum()
+            ) if "buyer_review_queue_bucket" in order_plan.columns else 0.0,
+            "top_500_review_decision_value": float(
+                _num(order_plan.get("regime_adjusted_decision_value"))[
+                    order_plan.get("buyer_review_queue_bucket", pd.Series("", index=order_plan.index)).isin(["TOP_50", "TOP_100", "TOP_250", "TOP_500"])
+                ].sum()
+            ) if "buyer_review_queue_bucket" in order_plan.columns else 0.0,
+            "expected_cash_release_from_review_queue": float(
+                (_num(order_plan.get("leftover_units_above_optimal")) * 4.82)[
+                    order_plan.get("buyer_review_required_flag_triaged", pd.Series("NO", index=order_plan.index)).eq("YES")
+                ].sum()
+            ) if "buyer_review_required_flag_triaged" in order_plan.columns and "leftover_units_above_optimal" in order_plan.columns else 0.0,
+            "expected_missed_demand_reduction_from_review_queue": float(
+                _num(order_plan.get("missed_demand_penalty"))[
+                    order_plan.get("buyer_review_required_flag_triaged", pd.Series("NO", index=order_plan.index)).eq("YES")
+                ].sum()
+            ) if "buyer_review_required_flag_triaged" in order_plan.columns else 0.0,
             "model_status": META_STATUS,
             "production_ordering_approved": PRODUCTION_ORDERING,
             "customer_report_release_approved": CUSTOMER_RELEASE,
