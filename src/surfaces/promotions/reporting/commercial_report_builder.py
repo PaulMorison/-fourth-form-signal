@@ -2574,6 +2574,50 @@ def build_manager_summary(order_plan: pd.DataFrame, exceptions: pd.DataFrame) ->
                 if Path("Diagnostics/phase5v01_lesson_weighted_updates/phase5v01_release_gate.csv").exists()
                 else "model_bias_dangerously_negative"
             ),
+            "human_review_workbook_generated": (
+                "YES" if Path("Diagnostics/phase5w01_human_review_capture/SHADOW_TOP_100_BUYER_REVIEW_WORKBOOK.xlsx").exists() else "NO"
+            ),
+            "human_review_workbook_rows": int(
+                pd.read_csv("Diagnostics/phase5w01_human_review_capture/phase5w01_release_gate.csv")["review_rows"].iloc[0]
+            ) if Path("Diagnostics/phase5w01_human_review_capture/phase5w01_release_gate.csv").exists() else 0,
+            "human_review_completed_count": int(
+                pd.read_csv("Diagnostics/phase5w01_human_review_capture/phase5w01_override_analytics.csv")["completed_reviews"].iloc[0]
+            ) if Path("Diagnostics/phase5w01_human_review_capture/phase5w01_override_analytics.csv").exists() else 0,
+            "human_review_pending_count": int(
+                pd.read_csv("Diagnostics/phase5w01_human_review_capture/phase5w01_override_analytics.csv")["pending_reviews"].iloc[0]
+            ) if Path("Diagnostics/phase5w01_human_review_capture/phase5w01_override_analytics.csv").exists() else 0,
+            "human_review_completion_rate_pct": float(
+                pd.read_csv("Diagnostics/phase5w01_human_review_capture/phase5w01_override_analytics.csv")["review_completion_rate"].iloc[0]
+            ) if Path("Diagnostics/phase5w01_human_review_capture/phase5w01_override_analytics.csv").exists() else 0.0,
+            "human_accepted_brain_count": int(
+                pd.read_csv("Diagnostics/phase5w01_human_review_capture/phase5w01_override_analytics.csv")["accepted_brain_count"].iloc[0]
+            ) if Path("Diagnostics/phase5w01_human_review_capture/phase5w01_override_analytics.csv").exists() else 0,
+            "human_accepted_governed_count": int(
+                pd.read_csv("Diagnostics/phase5w01_human_review_capture/phase5w01_override_analytics.csv")["accepted_governed_count"].iloc[0]
+            ) if Path("Diagnostics/phase5w01_human_review_capture/phase5w01_override_analytics.csv").exists() else 0,
+            "human_override_count": int(
+                pd.read_csv("Diagnostics/phase5w01_human_review_capture/phase5w01_override_analytics.csv")["override_count"].iloc[0]
+            ) if Path("Diagnostics/phase5w01_human_review_capture/phase5w01_override_analytics.csv").exists() else 0,
+            "human_average_confidence_score": float(
+                pd.read_csv("Diagnostics/phase5w01_human_review_capture/phase5w01_override_analytics.csv")["average_human_confidence"].iloc[0]
+            ) if Path("Diagnostics/phase5w01_human_review_capture/phase5w01_override_analytics.csv").exists() else 0.0,
+            "human_top_override_reasons": (
+                str(pd.read_csv("Diagnostics/phase5w01_human_review_capture/phase5w01_override_analytics.csv")["override_reasons_by_count"].iloc[0])
+                if Path("Diagnostics/phase5w01_human_review_capture/phase5w01_override_analytics.csv").exists()
+                and pd.notna(pd.read_csv("Diagnostics/phase5w01_human_review_capture/phase5w01_override_analytics.csv")["override_reasons_by_count"].iloc[0])
+                else ""
+            ),
+            "human_long_tail_override_count": int(
+                pd.read_csv("Diagnostics/phase5w01_human_review_capture/phase5w01_override_analytics.csv")["long_tail_overrides"].iloc[0]
+            ) if Path("Diagnostics/phase5w01_human_review_capture/phase5w01_override_analytics.csv").exists() else 0,
+            "human_data_quality_block_count": int(
+                pd.read_csv("Diagnostics/phase5w01_human_review_capture/phase5w01_override_analytics.csv")["data_quality_blocks"].iloc[0]
+            ) if Path("Diagnostics/phase5w01_human_review_capture/phase5w01_override_analytics.csv").exists() else 0,
+            "human_review_capture_release": (
+                str(pd.read_csv("Diagnostics/phase5w01_human_review_capture/phase5w01_release_gate.csv")["recommendation"].iloc[0])
+                if Path("Diagnostics/phase5w01_human_review_capture/phase5w01_release_gate.csv").exists()
+                else "NO_RELEASE"
+            ),
             "total_overstock_cash_release_value": float(_num(order_plan.get("overstock_cash_release_value")).sum()) if "overstock_cash_release_value" in order_plan.columns else 0.0,
             "total_review_effort_cost": float(
                 _num(order_plan.get("review_effort_cost"))[
