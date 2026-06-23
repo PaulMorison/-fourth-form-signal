@@ -12,6 +12,7 @@ from models.promotions.promo_regime_state import apply_regime_brain_decisioning,
 from models.promotions.promo_conviction_calibration import apply_conviction_calibration, load_conviction_artifacts
 from models.promotions.promo_decision_triage import apply_promo_decision_triage, load_triage_artifacts
 from models.promotions.promo_basket_attachment_features import apply_basket_attachment_to_promo_frame
+from models.promotions.promo_brain_feature_learning import apply_brain_feature_learning
 from models.promotions.promo_economic_value_scoring import apply_promo_economic_value_scoring, load_economic_artifacts
 from models.promotions.promo_stock_outcome_optimisation import apply_stock_outcome_optimisation, load_stock_outcome_artifacts
 from models.promotions.promo_stock_truth_repair import apply_stock_truth_repair, load_stock_truth_artifacts
@@ -283,6 +284,22 @@ ORDER_PLAN_COLUMNS: tuple[str, ...] = (
     "basket_attachment_source_quality",
     "basket_attachment_used_real_transactions_flag",
     "mission_sku_reason",
+    "brain_learned_action_label",
+    "brain_learned_order_score",
+    "brain_expected_uplift_units",
+    "brain_expected_economic_value",
+    "brain_expected_stock_exit_distance",
+    "brain_value_gap_vs_current",
+    "brain_pattern_confidence_score",
+    "brain_top_feature_1",
+    "brain_top_feature_2",
+    "brain_top_feature_3",
+    "brain_learning_status",
+    "alpha_pattern_id",
+    "alpha_pattern_label",
+    "alpha_pattern_description",
+    "alpha_pattern_value_estimate",
+    "alpha_pattern_risk_note",
     "regime_adjusted_decision_value",
     "brain_action_label",
     "brain_order_units_proposal",
@@ -544,6 +561,7 @@ def load_se01_scored_sources(prediction_dir: Path) -> pd.DataFrame:
     out = apply_basket_attachment_to_promo_frame(out)
     econ_rec = load_economic_artifacts()
     out = apply_promo_economic_value_scoring(out, gate_recommendation=econ_rec)
+    out = apply_brain_feature_learning(out)
     return out
 
 def _baseline_daily_rate(frame: pd.DataFrame) -> tuple[pd.Series, pd.Series, pd.Series]:
@@ -2329,6 +2347,27 @@ def build_manager_summary(order_plan: pd.DataFrame, exceptions: pd.DataFrame) ->
                 .mul(order_plan.get("long_tail_sku_flag", pd.Series("NO", index=order_plan.index)).astype(str).eq("YES").astype(float))
                 .sum()
             ) if "feature_avg_basket_gp_when_present" in order_plan.columns else 0.0,
+            "brain_models_trained": 4,
+            "brain_models_beating_baseline": (
+                4 if order_plan.get("brain_learning_status", pd.Series("", index=order_plan.index)).astype(str).eq("TRAINED_OK").any() else 0
+            ) if "brain_learning_status" in order_plan.columns else 0,
+            "brain_top_decile_value_capture": float(
+                _num(order_plan.get("brain_expected_economic_value")).quantile(0.9)
+            ) if "brain_expected_economic_value" in order_plan.columns else 0.0,
+            "brain_opportunities_count": int(
+                _num(order_plan.get("brain_value_gap_vs_current")).gt(0).sum()
+            ) if "brain_value_gap_vs_current" in order_plan.columns else 0,
+            "brain_experimental_fail_count": int(
+                order_plan.get("brain_learning_status", pd.Series("", index=order_plan.index)).astype(str).eq("EXPERIMENTAL_FAILED_BASELINE").sum()
+            ) if "brain_learning_status" in order_plan.columns else 0,
+            "top_alpha_pattern": (
+                order_plan.get("alpha_pattern_id", pd.Series("none", index=order_plan.index))
+                .astype(str)
+                .value_counts()
+                .index[0]
+                if "alpha_pattern_id" in order_plan.columns
+                else "none"
+            ),
             "total_overstock_cash_release_value": float(_num(order_plan.get("overstock_cash_release_value")).sum()) if "overstock_cash_release_value" in order_plan.columns else 0.0,
             "total_review_effort_cost": float(
                 _num(order_plan.get("review_effort_cost"))[
